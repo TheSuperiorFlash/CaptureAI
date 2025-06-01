@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 250px;
+            min-height: 400px;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #333333 !important;
+            background-color: white;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            color: #333;
+            color: #333333 !important;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-logo {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        
+        .header-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333333 !important;
+        }
+        
+        .header-ui-toggle {
+            background: none;
+            border: 1px solid #d1d1d1;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #666666 !important;
+            cursor: pointer;
+            width: 60px !important;
+            min-width: 60px !important;
+            max-width: 60px !important;
+            box-sizing: border-box;
+        }
+        
+        .header-ui-toggle:hover {
+            background-color: #f0f0f0;
+            color: #333333 !important;
+        }
+        
+        .section {
+            padding: 15px;
+        }
+        
+        .section:first-of-type {
+            padding-top: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333333 !important;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .button-with-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .button-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+        
+        .button-primary {
+            background-color: #4caf65;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background-color: #45a049;
+        }
+        
+        .button-secondary {
+            background-color: #f1f1f1;
+            color: #444;
+            border: 1px solid #d1d1d1;
+        }
+        
+        .button-secondary:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+            color: #666666 !important;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d1d1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #333333 !important;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .auto-solve-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .auto-solve-text {
+            font-size: 14px;
+            color: #333;
+            color: #333333 !important;
+        }
+        
+        .auto-solve-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 20px;
+        }
+        
+        .auto-solve-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .auto-solve-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e0e0e0;
+            transition: .3s;
+            border-radius: 34px;
+        }
+        
+        .auto-solve-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 34px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        input:checked + .auto-solve-slider {
+            background-color: #4caf65;
+        }
+        
+        input:checked + .auto-solve-slider:before {
+            transform: translateX(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="icons/icon128.png" alt="CaptureAI" class="header-logo">
+            <span class="header-title">CaptureAI</span>
+        </div>
+        <div class="header-right">
+            <button id="header-ui-toggle" class="header-ui-toggle">Show UI</button>
+        </div>
+    </div>
+    
+    <div class="content" style="padding: 0;">
+        <!-- Status Section -->
+        <div id="status-section" class="section hidden">
+            <div id="status-message" class="status"></div>
+        </div>
+        
+        <!-- API Key Section -->
+        <div id="api-key-section" class="section">
+            <div class="section-title">API Configuration</div>
+            <div class="input-group">
+                <label for="api-key-input">OpenAI API Key</label>
+                <input type="password" id="api-key-input" placeholder="Enter your API key">
+            </div>
+            <button id="save-api-key" class="button button-primary">Save API Key</button>
+        </div>
+        
+        <!-- Main Controls Section -->
+        <div id="main-controls" class="section hidden">
+            <button id="capture-btn" class="button button-primary button-with-icon">
+                <img src="icons/camera.png" alt="Camera" class="button-icon">
+                Capture A Question
+            </button>
+            <button id="quick-capture-btn" class="button button-secondary">Quick Capture (No Area)</button>
+        </div>
+        
+        <!-- Auto-Solve Section -->
+        <div id="auto-solve-section" class="auto-solve-section hidden">
+            <span class="auto-solve-text">Auto-Solve</span>
+            <label class="auto-solve-toggle-switch">
+                <input type="checkbox" id="auto-solve-toggle">
+                <span class="auto-solve-slider"></span>
+            </label>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
