@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const elements = {
         statusSection: document.getElementById('status-section'),
         statusMessage: document.getElementById('status-message'),
+        responseSection: document.getElementById('response-section'),
+        responseContent: document.getElementById('response-content'),
         apiKeySection: document.getElementById('api-key-section'),
         apiKeyInput: document.getElementById('api-key-input'),
         saveApiKeyBtn: document.getElementById('save-api-key'),
@@ -20,7 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         isPanelVisible: false,
         isAutoSolveMode: false,
         hasLastCaptureArea: false,
-        isOnVocabulary: false
+        isOnVocabulary: false,
+        currentResponse: ''
     };
 
     // Initialize popup
@@ -52,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 elements.apiKeySection.classList.remove('hidden');
             }
         } catch (error) {
-            showStatus('Error initializing popup', 'error');
+            showResponseMessage('Error initializing popup', 'error');
             console.error('Popup initialization error:', error);
         }
     }
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tab.url.startsWith('edge-extension://') ||
                 tab.url === 'about:blank' ||
                 tab.url.startsWith('about:')) {
-                showStatus('Content scripts cannot run on this page type', 'info');
+                showResponseMessage('Content scripts cannot run on this page type', 'info');
                 disableContentScriptFeatures();
                 return;
             }
@@ -78,10 +81,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (response && response.success) {
                 currentState = { ...currentState, ...response.state };
+                updateResponseDisplay();
                 updateUI();
             }
         } catch (error) {
-            showStatus('Page not ready for CaptureAI features', 'info');
+            showResponseMessage('Page not ready for CaptureAI features', 'info');
             disableContentScriptFeatures();
             console.log('Could not get state from content script:', error);
         }
@@ -115,12 +119,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Update response display
+    function updateResponseDisplay() {
+        if (currentState.currentResponse) {
+            elements.responseContent.textContent = currentState.currentResponse;
+            elements.responseContent.className = 'response-content';
+        } else {
+            elements.responseContent.textContent = '';
+            elements.responseContent.className = 'response-content empty';
+        }
+    }
+
     // Save API key
     async function saveApiKey() {
         const apiKey = elements.apiKeyInput.value.trim();
         
         if (!apiKey) {
-            showStatus('Please enter an API key', 'error');
+            showResponseMessage('Please enter an API key', 'error');
             return;
         }
 
@@ -128,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await chrome.storage.local.set({ 'captureai-api-key': apiKey });
             currentState.apiKey = apiKey;
             
-            showStatus('API key saved successfully!', 'success');
+            showResponseMessage('API key saved successfully!', 'success');
             
             setTimeout(() => {
                 elements.apiKeySection.classList.add('hidden');
@@ -137,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1500);
             
         } catch (error) {
-            showStatus('Error saving API key', 'error');
+            showResponseMessage('Error saving API key', 'error');
             console.error('Error saving API key:', error);
         }
     }
@@ -149,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Check if we're on a valid page
             if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-                showStatus('Cannot capture on this page type', 'error');
+                showResponseMessage('Cannot capture on this page type', 'error');
                 return;
             }
             
@@ -159,13 +174,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await chrome.tabs.sendMessage(tab.id, { action: 'startCapture' });
             
             if (response && response.success) {
-                showStatus('Capture started - select an area on the page', 'info');
+                showResponseMessage('Capture started - select an area on the page', 'info');
                 window.close(); // Close popup so user can select area
             } else {
-                showStatus('Error starting capture', 'error');
+                showResponseMessage('Error starting capture', 'error');
             }
         } catch (error) {
-            showStatus('Page not ready - please refresh and try again', 'error');
+            showResponseMessage('Page not ready - please refresh and try again', 'error');
             console.error('Capture error:', error);
         }
     }
@@ -177,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Check if we're on a valid page
             if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-                showStatus('Cannot capture on this page type', 'error');
+                showResponseMessage('Cannot capture on this page type', 'error');
                 return;
             }
             
@@ -187,13 +202,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await chrome.tabs.sendMessage(tab.id, { action: 'quickCapture' });
             
             if (response && response.success) {
-                showStatus('Quick capture started', 'info');
+                showResponseMessage('Quick capture started', 'info');
                 window.close();
             } else {
-                showStatus(response.error || 'Error with quick capture', 'error');
+                showResponseMessage(response.error || 'Error with quick capture', 'error');
             }
         } catch (error) {
-            showStatus('Page not ready - please refresh and try again', 'error');
+            showResponseMessage('Page not ready - please refresh and try again', 'error');
             console.error('Quick capture error:', error);
         }
     }
@@ -205,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Check if we're on a valid page
             if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-                showStatus('UI toggle not available on this page type', 'error');
+                showResponseMessage('UI toggle not available on this page type', 'error');
                 return;
             }
             
@@ -218,10 +233,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentState.isPanelVisible = !currentState.isPanelVisible;
                 updateUI();
             } else {
-                showStatus('Error toggling panel', 'error');
+                showResponseMessage('Error toggling panel', 'error');
             }
         } catch (error) {
-            showStatus('Page not ready - please refresh and try again', 'error');
+            showResponseMessage('Page not ready - please refresh and try again', 'error');
             console.error('Toggle panel error:', error);
         }
     }
@@ -233,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Check if we're on a valid page
             if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-                showStatus('Auto-solve not available on this page type', 'error');
+                showResponseMessage('Auto-solve not available on this page type', 'error');
                 return;
             }
             
@@ -245,12 +260,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response && response.success) {
                 currentState.isAutoSolveMode = response.autoSolveMode;
             } else {
-                showStatus(response.error || 'Error toggling auto-solve', 'error');
+                showResponseMessage(response.error || 'Error toggling auto-solve', 'error');
                 // Revert toggle state
                 elements.autoSolveToggle.checked = currentState.isAutoSolveMode;
             }
         } catch (error) {
-            showStatus('Page not ready - please refresh and try again', 'error');
+            showResponseMessage('Page not ready - please refresh and try again', 'error');
             console.error('Toggle auto-solve error:', error);
             // Revert toggle state
             elements.autoSolveToggle.checked = currentState.isAutoSolveMode;
@@ -267,13 +282,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await chrome.scripting.executeScript({
                     target: { tabId: tabId },
-                    files: ['libs/html2canvas.min.js', 'content.js']
+                    files: ['libs/html2 canvas.min.js', 'content.js']
                 });
                 // Wait a bit for initialization
                 await new Promise(resolve => setTimeout(resolve, 1000));
             } catch (injectionError) {
                 throw new Error('Could not load content script');
             }
+        }
+    }
+
+    // Show message in response box
+    function showResponseMessage(message, type) {
+        elements.responseContent.textContent = message;
+        
+        if (type === 'error') {
+            elements.responseContent.className = 'response-content error';
+        } else if (type === 'success') {
+            elements.responseContent.className = 'response-content';
+            elements.responseContent.style.color = '#008000';
+        } else {
+            elements.responseContent.className = 'response-content';
         }
     }
 
@@ -288,6 +317,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             elements.statusSection.classList.add('hidden');
         }, 3000);
     }
+
+    // Listen for response updates from content script
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'updateResponse') {
+            currentState.currentResponse = request.message;
+            currentState.isError = request.isError || false;
+            
+            elements.responseContent.textContent = request.message;
+            elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+        }
+    });
 
     // Listen for storage changes to update API key status
     chrome.storage.onChanged.addListener((changes, namespace) => {

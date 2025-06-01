@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <style>
         body {
-            width: 250px;
+            width: 350px;
             min-height: 400px;
             margin: 0;
             padding: 0;
@@ -67,6 +67,10 @@
         .section:first-of-type {
             padding-top: 15px;
             margin-bottom: 20px;
+        }
+        
+        #main-controls {
+            padding-bottom: 5px;
         }
         
         .section-title {
@@ -157,7 +161,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 0px 15px;
         }
         
         .auto-solve-text {
@@ -211,6 +215,35 @@
         input:checked + .auto-solve-slider:before {
             transform: translateX(10px);
         }
+        
+        .response-section {
+            padding: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .response-title {
+            font-size: 14px;
+            color: #666666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .response-content {
+            font-size: 16px;
+            color: #333333;
+            word-break: break-word;
+            min-height: 20px;
+            line-height: 1.4;
+        }
+        
+        .response-content.error {
+            color: #ff0000;
+        }
+        
+        .response-content.empty {
+            color: #999999;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -225,6 +258,12 @@
     </div>
     
     <div class="content" style="padding: 0;">
+        <!-- Response Section -->
+        <div id="response-section" class="response-section">
+            <div class="response-title">Response:</div>
+            <div id="response-content" class="response-content empty"></div>
+        </div>
+        
         <!-- Status Section -->
         <div id="status-section" class="section hidden">
             <div id="status-message" class="status"></div>

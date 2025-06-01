@@ -962,6 +962,17 @@
             resultElement.style.color = isError ? '#ff0000 !important' : '#333333 !important';
         }
 
+        // Send message to popup
+        try {
+            chrome.runtime.sendMessage({
+                action: 'updateResponse',
+                message: message,
+                isError: isError
+            });
+        } catch (error) {
+            // Popup might not be open, ignore error
+        }
+
         if (autoHideDelay > 0 && resultElement) {
             setTimeout(() => {
                 resultElement.textContent = '';
@@ -1073,7 +1084,8 @@
                     isAutoSolveMode,
                     hasLastCaptureArea: !!lastCaptureArea,
                     isOnVocabulary: isOnVocabulary(),
-                    apiKey: !!apiKey
+                    apiKey: !!apiKey,
+                    currentResponse: document.getElementById(RESULT_ID)?.textContent || ''
                 }
             });
         }
