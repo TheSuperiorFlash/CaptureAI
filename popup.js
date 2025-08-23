@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         captureBtn: document.getElementById('capture-btn'),
         quickCaptureBtn: document.getElementById('quick-capture-btn'),
         autoSolveSection: document.getElementById('auto-solve-section'),
-        autoSolveToggle: document.getElementById('auto-solve-toggle'),
-        headerUiToggle: document.getElementById('header-ui-toggle')
+        headerUiToggle: document.getElementById('header-ui-toggle'),
+        proModeToggle: document.getElementById('pro-mode-toggle')
     };
 
     // State variables
@@ -22,8 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         isPanelVisible: false,
         isAutoSolveMode: false,
         hasLastCaptureArea: false,
-        isOnVocabulary: false,
-        currentResponse: ''
+        isOnSupportedSite: false,
+        currentResponse: '',
+        isProMode: false
     };
 
     // Initialize popup
@@ -34,29 +35,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.captureBtn.addEventListener('click', startCapture);
     elements.quickCaptureBtn.addEventListener('click', quickCapture);
     elements.headerUiToggle.addEventListener('click', togglePanel);
-    elements.autoSolveToggle.addEventListener('change', toggleAutoSolve);
+    elements.proModeToggle.addEventListener('change', toggleProMode);
 
     // Initialize popup state
     async function initializePopup() {
         try {
-            // Load API key from storage
-            const result = await chrome.storage.local.get(['captureai-api-key']);
+            // Load API key and Pro Mode from storage
+            const result = await chrome.storage.local.get(['captureai-api-key', 'captureai-pro-mode']);
             const apiKey = result['captureai-api-key'] || '';
+            const isProMode = result['captureai-pro-mode'] || false;
+            
+            // Initialize Pro Mode state
+            currentState.isProMode = isProMode;
+            elements.proModeToggle.checked = isProMode;
             
             if (apiKey) {
                 currentState.apiKey = apiKey;
                 elements.apiKeyInput.value = '••••••••••••••••'; // Show masked key
                 elements.apiKeySection.classList.add('hidden');
                 elements.mainControls.classList.remove('hidden');
+                elements.autoSolveSection.classList.remove('hidden');
                 
                 // Get current state from content script
                 await updateStateFromContentScript();
             } else {
+                // Show error message when no API key is found
+                showResponseMessage('Error: Could not get API key', 'error');
                 elements.apiKeySection.classList.remove('hidden');
             }
         } catch (error) {
             showResponseMessage('Error initializing popup', 'error');
-            console.error('Popup initialization error:', error);
+            // Silent error handling
         }
     }
 
@@ -96,27 +105,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.captureBtn.disabled = true;
         elements.quickCaptureBtn.disabled = true;
         elements.headerUiToggle.disabled = true;
-        elements.autoSolveToggle.disabled = true;
+        // Auto-solve section kept hidden (container preserved for future use)
         elements.autoSolveSection.classList.add('hidden');
     }
+
+    // Auto-solve toggle functions removed - container preserved for future use
 
     // Update UI based on current state
     function updateUI() {
         // Update quick capture button state
-        elements.quickCaptureBtn.disabled = !currentState.hasLastCaptureArea;
-        elements.quickCaptureBtn.textContent = currentState.hasLastCaptureArea ? 
-            'Quick Capture' : 'Quick Capture (No Area)';
-
+        elements.quickCaptureBtn.textContent = 'Quick Capture';
+        
         // Update header UI toggle button
         elements.headerUiToggle.textContent = currentState.isPanelVisible ? 'Hide UI' : 'Show UI';
 
-        // Show/hide auto-solve section based on domain
-        if (currentState.isOnVocabulary) {
-            elements.autoSolveSection.classList.remove('hidden');
-            elements.autoSolveToggle.checked = currentState.isAutoSolveMode;
-        } else {
-            elements.autoSolveSection.classList.add('hidden');
-        }
+        // Keep auto-solve section hidden (container preserved for future use)
+        elements.autoSolveSection.classList.add('hidden');
     }
 
     // Update response display
@@ -140,20 +144,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
+            // Test API key validity
+            const response = await fetch('https://api.openai.com/v1/models', {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Invalid API key');
+            }
+            
             await chrome.storage.local.set({ 'captureai-api-key': apiKey });
             currentState.apiKey = apiKey;
             
             showResponseMessage('API key saved successfully!', 'success');
             
             setTimeout(() => {
+                // Clear the response message and show main controls
+                elements.responseContent.textContent = '';
+                elements.responseContent.className = 'response-content empty';
+            
                 elements.apiKeySection.classList.add('hidden');
                 elements.mainControls.classList.remove('hidden');
                 updateStateFromContentScript();
             }, 1500);
             
         } catch (error) {
-            showResponseMessage('Error saving API key', 'error');
-            console.error('Error saving API key:', error);
+            showResponseMessage('Error: Invalid API key', 'error');
+            // Silent error handling
+            await chrome.storage.local.remove('captureai-api-key');
         }
     }
 
@@ -181,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             showResponseMessage('Page not ready - please refresh and try again', 'error');
-            console.error('Capture error:', error);
+            // Silent error handling
         }
     }
 
@@ -209,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             showResponseMessage('Page not ready - please refresh and try again', 'error');
-            console.error('Quick capture error:', error);
+            // Silent error handling
         }
     }
 
@@ -237,40 +257,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             showResponseMessage('Page not ready - please refresh and try again', 'error');
-            console.error('Toggle panel error:', error);
+            // Silent error handling
         }
     }
 
-    // Toggle auto-solve mode
-    async function toggleAutoSolve() {
+    // Toggle Pro Mode
+    async function toggleProMode() {
         try {
+            console.log('Pro Mode toggle clicked, current state:', currentState.isProMode);
+            
+            currentState.isProMode = elements.proModeToggle.checked;
+            
+            // Save Pro Mode state to storage
+            await chrome.storage.local.set({ 'captureai-pro-mode': currentState.isProMode });
+            
+            // Send Pro Mode state to content script
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            // Check if we're on a valid page
-            if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-                showResponseMessage('Auto-solve not available on this page type', 'error');
-                return;
+            try {
+                const response = await chrome.tabs.sendMessage(tab.id, { 
+                    action: 'setProMode', 
+                    isProMode: currentState.isProMode 
+                });
+                
+                if (response && response.success) {
+                    console.log('Pro Mode updated successfully:', currentState.isProMode);
+                    // Status message removed - Pro Mode toggle is silent
+                } else {
+                    console.log('Pro Mode update response:', response);
+                }
+            } catch (error) {
+                console.log('Could not communicate with content script for Pro Mode:', error);
+                // Still save the state locally even if content script communication fails
             }
             
-            // Ensure content script is loaded
-            await ensureContentScriptLoaded(tab.id);
-            
-            const response = await chrome.tabs.sendMessage(tab.id, { action: 'toggleAutoSolve' });
-            
-            if (response && response.success) {
-                currentState.isAutoSolveMode = response.autoSolveMode;
-            } else {
-                showResponseMessage(response.error || 'Error toggling auto-solve', 'error');
-                // Revert toggle state
-                elements.autoSolveToggle.checked = currentState.isAutoSolveMode;
-            }
         } catch (error) {
-            showResponseMessage('Page not ready - please refresh and try again', 'error');
-            console.error('Toggle auto-solve error:', error);
-            // Revert toggle state
-            elements.autoSolveToggle.checked = currentState.isAutoSolveMode;
+            // Silent error handling
+            showResponseMessage('Error updating Pro Mode', 'error');
+            // Revert toggle state on error
+            elements.proModeToggle.checked = !elements.proModeToggle.checked;
+            currentState.isProMode = elements.proModeToggle.checked;
         }
     }
+
+    // Auto-solve toggle function removed - functionality moved to floating UI only
 
     // Ensure content script is loaded
     async function ensureContentScriptLoaded(tabId) {
