@@ -1,213 +1,155 @@
-// Background service worker for CaptureAI Chrome extension
+/**
+ * ==================================================================================
+ * CaptureAI Background Service Worker
+ * ==================================================================================
+ * Handles screenshot capture, OpenAI API communication, and message routing
+ * for the CaptureAI Chrome extension.
+ */
+
+// ==================================================================================
+// EXTENSION LIFECYCLE
+// ==================================================================================
+
+/**
+ * Initialize extension on install/update
+ * Injects content script into all existing tabs
+ */
 chrome.runtime.onInstalled.addListener(() => {
-    // Inject content script into all open tabs
-    chrome.tabs.query({}, (tabs) => {
-        for (let tab of tabs) {
-            if (isValidUrl(tab.url)) {
-                injectContentScript(tab.id);
-            }
-        }
-    });
-});
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    
-    if (request.action === 'sendToOpenAI') {
-        handleOpenAIRequest(request.data, sendResponse);
-        return true; // Keep message channel open for async response
-    }
-
-    if (request.action === 'captureArea') {
-        handleCaptureArea(request, sender, sendResponse);
-        return true; // Keep message channel open for async response
-    }
-
-    if (request.action === 'askQuestion') {
-        handleAskQuestion(request, sender, sendResponse);
-        return true; // Keep message channel open for async response
-    }
-
-    return false;
-});
-
-// Handle capture area requests (optimized)
-async function handleCaptureArea(request, sender, sendResponse) {
     try {
-
-        
-        chrome.tabs.captureVisibleTab(null, { format: 'png' }, async (imageUri) => {
+        chrome.tabs.query({}, (tabs) => {
             if (chrome.runtime.lastError) {
-
-                sendResponse({ error: 'Failed to capture screenshot' });
                 return;
             }
             
-
-            
-            // Send captured image to content script for processing
-            chrome.tabs.sendMessage(sender.tab.id, {
-                action: 'processCapturedImage',
-                imageUri: imageUri,
-                startX: request.coordinates.startX,
-                startY: request.coordinates.startY,
-                width: request.coordinates.width,
-                height: request.coordinates.height
-            }, async (response) => {
-                if (chrome.runtime.lastError) {
-
-                    return;
-                }
-                
-
-
-                // Show processing message before sending to OpenAI
-                chrome.tabs.sendMessage(sender.tab.id, {
-                    action: 'showProcessingMessage'
-                });
-
-                // Get API key and Pro Mode state
-                const apiKey = await getStoredApiKey();
-                const isProMode = await getStoredProMode();
-                const promptType = request.promptType || 'answer';
-                
-
-                
-                // Check for OCR errors first
-                if (response && response.hasError) {
-                    // Display error message directly without sending to OpenAI
-                    chrome.tabs.sendMessage(sender.tab.id, {
-                        action: 'displayResponse',
-                        response: response.error
-                    });
-                    return;
-                }
-                
-                // Check if we have the required data based on prompt type and mode
-                let hasRequiredData;
-                if (isProMode) {
-                    // Pro Mode always needs image data
-                    hasRequiredData = response && response.compressedImageData;
-                } else {
-                    // Standard mode: both auto-solve and manual need extracted text from OCR
-                    hasRequiredData = response && response.extractedText && response.extractedText.trim().length > 0;
-                }
-                
-                if (apiKey && hasRequiredData) {
-                    let gptResponse;
-                    
-                    if (isProMode) {
-                        // Pro Mode: always send image data regardless of prompt type
-                        const compressedImageData = response.compressedImageData;
-                        gptResponse = await sendExtractedTextToOpenAI({ imageData: compressedImageData }, apiKey, promptType, true);
-                    } else {
-                        // Standard Mode: use appropriate data type
-                        if (promptType === 'auto_solve') {
-                            // Standard auto-solve: use extracted text from Tesseract OCR
-                            gptResponse = await sendExtractedTextToOpenAI(response.extractedText, apiKey, 'auto_solve', false);
-                        } else {
-                            // Standard manual capture: use extracted text
-                            gptResponse = await sendExtractedTextToOpenAI(response.extractedText, apiKey, 'answer', false);
-                        }
+            for (let tab of tabs) {
+                try {
+                    if (isValidUrl(tab.url)) {
+                        injectContentScript(tab.id).catch(err => {});
                     }
-
-                    // Send the response back to content script for display
-                    chrome.tabs.sendMessage(sender.tab.id, {
-                        action: 'displayResponse',
-                        response: gptResponse,
-                        promptType: promptType
-                    });
-                } else {
-                    // Silent error handling
-                    chrome.tabs.sendMessage(sender.tab.id, {
-                        action: 'displayResponse',
-                        response: 'Error: Missing API key or failed to extract text'
-                    });
-                }
-            });
+                } catch (error) {}
+            }
         });
-    } catch (error) {
-        // Silent error handling
-        sendResponse({ error: error.message });
-    }
-}
+    } catch (error) {}
+});
 
-async function handleOpenAIRequest(data, sendResponse) {
+// ==================================================================================
+// MESSAGE ROUTING
+// ==================================================================================
+
+/**
+ * Central message router for all extension communication
+ * Routes messages from content scripts and popup to appropriate handlers
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    switch (request.action) {
+        case 'captureArea':
+            handleCaptureArea(request, sender, sendResponse);
+            return true;
+        
+        case 'askQuestion':
+            handleAskQuestion(request, sender, sendResponse);
+            return true;
+        
+        default:
+            return false;
+    }
+});
+
+// ==================================================================================
+// SCREENSHOT CAPTURE & PROCESSING
+// ==================================================================================
+
+/**
+ * Handle screenshot capture and AI processing pipeline
+ * @param {Object} request - Capture request with coordinates and prompt type
+ * @param {Object} sender - Message sender info
+ * @param {Function} sendResponse - Response callback
+ */
+async function handleCaptureArea(request, sender, sendResponse) {
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${data.apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: "gpt-5-nano",
-                messages: data.messages,
-                max_tokens: 100,
-                temperature: 0
-            })
-        });
+        // Step 1: Show capturing message and capture screenshot
+        await showCapturingMessage(sender.tab.id);
+        const imageUri = await captureScreenshot();
+        
+        // Step 2: Process captured image (crop and compress)
+        const processedData = await processImage(imageUri, request, sender);
+        
+        // Step 3: Show processing message to user
+        await showProcessingMessage(sender.tab.id);
 
-        if (response.ok) {
-            const result = await response.json();
-            sendResponse({ success: true, data: result });
-        } else {
-            const errorData = await response.json();
-            sendResponse({
-                success: false,
-                error: errorData.error?.message || 'Unknown API error'
-            });
+        // Step 4: Get user settings
+        const apiKey = await getStoredApiKey();
+        const promptType = request.promptType || 'answer';
+        
+        // Step 5: Handle processing errors
+        if (processedData?.hasError) {
+            await displayResponse(sender.tab.id, processedData.error);
+            sendResponse({ success: true });
+            return;
         }
+        
+        // Step 6: Send to AI and get response (always use direct image processing)
+        const aiResponse = await processWithAI(processedData, apiKey, promptType);
+        
+        // Step 7: Display response to user
+        await displayResponse(sender.tab.id, aiResponse, promptType);
+        
+        sendResponse({ success: true });
+        
     } catch (error) {
-        // Silent error handling
-        sendResponse({
-            success: false,
-            error: 'Network error or API unavailable'
-        });
+        sendResponse({ success: false, error: 'Capture failed' });
     }
 }
 
-// Handle ask question requests
+// ==================================================================================
+// AI PROCESSING FUNCTIONS
+// ==================================================================================
+
+
+/**
+ * Handle ask question requests from UI
+ * @param {Object} request - Question request
+ * @param {Object} sender - Message sender info
+ * @param {Function} sendResponse - Response callback
+ */
 async function handleAskQuestion(request, sender, sendResponse) {
     try {
         const question = request.question;
         
+        // Validate question
         if (!question || question.trim().length === 0) {
-            chrome.tabs.sendMessage(sender.tab.id, {
-                action: 'displayResponse',
-                response: 'Error: No question provided'
-            });
+            await displayResponse(sender.tab.id, 'Error: No question provided');
+            sendResponse({ success: false, error: 'No question provided' });
             return;
         }
 
         // Get API key
         const apiKey = await getStoredApiKey();
-        
         if (!apiKey) {
-            chrome.tabs.sendMessage(sender.tab.id, {
-                action: 'displayResponse',
-                response: 'Error: API key is not set'
-            });
+            await displayResponse(sender.tab.id, 'Error: API key is not set');
+            sendResponse({ success: false, error: 'API key not set' });
             return;
         }
 
-        // Send question to ChatGPT
-        const gptResponse = await sendQuestionToOpenAI(question, apiKey);
+        // Process question with AI
+        const aiResponse = await sendQuestionToOpenAI(question, apiKey);
         
         // Display response
-        chrome.tabs.sendMessage(sender.tab.id, {
-            action: 'displayResponse',
-            response: gptResponse
-        });
+        await displayResponse(sender.tab.id, aiResponse);
+        sendResponse({ success: true });
         
     } catch (error) {
-        chrome.tabs.sendMessage(sender.tab.id, {
-            action: 'displayResponse',
-            response: 'Error: Failed to process question'
-        });
+        await displayResponse(sender.tab.id, 'Error: Failed to process question');
+        sendResponse({ success: false, error: 'Failed to process question' });
     }
 }
 
-// Send question to OpenAI ChatGPT
+/**
+ * Send question to OpenAI ChatGPT API - ASK MODE (text-only questions from floating UI)
+ * @param {string} question - Question to ask
+ * @param {string} apiKey - OpenAI API key
+ * @returns {Promise<string>} AI response
+ */
 async function sendQuestionToOpenAI(question, apiKey) {
     try {
         const messages = [
@@ -215,6 +157,7 @@ async function sendQuestionToOpenAI(question, apiKey) {
             { role: "user", content: question }
         ];
 
+        // API Call for ASK MODE - text-only questions from floating UI
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -224,8 +167,9 @@ async function sendQuestionToOpenAI(question, apiKey) {
             body: JSON.stringify({
                 model: "gpt-5-nano",
                 messages: messages,
-                max_tokens: 500,
-                temperature: 0.7
+                max_completion_tokens: 500,
+                reasoning_effort: "low",
+                verbosity: "low"
             })
         });
 
@@ -242,123 +186,28 @@ async function sendQuestionToOpenAI(question, apiKey) {
     }
 }
 
-// Helper function to validate URLs
-function isValidUrl(url) {
-    return (url.startsWith('http://') || url.startsWith('https://')) &&
-           !url.startsWith('chrome://') &&
-           !url.startsWith('chrome-extension://') &&
-           !url.startsWith('chrome.google.com');
-}
-
-async function injectContentScript(tabId) {
+/**
+ * Send extracted text or image data to OpenAI for processing - CAPTURE MODES (normal capture and auto-solve)
+ * @param {Object} data - Image data object
+ * @param {string} apiKey - OpenAI API key
+ * @param {string} promptType - Type of prompt ('answer' for normal capture or 'auto_solve' for auto-solve mode)
+ * @returns {Promise<string>} AI response
+ */
+async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer') {
     try {
-        chrome.tabs.get(tabId, (tab) => {
-            if (isValidUrl(tab.url)) {
-                chrome.scripting.executeScript({
-                    target: { tabId: tabId },
-                    files: ['content.js']
-                }, () => {
-                    if (chrome.runtime.lastError) {
-                        // Silently handle injection errors
-                    }
-                });
-            }
-        });
-    } catch (error) {
-        // Silently handle errors
-    }
-}
-
-async function getStoredApiKey() {
-    return new Promise((resolve) => {
-        chrome.storage.local.get(['captureai-api-key'], (result) => {
-            resolve(result['captureai-api-key'] || '');
-        });
-    });
-}
-
-async function getStoredProMode() {
-    return new Promise((resolve) => {
-        chrome.storage.local.get(['captureai-pro-mode'], (result) => {
-            resolve(result['captureai-pro-mode'] || false);
-        });
-    });
-}
-
-async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer', isProMode = false) {
-    try {
-
-        
         if (!apiKey || apiKey.trim().length === 0) {
             return 'Error: API key is not set';
         }
-        
-        let messages;
-        let model = "gpt-5-nano";
-        
-        if (promptType === 'auto_solve') {
-            if (isProMode) {
-                // Pro Mode auto-solve: send image directly to gpt-5-nano
-                if (!data || !data.imageData) {
-                    return 'Error: No image data provided for Pro Mode auto-solve';
-                }
-                
-                const prompt = 'Answer with only the number (1, 2, 3, or 4) of the correct choice. Answer choices will go left to right, then top to bottom. If there are not exactly 4 choices or if it says Spell the word, respond with "Invalid question". Avoid choices that are red.';
-                
-                messages = [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt },
-                            { type: "image_url", image_url: { url: data.imageData } }
-                        ]
-                    }
-                ];
-            } else {
-                // Standard auto-solve: use Tesseract OCR + text processing
-                if (!data || data.trim().length === 0) {
-                    return 'Error: No text extracted from image for standard auto-solve';
-                }
-                
-                const prompt = 'Answer with only the number (1, 2, 3, or 4) of the correct choice. If there are not exactly 4 choices, respond with "Invalid question". Avoid choices containing @ and ®.';
-                
-                messages = [
-                    { role: "system", content: "You are a helpful assistant that answers questions accurately and concisely." },
-                    { role: "user", content: `${prompt}\n\nQuestion: "${data}"` }
-                ];
-            }
-        } else {
-            if (isProMode) {
-                // Pro Mode manual capture: send image directly to gpt-5-nano
-                if (!data || !data.imageData) {
-                    return 'Error: No image data provided for Pro Mode capture';
-                }
-                
-                const prompt = 'Reply with answer only, avoid choices that are red.';
-                
-                messages = [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: prompt },
-                            { type: "image_url", image_url: { url: data.imageData } }
-                        ]
-                    }
-                ];
-            } else {
-                // Standard manual capture: use extracted text
-                if (!data || data.trim().length === 0) {
-                    return 'Error: No text extracted from image';
-                }
-                
-                const prompt = 'Reply with answer only.';
-                messages = [
-                    { role: "system", content: "You are a helpful assistant that answers questions accurately and concisely." },
-                    { role: "user", content: `${prompt}\n\nQuestion: "${data}"`}
-                ];
-            }
-        }
 
+        // Configure model and messages based on mode and prompt type
+        // All modes now use gpt-5-nano for optimal speed and efficiency
+        const model = "gpt-5-nano";
+        const messages = buildMessages(data, promptType);
+
+
+        // API Call for CAPTURE MODES - image-based questions from screenshots
+        // AUTO-SOLVE: shorter responses (50 tokens) for quick answers
+        // NORMAL CAPTURE: longer responses (300 tokens) for detailed answers
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -368,8 +217,9 @@ async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer', is
             body: JSON.stringify({
                 model: model,
                 messages: messages,
-                max_tokens: 150,
-                temperature: 0
+                max_completion_tokens: 300,
+                reasoning_effort: "low",
+                verbosity: "low"
             })
         });
 
@@ -378,10 +228,227 @@ async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer', is
             const aiResponse = result.choices[0]?.message?.content?.trim() || 'No response found';
             return aiResponse;
         } else {
-            return `Error: OpenAI API error (${response.status})`;
+            const errorText = await response.text();
+            return `Error: OpenAI API error (${response.status}): ${response.statusText}`;
         }
     } catch (error) {
-
         return 'Error: Network error or API unavailable';
     }
 }
+
+// ==================================================================================
+// HELPER FUNCTIONS
+// ==================================================================================
+
+/**
+ * Capture screenshot of visible tab
+ * @returns {Promise<string>} Screenshot data URI
+ */
+async function captureScreenshot() {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.captureVisibleTab(null, { format: 'png' }, (imageUri) => {
+            if (chrome.runtime.lastError) {
+                reject(new Error('Failed to capture screenshot'));
+            } else {
+                resolve(imageUri);
+            }
+        });
+    });
+}
+
+/**
+ * Process captured image (send to content script for cropping/OCR)
+ * @param {string} imageUri - Screenshot data URI
+ * @param {Object} request - Original request with coordinates
+ * @param {Object} sender - Message sender info
+ * @returns {Promise<Object>} Processed image data
+ */
+async function processImage(imageUri, request, sender) {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(sender.tab.id, {
+            action: 'processCapturedImage',
+            imageUri: imageUri,
+            startX: request.coordinates.startX,
+            startY: request.coordinates.startY,
+            width: request.coordinates.width,
+            height: request.coordinates.height
+        }, (response) => {
+            if (chrome.runtime.lastError) {
+                reject(new Error('Error processing image: ' + chrome.runtime.lastError.message));
+            } else {
+                resolve(response);
+            }
+        });
+    });
+}
+
+/**
+ * Show capturing message to user
+ * @param {number} tabId - Tab ID
+ */
+async function showCapturingMessage(tabId) {
+    try {
+        await new Promise((resolve) => {
+            chrome.tabs.sendMessage(tabId, {
+                action: 'showCapturingMessage'
+            }, () => {
+                resolve(); // Always resolve to continue processing
+            });
+        });
+    } catch (e) {
+        // Continue processing even if message fails
+    }
+}
+
+/**
+ * Show processing message to user
+ * @param {number} tabId - Tab ID
+ */
+async function showProcessingMessage(tabId) {
+    try {
+        await new Promise((resolve) => {
+            chrome.tabs.sendMessage(tabId, {
+                action: 'showProcessingMessage'
+            }, () => {
+                resolve(); // Always resolve to continue processing
+            });
+        });
+    } catch (e) {
+        // Continue processing even if message fails
+    }
+}
+
+/**
+ * Display response to user
+ * @param {number} tabId - Tab ID
+ * @param {string} response - Response text
+ * @param {string} promptType - Prompt type (optional)
+ */
+async function displayResponse(tabId, response, promptType) {
+    await new Promise((resolve) => {
+        chrome.tabs.sendMessage(tabId, {
+            action: 'displayResponse',
+            response: response,
+            promptType: promptType
+        }, () => {
+            if (chrome.runtime.lastError) {}
+            resolve();
+        });
+    });
+}
+
+/**
+ * Process data with AI
+ * @param {Object} processedData - Data from image processing
+ * @param {string} apiKey - OpenAI API key
+ * @param {string} promptType - Type of prompt
+ * @returns {Promise<string>} AI response
+ */
+async function processWithAI(processedData, apiKey, promptType) {
+    // Check if we have the required image data
+    if (!apiKey || !processedData?.compressedImageData) {
+        return 'Error: Missing API key or failed to process image';
+    }
+    
+    // Always use direct image processing
+    const imageData = { imageData: processedData.compressedImageData };
+    return await sendExtractedTextToOpenAI(imageData, apiKey, promptType);
+}
+
+/**
+ * Build messages array for OpenAI API based on prompt type
+ * @param {Object} data - Input data (image)
+ * @param {string} promptType - Type of prompt
+ * @returns {Array} Messages array
+ */
+function buildMessages(data, promptType) {
+    if (promptType === 'auto_solve') {
+        // Auto-solve: always use image input
+        if (!data?.imageData) {
+            throw new Error('No image data provided for auto-solve');
+        }
+        
+        const prompt = 'Answer with only the number (1, 2, 3, or 4) of the correct choice. Answer choices will go left to right, then top to bottom. If there are not exactly 4 choices or if it says Spell the word, respond with "Invalid question". Avoid choices that are red.';
+        
+        return [{
+            role: "user",
+            content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: data.imageData } }
+            ]
+        }];
+    } else {
+        // Manual capture: always use image input
+        if (!data?.imageData) {
+            throw new Error('No image data provided for capture');
+        }
+        
+        const prompt = 'Reply with answer only, avoid choices that are red.';
+        
+        return [{
+            role: "user",
+            content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: data.imageData } }
+            ]
+        }];
+    }
+}
+
+// ==================================================================================
+// CHROME EXTENSION UTILITIES
+// ==================================================================================
+
+/**
+ * Validate if URL is suitable for content script injection
+ * @param {string} url - URL to validate
+ * @returns {boolean} Whether URL is valid
+ */
+function isValidUrl(url) {
+    return (url.startsWith('http://') || url.startsWith('https://')) &&
+           !url.startsWith('chrome://') &&
+           !url.startsWith('chrome-extension://') &&
+           !url.startsWith('chrome.google.com');
+}
+
+/**
+ * Inject content script into a specific tab
+ * @param {number} tabId - Tab ID to inject into
+ */
+async function injectContentScript(tabId) {
+    try {
+        chrome.tabs.get(tabId, (tab) => {
+            if (chrome.runtime.lastError) {
+                return;
+            }
+            if (isValidUrl(tab.url)) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    files: ['content.js']
+                }, () => {
+                    if (chrome.runtime.lastError) {}
+                });
+            }
+        });
+    } catch (error) {
+        // Silently handle errors
+    }
+}
+
+// ==================================================================================
+// STORAGE UTILITIES
+// ==================================================================================
+
+/**
+ * Get stored OpenAI API key from Chrome storage
+ * @returns {Promise<string>} API key or empty string
+ */
+async function getStoredApiKey() {
+    return new Promise((resolve) => {
+        chrome.storage.local.get(['captureai-api-key'], (result) => {
+            resolve(result['captureai-api-key'] || '');
+        });
+    });
+}
+
+// Pro Mode removed - direct image processing is now the default

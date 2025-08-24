@@ -5,7 +5,7 @@
     "author": "Grayson Kramer",
     "description": "AI-powered question capture tool",
     "content_security_policy": {
-        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; worker-src 'self';"
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self';"
     },
     "permissions": [
         "storage",
@@ -30,11 +30,26 @@
     },
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": [ "content.js", "libs/tesseract.min.js" ],
+        "js": [ "content.js" ],
         "run_at": "document_idle"
     }],
     "web_accessible_resources": [{
-        "resources": ["icons/icon128.png", "icons/camera.png", "libs/tesseract.min.js"],
+        "resources": [
+            "icons/icon128.png", 
+            "icons/camera.png", 
+            "modules/config.js",
+            "modules/storage.js",
+            "modules/domains.js",
+            "modules/utils.js",
+            "modules/image-processing.js",
+            "modules/ui-components.js",
+            "modules/ui-handlers.js",
+            "modules/capture-system.js",
+            "modules/auto-solve.js",
+            "modules/messaging.js",
+            "modules/keyboard.js",
+            "modules/event-manager.js"
+        ],
         "matches": ["<all_urls>"]
     }]
 }
