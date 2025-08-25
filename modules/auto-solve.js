@@ -12,7 +12,7 @@ export const AutoSolve = {
                 return;
             }
             
-            const { STATE, STORAGE_KEYS, CONFIG } = window.CaptureAI;
+            const { STATE, STORAGE_KEYS } = window.CaptureAI;
             
             if (enabled === null) {
                 enabled = !STATE.isAutoSolveMode;
@@ -157,7 +157,7 @@ export const AutoSolve = {
                     action: 'captureArea',
                     coordinates: captureArea,
                     promptType: window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE
-                }, (response) => {
+                }, () => {
                     if (chrome.runtime.lastError) {
                         STATE.isProcessing = false;
                         this.scheduleNextAutoSolve();
@@ -235,8 +235,10 @@ export const AutoSolve = {
             // Simple response processing like the backup
             const cleanResponse = response.trim().toLowerCase();
 
-            // EXACTLY like backup - only check for 'invalid question'
-            if (cleanResponse.includes('invalid question')) {
+            // Check for invalid responses: 'invalid question', 'no response found', or any error
+            if (cleanResponse.includes('invalid question') || 
+                cleanResponse.includes('no response found') || 
+                cleanResponse.startsWith('error:')) {
                 STATE.invalidQuestionCount++;
 
                 if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {

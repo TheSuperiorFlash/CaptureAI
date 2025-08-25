@@ -62,7 +62,8 @@ export const STATE = {
     autoSolveTimer: null,
     invalidQuestionCount: 0,
     autoSolveToggle: null,
-    isAskMode: false
+    isAskMode: false,
+    currentResponse: ''
 };
 
 // Cached DOM elements

@@ -90,7 +90,7 @@ export const Messaging = {
                             }
                         });
                     })
-                    .catch(error => {
+                    .catch(() => {
                         sendResponse({
                             success: true,
                             state: {
@@ -111,8 +111,7 @@ export const Messaging = {
                         isAutoSolveMode: STATE.isAutoSolveMode || false,
                         hasLastCaptureArea: false,
                         isOnSupportedSite: window.CaptureAI.DomainUtils ? window.CaptureAI.DomainUtils.isOnSupportedSite() : false,
-                        currentResponse: STATE.currentResponse || '',
-                        isProMode: STATE.isProMode || false
+                        currentResponse: STATE.currentResponse || ''
                     }
                 });
             }
@@ -285,7 +284,7 @@ export const Messaging = {
                                 action: 'updateResponse',
                                 message: request.response,
                                 isError: request.response.startsWith('Error:')
-                            }, (response) => {
+                            }, () => {
                                 // Ignore response or errors - popup might not be open
                                 if (chrome.runtime.lastError) {
                                     // Silent handling of popup communication errors
@@ -314,7 +313,6 @@ export const Messaging = {
             
             // Determine message type
             const isError = response.startsWith('Error:') || response.includes('failed');
-            const messageType = isError ? 'error' : 'success';
             
             // Use new messaging system to display AI response
             if (window.CaptureAI.UIMessaging) {

@@ -4,36 +4,104 @@
 
 export const ImageProcessing = {
         /**
-         * Compress image to WebP format with performance optimization
+         * Compress image with advanced optimization for token reduction
          * @param {string} imageDataUrl - Original image data URL
          * @param {number} quality - Compression quality (0-1)
+         * @param {Object} options - Compression options
          * @returns {Promise<string>}
          */
-        compressImage(imageDataUrl, quality = 0.6) {
+        compressImage(imageDataUrl, quality = 0.3, options = {}) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+                    // Smart resize for token optimization
+                    const { width: newWidth, height: newHeight } = this.calculateOptimalSize(
+                        img.width, 
+                        img.height, 
+                        options.maxWidth || 800,
+                        options.maxHeight || 600
+                    );
                     
-                    ctx.drawImage(img, 0, 0);
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
                     
-                    try {
-                        const compressedDataUrl = canvas.toDataURL('image/webp', quality);
-                        resolve(compressedDataUrl);
-                    } catch (error) {
+                    // Enhanced rendering for better compression
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                    
+                    // Try multiple compression strategies and pick the smallest
+                    const compressionPromises = [
+                        // Strategy 1: WebP with lower quality
+                        this.tryCompression(canvas, 'image/webp', quality * 0.8),
+                        // Strategy 2: JPEG with medium quality
+                        this.tryCompression(canvas, 'image/jpeg', quality),
+                        // Strategy 3: WebP with very low quality
+                        this.tryCompression(canvas, 'image/webp', 0.2)
+                    ];
+                    
+                    Promise.all(compressionPromises).then(results => {
+                        // Pick the smallest result that's still readable
+                        const smallest = results.reduce((prev, curr) => 
+                            curr && curr.length < prev.length ? curr : prev
+                        );
+                        resolve(smallest);
+                    }).catch(() => {
+                        // Fallback to simple JPEG compression
                         const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
                         resolve(jpegDataUrl);
-                    }
+                    });
                 };
                 img.onerror = (error) => {
                     reject(error);
                 };
                 img.src = imageDataUrl;
             });
+        },
+
+        /**
+         * Try compression with specific format and quality
+         * @param {HTMLCanvasElement} canvas - Canvas element
+         * @param {string} mimeType - MIME type for compression
+         * @param {number} quality - Compression quality
+         * @returns {Promise<string>}
+         */
+        tryCompression(canvas, mimeType, quality) {
+            return new Promise((resolve) => {
+                try {
+                    const result = canvas.toDataURL(mimeType, quality);
+                    resolve(result);
+                } catch (error) {
+                    resolve(null);
+                }
+            });
+        },
+
+        /**
+         * Calculate optimal dimensions for token efficiency
+         * @param {number} originalWidth - Original image width
+         * @param {number} originalHeight - Original image height
+         * @param {number} maxWidth - Maximum allowed width
+         * @param {number} maxHeight - Maximum allowed height
+         * @returns {Object} New dimensions
+         */
+        calculateOptimalSize(originalWidth, originalHeight, maxWidth, maxHeight) {
+            // Calculate area reduction for token optimization
+            const originalArea = originalWidth * originalHeight;
+            const targetArea = Math.min(originalArea, maxWidth * maxHeight);
+            
+            if (originalArea <= targetArea) {
+                return { width: originalWidth, height: originalHeight };
+            }
+            
+            const scaleFactor = Math.sqrt(targetArea / originalArea);
+            return {
+                width: Math.round(originalWidth * scaleFactor),
+                height: Math.round(originalHeight * scaleFactor)
+            };
         },
 
         /**
@@ -67,13 +135,12 @@ export const ImageProcessing = {
         },
 
         /**
-         * Process captured image: crop, compress, and extract text
+         * Process captured image: crop, compress, and optimize for token reduction
          * @param {string} imageUri - Full screenshot image URI
          * @param {Object} coordinates - Crop coordinates
          * @returns {Promise<Object>}
          */
         async captureAndProcess(imageUri, coordinates) {
-            const { STATE } = window.CaptureAI;
             
             try {
                 const croppedImage = await this.cropImage(imageUri, {
@@ -83,7 +150,14 @@ export const ImageProcessing = {
                     height: coordinates.height
                 });
 
-                const compressedImageData = await this.compressImage(croppedImage, 0.5);
+                // Use consistent compression settings for all modes
+                const compressionOptions = {
+                    maxWidth: 800,
+                    maxHeight: 600
+                };
+                
+                const compressedImageData = await this.compressImage(croppedImage, 0.3, compressionOptions);
+                
                 return { 
                     success: true, 
                     compressedImageData: compressedImageData 

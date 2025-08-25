@@ -27,29 +27,24 @@ export const UIMessaging = {
      * @param {number} autoHideDelay - Auto-hide delay in milliseconds
      */
     showMessage(message, isError = false, autoHideDelay = 0) {
-        const { STATE, CONFIG } = window.CaptureAI || {};
+        const { STATE } = window.CaptureAI || {};
         
         // Normalize isError parameter
         const isErrorFlag = isError === true || isError === 'error';
-
-        // Early return condition from original logic
-        if (!STATE?.isPanelVisible && !STATE?.isShowingAnswer) {
-            return;
-        }
 
         // Show in floating panel if visible and panel exists
         if (STATE?.isPanelVisible) {
             this.showInFloatingPanel(message, isErrorFlag);
         }
 
-        // Always handle stealthy result
+        // Always handle stealthy result (this will show/hide based on panel visibility)
         this.handleStealthyResult(message, isErrorFlag);
 
-        // Send to popup
+        // Send to popup (always available)
         this.sendToPopup(message, isErrorFlag);
 
         // Handle auto-hide for floating panel
-        if (autoHideDelay > 0) {
+        if (autoHideDelay > 0 && STATE?.isPanelVisible) {
             this.scheduleAutoHide(message, autoHideDelay);
         }
     },
@@ -136,20 +131,8 @@ export const UIMessaging = {
      * @param {boolean} isError - Whether response is an error
      */
     displayAIResponse(response, isError = false) {
-        const { STATE } = window.CaptureAI || {};
-
-        // Set showing answer state temporarily to allow message display
-        if (STATE) {
-            STATE.isShowingAnswer = true;
-        }
-
-        // Show the message (which will handle both panel and stealthy result)
+        // Simply show the message - it will respect panel visibility and show in appropriate UI
         this.showMessage(response, isError);
-
-        // Reset showing answer state
-        if (STATE) {
-            STATE.isShowingAnswer = false;
-        }
     },
 
     /**
@@ -157,7 +140,7 @@ export const UIMessaging = {
      * @param {string} question - Question text
      */
     handleAskQuestion(question) {
-        this.showMessage('Asking GPT-5...');
+        this.showMessage('Asking AI...');
 
         // Send question to background script for processing
         chrome.runtime.sendMessage({

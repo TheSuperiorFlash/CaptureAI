@@ -84,10 +84,7 @@ export const EventManager = {
                 STATE.autoSolveTimer = null;
             }
             
-            // Clean up OCR resources
-            if (window.CaptureAI.OCRUtils) {
-                window.CaptureAI.OCRUtils.cleanup();
-            }
+            // OCR removed - direct image processing only
             
             // Clean up UI elements
             this.cleanupUI();
@@ -164,10 +161,8 @@ export const EventManager = {
 
         /**
          * Handle errors gracefully
-         * @param {Error} error - Error object
-         * @param {string} context - Error context
          */
-        handleError(error, context = 'Unknown') {
+        handleError() {
             
             // Show user-friendly error message
             if (window.CaptureAI.UIHandlers) {
