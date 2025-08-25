@@ -316,14 +316,15 @@ export const Messaging = {
             const isError = response.startsWith('Error:') || response.includes('failed');
             const messageType = isError ? 'error' : 'success';
             
-            // Set showing answer state temporarily to allow stealthy result display
-            STATE.isShowingAnswer = true;
-            
-            // Show the message (which will handle stealthy result)
-            window.CaptureAI.UIComponents.showMessage(response, isError);
-            
-            // Reset showing answer state
-            STATE.isShowingAnswer = false;
+            // Use new messaging system to display AI response
+            if (window.CaptureAI.UIMessaging) {
+                window.CaptureAI.UIMessaging.displayAIResponse(response, isError);
+            } else {
+                // Fallback to direct UI components call
+                STATE.isShowingAnswer = true;
+                window.CaptureAI.UIComponents.showMessage(response, isError);
+                STATE.isShowingAnswer = false;
+            }
         },
 
         /**

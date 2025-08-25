@@ -2,14 +2,14 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <!-- Google Fonts removed to avoid CSP issues -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             width: 300px;
             min-height: max-content;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: #333333 !important;
             background-color: white;
         }
@@ -150,126 +150,6 @@
             display: none;
         }
         
-        .auto-solve-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0px 15px;
-            margin-bottom: 15px;
-            margin-left: 5px;
-        }
-        
-        .auto-solve-text {
-            font-size: 14px;
-            color: #333;
-            color: #333333 !important;
-        }
-        
-        .auto-solve-toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 20px;
-        }
-        
-        .auto-solve-toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .auto-solve-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #e0e0e0;
-            transition: .3s;
-            border-radius: 34px;
-        }
-        
-        .auto-solve-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 34px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        input:checked + .auto-solve-slider {
-            background-color: #4caf65;
-        }
-        
-        input:checked + .auto-solve-slider:before {
-            transform: translateX(10px);
-        }
-        
-        /* Pro Mode Toggle Styles - Matching floating panel toggle */
-        .pro-mode-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .pro-mode-label {
-            font-size: 14px;
-            color: #666666 !important;
-            font-weight: 500;
-        }
-        
-        .captureai-toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 20px;
-        }
-        
-        .captureai-toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            width: 30px;
-            height: 20px;
-            background-color: #ccc;
-            transition: .3s;
-            border-radius: 34px;
-        }
-        
-        .toggle-slider-button {
-            position: absolute;
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white !important;
-            transition: .4s;
-            border-radius: 34px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        .captureai-toggle-switch input:checked + .toggle-slider {
-            background-color: #4CAF50;
-        }
-        
-        .captureai-toggle-switch input:checked + .toggle-slider .toggle-slider-button {
-            left: 12px;
-        }
-        
         .response-section {
             padding: 15px;
             margin-bottom: 5px;
@@ -279,7 +159,6 @@
             font-size: 14px;
             color: #666666;
             margin-bottom: 5px;
-            font-weight: bold;
         }
         
         .response-content {
@@ -357,6 +236,71 @@
             visibility: visible;
             opacity: 1;
         }
+        
+        /* Help section styles */
+        .help-section {
+            padding: 0px 15px 15px 20px;
+        }
+        
+        .help-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666666;
+            font-weight: 500;
+            padding: 2px 0;
+        }
+        
+        .help-toggle:hover {
+            color: #333333;
+        }
+        
+        .help-arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease-in-out;
+            transform-origin: center;
+        }
+        
+        .help-arrow.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .help-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        
+        .help-content.expanded {
+            max-height: 400px;
+            padding-top: 5px;
+        }
+        
+        .help-category {
+            margin: 12px 0 8px 0;
+            font-size: 13px;
+            font-weight: bold;
+            color: #4caf65;
+        }
+        
+        .help-item {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.4;
+        }
+        
+        .help-shortcut {
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: bold;
+            color: #4caf65;
+        }
     </style>
 </head>
 <body>
@@ -394,26 +338,21 @@
         <div id="main-controls" class="section hidden">
             <button id="capture-btn" class="button button-primary button-with-icon">
                 <img src="icons/camera.png" alt="Camera" class="button-icon">
-                Capture A Question
+                Capture a Question
             </button>
             <button id="quick-capture-btn" class="button button-secondary">Quick Capture</button>
         </div>
         
-        <!-- Auto Solve Section -->
-        <div id="auto-solve-section" class="auto-solve-section hidden">
-            <div class="pro-mode-container">
-                <span class="pro-mode-label">Auto Solve
-                    <span class="tooltip">
-                        <img src="icons/info.png" alt="Info" class="info-icon">
-                        <span class="tooltiptext">Automatically solve questions on supported educational sites like Vocabulary.com and Quizlet.com.</span>
-                    </span>
-                </span>
-                <label class="captureai-toggle-switch auto-solve-toggle">
-                    <input type="checkbox" id="auto-solve-toggle">
-                    <span class="toggle-slider">
-                        <span class="toggle-slider-button"></span>
-                    </span>
-                </label>
+        <!-- Help Section -->
+        <div id="help-section" class="help-section">
+            <div class="help-toggle" id="help-toggle">
+                <span>Keybinds</span>
+                <span class="help-arrow" id="help-arrow">▶</span>
+            </div>
+            <div class="help-content" id="help-content">
+                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+E</span> Toggle UI panel</div>
+                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+X</span> Start area capture</div>
+                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
             </div>
         </div>
     </div>

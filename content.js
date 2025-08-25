@@ -61,8 +61,11 @@ const CaptureAIApp = {
                     }
                 }
 
-                // Create UI immediately to ensure stealthy result is available
-                this.createUI();
+                // Initialize stealthy result immediately (lightweight, no floating UI)
+                window.CaptureAI.UIStealthyResult.init();
+                window.CaptureAI.UIMessaging.init();
+                
+                // Floating UI will be created on-demand via keyboard shortcuts or popup
 
                 // Register event handlers AFTER modules are loaded
                 this.setupEventHandlers();
@@ -88,6 +91,15 @@ const CaptureAIApp = {
                 const utilsModule = await import(chrome.runtime.getURL('modules/utils.js'));
                 // OCR module removed
                 const imageProcessingModule = await import(chrome.runtime.getURL('modules/image-processing.js'));
+                
+                // UI modules (new modular structure)
+                const uiStealthyResultModule = await import(chrome.runtime.getURL('modules/ui-stealthy-result.js'));
+                const uiThemeModule = await import(chrome.runtime.getURL('modules/ui-theme.js'));
+                const uiMessagingModule = await import(chrome.runtime.getURL('modules/ui-messaging.js'));
+                const uiPanelCoreModule = await import(chrome.runtime.getURL('modules/ui-panel-core.js'));
+                const uiModeToggleModule = await import(chrome.runtime.getURL('modules/ui-mode-toggle.js'));
+                const uiButtonsModule = await import(chrome.runtime.getURL('modules/ui-buttons.js'));
+                const uiAskModeModule = await import(chrome.runtime.getURL('modules/ui-ask-mode.js'));
                 const uiComponentsModule = await import(chrome.runtime.getURL('modules/ui-components.js'));
                 const uiHandlersModule = await import(chrome.runtime.getURL('modules/ui-handlers.js'));
                 const captureSystemModule = await import(chrome.runtime.getURL('modules/capture-system.js'));
@@ -111,6 +123,15 @@ const CaptureAIApp = {
                     Utils: utilsModule.Utils,
                     // OCRUtils removed
                     ImageProcessing: imageProcessingModule.ImageProcessing,
+                    
+                    // UI modules (new modular structure)
+                    UIStealthyResult: uiStealthyResultModule.UIStealthyResult,
+                    UITheme: uiThemeModule.UITheme,
+                    UIMessaging: uiMessagingModule.UIMessaging,
+                    UIPanelCore: uiPanelCoreModule.UIPanelCore,
+                    UIModeToggle: uiModeToggleModule.UIModeToggle,
+                    UIButtons: uiButtonsModule.UIButtons,
+                    UIAskMode: uiAskModeModule.UIAskMode,
                     UIComponents: uiComponentsModule.UIComponents,
                     UIHandlers: uiHandlersModule.UIHandlers,
                     CaptureSystem: captureSystemModule.CaptureSystem,
@@ -120,6 +141,8 @@ const CaptureAIApp = {
                     EventManager: eventManagerModule.EventManager
                 };
                 
+                // Initialize icons after Chrome APIs are available
+                window.CaptureAI.ICONS.init();
                 
                 // Add message handlers after modules are loaded
                 this.setupMessageHandlers();
@@ -274,7 +297,7 @@ const CaptureAIApp = {
                     padding: 0;
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
                     z-index: 9999;
-                    font-family: 'Roboto', Arial, sans-serif;
+                    font-family: 'Inter', Arial, sans-serif;
                     font-size: 14px;
                     display: block;
                     overflow: hidden;

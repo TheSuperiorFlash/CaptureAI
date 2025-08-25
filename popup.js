@@ -15,20 +15,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainControls: document.getElementById('main-controls'),
         captureBtn: document.getElementById('capture-btn'),
         quickCaptureBtn: document.getElementById('quick-capture-btn'),
-        autoSolveSection: document.getElementById('auto-solve-section'),
         headerUiToggle: document.getElementById('header-ui-toggle'),
-        autoSolveToggle: document.getElementById('auto-solve-toggle')
+        helpToggle: document.getElementById('help-toggle'),
+        helpContent: document.getElementById('help-content'),
+        helpArrow: document.getElementById('help-arrow')
     };
 
     // State variables
     let currentState = {
         apiKey: '',
         isPanelVisible: false,
-        isAutoSolveMode: false,
         hasLastCaptureArea: false,
-        isOnSupportedSite: false,
-        currentResponse: '',
-        isAutoSolveMode: false
+        currentResponse: ''
     };
 
     // Initialize popup state and UI
@@ -39,28 +37,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.captureBtn.addEventListener('click', startCapture);
     elements.quickCaptureBtn.addEventListener('click', quickCapture);
     elements.headerUiToggle.addEventListener('click', togglePanel);
-    elements.autoSolveToggle.addEventListener('change', toggleAutoSolve);
+    elements.helpToggle.addEventListener('click', toggleHelp);
 
     /**
      * Initialize popup state and load user preferences
      */
     async function initializePopup() {
         try {
-            // Load API key and Auto Solve mode from storage
-            const result = await chrome.storage.local.get(['captureai-api-key', 'captureai-auto-solve-mode']);
+            // Load API key from storage
+            const result = await chrome.storage.local.get(['captureai-api-key']);
             const apiKey = result['captureai-api-key'] || '';
-            const isAutoSolveMode = result['captureai-auto-solve-mode'] || false;
-            
-            // Initialize Auto Solve mode state
-            currentState.isAutoSolveMode = isAutoSolveMode;
-            elements.autoSolveToggle.checked = isAutoSolveMode;
             
             if (apiKey) {
                 currentState.apiKey = apiKey;
                 elements.apiKeyInput.value = '••••••••••••••••'; // Show masked key
                 elements.apiKeySection.classList.add('hidden');
                 elements.mainControls.classList.remove('hidden');
-                elements.autoSolveSection.classList.remove('hidden');
                 
                 // Get current state from content script
                 await updateStateFromContentScript();
@@ -131,11 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.captureBtn.disabled = true;
         elements.quickCaptureBtn.disabled = true;
         elements.headerUiToggle.disabled = true;
-        // Auto-solve section hidden when content scripts not available
-        elements.autoSolveSection.classList.add('hidden');
     }
-
-    // Auto-solve toggle functions removed - container preserved for future use
 
     /**
      * Update popup UI elements based on current state
@@ -146,13 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Update header UI toggle button
         elements.headerUiToggle.textContent = currentState.isPanelVisible ? 'Hide UI' : 'Show UI';
-
-        // Show auto-solve section when on supported sites
-        if (currentState.isOnSupportedSite) {
-            elements.autoSolveSection.classList.remove('hidden');
-        } else {
-            elements.autoSolveSection.classList.add('hidden');
-        }
     }
 
     /**
@@ -312,42 +293,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * Toggle Auto Solve setting
+     * Toggle help section visibility
      */
-    async function toggleAutoSolve() {
-        try {
-            
-            currentState.isAutoSolveMode = elements.autoSolveToggle.checked;
-            
-            // Save Auto Solve state to storage
-            await chrome.storage.local.set({ 'captureai-auto-solve-mode': currentState.isAutoSolveMode });
-            
-            // Send Auto Solve state to content script
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            
-            try {
-                const response = await chrome.tabs.sendMessage(tab.id, { 
-                    action: 'setAutoSolve', 
-                    isAutoSolveMode: currentState.isAutoSolveMode 
-                });
-                
-                if (response && response.success) {
-                } else {
-                }
-            } catch (error) {
-                // Still save the state locally even if content script communication fails
-            }
-            
-        } catch (error) {
-            // Silent error handling
-            showResponseMessage('Error updating Auto Solve', 'error');
-            // Revert toggle state on error
-            elements.autoSolveToggle.checked = !elements.autoSolveToggle.checked;
-            currentState.isAutoSolveMode = elements.autoSolveToggle.checked;
+    function toggleHelp() {
+        const isExpanded = elements.helpContent.classList.contains('expanded');
+        
+        if (isExpanded) {
+            elements.helpContent.classList.remove('expanded');
+            elements.helpArrow.classList.remove('expanded');
+        } else {
+            elements.helpContent.classList.add('expanded');
+            elements.helpArrow.classList.add('expanded');
         }
     }
-
-    // Auto-solve toggle function removed - functionality moved to floating UI only
 
     /**
      * Ensure content script is loaded in the target tab
