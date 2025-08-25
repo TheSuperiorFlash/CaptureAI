@@ -21,6 +21,14 @@ export const Utils = {
             let timeout;
             let lastCallTime = 0;
             
+            /**
+             * Executes a function at defined intervals, ensuring it's not called more frequently than specified.
+             * @example
+             * executedFunction(arg1, arg2)
+             * undefined
+             * @param {...any} args - Arguments to pass to the function being executed.
+             * @returns {void} Executes the function with provided arguments after a certain wait time.
+             */
             return function executedFunction(...args) {
                 const now = Date.now();
                 const shouldExecute = now - lastCallTime >= wait;
