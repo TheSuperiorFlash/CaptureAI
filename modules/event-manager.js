@@ -33,25 +33,6 @@ export const EventManager = {
             });
         },
 
-        /**
-         * Remove event listener
-         * @param {HTMLElement} element - Target element
-         * @param {string} event - Event type
-         * @param {Function} handler - Event handler
-         */
-        removeEventListener(element, event, handler) {
-            if (!element || !event || !handler) return;
-            
-            element.removeEventListener(event, handler);
-            
-            // Remove from tracking
-            const { STATE } = window.CaptureAI;
-            STATE.eventListeners = STATE.eventListeners.filter(listener => 
-                !(listener.element === element && 
-                  listener.event === event && 
-                  listener.handler === handler)
-            );
-        },
 
         /**
          * Clean up all event listeners and resources

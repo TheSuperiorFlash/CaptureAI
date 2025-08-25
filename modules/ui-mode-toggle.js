@@ -32,77 +32,115 @@ export const UIModeToggle = {
         // Create toggle container
         this.toggleContainer = document.createElement('div');
         this.toggleContainer.style.cssText = `
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            vertical-align: middle;
-            margin-top: -17px;
+            position: relative !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            vertical-align: middle !important;
+            margin-top: 1px !important;
+            box-sizing: border-box !important;
+            float: none !important;
+            clear: none !important;
+            transform: none !important;
         `;
 
         // Hidden input
         this.toggleInput = document.createElement('input');
         this.toggleInput.type = 'checkbox';
         this.toggleInput.style.cssText = `
-            opacity: 0;
-            width: 0;
-            height: 0;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            position: absolute !important;
+            z-index: -1 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: none !important;
         `;
 
         // Toggle switch background
         const modeToggleSwitch = document.createElement('div');
         modeToggleSwitch.style.cssText = `
-            position: relative;
-            width: 90px;
-            height: 24px;
-            background-color: ${theme.toggleBg};
-            border-radius: 12px;
-            border: 1px solid ${theme.border};
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            font-size: 11px;
-            font-weight: 500;
-            font-family: 'Inter', sans-serif;
+            position: relative !important;
+            width: 90px !important;
+            height: 24px !important;
+            background-color: ${theme.toggleBg} !important;
+            border-radius: 12px !important;
+            border: 1px solid ${theme.border} !important;
+            transition: all 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+            font-family: 'Inter', sans-serif !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            float: none !important;
+            clear: none !important;
+            transform: none !important;
+            overflow: hidden !important;
         `;
 
         // Sliding indicator
         this.toggleSlider = document.createElement('div');
         this.toggleSlider.style.cssText = `
-            position: absolute;
-            width: 54px;
-            height: 22px;
-            background-color: #4caf65;
-            border-radius: 11px;
-            top: 0px;
-            left: 0px;
-            transition: all 0.3s ease;
-            z-index: 1;
+            position: absolute !important;
+            width: 54px !important;
+            height: 22px !important;
+            background-color: #4caf65 !important;
+            border-radius: 11px !important;
+            top: 0px !important;
+            left: 0px !important;
+            transition: all 0.3s ease !important;
+            z-index: 1 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            box-sizing: border-box !important;
+            transform: none !important;
         `;
 
         // Capture label
         this.captureLabel = document.createElement('span');
         this.captureLabel.textContent = 'Capture';
         this.captureLabel.style.cssText = `
-            position: absolute;
-            left: 8px;
-            color: white;
-            font-size: 10px;
-            font-weight: 500;
-            z-index: 2;
-            transition: color 0.3s ease;
+            position: absolute !important;
+            left: 8px !important;
+            color: white !important;
+            font-size: 10px !important;
+            font-weight: 500 !important;
+            z-index: 2 !important;
+            transition: color 0.3s ease !important;
+            font-family: 'Inter', sans-serif !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: none !important;
+            text-decoration: none !important;
+            line-height: normal !important;
+            white-space: nowrap !important;
         `;
 
         // Ask label
         this.askLabel = document.createElement('span');
         this.askLabel.textContent = 'Ask';
         this.askLabel.style.cssText = `
-            position: absolute;
-            right: 8px;
-            color: ${theme.secondaryText};
-            font-size: 10px;
-            font-weight: 500;
-            z-index: 2;
-            transition: color 0.3s ease;
+            position: absolute !important;
+            right: 8px !important;
+            color: ${theme.secondaryText} !important;
+            font-size: 10px !important;
+            font-weight: 500 !important;
+            z-index: 2 !important;
+            transition: color 0.3s ease !important;
+            font-family: 'Inter', sans-serif !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: none !important;
+            text-decoration: none !important;
+            line-height: normal !important;
+            white-space: nowrap !important;
         `;
 
         // Assemble components
@@ -132,17 +170,17 @@ export const UIModeToggle = {
         // Update UI based on mode
         if (STATE.isAskMode) {
             // Ask mode: slider moves right, Ask text becomes white, Capture becomes gray
-            this.toggleSlider.style.left = '52px';
-            this.toggleSlider.style.width = '38px';
-            this.captureLabel.style.color = theme.secondaryText;
-            this.askLabel.style.color = 'white';
+            this.toggleSlider.style.setProperty('left', '52px', 'important');
+            this.toggleSlider.style.setProperty('width', '38px', 'important');
+            this.captureLabel.style.setProperty('color', theme.secondaryText, 'important');
+            this.askLabel.style.setProperty('color', 'white', 'important');
             this.switchToAskMode();
         } else {
             // Capture mode: slider moves left, Capture text becomes white, Ask becomes gray
-            this.toggleSlider.style.left = '0px';
-            this.toggleSlider.style.width = '54px';
-            this.captureLabel.style.color = 'white';
-            this.askLabel.style.color = theme.secondaryText;
+            this.toggleSlider.style.setProperty('left', '0px', 'important');
+            this.toggleSlider.style.setProperty('width', '54px', 'important');
+            this.captureLabel.style.setProperty('color', 'white', 'important');
+            this.askLabel.style.setProperty('color', theme.secondaryText, 'important');
             this.switchToCaptureMode();
         }
 
@@ -200,16 +238,16 @@ export const UIModeToggle = {
 
                 // Update UI to match saved state
                 if (STATE.isAskMode) {
-                    this.toggleSlider.style.left = '52px';
-                    this.toggleSlider.style.width = '38px';
-                    this.captureLabel.style.color = theme.secondaryText;
-                    this.askLabel.style.color = 'white';
+                    this.toggleSlider.style.setProperty('left', '52px', 'important');
+                    this.toggleSlider.style.setProperty('width', '38px', 'important');
+                    this.captureLabel.style.setProperty('color', theme.secondaryText, 'important');
+                    this.askLabel.style.setProperty('color', 'white', 'important');
                     this.switchToAskMode();
                 } else {
-                    this.toggleSlider.style.left = '0px';
-                    this.toggleSlider.style.width = '54px';
-                    this.captureLabel.style.color = 'white';
-                    this.askLabel.style.color = theme.secondaryText;
+                    this.toggleSlider.style.setProperty('left', '0px', 'important');
+                    this.toggleSlider.style.setProperty('width', '54px', 'important');
+                    this.captureLabel.style.setProperty('color', 'white', 'important');
+                    this.askLabel.style.setProperty('color', theme.secondaryText, 'important');
                     this.switchToCaptureMode();
                 }
             } catch (error) {

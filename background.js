@@ -24,7 +24,7 @@ chrome.runtime.onInstalled.addListener(() => {
             for (let tab of tabs) {
                 try {
                     if (isValidUrl(tab.url)) {
-                        injectContentScript(tab.id).catch(err => {});
+                        injectContentScript(tab.id).catch(() => {});
                     }
                 } catch (error) {}
             }
@@ -126,7 +126,7 @@ async function handleAskQuestion(request, sender, sendResponse) {
         // Get API key
         const apiKey = await getStoredApiKey();
         if (!apiKey) {
-            await displayResponse(sender.tab.id, 'Error: API key is not set');
+            await displayResponse(sender.tab.id, 'Error: API key is not set, check popup');
             sendResponse({ success: false, error: 'API key not set' });
             return;
         }
@@ -175,8 +175,7 @@ async function sendQuestionToOpenAI(question, apiKey) {
 
         if (response.ok) {
             const result = await response.json();
-            const aiResponse = result.choices[0]?.message?.content?.trim() || 'No response found';
-            return aiResponse;
+            return result.choices[0]?.message?.content?.trim() || 'No response found';
         } else {
             const errorData = await response.json();
             return `Error: ${errorData.error?.message || 'API request failed'}`;
@@ -225,10 +224,8 @@ async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer') {
 
         if (response.ok) {
             const result = await response.json();
-            const aiResponse = result.choices[0]?.message?.content?.trim() || 'No response found';
-            return aiResponse;
+            return result.choices[0]?.message?.content?.trim() || 'No response found';
         } else {
-            const errorText = await response.text();
             return `Error: OpenAI API error (${response.status}): ${response.statusText}`;
         }
     } catch (error) {

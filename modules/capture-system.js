@@ -16,6 +16,9 @@ export const CaptureSystem = {
                 return;
             }
 
+            // Store original panel visibility state before hiding
+            this.wasVisible = STATE.isPanelVisible;
+
             // Hide panel during capture
             if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
                 window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
@@ -283,10 +286,8 @@ export const CaptureSystem = {
             this.cleanupSelection();
             window.CaptureAI.UIHandlers.showMessage('Selection cancelled', 'info');
             
-            // Show panel again
-            if (window.CaptureAI.DOM_CACHE.panel) {
-                window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-            }
+            // Restore panel to original visibility state
+            this.restorePanelVisibility();
         },
 
         /**
@@ -310,9 +311,26 @@ export const CaptureSystem = {
             // Reset drag state
             STATE.isDragging = false;
 
-            // Show panel again
+            // Restore panel to original visibility state
+            this.restorePanelVisibility();
+        },
+
+        /**
+         * Restore panel visibility to original state before capture
+         */
+        restorePanelVisibility() {
+            const { STATE } = window.CaptureAI;
+            
             if (window.CaptureAI.DOM_CACHE.panel) {
-                window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+                // Only show panel if it was originally visible
+                if (this.wasVisible) {
+                    window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+                    STATE.isPanelVisible = true;
+                } else {
+                    // Keep it hidden if it was originally hidden
+                    window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
+                    STATE.isPanelVisible = false;
+                }
             }
         },
 

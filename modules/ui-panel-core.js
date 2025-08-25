@@ -177,7 +177,7 @@ export const UIPanelCore = {
 
         // Update UI based on API key status
         if (!STATE.apiKey) {
-            responseContent.textContent = 'Error: API key is not set';
+            responseContent.textContent = 'API key is not set, check popup';
             responseContent.style.color = `${theme.errorText} !important`;
         }
 
