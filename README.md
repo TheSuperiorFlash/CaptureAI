@@ -4,32 +4,26 @@ CaptureAI is a powerful browser extension that helps you quickly find answers to
 
 ## 🌟 Features
 
-### 📸 Smart Capture
-- Capture questions from any website with a simple selection
-- Supports both text and image-based questions (Pro Mode only)
-- Remembers your last capture area for quick access
+### 🎯 Core Functionality
+- **Area Screenshot Capture** - Select any area on a webpage to capture
+- **AI-Powered Analysis** - Uses OpenAI GPT models to analyze and answer questions)
 
-### 🤖 AI-Powered Answers
-- Utilizes advanced AI to provide accurate answers
-- Two processing modes:
-  - **Standard Mode**: Text-based question processing only
-  - **Pro Mode**: Processes both text and image-based questions with faster performance (uses more tokens)
+### 🚀 Smart Modes
+- **Manual Capture** - Click and drag to select specific areas
+- **Quick Capture** - Instantly recapture your last selected area
+- **Ask Mode** - Type custom questions inside the webpage
+- **Auto-Solve** - Automatically processes questions on supported educational sites
 
-### ⚡ Quick Actions
-- Keyboard shortcuts for seamless operation
-- Auto-solve mode for multiple-choice questions
-- Persistent settings across sessions
-
-### 🎨 User Interface
-- Clean, intuitive popup interface
-- Draggable overlay
-- Real-time processing feedback
-
+### ⚡ Convenience Features
+- **Floating UI Panel** - Movable interface that stays on top
+- **Keyboard Shortcuts** - Fast access without clicking
+- **Stealthy Results** - Discrete result display when UI is hidden
+- 
 ## 🛠 Installation
 
 ### Prerequisites
 - Google Chrome or Chromium-based browser
-- An OpenAI API key (get yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys))
+- OpenAI API key (get yours at [OpenAI API Keys](https://platform.openai.com/account/api-keys))
 
 ### Installation Steps
 
@@ -51,82 +45,74 @@ CaptureAI is a powerful browser extension that helps you quickly find answers to
    - The extension is now ready to use
    - Use the keyboard shortcuts or click the extension icon to get started
 
-## 🌐 Browser Compatibility
-
-### ✅ Supported Browsers
-- **Google Chrome** (recommended)
-- **Microsoft Edge** (Chromium-based)
-- **Brave**
-- **Opera**
-- **Vivaldi**
-- Other Chromium-based browsers
-
-### ❌ Not Currently Supported
-- Mozilla Firefox
-- Safari
-- Internet Explorer
-- Non-Chromium browsers
-
 ### Technical Note
 This extension uses Chrome's `tabs.captureVisibleTab` API for screen capture functionality, which is specific to Chromium-based browsers. While the extension may load in other browsers, the screen capture feature will not work as expected.
 
 ## 🎯 How to Use
 
-### Basic Usage
-1. **Capture a Question**
-   - Click the CaptureAI icon or press `Ctrl+Shift+X`
-   - Select the area containing your question
-   - The answer will appear in the overlay
+## How to Use
 
-2. **Quick Capture**
-   - After your first capture, use `Ctrl+Shift+F` to quickly capture the same area again
+### Basic Capture
+1. **Start Capture**: Press `Ctrl+Shift+X` or click "Capture A Question"
+2. **Select Area**: Click and drag to select the area you want to analyze
+3. **Get Answer**: Wait for AI analysis and view the result
 
-3. **Toggle Panel**
-   - Press `Ctrl+Shift+E` to show/hide the CaptureAI panel
+### Keyboard Shortcuts
+- `Ctrl+Shift+E` - Toggle UI panel visibility
+- `Ctrl+Shift+X` - Start area capture
+- `Ctrl+Shift+F` - Quick capture (repeat last area)
+- `Escape` - Cancel auto-solve
 
-### Advanced Features
+### UI Modes
+- **Capture Mode** - Screenshot and analyze images
+- **Ask Mode** - Type custom questions about captured content
+- **Auto-Solve** - Automatically answer questions on supported sites
 
-#### Pro Mode
-- Toggle Pro Mode in the settings to process image-based questions
-- The only mode that can analyze and answer questions from images
-- Also provides faster processing than Standard Mode
-- Uses more API tokens but enables image processing capabilities
+### Pro Tips
+- Use **Quick Capture** for repeated captures of the same area
+- Enable **Auto-Solve** on educational sites for automatic answers
+- Use the **floating panel** to keep results visible while browsing
 
-#### Auto-Solve Mode
-- Enable Auto-Solve in the panel to automatically answer multiple-choice questions
-- The extension will automatically detect and select the correct answer
-- Press `Escape` to cancel auto-solve mode
-
-## ⚙️ Settings
-
-### API Configuration
-- **OpenAI API Key**: Required for the extension to function
-
-### Display Options
-- **Pro Mode Toggle**: Switch between Standard and Pro modes
-
-## 🚀 Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+Shift+X` | Capture a new question |
-| `Ctrl+Shift+F` | Quick capture (uses last area) |
-| `Ctrl+Shift+E` | Toggle panel visibility |
-| `Escape` | Cancel auto-solve mode |
-
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-#### API Key Not Working
-- Ensure your API key is entered correctly
-- Check that your OpenAI account has available credits
+#### Extension Not Working
+- **Refresh the page** after installation
+- **Check API key** is correctly entered in popup
+- **Verify permissions** are granted in chrome://extensions
 
-#### Capture Not Working
-- Try refreshing the page
-- Ensure the website allows content scripts to run
-- Check the browser console for errors (right-click → Inspect → Console)
+#### Capture Not Starting
+- **Page restrictions**: Cannot capture on chrome:// or extension pages
+- **Try keyboard shortcut**: Press `Ctrl+Shift+X` instead of clicking
+- **Reload extension**: Disable and re-enable in chrome://extensions
+
+#### AI Analysis Fails
+- **Check API key**: Must be valid OpenAI API key with credits
+- **Network issues**: Verify internet connection
+- **Rate limits**: Wait a moment if you've made many requests
+
+#### Auto-Solve Not Working
+- **Supported sites only**: Works on Vocabulary.com and Quizlet.com
+- **Enable auto-solve**: Toggle must be ON in floating UI
+- **Page must be loaded**: Wait for page to fully load before expecting auto-solve
+
+### Getting Help
+- **Check console**: Press F12 and look for error messages
+- **Reset settings**: Clear extension data in chrome://extensions
+- **Reload page**: Refresh the webpage and try again
+
+### Known Limitations
+- Cannot capture on browser internal pages (chrome://, about:, etc.)
+- Some sites with strict CSP may limit functionality
+- Auto-solve only works on specifically supported educational platforms
+
+### ✨ **Happy Learning with CaptureAI!** ✨
 
 ---
 
-✨ **Happy Learning with CaptureAI!** ✨
+**Version**: 2.4.0  
+**Author**: Grayson Kramer  
+**License**: MIT
+
+For support or feature requests, please check the extension's GitHub repository.
