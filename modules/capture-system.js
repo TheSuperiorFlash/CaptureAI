@@ -103,8 +103,12 @@ export const CaptureSystem = {
          * @returns {HTMLElement}
          */
         createOverlay() {
+            const { STATE } = window.CaptureAI;
             const overlay = document.createElement('div');
             overlay.id = 'captureai-overlay';
+            
+            // In stealth mode (UI hidden), don't show the translucent gray background
+            const isStealthMode = !STATE.isPanelVisible;
             
             Object.assign(overlay.style, {
                 position: 'fixed',
@@ -112,8 +116,8 @@ export const CaptureSystem = {
                 left: '0',
                 width: '100vw',
                 height: '100vh',
-                backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                cursor: 'crosshair',
+                backgroundColor: isStealthMode ? 'transparent' : 'rgba(0, 0, 0, 0.3)',
+                cursor: isStealthMode ? 'default' : 'crosshair',
                 zIndex: '2147483646',
                 outline: 'none'
             });
