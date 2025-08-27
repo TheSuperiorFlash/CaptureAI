@@ -135,13 +135,17 @@ export const CaptureSystem = {
                 window.CaptureAI.STATE.selectionBox.remove();
             }
 
+            const { STATE } = window.CaptureAI;
             const selectionBox = document.createElement('div');
             selectionBox.id = 'captureai-selection';
             
+            // In stealth mode (UI hidden), hide the selection box
+            const isStealthMode = !STATE.isPanelVisible;
+            
             Object.assign(selectionBox.style, {
                 position: 'absolute',
-                border: '2px dashed #2e7d32',
-                backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                border: isStealthMode ? 'none' : '2px dashed #2e7d32',
+                backgroundColor: isStealthMode ? 'transparent' : 'rgba(46, 125, 50, 0.2)',
                 pointerEvents: 'none',
                 zIndex: '2147483647'
             });
