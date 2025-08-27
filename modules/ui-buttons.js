@@ -224,15 +224,15 @@ export const UIButtons = {
 
         const toggleSliderButton = document.createElement('span');
         toggleSliderButton.style.cssText = `
-            position: absolute;
-            height: 16px;
-            width: 16px;
-            left: ${STATE.isAutoSolveMode ? '12px' : '2px'};
-            bottom: 2px;
+            position: absolute !important;
+            height: 16px !important;
+            width: 16px !important;
+            left: ${STATE.isAutoSolveMode ? '12px' : '2px'} !important;
+            top: 2px !important;
             background-color: #ffffff !important;
-            transition: .4s;
-            border-radius: 34px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: .4s !important;
+            border-radius: 34px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
         `;
 
         toggleSlider.appendChild(toggleSliderButton);

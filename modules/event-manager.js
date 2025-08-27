@@ -7,9 +7,8 @@ export const EventManager = {
          * Initialize event manager
          */
         init() {
-            // Set up cleanup on page unload
+            // Set up cleanup on page unload (using only beforeunload to avoid permissions policy violation)
             window.addEventListener('beforeunload', this.cleanup.bind(this));
-            window.addEventListener('unload', this.cleanup.bind(this));
         },
 
         /**
