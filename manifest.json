@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "CaptureAI",
-    "version": "2.4.0",
+    "version": "2.4.2",
     "author": "Grayson Kramer",
     "description": "AI-powered question capture tool",
     "content_security_policy": {
@@ -36,7 +36,9 @@
     "web_accessible_resources": [{
         "resources": [
             "icons/icon128.png", 
-            "icons/camera.png", 
+            "icons/camera.png",
+            "icons/attach.png",
+            "icons/attached.png",
             "modules/config.js",
             "modules/storage.js",
             "modules/domains.js",

@@ -33,11 +33,15 @@ export const PROMPT_TYPES = {
 export const ICONS = {
     CHECKMARK: null,
     CAMERA: null,
+    ATTACH: null,
+    ATTACHED: null,
     
     // Initialize icons when Chrome APIs are ready
     init() {
         this.CHECKMARK = chrome.runtime.getURL('icons/icon128.png');
         this.CAMERA = chrome.runtime.getURL('icons/camera.png');
+        this.ATTACH = chrome.runtime.getURL('icons/attach.png');
+        this.ATTACHED = chrome.runtime.getURL('icons/attached.png');
     }
 };
 

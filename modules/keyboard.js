@@ -94,8 +94,19 @@ export const Keyboard = {
                 return;
             }
             
+            // Check if ask mode is currently active
+            const askModeContainer = document.getElementById('ask-mode-container');
+            const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
+            
             if (window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.startCapture) {
-                window.CaptureAI.CaptureSystem.startCapture();
+                if (isAskModeVisible && window.CaptureAI.UIAskMode) {
+                    // In ask mode - start image capture for attachment
+                    window.CaptureAI.STATE.askModeInstance = window.CaptureAI.UIAskMode;
+                    window.CaptureAI.CaptureSystem.startCapture(true);
+                } else {
+                    // Normal capture mode
+                    window.CaptureAI.CaptureSystem.startCapture();
+                }
             }
         },
 
@@ -113,9 +124,24 @@ export const Keyboard = {
          * Handle quick capture shortcut (Ctrl+Shift+F)
          */
         handleQuickCaptureShortcut() {
-            // Perform quick capture using last capture area
-            if (window.CaptureAI && window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.quickCapture) {
-                window.CaptureAI.CaptureSystem.quickCapture();
+            if (!window.CaptureAI || !window.CaptureAI.CaptureSystem) {
+                return;
+            }
+            
+            // Check if ask mode is currently active
+            const askModeContainer = document.getElementById('ask-mode-container');
+            const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
+            
+            if (window.CaptureAI.CaptureSystem.quickCapture) {
+                if (isAskModeVisible && window.CaptureAI.UIAskMode) {
+                    // In ask mode - use quick capture for image attachment
+                    window.CaptureAI.STATE.askModeInstance = window.CaptureAI.UIAskMode;
+                    window.CaptureAI.STATE.isForAskMode = true;
+                    window.CaptureAI.CaptureSystem.quickCapture();
+                } else {
+                    // Normal quick capture mode
+                    window.CaptureAI.CaptureSystem.quickCapture();
+                }
             }
         },
 

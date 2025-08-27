@@ -40,6 +40,9 @@ export const Messaging = {
                 case 'setAutoSolve':
                     return this.handleSetAutoSolve(request, sendResponse);
 
+                case 'setAskModeImage':
+                    return this.handleSetAskModeImage(request, sendResponse);
+
                 case 'processCapturedImage':
                     return this.handleProcessCapturedImage(request, sendResponse);
 
@@ -323,6 +326,48 @@ export const Messaging = {
                 window.CaptureAI.UIComponents.showMessage(response, isError);
                 STATE.isShowingAnswer = false;
             }
+        },
+
+        /**
+         * Handle set ask mode image request
+         * @param {Object} request - Message request with image data
+         * @param {Function} sendResponse - Response callback
+         * @returns {boolean}
+         */
+        handleSetAskModeImage(request, sendResponse) {
+            const { STATE } = window.CaptureAI;
+            
+            try {
+                // Reset processing state and restore panel
+                STATE.isProcessing = false;
+                STATE.isForAskMode = false;
+                
+                // Restore panel visibility to original state
+                if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
+                    // Use the capture system's original visibility state
+                    if (window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.wasVisible) {
+                        window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+                        STATE.isPanelVisible = true;
+                    } else {
+                        window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
+                        STATE.isPanelVisible = false;
+                    }
+                }
+                
+                // Pass image data to ask mode instance
+                if (STATE.askModeInstance && STATE.askModeInstance.setAttachedImage) {
+                    STATE.askModeInstance.setAttachedImage(request.imageData);
+                }
+                
+                // Clear the ask mode instance reference
+                STATE.askModeInstance = null;
+                
+                sendResponse({ success: true });
+            } catch (error) {
+                sendResponse({ success: false, error: error.message });
+            }
+            
+            return false;
         },
 
         /**

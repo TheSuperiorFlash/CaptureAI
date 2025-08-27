@@ -138,14 +138,22 @@ export const UIMessaging = {
     /**
      * Handle ask question processing
      * @param {string} question - Question text
+     * @param {string|null} imageData - Optional base64 image data
      */
-    handleAskQuestion(question) {
+    handleAskQuestion(question, imageData = null) {
         this.showMessage('Asking AI...');
 
         // Send question to background script for processing
-        chrome.runtime.sendMessage({
+        const message = {
             action: 'askQuestion',
             question: question
-        });
+        };
+        
+        // Add image data if provided
+        if (imageData) {
+            message.imageData = imageData;
+        }
+        
+        chrome.runtime.sendMessage(message);
     }
 };

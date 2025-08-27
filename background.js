@@ -46,6 +46,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             handleCaptureArea(request, sender, sendResponse);
             return true;
         
+        case 'captureForAskMode':
+            handleCaptureForAskMode(request, sender, sendResponse);
+            return true;
+        
         case 'askQuestion':
             handleAskQuestion(request, sender, sendResponse);
             return true;
@@ -105,6 +109,45 @@ async function handleCaptureArea(request, sender, sendResponse) {
 // AI PROCESSING FUNCTIONS
 // ==================================================================================
 
+/**
+ * Handle capture for ask mode - returns image data instead of processing
+ * @param {Object} request - Capture request
+ * @param {Object} sender - Message sender info
+ * @param {Function} sendResponse - Response callback
+ */
+async function handleCaptureForAskMode(request, sender, sendResponse) {
+    try {
+        console.log('Starting ask mode capture...');
+        
+        // Step 1: Capture screenshot (no message shown for ask mode)
+        console.log('Taking screenshot...');
+        const imageUri = await captureScreenshot();
+        
+        // Step 2: Process image (crop and compress) using content script
+        console.log('Processing image...');
+        const processedData = await processImage(imageUri, request, sender);
+        
+        // Step 3: Handle processing errors
+        if (processedData?.hasError) {
+            sendResponse({ success: false, error: processedData.error });
+            return;
+        }
+        
+        // Step 4: Send the compressed image data to ask mode
+        console.log('Sending image data to ask mode...');
+        await chrome.tabs.sendMessage(sender.tab.id, {
+            action: 'setAskModeImage',
+            imageData: processedData.compressedImageData
+        });
+        
+        console.log('Ask mode capture completed successfully');
+        sendResponse({ success: true });
+        
+    } catch (error) {
+        console.error('Ask mode capture error:', error);
+        sendResponse({ success: false, error: `Capture for ask mode failed: ${error.message}` });
+    }
+}
 
 /**
  * Handle ask question requests from UI
@@ -115,6 +158,7 @@ async function handleCaptureArea(request, sender, sendResponse) {
 async function handleAskQuestion(request, sender, sendResponse) {
     try {
         const question = request.question;
+        const imageData = request.imageData; // Optional image attachment
         
         // Validate question
         if (!question || question.trim().length === 0) {
@@ -132,7 +176,15 @@ async function handleAskQuestion(request, sender, sendResponse) {
         }
 
         // Process question with AI
-        const aiResponse = await sendQuestionToOpenAI(question, apiKey);
+        let aiResponse;
+        if (imageData) {
+            // Ask with image - use the unified processWithAI function
+            const data = { question, imageData };
+            aiResponse = await sendImgQuestionToOpenAI(data, apiKey, 'ask');
+        } else {
+            // Text-only ask - use existing function
+            aiResponse = await sendQuestionToOpenAI(question, apiKey);
+        }
         
         // Display response
         await displayResponse(sender.tab.id, aiResponse);
@@ -192,7 +244,7 @@ async function sendQuestionToOpenAI(question, apiKey) {
  * @param {string} promptType - Type of prompt ('answer' for normal capture or 'auto_solve' for auto-solve mode)
  * @returns {Promise<string>} AI response
  */
-async function sendExtractedTextToOpenAI(data, apiKey, promptType = 'answer') {
+async function sendImgQuestionToOpenAI(data, apiKey, promptType = 'answer') {
     try {
         if (!apiKey || apiKey.trim().length === 0) {
             return 'Error: API key is not set';
@@ -349,7 +401,7 @@ async function processWithAI(processedData, apiKey, promptType) {
     
     // Always use direct image processing
     const imageData = { imageData: processedData.compressedImageData };
-    return await sendExtractedTextToOpenAI(imageData, apiKey, promptType);
+    return await sendImgQuestionToOpenAI(imageData, apiKey, promptType);
 }
 
 /**
@@ -374,6 +426,24 @@ function buildMessages(data, promptType) {
                 { type: "image_url", image_url: { url: data.imageData } }
             ]
         }];
+    } else if (promptType === 'ask') {
+        // Ask mode: can be text-only or text with image
+        if (data?.imageData) {
+            // Ask with image attachment
+            return [{
+                role: "user",
+                content: [
+                    { type: "text", text: data.question },
+                    { type: "image_url", image_url: { url: data.imageData } }
+                ]
+            }];
+        } else {
+            // Ask text-only (existing behavior)
+            return [{
+                role: "user",
+                content: data.question
+            }];
+        }
     } else {
         // Manual capture: always use image input
         if (!data?.imageData) {

@@ -5,8 +5,9 @@
 export const CaptureSystem = {
         /**
          * Start capture process
+         * @param {boolean} forAskMode - Whether this capture is for ask mode
          */
-        startCapture() {
+        startCapture(forAskMode = false) {
             const { STATE } = window.CaptureAI;
             
             if (STATE.isProcessing) {
@@ -26,6 +27,9 @@ export const CaptureSystem = {
 
             // Set current prompt type based on auto-solve mode (like original)
             STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
+            
+            // Store if this is for ask mode
+            STATE.isForAskMode = forAskMode;
 
             this.startSelectionProcess();
         },
@@ -61,12 +65,27 @@ export const CaptureSystem = {
             // Set current prompt type based on auto-solve mode for quick capture (like original)
             STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
 
-            // Send message to background script
-            chrome.runtime.sendMessage({
-                action: 'captureArea',
-                coordinates: lastArea,
-                promptType: STATE.currentPromptType
-            });
+            // Check if we're in ask mode (same logic as keyboard shortcuts)
+            const askModeContainer = document.getElementById('ask-mode-container');
+            const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
+
+            if (isAskModeVisible && window.CaptureAI.UIAskMode) {
+                // Quick capture for ask mode - capture image for attachment
+                STATE.askModeInstance = window.CaptureAI.UIAskMode;
+                STATE.isForAskMode = true;
+                
+                chrome.runtime.sendMessage({
+                    action: 'captureForAskMode',
+                    coordinates: lastArea
+                });
+            } else {
+                // Normal quick capture
+                chrome.runtime.sendMessage({
+                    action: 'captureArea',
+                    coordinates: lastArea,
+                    promptType: STATE.currentPromptType
+                });
+            }
         },
 
         /**
@@ -95,7 +114,6 @@ export const CaptureSystem = {
             // Focus overlay for keyboard events
             overlay.focus();
 
-            window.CaptureAI.UIHandlers.showMessage('Select an area by dragging', 'info');
         },
 
         /**
@@ -272,19 +290,53 @@ export const CaptureSystem = {
             // Clean up selection UI
             this.cleanupSelection();
 
-            // Show processing message
-            window.CaptureAI.UIHandlers.showMessage('Processing capture...', 'info');
+            // Show processing message (skip for ask mode)
+            if (!STATE.isForAskMode) {
+                window.CaptureAI.UIHandlers.showMessage('Processing capture...', 'info');
+            }
             STATE.isProcessing = true;
 
             // Set current prompt type based on auto-solve mode (like original)
             STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
 
-            // Send to background script
-            chrome.runtime.sendMessage({
-                action: 'captureArea',
-                coordinates: coordinates,
-                promptType: STATE.currentPromptType
-            });
+            // Handle ask mode vs normal capture
+            if (STATE.isForAskMode) {
+                // For ask mode, capture and return image data to ask mode instance
+                chrome.runtime.sendMessage({
+                    action: 'captureForAskMode',
+                    coordinates: coordinates
+                }, (response) => {
+                    // Handle response and reset state
+                    if (chrome.runtime.lastError) {
+                        console.error('Ask mode capture failed:', chrome.runtime.lastError);
+                        STATE.isProcessing = false;
+                        STATE.isForAskMode = false;
+                        window.CaptureAI.UIMessaging.showMessage('Failed to capture image for ask mode', 'error');
+                        
+                        // Restore panel visibility
+                        if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
+                            window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+                        }
+                    } else if (!response || !response.success) {
+                        console.error('Ask mode capture failed:', response?.error || 'Unknown error');
+                        STATE.isProcessing = false;
+                        STATE.isForAskMode = false;
+                        window.CaptureAI.UIMessaging.showMessage('Failed to capture image', 'error');
+                        
+                        // Restore panel visibility
+                        if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
+                            window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+                        }
+                    }
+                });
+            } else {
+                // Normal capture processing
+                chrome.runtime.sendMessage({
+                    action: 'captureArea',
+                    coordinates: coordinates,
+                    promptType: STATE.currentPromptType
+                });
+            }
         },
 
         /**
