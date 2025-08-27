@@ -63,6 +63,9 @@ export const UIAskMode = {
             flex-direction: column;
             gap: 10px;
             box-sizing: border-box !important;
+            opacity: 0;
+            transform: translateY(0px);
+            transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
         `;
 
         return askModeContainer;

@@ -201,8 +201,24 @@ export const UIModeToggle = {
         const askModeContainer = document.getElementById('ask-mode-container');
 
         if (buttonsContainer && askModeContainer) {
-            buttonsContainer.style.display = 'none';
-            askModeContainer.style.display = 'flex';
+            // Add transition styles
+            this.addTransitionStyles(buttonsContainer);
+            this.addTransitionStyles(askModeContainer);
+            
+            // Fade out buttons container
+            buttonsContainer.style.opacity = '0';
+            buttonsContainer.style.transform = 'translateY(0px)';
+            
+            setTimeout(() => {
+                buttonsContainer.style.display = 'none';
+                askModeContainer.style.display = 'flex';
+                
+                // Fade in ask mode container
+                setTimeout(() => {
+                    askModeContainer.style.opacity = '1';
+                    askModeContainer.style.transform = 'translateY(0)';
+                }, 10);
+            }, 150);
         }
     },
 
@@ -217,8 +233,42 @@ export const UIModeToggle = {
         const askModeContainer = document.getElementById('ask-mode-container');
 
         if (buttonsContainer && askModeContainer) {
-            buttonsContainer.style.display = 'flex';
-            askModeContainer.style.display = 'none';
+            // Add transition styles
+            this.addTransitionStyles(buttonsContainer);
+            this.addTransitionStyles(askModeContainer);
+            
+            // Fade out ask mode container
+            askModeContainer.style.opacity = '0';
+            askModeContainer.style.transform = 'translateY(0px)';
+            
+            setTimeout(() => {
+                askModeContainer.style.display = 'none';
+                buttonsContainer.style.display = 'flex';
+                
+                // Fade in buttons container
+                setTimeout(() => {
+                    buttonsContainer.style.opacity = '1';
+                    buttonsContainer.style.transform = 'translateY(0)';
+                }, 10);
+            }, 150);
+        }
+    },
+
+    /**
+     * Add transition styles to element
+     * @param {HTMLElement} element - Element to add transitions to
+     */
+    addTransitionStyles(element) {
+        if (!element) return;
+        
+        element.style.transition = 'opacity 0.15s ease-in-out, transform 0.15s ease-in-out';
+        
+        // Initialize transform and opacity if not set
+        if (!element.style.opacity) {
+            element.style.opacity = '1';
+        }
+        if (!element.style.transform) {
+            element.style.transform = 'translateY(0)';
         }
     },
 

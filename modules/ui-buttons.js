@@ -32,6 +32,9 @@ export const UIButtons = {
             flex-direction: column;
             gap: 10px;
             box-sizing: border-box !important;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
         `;
 
         // Create buttons
