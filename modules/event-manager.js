@@ -145,8 +145,8 @@ export const EventManager = {
         handleError() {
             
             // Show user-friendly error message
-            if (window.CaptureAI.UIHandlers) {
-                window.CaptureAI.UIHandlers.showMessage(
+            if (window.CaptureAI.UICore) {
+                window.CaptureAI.UICore.showMessage(
                     'An error occurred. Please try again.',
                     'error'
                 );
