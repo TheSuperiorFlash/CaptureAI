@@ -88,9 +88,6 @@ export const Keyboard = {
             const { STATE } = window.CaptureAI;
             
             if (STATE.isProcessing) {
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showMessage) {
-                    window.CaptureAI.UIHandlers.showMessage('Processing in progress...', 'info');
-                }
                 return;
             }
             
@@ -115,8 +112,8 @@ export const Keyboard = {
          */
         handleToggleShortcut() {
             // Toggle panel visibility
-            if (window.CaptureAI && window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.togglePanelVisibility) {
-                window.CaptureAI.UIHandlers.togglePanelVisibility();
+            if (window.CaptureAI && window.CaptureAI.UICore && window.CaptureAI.UICore.togglePanelVisibility) {
+                window.CaptureAI.UICore.togglePanelVisibility();
             }
         },
 
@@ -155,7 +152,6 @@ export const Keyboard = {
             if (STATE.isAutoSolveMode) {
                 if (window.CaptureAI.AutoSolve && window.CaptureAI.AutoSolve.toggleAutoSolveMode) {
                     window.CaptureAI.AutoSolve.toggleAutoSolveMode(false);
-                    window.CaptureAI.UIHandlers.showStealthyResult('Auto-solve mode disabled.');
                 }
                 return;
             }
@@ -173,7 +169,7 @@ export const Keyboard = {
                 // Only clear processing messages, not answers
                 const resultElement = document.getElementById(window.CaptureAI.CONFIG?.RESULT_ID);
                 if (resultElement && (resultElement.textContent.includes('Processing') || resultElement.textContent.includes('Capturing'))) {
-                    window.CaptureAI.UIHandlers.clearMessage();
+                    window.CaptureAI.UIStealthyResult.hide();
                 }
             }
             
@@ -188,7 +184,7 @@ export const Keyboard = {
             
             // Switch back to capture mode if in ask mode
             if (STATE.isAskMode) {
-                window.CaptureAI.UIHandlers.switchToCaptureMode();
+                window.CaptureAI.CaptureSystem.startCapture();
                 // Recreate UI to show capture interface
                 setTimeout(() => {
                     window.CaptureAI.UIComponents.createUI();
