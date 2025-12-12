@@ -172,11 +172,11 @@ export const Messaging = {
          * @returns {boolean}
          */
         handleTogglePanel(sendResponse) {
-            if (window.CaptureAI && window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.togglePanelVisibility) {
-                window.CaptureAI.UIHandlers.togglePanelVisibility();
+            if (window.CaptureAI && window.CaptureAI.UICore && window.CaptureAI.UICore.togglePanelVisibility) {
+                window.CaptureAI.UICore.togglePanelVisibility();
                 sendResponse({ success: true });
             } else {
-                sendResponse({ success: false, error: 'UIHandlers not available' });
+                sendResponse({ success: false, error: 'UICore not available' });
             }
             return false;
         },
@@ -239,7 +239,9 @@ export const Messaging = {
          * @returns {boolean}
          */
         handleShowCapturingMessage(sendResponse) {
-            window.CaptureAI.UIHandlers.showMessage('Capturing...', 'info');
+            if (window.CaptureAI.UICore?.showMessage) {
+                window.CaptureAI.UICore.showMessage('Capturing...', false);
+            }
             sendResponse({ success: true });
             return false;
         },
@@ -250,7 +252,9 @@ export const Messaging = {
          * @returns {boolean}
          */
         handleShowProcessingMessage(sendResponse) {
-            window.CaptureAI.UIHandlers.showMessage('Processing...', 'info');
+            if (window.CaptureAI.UICore?.showMessage) {
+                window.CaptureAI.UICore.showMessage('Processing...', false);
+            }
             sendResponse({ success: true });
             return false;
         },
@@ -318,12 +322,12 @@ export const Messaging = {
             const isError = response.startsWith('Error:') || response.includes('failed');
             
             // Use new messaging system to display AI response
-            if (window.CaptureAI.UIMessaging) {
-                window.CaptureAI.UIMessaging.displayAIResponse(response, isError);
+            if (window.CaptureAI.UICore) {
+                window.CaptureAI.UICore.displayAIResponse(response, isError);
             } else {
                 // Fallback to direct UI components call
                 STATE.isShowingAnswer = true;
-                window.CaptureAI.UIComponents.showMessage(response, isError);
+                window.CaptureAI.UICore.showMessage(response, isError);
                 STATE.isShowingAnswer = false;
             }
         },
