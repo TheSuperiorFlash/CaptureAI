@@ -99,14 +99,14 @@
             width: 100% !important;
             box-sizing: border-box;
         }
-        
+
         .button-primary {
-            background-color: #4caf65;
+            background-color: #218aff;
             color: white;
         }
-        
+
         .button-primary:hover {
-            background-color: #45a049;
+            background-color: #1a6fd9;
         }
         
         .button-secondary {
@@ -291,7 +291,7 @@
             color: #666666;
             line-height: 1.4;
         }
-        
+
         .help-shortcut {
             background-color: #e8e8e8;
             padding: 2px 6px;
@@ -299,7 +299,7 @@
             font-family: monospace;
             font-size: 11px;
             font-weight: bold;
-            color: #4caf65;
+            color: #218aff;
         }
     </style>
 </head>
@@ -342,19 +342,21 @@
             </button>
             <button id="quick-capture-btn" class="button button-secondary">Quick Capture</button>
         </div>
-        
+
         <!-- Help Section -->
         <div id="help-section" class="help-section">
             <div class="help-toggle" id="help-toggle">
-                <span>Keybinds</span>
+                <span>Help</span>
                 <span class="help-arrow" id="help-arrow">▶</span>
             </div>
             <div class="help-content" id="help-content">
+                <div class="help-category">Keybinds</div>
                 <div class="help-item"><span class="help-shortcut">Ctrl+Shift+E</span> Toggle UI panel</div>
                 <div class="help-item"><span class="help-shortcut">Ctrl+Shift+X</span> Start area capture</div>
                 <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
                 <div class="help-category">Stealth Mode</div>
                 <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
+                <div class="help-item"><button id="reset-api-key-btn" style="margin-top: 8px; background-color: rgba(255,240,240,0.3); border: 1px solid rgba(255,204,204,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #d32f2f; font-weight: 500; width: 100%; transition: background-color 0.2s;">Clear API Key</button></div>
             </div>
         </div>
     </div>
