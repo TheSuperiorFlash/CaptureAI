@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "CaptureAI",
-    "version": "2.4.2",
+    "version": "1.0.0",
     "author": "Grayson Kramer",
     "description": "AI-powered question capture tool",
     "content_security_policy": {
@@ -10,9 +10,7 @@
     "permissions": [
         "storage",
         "activeTab",
-        "scripting",
-        "contextMenus",
-        "tabs"
+        "scripting"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -45,14 +43,8 @@
             "modules/utils.js",
             "modules/image-processing.js",
             "modules/ui-stealthy-result.js",
-            "modules/ui-theme.js",
-            "modules/ui-messaging.js",
-            "modules/ui-panel-core.js",
-            "modules/ui-mode-toggle.js",
-            "modules/ui-buttons.js",
-            "modules/ui-ask-mode.js",
+            "modules/ui-core.js",
             "modules/ui-components.js",
-            "modules/ui-handlers.js",
             "modules/capture-system.js",
             "modules/auto-solve.js",
             "modules/messaging.js",
