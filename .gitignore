@@ -1,0 +1,4 @@
+# Ignore binary artifacts that block PR creation
+CaptureAI.zip
+*.zip
+*.png
