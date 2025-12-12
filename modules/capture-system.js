@@ -1,403 +1,408 @@
 /**
- * Screen capture and area selection system
+ * Auto-solve functionality for educational websites
  */
 
-export const CaptureSystem = {
+export const AutoSolve = {
         /**
-         * Start capture process
-         * @param {boolean} forAskMode - Whether this capture is for ask mode
+         * Toggle auto-solve mode
+         * @param {boolean} enabled - Whether to enable auto-solve
          */
-        startCapture(forAskMode = false) {
-            const { STATE } = window.CaptureAI;
-            
-            if (STATE.isProcessing) {
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showMessage) {
-                    window.CaptureAI.UIHandlers.showMessage('Processing in progress...', 'info');
-                }
+        async toggleAutoSolveMode(enabled = null) {
+            if (!window.CaptureAI || !window.CaptureAI.STATE || !window.CaptureAI.STORAGE_KEYS) {
                 return;
             }
-
-            // Store original panel visibility state before hiding
-            this.wasVisible = STATE.isPanelVisible;
-
-            // Hide panel during capture
-            if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-                window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
-            }
-
-            // Set current prompt type based on auto-solve mode (like original)
-            STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
             
-            // Store if this is for ask mode
-            STATE.isForAskMode = forAskMode;
-
-            this.startSelectionProcess();
-        },
-
-        /**
-         * Quick capture using last area
-         */
-        async quickCapture() {
             const { STATE, STORAGE_KEYS } = window.CaptureAI;
             
-            if (STATE.isProcessing) {
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showMessage) {
-                    window.CaptureAI.UIHandlers.showMessage('Processing in progress...', 'info');
-                }
-                return;
+            if (enabled === null) {
+                enabled = !STATE.isAutoSolveMode;
             }
 
-            if (!window.CaptureAI.StorageUtils || !STORAGE_KEYS) {
-                return;
-            }
-
-            const lastArea = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.LAST_CAPTURE_AREA);
-            
-            if (!lastArea) {
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showMessage) {
-                    window.CaptureAI.UIHandlers.showMessage('No previous capture area found', 'error');
-                }
-                return;
-            }
-
-            STATE.isProcessing = true;
-
-            // Set current prompt type based on auto-solve mode for quick capture (like original)
-            STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
-
-            // Check if we're in ask mode (same logic as keyboard shortcuts)
-            const askModeContainer = document.getElementById('ask-mode-container');
-            const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
-
-            if (isAskModeVisible && window.CaptureAI.UIAskMode) {
-                // Quick capture for ask mode - capture image for attachment
-                STATE.askModeInstance = window.CaptureAI.UIAskMode;
-                STATE.isForAskMode = true;
+            // If enabling, check for capture area first (like original implementation)
+            if (enabled) {
+                const lastCaptureArea = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.LAST_CAPTURE_AREA);
                 
-                chrome.runtime.sendMessage({
-                    action: 'captureForAskMode',
-                    coordinates: lastArea
-                });
+                if (!lastCaptureArea) {
+                    // Don't change the state, keep it disabled
+                    STATE.isAutoSolveMode = false; // Explicitly set to false
+                    this.updateAutoSolveToggleUI(); // Reset toggle to off position
+                    return;
+                }
+            }
+
+            STATE.isAutoSolveMode = enabled;
+            
+            if (window.CaptureAI.StorageUtils && window.CaptureAI.StorageUtils.setValue) {
+                await window.CaptureAI.StorageUtils.setValue(STORAGE_KEYS.AUTO_SOLVE_MODE, enabled);
+            }
+
+            this.updateAutoSolveToggleUI();
+
+            if (enabled) {
+                STATE.invalidQuestionCount = 0;
+                // Don't automatically start the loop! Wait for user to manually capture first
             } else {
-                // Normal quick capture
-                chrome.runtime.sendMessage({
-                    action: 'captureArea',
-                    coordinates: lastArea,
-                    promptType: STATE.currentPromptType
-                });
+                this.cancelAutoSolve();
             }
         },
 
         /**
-         * Start area selection process
+         * Update auto-solve toggle UI
          */
-        startSelectionProcess() {
+        updateAutoSolveToggleUI() {
             const { STATE } = window.CaptureAI;
             
-            // Create overlay
-            const overlay = this.createOverlay();
-            document.body.appendChild(overlay);
+            // Update header toggle (the one in the floating UI)
+            const headerToggle = document.getElementById('captureai-header-auto-solve-toggle');
+            if (headerToggle) {
+                headerToggle.checked = STATE.isAutoSolveMode;
+                
+                // Update toggle visual appearance
+                const toggleSlider = headerToggle.parentElement.querySelector('span');
+                const toggleButton = toggleSlider?.querySelector('span');
 
-            // Reset drag state
-            STATE.isDragging = false;
-            STATE.startX = 0;
-            STATE.startY = 0;
-            STATE.endX = 0;
-            STATE.endY = 0;
-
-            // Add event listeners
-            overlay.addEventListener('mousedown', this.onMouseDown.bind(this));
-            overlay.addEventListener('mousemove', this.onMouseMove.bind(this));
-            overlay.addEventListener('mouseup', this.onMouseUp.bind(this));
-            overlay.addEventListener('keydown', this.onKeyDown.bind(this));
-
-            // Focus overlay for keyboard events
-            overlay.focus();
-
-        },
-
-        /**
-         * Create selection overlay
-         * @returns {HTMLElement}
-         */
-        createOverlay() {
-            const { STATE } = window.CaptureAI;
-            const overlay = document.createElement('div');
-            overlay.id = 'captureai-overlay';
-            
-            // In stealth mode (UI hidden), don't show the translucent gray background
-            const isStealthMode = !STATE.isPanelVisible;
-            
-            Object.assign(overlay.style, {
-                position: 'fixed',
-                top: '0',
-                left: '0',
-                width: '100vw',
-                height: '100vh',
-                backgroundColor: isStealthMode ? 'transparent' : 'rgba(0, 0, 0, 0.3)',
-                cursor: isStealthMode ? 'default' : 'crosshair',
-                zIndex: '2147483646',
-                outline: 'none'
-            });
-
-            overlay.tabIndex = -1;
-            return overlay;
-        },
-
-        /**
-         * Create selection box
-         * @returns {HTMLElement}
-         */
-        createSelectionBox() {
-            if (window.CaptureAI.STATE.selectionBox) {
-                window.CaptureAI.STATE.selectionBox.remove();
+                if (toggleSlider) {
+                    toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? '#4caf65' : '#f1f1f1';
+                }
+                if (toggleButton) {
+                    toggleButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
+                }
             }
-
-            const { STATE } = window.CaptureAI;
-            const selectionBox = document.createElement('div');
-            selectionBox.id = 'captureai-selection';
             
-            // In stealth mode (UI hidden), hide the selection box
-            const isStealthMode = !STATE.isPanelVisible;
-            
-            Object.assign(selectionBox.style, {
-                position: 'absolute',
-                border: isStealthMode ? 'none' : '2px dashed #2e7d32',
-                backgroundColor: isStealthMode ? 'transparent' : 'rgba(46, 125, 50, 0.2)',
-                pointerEvents: 'none',
-                zIndex: '2147483647'
-            });
-
-            const overlay = document.getElementById('captureai-overlay');
-            if (overlay) {
-                overlay.appendChild(selectionBox);
-            }
-
-            window.CaptureAI.STATE.selectionBox = selectionBox;
-            return selectionBox;
-        },
-
-        /**
-         * Handle mouse down event
-         * @param {MouseEvent} e - Mouse event
-         */
-        onMouseDown(e) {
-            const { STATE } = window.CaptureAI;
-            
-            STATE.isDragging = true;
-            STATE.startX = e.clientX;
-            STATE.startY = e.clientY;
-            STATE.endX = e.clientX;
-            STATE.endY = e.clientY;
-
-            this.createSelectionBox();
-            this.updateSelectionBox();
-        },
-
-        /**
-         * Handle mouse move event
-         * @param {MouseEvent} e - Mouse event
-         */
-        onMouseMove(e) {
-            const { STATE } = window.CaptureAI;
-            
-            if (!STATE.isDragging) return;
-
-            STATE.endX = e.clientX;
-            STATE.endY = e.clientY;
-            this.updateSelectionBox();
-        },
-
-        /**
-         * Handle mouse up event
-         * @param {MouseEvent} e - Mouse event
-         */
-        onMouseUp(e) {
-            const { STATE } = window.CaptureAI;
-            
-            if (!STATE.isDragging) return;
-
-            STATE.isDragging = false;
-            STATE.endX = e.clientX;
-            STATE.endY = e.clientY;
-
-            // Calculate selection area
-            const width = Math.abs(STATE.endX - STATE.startX);
-            const height = Math.abs(STATE.endY - STATE.startY);
-
-            if (width < 10 || height < 10) {
-                window.CaptureAI.UIHandlers.showMessage('Selection too small, try again', 'error');
-                this.cancelSelection();
-                return;
-            }
-
-            this.completeSelection();
-        },
-
-        /**
-         * Handle keyboard events
-         * @param {KeyboardEvent} e - Keyboard event
-         */
-        onKeyDown(e) {
-            if (e.key === 'Escape' || e.key === 'Esc') {
-                this.cancelSelection();
-            }
-        },
-
-        /**
-         * Update selection box dimensions
-         */
-        updateSelectionBox() {
-            const { STATE } = window.CaptureAI;
-            
-            if (!STATE.selectionBox) return;
-
-            const left = Math.min(STATE.startX, STATE.endX);
-            const top = Math.min(STATE.startY, STATE.endY);
-            const width = Math.abs(STATE.endX - STATE.startX);
-            const height = Math.abs(STATE.endY - STATE.startY);
-
-            Object.assign(STATE.selectionBox.style, {
-                left: left + 'px',
-                top: top + 'px',
-                width: width + 'px',
-                height: height + 'px'
-            });
-        },
-
-        /**
-         * Complete selection and initiate capture
-         */
-        async completeSelection() {
-            const { STATE, STORAGE_KEYS } = window.CaptureAI;
-            
-            // Calculate final coordinates
-            const left = Math.min(STATE.startX, STATE.endX);
-            const top = Math.min(STATE.startY, STATE.endY);
-            const width = Math.abs(STATE.endX - STATE.startX);
-            const height = Math.abs(STATE.endY - STATE.startY);
-
-            const coordinates = {
-                startX: left + window.scrollX,
-                startY: top + window.scrollY,
-                width: width,
-                height: height
-            };
-
-            // Store for quick capture
-            await window.CaptureAI.StorageUtils.setValue(STORAGE_KEYS.LAST_CAPTURE_AREA, coordinates);
-
-            // Clean up selection UI
-            this.cleanupSelection();
-
-            // Show processing message (skip for ask mode)
-            if (!STATE.isForAskMode) {
-                window.CaptureAI.UIHandlers.showMessage('Processing capture...', 'info');
-            }
-            STATE.isProcessing = true;
-
-            // Set current prompt type based on auto-solve mode (like original)
-            STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
-
-            // Handle ask mode vs normal capture
-            if (STATE.isForAskMode) {
-                // For ask mode, capture and return image data to ask mode instance
-                chrome.runtime.sendMessage({
-                    action: 'captureForAskMode',
-                    coordinates: coordinates
-                }, (response) => {
-                    // Handle response and reset state
-                    if (chrome.runtime.lastError) {
-                        console.error('Ask mode capture failed:', chrome.runtime.lastError);
-                        STATE.isProcessing = false;
-                        STATE.isForAskMode = false;
-                        window.CaptureAI.UIMessaging.showMessage('Failed to capture image for ask mode', 'error');
-                        
-                        // Restore panel visibility
-                        if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-                            window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-                        }
-                    } else if (!response || !response.success) {
-                        console.error('Ask mode capture failed:', response?.error || 'Unknown error');
-                        STATE.isProcessing = false;
-                        STATE.isForAskMode = false;
-                        window.CaptureAI.UIMessaging.showMessage('Failed to capture image', 'error');
-                        
-                        // Restore panel visibility
-                        if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-                            window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-                        }
-                    }
-                });
-            } else {
-                // Normal capture processing
-                chrome.runtime.sendMessage({
-                    action: 'captureArea',
-                    coordinates: coordinates,
-                    promptType: STATE.currentPromptType
-                });
-            }
-        },
-
-        /**
-         * Cancel selection process
-         */
-        cancelSelection() {
-            this.cleanupSelection();
-            window.CaptureAI.UIHandlers.showMessage('Selection cancelled', 'info');
-            
-            // Restore panel to original visibility state
-            this.restorePanelVisibility();
-        },
-
-        /**
-         * Clean up selection UI elements
-         */
-        cleanupSelection() {
-            const { STATE } = window.CaptureAI;
-            
-            // Remove overlay
-            const overlay = document.getElementById('captureai-overlay');
-            if (overlay) {
-                overlay.remove();
-            }
-
-            // Clear selection box reference
-            if (STATE.selectionBox) {
-                STATE.selectionBox.remove();
-                STATE.selectionBox = null;
-            }
-
-            // Reset drag state
-            STATE.isDragging = false;
-
-            // Restore panel to original visibility state
-            this.restorePanelVisibility();
-        },
-
-        /**
-         * Restore panel visibility to original state before capture
-         */
-        restorePanelVisibility() {
-            const { STATE } = window.CaptureAI;
-            
-            if (window.CaptureAI.DOM_CACHE.panel) {
-                // Only show panel if it was originally visible
-                if (this.wasVisible) {
-                    window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-                    STATE.isPanelVisible = true;
-                } else {
-                    // Keep it hidden if it was originally hidden
-                    window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
-                    STATE.isPanelVisible = false;
+            // Also update any other toggle with the old ID for backward compatibility
+            const toggle = document.getElementById('auto-solve-toggle');
+            if (toggle) {
+                toggle.checked = STATE.isAutoSolveMode;
+                
+                // Update visual appearance of the toggle
+                const toggleSlider = toggle.parentElement.querySelector('span');
+                const toggleButton = toggleSlider?.querySelector('span');
+                
+                if (toggleSlider) {
+                    const theme = window.CaptureAI.UICore?.getCurrentTheme?.() || { buttonPrimary: '#4caf65', toggleInactiveBg: '#f1f1f1' };
+                    toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? theme.buttonPrimary : theme.toggleInactiveBg;
+                }
+                if (toggleButton) {
+                    toggleButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
                 }
             }
         },
 
         /**
-         * Initialize capture system
+         * Schedule next auto-solve cycle
          */
-        init() {
-            // Any initialization code for capture system
+        scheduleNextAutoSolve() {
+            const { STATE, CONFIG } = window.CaptureAI;
+            
+            if (!STATE.isAutoSolveMode) {
+                return;
+            }
+
+            // Clear existing timer to prevent duplicates
+            this.cancelAutoSolve();
+
+            // Schedule next capture with delay
+            STATE.autoSolveTimer = setTimeout(() => {
+                this.performAutoSolve();
+            }, CONFIG.AUTO_SOLVE_CYCLE_DELAY);
+        },
+
+        /**
+         * Cancel auto-solve timer
+         */
+        cancelAutoSolve() {
+            const { STATE } = window.CaptureAI;
+            
+            if (STATE.autoSolveTimer) {
+                clearTimeout(STATE.autoSolveTimer);
+                STATE.autoSolveTimer = null;
+            }
+        },
+
+        /**
+         * Perform auto-solve capture
+         */
+        async performAutoSolve() {
+            const { STATE, CONFIG } = window.CaptureAI;
+            
+            if (!STATE.isAutoSolveMode || STATE.isProcessing) {
+                return;
+            }
+
+            // Double-check we're still on a supported site
+            if (!window.CaptureAI.DomainUtils.isOnSupportedSite()) {
+                await this.toggleAutoSolveMode(false);
+                return;
+            }
+
+            try {
+                // Check if we've had too many invalid questions
+                if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {
+                    await this.toggleAutoSolveMode(false);
+                    return;
+                }
+
+                // Determine capture area - use stored last capture area like original
+                const captureArea = await this.getAutoSolveCaptureArea();
+                
+                if (!captureArea) {
+                    this.scheduleNextAutoSolve();
+                    return;
+                }
+
+                // Set processing state to prevent overlapping captures
+                STATE.isProcessing = true;
+                STATE.currentPromptType = window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE;
+
+                // Send to background script with timeout handling
+                chrome.runtime.sendMessage({
+                    action: 'captureArea',
+                    coordinates: captureArea,
+                    promptType: window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        STATE.isProcessing = false;
+                        this.scheduleNextAutoSolve();
+                    }
+                    // Note: Don't schedule next auto-solve here anymore!
+                    // It will be scheduled in handleAutoSolveResponse after receiving the response
+                });
+
+                // Safety timeout removed entirely!
+
+            } catch (error) {
+                STATE.isProcessing = false;
+                // Wait longer before retrying on errors
+                setTimeout(() => {
+                    this.scheduleNextAutoSolve();
+                }, 2000);
+            }
+        },
+
+        /**
+         * Get capture area for auto-solve - uses stored last capture area like original
+         * @returns {Object|null}
+         */
+        async getAutoSolveCaptureArea() {
+            // Use the last manually captured area, just like the original implementation
+            const lastCaptureArea = await window.CaptureAI.StorageUtils.getValue(window.CaptureAI.STORAGE_KEYS.LAST_CAPTURE_AREA);
+            
+            if (lastCaptureArea) {
+                // Convert from stored format to coordinates format
+                // Handle different possible storage formats
+                const coordinates = {
+                    startX: lastCaptureArea.left || lastCaptureArea.startX,
+                    startY: lastCaptureArea.top || lastCaptureArea.startY,
+                    width: lastCaptureArea.width,
+                    height: lastCaptureArea.height
+                };
+                
+                // Validate coordinates are not undefined
+                if (coordinates.startX !== undefined && coordinates.startY !== undefined && 
+                    coordinates.width !== undefined && coordinates.height !== undefined) {
+                    return coordinates;
+                } else {
+                    return null;
+                }
+            }
+            
+            return null;
+        },
+
+        /**
+         * Handle auto-solve response - simplified like the backup
+         * @param {string} response - AI response
+         */
+        async handleAutoSolveResponse(response) {
+            const { STATE, CONFIG } = window.CaptureAI;
+            
+            // Simple duplicate prevention - ignore exact same response immediately following
+            if (this.lastAutoSolveResponse === response && Date.now() - this.lastAutoSolveTime < 1000) {
+                return;
+            }
+            this.lastAutoSolveResponse = response;
+            this.lastAutoSolveTime = Date.now();
+            
+            // Reset processing state (response received)
+            STATE.isProcessing = false;
+
+            if (!STATE.isAutoSolveMode) {
+                return;
+            }
+
+            // Simple response processing like the backup
+            const cleanResponse = response.trim().toLowerCase();
+
+            // Check for invalid responses: 'invalid question', 'no response found', or any error
+            if (cleanResponse.includes('invalid question') || 
+                cleanResponse.includes('no response found') || 
+                cleanResponse.startsWith('error:')) {
+                STATE.invalidQuestionCount++;
+
+                if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {
+                    await this.toggleAutoSolveMode(false);
+                    return;
+                }
+
+                // Press Enter for invalid questions (like backup: simulateKeypress('', true))
+                setTimeout(() => {
+                    this.simulateKeypress('', true);
+                }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+            } else {
+                // Valid response, reset counter (like backup)
+                STATE.invalidQuestionCount = 0;
+
+                // Try to extract answer number [1-4] like backup
+                const answerMatch = cleanResponse.match(/[1-4]/);
+                if (answerMatch) {
+                    const answerNumber = answerMatch[0];
+                    
+                    setTimeout(() => {
+                        // Like backup: simulateKeypress(answerNumber, true) - number + Enter
+                        this.simulateKeypress(answerNumber, true);
+                    }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+                } else {
+                    // If no number found, treat as invalid and just press Enter
+                    setTimeout(() => {
+                        this.simulateKeypress('', true);
+                    }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+                }
+            }
+
+            // MOVED: Schedule next auto-solve cycle AFTER processing the response
+            // This ensures the delay starts counting from when we finish processing the OpenAI response
+            if (STATE.isAutoSolveMode) {
+                this.scheduleNextAutoSolve();
+            }
+        },
+
+        /**
+         * Simulate keypress for answer - exactly like the backup
+         * @param {string} key - Key to press (or empty for just Enter)
+         * @param {boolean} pressEnter - Whether to press Enter after the key
+         */
+        simulateKeypress(key, pressEnter = false) {
+            
+            const activeElement = document.activeElement;
+            let success = false;
+
+            // If key is provided, try to input it (like backup)
+            if (key && key.trim() !== '') {
+                try {
+                    if (activeElement &&
+                        (activeElement.isContentEditable ||
+                            activeElement.tagName === 'INPUT' ||
+                            activeElement.tagName === 'TEXTAREA')) {
+
+                        const inputEvent = new InputEvent('input', {
+                            inputType: 'insertText',
+                            data: key,
+                            bubbles: true,
+                            cancelable: true
+                        });
+
+                        activeElement.focus();
+                        activeElement.value = (activeElement.value || '') + key;
+                        activeElement.dispatchEvent(inputEvent);
+                        success = true;
+                    }
+                } catch (e) {
+                    // InputEvent failed, will try KeyboardEvent
+                }
+
+                // Fallback approach if InputEvent didn't work
+                if (!success && activeElement &&
+                    (activeElement.isContentEditable ||
+                        activeElement.tagName === 'INPUT' ||
+                        activeElement.tagName === 'TEXTAREA')) {
+                    try {
+                        activeElement.focus();
+                        const event = new KeyboardEvent('keydown', {
+                            key: key,
+                            code: 'Digit' + key,
+                            keyCode: key.charCodeAt(0),
+                            which: key.charCodeAt(0),
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        activeElement.dispatchEvent(event);
+                        success = true;
+                    } catch (e) {
+                        // KeyboardEvent failed
+                    }
+                }
+
+                // Last resort - dispatch to document
+                if (!success && document.activeElement) {
+                    try {
+                        const event = new KeyboardEvent('keydown', {
+                            key: key,
+                            code: 'Digit' + key,
+                            keyCode: key.charCodeAt(0),
+                            which: key.charCodeAt(0),
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        document.activeElement.dispatchEvent(event);
+                    } catch (e) {
+                        // Document dispatch failed
+                    }
+                }
+            }
+
+            // Press Enter if requested (like backup)
+            if (pressEnter) {
+                setTimeout(() => {
+                    try {
+                        const enterEvent = new KeyboardEvent('keydown', {
+                            key: 'Enter',
+                            code: 'Enter',
+                            keyCode: 13,
+                            which: 13,
+                            bubbles: true,
+                            cancelable: true
+                        });
+
+                        if (activeElement && activeElement.dispatchEvent) {
+                            activeElement.dispatchEvent(enterEvent);
+                        }
+                        
+                        // Also try document.activeElement
+                        if (document.activeElement && document.activeElement.dispatchEvent) {
+                            document.activeElement.dispatchEvent(enterEvent);
+                        }
+                    } catch (e) {
+                        // Enter dispatch failed
+                    }
+                }, 500); // Use backup's timing
+            }
+        },
+
+
+        /**
+         * Initialize auto-solve system
+         */
+        async init() {
+            const { STATE, STORAGE_KEYS } = window.CaptureAI;
+            
+            
+            // Load auto-solve state from storage
+            const isAutoSolveMode = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.AUTO_SOLVE_MODE, false);
+            
+            if (isAutoSolveMode && window.CaptureAI.DomainUtils.isOnSupportedSite()) {
+                // Check if we have a last capture area before enabling auto-solve
+                const lastCaptureArea = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.LAST_CAPTURE_AREA);
+                
+                if (lastCaptureArea) {
+                    STATE.isAutoSolveMode = true;
+                    this.updateAutoSolveToggleUI();
+                    // Don't auto-start on initialization - wait for manual trigger
+                } else {
+                    // Don't enable auto-solve without a capture area
+                    STATE.isAutoSolveMode = false;
+                    await window.CaptureAI.StorageUtils.setValue(STORAGE_KEYS.AUTO_SOLVE_MODE, false);
+                }
+            }
+            
         }
     };
