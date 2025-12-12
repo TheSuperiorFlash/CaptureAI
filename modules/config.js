@@ -12,7 +12,7 @@ export const CONFIG = {
     ESC_KEY_CODE: 'Escape',
     MAX_INVALID_QUESTIONS: 2,
     AUTO_SOLVE_ANSWER_DELAY: 500,
-    AUTO_SOLVE_CYCLE_DELAY: 2000,
+    AUTO_SOLVE_CYCLE_DELAY: 2500,
 };
 
 // Storage Keys
