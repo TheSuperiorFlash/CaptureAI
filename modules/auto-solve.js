@@ -23,9 +23,6 @@ export const AutoSolve = {
                 const lastCaptureArea = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.LAST_CAPTURE_AREA);
                 
                 if (!lastCaptureArea) {
-                    if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showStealthyResult) {
-                        window.CaptureAI.UIHandlers.showStealthyResult('Please capture an area first before enabling auto-solve');
-                    }
                     // Don't change the state, keep it disabled
                     STATE.isAutoSolveMode = false; // Explicitly set to false
                     this.updateAutoSolveToggleUI(); // Reset toggle to off position
@@ -44,14 +41,8 @@ export const AutoSolve = {
             if (enabled) {
                 STATE.invalidQuestionCount = 0;
                 // Don't automatically start the loop! Wait for user to manually capture first
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showStealthyResult) {
-                    window.CaptureAI.UIHandlers.showStealthyResult('Auto-solve enabled - capture an area to start');
-                }
             } else {
                 this.cancelAutoSolve();
-                if (window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.showStealthyResult) {
-                    window.CaptureAI.UIHandlers.showStealthyResult('Auto-solve disabled');
-                }
             }
         },
 
@@ -82,6 +73,18 @@ export const AutoSolve = {
             const toggle = document.getElementById('auto-solve-toggle');
             if (toggle) {
                 toggle.checked = STATE.isAutoSolveMode;
+                
+                // Update visual appearance of the toggle
+                const toggleSlider = toggle.parentElement.querySelector('span');
+                const toggleButton = toggleSlider?.querySelector('span');
+                
+                if (toggleSlider) {
+                    const theme = window.CaptureAI.UICore?.getCurrentTheme?.() || { buttonPrimary: '#4caf65', toggleInactiveBg: '#f1f1f1' };
+                    toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? theme.buttonPrimary : theme.toggleInactiveBg;
+                }
+                if (toggleButton) {
+                    toggleButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
+                }
             }
         },
 
@@ -136,7 +139,6 @@ export const AutoSolve = {
                 // Check if we've had too many invalid questions
                 if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {
                     await this.toggleAutoSolveMode(false);
-                    window.CaptureAI.UIHandlers.showStealthyResult('Auto-solve stopped: too many invalid questions');
                     return;
                 }
 
@@ -162,22 +164,18 @@ export const AutoSolve = {
                         STATE.isProcessing = false;
                         this.scheduleNextAutoSolve();
                     }
+                    // Note: Don't schedule next auto-solve here anymore!
+                    // It will be scheduled in handleAutoSolveResponse after receiving the response
                 });
 
-                // Set a safety timeout to reset processing state if no response received after a long time
-                setTimeout(() => {
-                    if (STATE.isProcessing && STATE.currentPromptType === window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE) {
-                        STATE.isProcessing = false;
-                        this.scheduleNextAutoSolve();
-                    }
-                }, 30000);
+                // Safety timeout removed entirely!
 
             } catch (error) {
                 STATE.isProcessing = false;
                 // Wait longer before retrying on errors
                 setTimeout(() => {
                     this.scheduleNextAutoSolve();
-                }, 5000);
+                }, 2000);
             }
         },
 
@@ -225,7 +223,7 @@ export const AutoSolve = {
             this.lastAutoSolveResponse = response;
             this.lastAutoSolveTime = Date.now();
             
-            // Reset processing state (if it was set)
+            // Reset processing state (response received)
             STATE.isProcessing = false;
 
             if (!STATE.isAutoSolveMode) {
@@ -243,7 +241,6 @@ export const AutoSolve = {
 
                 if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {
                     await this.toggleAutoSolveMode(false);
-                    window.CaptureAI.UIHandlers.showStealthyResult('Too many invalid questions. Stopping auto-solve.');
                     return;
                 }
 
@@ -272,7 +269,8 @@ export const AutoSolve = {
                 }
             }
 
-            // Schedule next auto-solve cycle if still enabled (like backup)
+            // MOVED: Schedule next auto-solve cycle AFTER processing the response
+            // This ensures the delay starts counting from when we finish processing the OpenAI response
             if (STATE.isAutoSolveMode) {
                 this.scheduleNextAutoSolve();
             }
