@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         headerUiToggle: document.getElementById('header-ui-toggle'),
         helpToggle: document.getElementById('help-toggle'),
         helpContent: document.getElementById('help-content'),
-        helpArrow: document.getElementById('help-arrow')
+        helpArrow: document.getElementById('help-arrow'),
+        resetApiKeyBtn: document.getElementById('reset-api-key-btn')
     };
 
     // State variables
@@ -32,12 +33,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize popup state and UI
     await initializePopup();
 
-    // Event listeners
     elements.saveApiKeyBtn.addEventListener('click', saveApiKey);
     elements.captureBtn.addEventListener('click', startCapture);
     elements.quickCaptureBtn.addEventListener('click', quickCapture);
     elements.headerUiToggle.addEventListener('click', togglePanel);
     elements.helpToggle.addEventListener('click', toggleHelp);
+
+// Reset API Key button - needs to wait for DOM to be ready
+    setTimeout(() => {
+        const resetBtn = document.getElementById('reset-api-key-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', showApiKeyInput);
+            // Add hover effects for the reset button
+            resetBtn.addEventListener('mouseover', () => {
+                resetBtn.style.backgroundColor = '#ffe0e0';
+            });
+            resetBtn.addEventListener('mouseout', () => {
+                resetBtn.style.backgroundColor = 'rgba(255,240,240,0.3)';
+            });
+        }
+    }, 100);
 
     /**
      * Initialize popup state and load user preferences
@@ -154,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function saveApiKey() {
         const apiKey = elements.apiKeyInput.value.trim();
-        
+
         if (!apiKey) {
             showResponseMessage('Please enter an API key', 'error');
             return;
@@ -167,26 +182,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Authorization': `Bearer ${apiKey}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Invalid API key');
             }
-            
+
             await chrome.storage.local.set({ 'captureai-api-key': apiKey });
             currentState.apiKey = apiKey;
-            
+
             showResponseMessage('API key saved successfully!', 'success');
-            
+
+            // Show message in floating UI
+            try {
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tab && tab.id) {
+                    chrome.tabs.sendMessage(tab.id, {
+                        action: 'displayResponse',
+                        response: 'API key saved successfully!',
+                        promptType: null
+                    }, () => {
+                        // Ignore errors if content script not loaded
+                        if (chrome.runtime.lastError) {}
+                    });
+                }
+            } catch (error) {
+                // Silent error - content script might not be loaded
+            }
+
             setTimeout(() => {
-                // Clear the response message and show main controls
-                elements.responseContent.textContent = '';
-                elements.responseContent.className = 'response-content empty';
-            
                 elements.apiKeySection.classList.add('hidden');
                 elements.mainControls.classList.remove('hidden');
                 updateStateFromContentScript();
             }, 1500);
-            
+
         } catch (error) {
             showResponseMessage('Error: Invalid API key', 'error');
             // Silent error handling
@@ -274,8 +302,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 function: () => {
-                    if (window.CaptureAI && window.CaptureAI.UIHandlers && window.CaptureAI.UIHandlers.togglePanelVisibility) {
-                        window.CaptureAI.UIHandlers.togglePanelVisibility();
+                    if (window.CaptureAI && window.CaptureAI.UICore && window.CaptureAI.UICore.togglePanelVisibility) {
+                        window.CaptureAI.UICore.togglePanelVisibility();
                     }
                 }
             });
@@ -377,4 +405,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+
+    /**
+     * Show API key input section and clear stored API key
+     */
+    async function showApiKeyInput() {
+        // Clear API key from storage
+        await chrome.storage.local.remove('captureai-api-key');
+
+        // Reset state
+        currentState.apiKey = '';
+
+        // Reset UI
+        elements.apiKeyInput.value = '';
+        elements.apiKeyInput.placeholder = 'Enter OpenAI API key';
+        elements.mainControls.classList.add('hidden');
+        elements.apiKeySection.classList.remove('hidden');
+        elements.responseContent.textContent = 'API key cleared. Please enter a new key.';
+        elements.responseContent.className = 'response-content';
+        elements.responseContent.style.color = '#666';
+
+        // Close the help section
+        elements.helpContent.classList.remove('expanded');
+        elements.helpArrow.classList.remove('expanded');
+    }
 });
