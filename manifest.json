@@ -1,0 +1,56 @@
+{
+    "manifest_version": 3,
+    "name": "CaptureAI",
+    "version": "1.0.0",
+    "author": "Grayson Kramer",
+    "description": "AI-powered question capture tool",
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self';"
+    },
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "icons": {
+        "128": "icons/icon128.png",
+        "48": "icons/icon48.png",
+        "16": "icons/icon16.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": [ "content.js" ],
+        "run_at": "document_idle"
+    }],
+    "web_accessible_resources": [{
+        "resources": [
+            "icons/icon128.png", 
+            "icons/camera.png",
+            "icons/attach.png",
+            "icons/attached.png",
+            "modules/config.js",
+            "modules/storage.js",
+            "modules/domains.js",
+            "modules/utils.js",
+            "modules/image-processing.js",
+            "modules/ui-stealthy-result.js",
+            "modules/ui-core.js",
+            "modules/ui-components.js",
+            "modules/capture-system.js",
+            "modules/auto-solve.js",
+            "modules/messaging.js",
+            "modules/keyboard.js",
+            "modules/event-manager.js"
+        ],
+        "matches": ["<all_urls>"]
+    }]
+}
