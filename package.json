@@ -1,0 +1,26 @@
+{
+  "name": "captureai",
+  "version": "1.0.0",
+  "description": "AI-powered question capture tool",
+  "homepage": "https://github.com/TheSuperiorFlash/CaptureAI#readme",
+  "bugs": {
+    "url": "https://github.com/TheSuperiorFlash/CaptureAI/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheSuperiorFlash/CaptureAI.git"
+  },
+  "license": "ISC",
+  "author": "Grayson Kramer",
+  "type": "commonjs",
+  "main": "background.js",
+  "scripts": {
+      "lint": "eslint .",
+      "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0"
+  }
+}
