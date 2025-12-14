@@ -49,6 +49,7 @@ content.js.backup
 
 ### Build Output ###
 dist/
+build.bat
 
 ### Node.js ###
 node_modules/
