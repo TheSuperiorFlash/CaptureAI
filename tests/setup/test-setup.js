@@ -9,6 +9,10 @@ const { setupChromeMock } = require('./chrome-mock');
 // Set up Chrome API mocks globally
 setupChromeMock();
 
+// Set up fetch mock globally
+global.fetch = require('jest-fetch-mock');
+global.fetch.enableMocks();
+
 // Suppress console output during tests (optional)
 // Uncomment to reduce test output noise
 // global.console = {
