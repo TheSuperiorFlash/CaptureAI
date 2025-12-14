@@ -5,6 +5,7 @@ export default [
   js.configs.recommended,
   {
     files: ['**/*.js'],
+    ignores: ['tests/**', 'config/**'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -70,6 +71,56 @@ export default [
 
       // Chrome Extension Specific
       'no-undef': 'error' // Catch undefined variables
+    }
+  },
+  {
+    // Config files - JS (CommonJS)
+    files: ['config/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node
+      }
+    },
+    rules: {
+      'no-undef': 'error'
+    }
+  },
+  {
+    // Config files - MJS (ES Modules)
+    files: ['config/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node
+      }
+    },
+    rules: {
+      'no-undef': 'error'
+    }
+  },
+  {
+    // Test files
+    files: ['tests/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+        chrome: 'readonly',
+        window: 'writable',
+        global: 'writable'
+      }
+    },
+    rules: {
+      // Relax some rules for test files
+      'max-lines-per-function': 'off', // Tests can have longer functions
+      'max-lines': 'off', // Test files can be longer
+      'no-undef': 'error',
+      'no-unused-vars': 'off' // Allow unused imports in test files
     }
   },
   {

@@ -48,7 +48,9 @@ describe('Storage Module', () => {
   describe('setValue', () => {
     test('should store string value', async () => {
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await setValue('test-key', 'test-value');
@@ -61,7 +63,9 @@ describe('Storage Module', () => {
 
     test('should store number value', async () => {
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await setValue('count', 42);
@@ -76,7 +80,9 @@ describe('Storage Module', () => {
       const testObject = { name: 'test', value: 123 };
 
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await setValue('config', testObject);
@@ -91,7 +97,9 @@ describe('Storage Module', () => {
       const testArray = [1, 2, 3, 4, 5];
 
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await setValue('list', testArray);
@@ -104,7 +112,9 @@ describe('Storage Module', () => {
 
     test('should store null value', async () => {
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await setValue('nullable', null);
@@ -117,7 +127,9 @@ describe('Storage Module', () => {
 
     test('should resolve when storage operation completes', async () => {
       storageMock.local.set.mockImplementation((items, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       const result = await setValue('test', 'value');
@@ -274,7 +286,9 @@ describe('Storage Module', () => {
   describe('removeValue', () => {
     test('should remove value by key', async () => {
       storageMock.local.remove.mockImplementation((key, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await removeValue('test-key');
@@ -287,7 +301,9 @@ describe('Storage Module', () => {
 
     test('should resolve when removal completes', async () => {
       storageMock.local.remove.mockImplementation((key, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       const result = await removeValue('test-key');
@@ -297,7 +313,9 @@ describe('Storage Module', () => {
 
     test('should handle removing non-existent key', async () => {
       storageMock.local.remove.mockImplementation((key, callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await expect(removeValue('non-existent')).resolves.toBeUndefined();
@@ -307,7 +325,9 @@ describe('Storage Module', () => {
   describe('clear', () => {
     test('should clear all storage', async () => {
       storageMock.local.clear.mockImplementation((callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       await clear();
@@ -319,7 +339,9 @@ describe('Storage Module', () => {
 
     test('should resolve when clear completes', async () => {
       storageMock.local.clear.mockImplementation((callback) => {
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
       });
 
       const result = await clear();

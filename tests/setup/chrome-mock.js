@@ -12,13 +12,19 @@ const storageMock = {
       callback({});
     }),
     set: jest.fn((items, callback) => {
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
     }),
     remove: jest.fn((keys, callback) => {
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
     }),
     clear: jest.fn((callback) => {
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
     })
   }
 };
@@ -27,7 +33,9 @@ const storageMock = {
 const runtimeMock = {
   lastError: null,
   sendMessage: jest.fn((message, callback) => {
-    if (callback) callback({ success: true });
+    if (callback) {
+      callback({ success: true });
+    }
   }),
   onMessage: {
     addListener: jest.fn(),
@@ -42,7 +50,9 @@ const tabsMock = {
     callback('data:image/png;base64,mockImageData');
   }),
   sendMessage: jest.fn((tabId, message, callback) => {
-    if (callback) callback({ success: true });
+    if (callback) {
+      callback({ success: true });
+    }
   }),
   query: jest.fn((queryInfo, callback) => {
     callback([{ id: 1, url: 'https://example.com' }]);
@@ -52,7 +62,9 @@ const tabsMock = {
 // Scripting API mock
 const scriptingMock = {
   executeScript: jest.fn((injection, callback) => {
-    if (callback) callback([{ result: true }]);
+    if (callback) {
+      callback([{ result: true }]);
+    }
   })
 };
 

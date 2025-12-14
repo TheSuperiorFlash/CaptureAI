@@ -92,7 +92,9 @@ describe('Utils', () => {
 
     test('should not resolve before specified time', async () => {
       let resolved = false;
-      Utils.delay(1000).then(() => { resolved = true; });
+      Utils.delay(1000).then(() => {
+        resolved = true;
+      });
 
       jest.advanceTimersByTime(500);
       await Promise.resolve();

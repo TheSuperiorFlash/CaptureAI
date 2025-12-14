@@ -15,12 +15,12 @@
   "type": "commonjs",
   "main": "background.js",
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:verbose": "jest --verbose"
+    "lint": "eslint . --config config/eslint.config.mjs",
+    "lint:fix": "eslint . --config config/eslint.config.mjs --fix",
+    "test": "jest --config config/jest.config.js",
+    "test:watch": "jest --config config/jest.config.js --watch",
+    "test:coverage": "jest --config config/jest.config.js --coverage",
+    "test:verbose": "jest --config config/jest.config.js --verbose"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

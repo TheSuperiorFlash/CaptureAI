@@ -5,6 +5,9 @@
  */
 
 module.exports = {
+  // Root directory is project root (parent of config/)
+  rootDir: '..',
+
   // Use Node environment for testing
   testEnvironment: 'node',
 
