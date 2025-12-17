@@ -40,9 +40,7 @@ const PROMPT_TYPES = {
  * OpenAI API configuration
  */
 const OPENAI_CONFIG = {
-  MODEL: 'gpt-5-nano',
   API_URL: 'https://api.openai.com/v1/chat/completions',
-  REASONING_EFFORT: 'low',
   VERBOSITY: 'low',
   MAX_TOKENS: {
     AUTO_SOLVE: 2500,
@@ -51,6 +49,44 @@ const OPENAI_CONFIG = {
     DEFAULT: 5000
   }
 };
+
+/**
+ * Get AI configuration based on reasoning level from storage
+ * @returns {Promise<Object>} Configuration object with model and reasoning effort
+ */
+async function getAIConfig() {
+  try {
+    const result = await chrome.storage.local.get('captureai-reasoning-level');
+    const level = result['captureai-reasoning-level'];
+
+    // Default to medium (1) if not set
+    const reasoningLevel = level !== undefined ? level : 1;
+
+    // Reasoning level configurations
+    const configs = {
+      0: { MODEL: 'gpt-4.1-nano', REASONING_EFFORT: null, USE_LEGACY_PARAMS: true },      // Low - no reasoning, uses different params
+      1: { MODEL: 'gpt-5-nano', REASONING_EFFORT: 'low', USE_LEGACY_PARAMS: false },     // Medium
+      2: { MODEL: 'gpt-5-nano', REASONING_EFFORT: 'medium', USE_LEGACY_PARAMS: false }   // High
+    };
+
+    // Use config if valid, otherwise fallback to medium
+    const selectedConfig = configs[reasoningLevel] || configs[1];
+
+    return {
+      ...OPENAI_CONFIG,
+      ...selectedConfig
+    };
+  } catch (error) {
+    console.error('Error getting AI config:', error);
+    // Return medium config as fallback
+    return {
+      ...OPENAI_CONFIG,
+      MODEL: 'gpt-5-nano',
+      REASONING_EFFORT: 'low',
+      USE_LEGACY_PARAMS: false
+    };
+  }
+}
 
 /**
  * AI prompt templates
@@ -92,7 +128,10 @@ const STORAGE_KEY_API_KEY = 'captureai-api-key';
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const handlers = {
     'captureArea': handleCaptureArea,
-    'askQuestion': handleAskQuestion
+    'askQuestion': handleAskQuestion,
+    'enablePrivacyGuard': handleEnablePrivacyGuard,
+    'disablePrivacyGuard': handleDisablePrivacyGuard,
+    'getPrivacyGuardStatus': handleGetPrivacyGuardStatus
   };
 
   const handler = handlers[request.action];
@@ -142,6 +181,20 @@ async function handleCaptureArea(request, sender, sendResponse) {
       await displayResponse(sender.tab.id, processedData.error);
       sendResponse({ success: true });
       return;
+    }
+
+    // Debug mode: log captured image to console
+    if (DEBUG && processedData?.compressedImageData) {
+      // Log to service worker console
+      console.log('CaptureAI Debug - Captured Image Data:', processedData.compressedImageData);
+
+      // Also send to page console for easier viewing
+      chrome.tabs.sendMessage(sender.tab.id, {
+        action: 'debugLogImage',
+        imageData: processedData.compressedImageData
+      }).catch(() => {
+        // Ignore errors if content script isn't ready
+      });
     }
 
     // If this is for ask mode, send image data back to content script
@@ -219,6 +272,73 @@ async function handleAskQuestion(request, sender, sendResponse) {
   }
 }
 
+/**
+ * Handle privacy guard enable request
+ * Injects privacy protection script into MAIN world
+ *
+ * @param {Object} request - Message request object
+ * @param {Object} sender - Message sender object with tab info
+ * @param {Function} sendResponse - Callback to send response
+ * @returns {void}
+ */
+async function handleEnablePrivacyGuard(request, sender, sendResponse) {
+  try {
+    const tabId = sender.tab.id;
+    const url = sender.tab.url;
+
+    // Check if URL is valid for script injection
+    if (!isValidUrl(url)) {
+      sendResponse({ success: false, error: 'Cannot inject on this page type' });
+      return;
+    }
+
+    // Inject privacy guard script into MAIN world
+    await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      files: ['inject.js'],
+      world: 'MAIN',
+      injectImmediately: true
+    });
+
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Privacy guard injection error:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * Handle privacy guard disable request
+ * Note: Cannot truly disable once injected, but can signal status change
+ *
+ * @param {Object} request - Message request object
+ * @param {Object} sender - Message sender object
+ * @param {Function} sendResponse - Callback to send response
+ * @returns {void}
+ */
+async function handleDisablePrivacyGuard(request, sender, sendResponse) {
+  // Privacy guard script cannot be removed once injected
+  // This just acknowledges the disable request
+  sendResponse({ success: true, note: 'Privacy guard persists until page reload' });
+}
+
+/**
+ * Handle privacy guard status request
+ *
+ * @param {Object} request - Message request object
+ * @param {Object} sender - Message sender object
+ * @param {Function} sendResponse - Callback to send response
+ * @returns {void}
+ */
+async function handleGetPrivacyGuardStatus(request, sender, sendResponse) {
+  // Check if inject.js is available
+  try {
+    sendResponse({ enabled: true, available: true });
+  } catch (error) {
+    sendResponse({ enabled: false, available: false });
+  }
+}
+
 
 // ============================================================================
 // SECTION 4: OPENAI API CLIENT
@@ -241,28 +361,44 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
       return formatError(ERROR_MESSAGES.NO_API_KEY);
     }
 
+    // Get dynamic AI configuration based on reasoning level
+    const config = await getAIConfig();
+
     // Build message payload
     const messages = buildMessages(data, promptType);
 
     // Select appropriate max tokens based on prompt type
     const tokenKey = promptType === PROMPT_TYPES.AUTO_SOLVE ? 'AUTO_SOLVE' :
       promptType === PROMPT_TYPES.ASK ? 'ASK' : 'DEFAULT';
-    const maxTokens = OPENAI_CONFIG.MAX_TOKENS[tokenKey];
+    const maxTokens = config.MAX_TOKENS[tokenKey];
+
+    // Build request body - handle legacy params for gpt-4.1-nano
+    const requestBody = {
+      model: config.MODEL,
+      messages: messages
+    };
+
+    // Use different parameters based on model
+    if (config.USE_LEGACY_PARAMS) {
+      // For gpt-4.1-nano: use max_tokens, no reasoning_effort or verbosity
+      requestBody.max_tokens = maxTokens;
+    } else {
+      // For gpt-5-nano: use max_completion_tokens, reasoning_effort, and verbosity
+      requestBody.max_completion_tokens = maxTokens;
+      requestBody.verbosity = config.VERBOSITY;
+      if (config.REASONING_EFFORT !== null) {
+        requestBody.reasoning_effort = config.REASONING_EFFORT;
+      }
+    }
 
     // Make API request
-    const response = await fetch(OPENAI_CONFIG.API_URL, {
+    const response = await fetch(config.API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: OPENAI_CONFIG.MODEL,
-        messages: messages,
-        max_completion_tokens: maxTokens,
-        reasoning_effort: OPENAI_CONFIG.REASONING_EFFORT,
-        verbosity: OPENAI_CONFIG.VERBOSITY
-      })
+      body: JSON.stringify(requestBody)
     });
 
     // Handle successful response
@@ -291,24 +427,40 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
  */
 async function sendTextOnlyQuestion(question, apiKey) {
   try {
+    // Get dynamic AI configuration based on reasoning level
+    const config = await getAIConfig();
+
     const messages = [
       { role: 'system', content: PROMPTS.ASK_SYSTEM },
       { role: 'user', content: question }
     ];
 
-    const response = await fetch(OPENAI_CONFIG.API_URL, {
+    // Build request body - handle legacy params for gpt-4.1-nano
+    const requestBody = {
+      model: config.MODEL,
+      messages: messages
+    };
+
+    // Use different parameters based on model
+    if (config.USE_LEGACY_PARAMS) {
+      // For gpt-4.1-nano: use max_tokens, no reasoning_effort or verbosity
+      requestBody.max_tokens = config.MAX_TOKENS.TEXT_ONLY;
+    } else {
+      // For gpt-5-nano: use max_completion_tokens, reasoning_effort, and verbosity
+      requestBody.max_completion_tokens = config.MAX_TOKENS.TEXT_ONLY;
+      requestBody.verbosity = config.VERBOSITY;
+      if (config.REASONING_EFFORT !== null) {
+        requestBody.reasoning_effort = config.REASONING_EFFORT;
+      }
+    }
+
+    const response = await fetch(config.API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: OPENAI_CONFIG.MODEL,
-        messages: messages,
-        max_completion_tokens: OPENAI_CONFIG.MAX_TOKENS.TEXT_ONLY,
-        reasoning_effort: OPENAI_CONFIG.REASONING_EFFORT,
-        verbosity: OPENAI_CONFIG.VERBOSITY
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (response.ok) {
@@ -483,40 +635,6 @@ function isValidUrl(url) {
          !url.startsWith('chrome.google.com');
 }
 
-/**
- * Inject content script into specified tab
- * Only injects if URL is valid (not chrome://, etc.)
- *
- * @param {number} tabId - Chrome tab ID to inject into
- * @returns {Promise<void>}
- */
-async function _injectContentScript(tabId) {
-  try {
-    chrome.tabs.get(tabId, (tab) => {
-      if (chrome.runtime.lastError) {
-        if (DEBUG) {
-          console.error('CaptureAI: Failed to get tab:', chrome.runtime.lastError);
-        }
-        return;
-      }
-
-      if (isValidUrl(tab.url)) {
-        chrome.scripting.executeScript({
-          target: { tabId: tabId },
-          files: ['content.js']
-        }, () => {
-          if (chrome.runtime.lastError && DEBUG) {
-            console.error('CaptureAI: Failed to inject content script:', chrome.runtime.lastError);
-          }
-        });
-      }
-    });
-  } catch (error) {
-    if (DEBUG) {
-      console.error('CaptureAI: Error in injectContentScript:', error);
-    }
-  }
-}
 
 
 // ============================================================================

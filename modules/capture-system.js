@@ -22,11 +22,10 @@ export const CaptureSystem = {
       window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
     }
 
-    // Set current prompt type based on auto-solve mode (like original)
-    STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
-
-    // Store if this is for ask mode
-    STATE.isForAskMode = forAskMode;
+    // Only set prompt type if NOT for ask mode (ask mode will be handled by ask mode submission)
+    if (!STATE.isForAskMode) {
+      STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
+    }
 
     this.startSelectionProcess();
   },
@@ -53,25 +52,14 @@ export const CaptureSystem = {
 
     STATE.isProcessing = true;
 
-    // Set current prompt type based on auto-solve mode for quick capture (like original)
+    // Set current prompt type based on auto-solve mode
     STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
 
-    // Check if we're in ask mode (same logic as keyboard shortcuts)
-    const askModeContainer = document.getElementById('ask-mode-container');
-    const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
-
-    // Determine if we're in ask mode
-    if (isAskModeVisible && window.CaptureAI.UIComponents) {
-      STATE.askModeInstance = window.CaptureAI.UIComponents;
-      STATE.isForAskMode = true;
-    }
-
-    // Use the same capture action for both modes
+    // Always process the image
     chrome.runtime.sendMessage({
       action: 'captureArea',
       coordinates: lastArea,
-      promptType: STATE.currentPromptType,
-      isForAskMode: STATE.isForAskMode
+      promptType: STATE.currentPromptType
     });
   },
 
@@ -272,9 +260,12 @@ export const CaptureSystem = {
     // Account for browser zoom level
     const zoom = window.devicePixelRatio;
 
+    // Note: captureVisibleTab only captures the viewport, so coordinates
+    // should be relative to viewport (clientX/clientY), not document.
+    // We do NOT add scrollX/scrollY because the screenshot is of the viewport only.
     const coordinates = {
-      startX: (left + window.scrollX) * zoom,
-      startY: (top + window.scrollY) * zoom,
+      startX: left * zoom,
+      startY: top * zoom,
       width: width * zoom,
       height: height * zoom
     };

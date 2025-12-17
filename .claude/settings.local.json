@@ -10,7 +10,9 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(rm:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(tree:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

@@ -27,7 +27,8 @@ export const STORAGE_KEYS = {
   API_KEY: 'captureai-api-key',
   AUTO_SOLVE_MODE: 'captureai-auto-solve-mode',
   LAST_CAPTURE_AREA: 'captureai-last-capture-area',
-  ASK_MODE: 'captureai-ask-mode'
+  ASK_MODE: 'captureai-ask-mode',
+  REASONING_LEVEL: 'captureai-reasoning-level'
 };
 
 // Prompt types
@@ -83,6 +84,5 @@ export const STATE = {
 // Cached DOM elements
 export const DOM_CACHE = {
   panel: null,
-  stealthyResult: null,
-  resultElement: null
+  stealthyResult: null
 };

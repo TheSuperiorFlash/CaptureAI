@@ -26,6 +26,7 @@ CaptureAI is a Chrome extension that lets you capture questions from any webpage
 - **🎯 Auto-Solve Mode** - Automatically solve multiple-choice questions (Quizlet, Vocabulary.com)
 - **💬 Ask Mode** - Ask custom questions with optional image attachments
 - **👻 Stealth Mode** - Invisible operation when UI is hidden
+- **🛡️ Privacy Guard** - Prevents websites from detecting focus loss or tab switches
 - **⌨️ Keyboard Shortcuts** - Fast workflow with hotkeys
 - **🔒 Privacy-First** - No data collection, everything stays local
 
@@ -125,7 +126,10 @@ CaptureAI/
 │   ├── ui-stealthy-result.js # Stealth mode result display
 │   ├── messaging.js          # Chrome extension messaging
 │   ├── keyboard.js           # Keyboard shortcut handling
-│   └── event-manager.js      # Event cleanup and error handling
+│   ├── event-manager.js      # Event cleanup and error handling
+│   └── privacy-guard.js      # Privacy protection coordinator
+│
+├── inject.js                  # MAIN world privacy protection script
 │
 └── icons/                     # Extension icons
     ├── icon16.png
@@ -171,6 +175,24 @@ When UI is hidden:
 - No selection box shown
 - Results appear subtly in bottom-right corner
 - Completely invisible operation
+
+### Privacy Guard System
+
+**Prevents websites from detecting extension usage:**
+
+- ✅ **Blocks focus/blur detection** - Websites can't tell when you click the extension
+- ✅ **Hides tab switches** - `visibilitychange` events are blocked
+- ✅ **Spoofs focus state** - `document.hasFocus()` always returns true
+- ✅ **Removes AI honeypots** - Automatically deletes hidden AI detection traps
+- ✅ **MAIN world injection** - Runs before page scripts, undetectable by websites
+
+**How it works:**
+1. Injects into MAIN world (same context as page)
+2. Overrides native browser APIs before page loads
+3. Blocks privacy-sensitive event listeners
+4. Monitors and removes AI detection elements
+
+See [docs/PRIVACY_GUARD.md](docs/PRIVACY_GUARD.md) for technical details.
 
 ### Auto-Solve Intelligence
 

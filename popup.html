@@ -272,10 +272,20 @@
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
         }
-        
+
         .help-content.expanded {
-            max-height: 400px;
+            max-height: 700px;
             padding-top: 5px;
+            overflow-y: auto;
+        }
+
+        .help-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .help-content {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
         .help-category {
@@ -300,6 +310,80 @@
             font-size: 11px;
             font-weight: bold;
             color: #218aff;
+        }
+
+        /* Reasoning Toggle Styles */
+        .reasoning-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .reasoning-toggle-track {
+            position: relative;
+            width: 100%;
+            max-width: 260px;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            overflow: visible;
+        }
+
+        .reasoning-toggle-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, #218aff 0%, #0066ff 100%);
+            border-radius: 3px;
+            left: 0;
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+
+        .reasoning-toggle-slider {
+            position: absolute;
+            width: 40px;
+            height: 24px;
+            background-color: white;
+            border-radius: 100px;
+            border: none;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0px;
+            transition: all 0.3s ease;
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
+                        0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .reasoning-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: color 0.15s ease;
+            z-index: 3;
+            user-select: none;
+            white-space: nowrap;
+            pointer-events: none;
+            bottom: -28px;
+            color: #666666;
+        }
+
+        .reasoning-label-low {
+            left: 10px;
+        }
+
+        .reasoning-label-medium {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .reasoning-label-high {
+            right: 7px;
         }
     </style>
 </head>
@@ -333,7 +417,7 @@
             </div>
             <button id="save-api-key" class="button button-primary">Save API Key</button>
         </div>
-        
+
         <!-- Main Controls Section -->
         <div id="main-controls" class="section hidden">
             <button id="capture-btn" class="button button-primary button-with-icon">
@@ -356,6 +440,21 @@
                 <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
                 <div class="help-category">Stealth Mode</div>
                 <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
+
+                <div class="help-category">Reasoning Level</div>
+                <div class="help-item">
+                    <div class="reasoning-toggle-container" style="margin-top: 15px; margin-bottom: 30px;">
+                        <input type="range" id="reasoning-slider" min="0" max="2" value="1" step="1" style="display: none;">
+                        <div class="reasoning-toggle-track" id="reasoning-toggle-track">
+                            <div class="reasoning-toggle-progress" id="reasoning-toggle-progress"></div>
+                            <div class="reasoning-toggle-slider" id="reasoning-toggle-slider"></div>
+                            <span class="reasoning-label reasoning-label-low">Low</span>
+                            <span class="reasoning-label reasoning-label-medium">Medium</span>
+                            <span class="reasoning-label reasoning-label-high">High</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="help-item"><button id="reset-api-key-btn" style="margin-top: 8px; background-color: rgba(255,240,240,0.3); border: 1px solid rgba(255,204,204,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #d32f2f; font-weight: 500; width: 100%; transition: background-color 0.2s;">Clear API Key</button></div>
             </div>
         </div>

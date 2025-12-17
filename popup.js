@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     helpToggle: document.getElementById('help-toggle'),
     helpContent: document.getElementById('help-content'),
     helpArrow: document.getElementById('help-arrow'),
-    resetApiKeyBtn: document.getElementById('reset-api-key-btn')
+    resetApiKeyBtn: document.getElementById('reset-api-key-btn'),
+    reasoningSlider: document.getElementById('reasoning-slider')
   };
 
   // State variables
@@ -38,6 +39,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.quickCaptureBtn.addEventListener('click', quickCapture);
   elements.headerUiToggle.addEventListener('click', togglePanel);
   elements.helpToggle.addEventListener('click', toggleHelp);
+
+  // Setup reasoning toggle
+  setupReasoningToggle();
 
   // Reset API Key button - needs to wait for DOM to be ready
   setTimeout(() => {
@@ -59,9 +63,14 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
   async function initializePopup() {
     try {
-      // Load API key from storage
-      const result = await chrome.storage.local.get(['captureai-api-key']);
+      // Load API key and reasoning level from storage
+      const result = await chrome.storage.local.get(['captureai-api-key', 'captureai-reasoning-level']);
       const apiKey = result['captureai-api-key'] || '';
+      const reasoningLevel = result['captureai-reasoning-level'];
+
+      // Load reasoning level (default to 1 = medium if not set)
+      const level = reasoningLevel !== undefined ? reasoningLevel : 1;
+      elements.reasoningSlider.value = level;
 
       if (apiKey) {
         currentState.apiKey = apiKey;
@@ -437,5 +446,92 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Close the help section
     elements.helpContent.classList.remove('expanded');
     elements.helpArrow.classList.remove('expanded');
+  }
+
+  /**
+     * Save reasoning level to storage
+     */
+  async function saveReasoningLevel() {
+    try {
+      const level = parseInt(elements.reasoningSlider.value);
+      await chrome.storage.local.set({ 'captureai-reasoning-level': level });
+    } catch (error) {
+      console.error('Error saving reasoning level:', error);
+    }
+  }
+
+  /**
+     * Setup reasoning toggle interaction
+     */
+  function setupReasoningToggle() {
+    const track = document.getElementById('reasoning-toggle-track');
+    const slider = document.getElementById('reasoning-toggle-slider');
+    const progress = document.getElementById('reasoning-toggle-progress');
+    const lowLabel = document.querySelector('.reasoning-label-low');
+    const mediumLabel = document.querySelector('.reasoning-label-medium');
+    const highLabel = document.querySelector('.reasoning-label-high');
+
+    if (!track || !slider || !progress) return;
+
+    // Update toggle appearance based on level
+    function updateToggleUI(level) {
+      const trackWidth = track.offsetWidth;
+      const sliderWidth = 40; // Current slider width from CSS
+      const sliderHalfWidth = sliderWidth / 2;
+
+      // Add padding so slider doesn't get cut off at edges
+      const edgePadding = sliderHalfWidth;
+
+      // Positions for the pill handle (centered on position)
+      const positions = {
+        0: edgePadding,                          // Low (with padding from left edge)
+        1: trackWidth / 2,                       // Medium (center)
+        2: trackWidth - edgePadding              // High (with padding from right edge)
+      };
+
+      const centerPos = positions[level];
+
+      // Position the slider (pill handle) - center it on the position
+      slider.style.left = (centerPos - sliderHalfWidth) + 'px';
+
+      // Update progress bar width to reach the slider center
+      progress.style.width = centerPos + 'px';
+
+      // Update label colors - highlight the active label
+      lowLabel.style.color = level === 0 ? '#218aff' : '#666666';
+      lowLabel.style.fontWeight = level === 0 ? '600' : '500';
+
+      mediumLabel.style.color = level === 1 ? '#218aff' : '#666666';
+      mediumLabel.style.fontWeight = level === 1 ? '600' : '500';
+
+      highLabel.style.color = level === 2 ? '#218aff' : '#666666';
+      highLabel.style.fontWeight = level === 2 ? '600' : '500';
+    }
+
+    // Click on track
+    track.addEventListener('click', async (e) => {
+      const rect = track.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const trackWidth = rect.width;
+
+      // Determine which third was clicked
+      let newLevel;
+      if (clickX < trackWidth / 3) {
+        newLevel = 0; // Low
+      } else if (clickX < (trackWidth * 2 / 3)) {
+        newLevel = 1; // Medium
+      } else {
+        newLevel = 2; // High
+      }
+
+      // Update hidden input and UI
+      elements.reasoningSlider.value = newLevel;
+      updateToggleUI(newLevel);
+      await saveReasoningLevel();
+    });
+
+    // Initialize UI based on current value
+    const currentLevel = elements.reasoningSlider.value !== '' ? parseInt(elements.reasoningSlider.value) : 1;
+    updateToggleUI(currentLevel);
   }
 });

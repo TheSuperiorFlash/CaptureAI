@@ -7,7 +7,19 @@ export const Keyboard = {
          * Initialize keyboard shortcuts
          */
   init() {
-    document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // Bind the handler once and store it for cleanup
+    this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+    document.addEventListener('keydown', this.boundHandleKeyDown);
+  },
+
+  /**
+         * Cleanup keyboard event listeners
+         */
+  cleanup() {
+    if (this.boundHandleKeyDown) {
+      document.removeEventListener('keydown', this.boundHandleKeyDown);
+      this.boundHandleKeyDown = null;
+    }
   },
 
   /**
@@ -93,19 +105,9 @@ export const Keyboard = {
       return;
     }
 
-    // Check if ask mode is currently active
-    const askModeContainer = document.getElementById('ask-mode-container');
-    const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
-
     if (window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.startCapture) {
-      if (isAskModeVisible && window.CaptureAI.UIAskMode) {
-        // In ask mode - start image capture for attachment
-        window.CaptureAI.STATE.askModeInstance = window.CaptureAI.UIAskMode;
-        window.CaptureAI.CaptureSystem.startCapture(true);
-      } else {
-        // Normal capture mode
-        window.CaptureAI.CaptureSystem.startCapture();
-      }
+      // Always start normal capture
+      window.CaptureAI.CaptureSystem.startCapture();
     }
   },
 
@@ -127,20 +129,9 @@ export const Keyboard = {
       return;
     }
 
-    // Check if ask mode is currently active
-    const askModeContainer = document.getElementById('ask-mode-container');
-    const isAskModeVisible = askModeContainer && askModeContainer.style.display !== 'none';
-
     if (window.CaptureAI.CaptureSystem.quickCapture) {
-      if (isAskModeVisible && window.CaptureAI.UIAskMode) {
-        // In ask mode - use quick capture for image attachment
-        window.CaptureAI.STATE.askModeInstance = window.CaptureAI.UIAskMode;
-        window.CaptureAI.STATE.isForAskMode = true;
-        window.CaptureAI.CaptureSystem.quickCapture();
-      } else {
-        // Normal quick capture mode
-        window.CaptureAI.CaptureSystem.quickCapture();
-      }
+      // Always process image, never attach
+      window.CaptureAI.CaptureSystem.quickCapture();
     }
   },
 
@@ -148,14 +139,19 @@ export const Keyboard = {
          * Handle escape key functionality
          */
   handleEscapeKey() {
-    const { STATE } = window.CaptureAI;
+    const { STATE, DOM_CACHE } = window.CaptureAI;
 
-    // Cancel auto-solve mode immediately (like backup)
+    // Always turn off auto-solve mode
     if (STATE.isAutoSolveMode) {
       if (window.CaptureAI.AutoSolve && window.CaptureAI.AutoSolve.toggleAutoSolveMode) {
         window.CaptureAI.AutoSolve.toggleAutoSolveMode(false);
       }
-      return;
+    }
+
+    // Always hide the floating UI panel
+    if (STATE.isPanelVisible && DOM_CACHE.panel) {
+      DOM_CACHE.panel.style.display = 'none';
+      STATE.isPanelVisible = false;
     }
 
     // Cancel any ongoing selection

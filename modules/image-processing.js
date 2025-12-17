@@ -33,27 +33,22 @@ export const ImageProcessing = {
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
-        // Try multiple compression strategies and pick the smallest
-        const compressionPromises = [
-          // Strategy 1: WebP with lower quality
-          this.tryCompression(canvas, 'image/webp', quality * 0.8),
-          // Strategy 2: JPEG with medium quality
-          this.tryCompression(canvas, 'image/jpeg', quality),
-          // Strategy 3: WebP with very low quality
-          this.tryCompression(canvas, 'image/webp', 0.2)
-        ];
-
-        Promise.all(compressionPromises).then(results => {
-          // Pick the smallest result that's still readable
-          const smallest = results.reduce((prev, curr) =>
-            curr && curr.length < prev.length ? curr : prev
-          );
-          resolve(smallest);
-        }).catch(() => {
-          // Fallback to simple JPEG compression
-          const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(jpegDataUrl);
-        });
+        // Try WebP first (best compression), fallback to JPEG if unsupported
+        this.tryCompression(canvas, 'image/webp', quality * 0.8)
+          .then(webpResult => {
+            if (webpResult) {
+              resolve(webpResult);
+            } else {
+              // WebP not supported, use JPEG
+              const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+              resolve(jpegDataUrl);
+            }
+          })
+          .catch(() => {
+            // Fallback to simple JPEG compression
+            const jpegDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(jpegDataUrl);
+          });
       };
       img.onerror = (error) => {
         reject(error);

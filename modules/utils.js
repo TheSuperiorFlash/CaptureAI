@@ -4,14 +4,6 @@
 
 export const Utils = {
   /**
-         * Debug logger (disabled)
-         * @param {...*} args - Arguments to log
-         */
-  debugLog(..._args) {
-    // Debug logging disabled
-  },
-
-  /**
          * Debounce function to limit execution frequency (optimized)
          * @param {Function} func - Function to debounce
          * @param {number} wait - Wait time in milliseconds
@@ -108,5 +100,14 @@ export const Utils = {
   isInViewport(x, y) {
     return x >= 0 && x <= window.innerWidth &&
                    y >= 0 && y <= window.innerHeight;
+  },
+
+  /**
+         * Check if ask mode is currently active
+         * @returns {boolean}
+         */
+  isAskModeActive() {
+    const askModeContainer = document.getElementById('ask-mode-container');
+    return askModeContainer && askModeContainer.style.display !== 'none';
   }
 };

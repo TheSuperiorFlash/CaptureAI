@@ -55,6 +55,11 @@ export const EventManager = {
     // Clear the array
     STATE.eventListeners = [];
 
+    // Clean up keyboard event listeners
+    if (window.CaptureAI.Keyboard?.cleanup) {
+      window.CaptureAI.Keyboard.cleanup();
+    }
+
     // Clean up timers
     if (STATE.answerFadeoutTimer) {
       clearTimeout(STATE.answerFadeoutTimer);
@@ -65,8 +70,6 @@ export const EventManager = {
       clearTimeout(STATE.autoSolveTimer);
       STATE.autoSolveTimer = null;
     }
-
-    // OCR removed - direct image processing only
 
     // Clean up UI elements
     this.cleanupUI();
@@ -143,8 +146,13 @@ export const EventManager = {
 
   /**
          * Handle errors gracefully
+         * @param {Error} error - Error object
+         * @param {string} context - Context where error occurred
          */
-  handleError() {
+  handleError(error, context) {
+    if (window.CaptureAI.CONFIG?.DEBUG) {
+      console.error(`CaptureAI Error [${context}]:`, error);
+    }
 
     // Show user-friendly error message
     if (window.CaptureAI.UICore) {

@@ -55,6 +55,9 @@ export const Messaging = {
       case 'displayResponse':
         return this.handleDisplayResponse(request, sendResponse);
 
+      case 'debugLogImage':
+        return this.handleDebugLogImage(request, sendResponse);
+
       default:
         sendResponse({ success: false, error: 'Unknown action' });
         return false;
@@ -78,45 +81,26 @@ export const Messaging = {
 
     const { STATE, STORAGE_KEYS } = window.CaptureAI;
 
+    // Helper to build state response
+    const buildStateResponse = (hasLastCaptureArea = false) => ({
+      success: true,
+      state: {
+        isPanelVisible: STATE.isPanelVisible || false,
+        isAutoSolveMode: STATE.isAutoSolveMode || false,
+        hasLastCaptureArea,
+        isOnSupportedSite: window.CaptureAI.DomainUtils ? window.CaptureAI.DomainUtils.isOnSupportedSite() : false,
+        currentResponse: STATE.currentResponse || ''
+      }
+    });
+
     // Get last capture area from storage
-    if (window.CaptureAI.StorageUtils && window.CaptureAI.StorageUtils.getValue) {
+    if (window.CaptureAI.StorageUtils?.getValue) {
       window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.LAST_CAPTURE_AREA)
-        .then(lastArea => {
-          sendResponse({
-            success: true,
-            state: {
-              isPanelVisible: STATE.isPanelVisible || false,
-              isAutoSolveMode: STATE.isAutoSolveMode || false,
-              hasLastCaptureArea: !!lastArea,
-              isOnSupportedSite: window.CaptureAI.DomainUtils ? window.CaptureAI.DomainUtils.isOnSupportedSite() : false,
-              currentResponse: STATE.currentResponse || ''
-            }
-          });
-        })
-        .catch(() => {
-          sendResponse({
-            success: true,
-            state: {
-              isPanelVisible: STATE.isPanelVisible || false,
-              isAutoSolveMode: STATE.isAutoSolveMode || false,
-              hasLastCaptureArea: false,
-              isOnSupportedSite: window.CaptureAI.DomainUtils ? window.CaptureAI.DomainUtils.isOnSupportedSite() : false,
-              currentResponse: STATE.currentResponse || ''
-            }
-          });
-        });
+        .then(lastArea => sendResponse(buildStateResponse(!!lastArea)))
+        .catch(() => sendResponse(buildStateResponse(false)));
     } else {
       // Fallback response when storage isn't available
-      sendResponse({
-        success: true,
-        state: {
-          isPanelVisible: STATE.isPanelVisible || false,
-          isAutoSolveMode: STATE.isAutoSolveMode || false,
-          hasLastCaptureArea: false,
-          isOnSupportedSite: window.CaptureAI.DomainUtils ? window.CaptureAI.DomainUtils.isOnSupportedSite() : false,
-          currentResponse: STATE.currentResponse || ''
-        }
-      });
+      sendResponse(buildStateResponse(false));
     }
 
     return true; // Keep message channel open
@@ -239,7 +223,10 @@ export const Messaging = {
          * @returns {boolean}
          */
   handleShowCapturingMessage(sendResponse) {
-    if (window.CaptureAI.UICore?.showMessage) {
+    // Don't show "Capturing..." message when ask mode is visible
+    const isAskModeVisible = window.CaptureAI.Utils?.isAskModeActive();
+
+    if (!isAskModeVisible && window.CaptureAI.UICore?.showMessage) {
       window.CaptureAI.UICore.showMessage('Capturing...', false);
     }
     sendResponse({ success: true });
@@ -371,6 +358,25 @@ export const Messaging = {
       sendResponse({ success: false, error: error.message });
     }
 
+    return false;
+  },
+
+  /**
+         * Handle debug log image request
+         * @param {Object} request - Message request with image data
+         * @param {Function} sendResponse - Response callback
+         * @returns {boolean}
+         */
+  handleDebugLogImage(request, sendResponse) {
+    try {
+      // Log image data on its own line for easy copying
+      console.log('CaptureAI Debug - Captured Image Data:');
+      console.log(request.imageData);
+
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
     return false;
   },
 

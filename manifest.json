@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "CaptureAI",
     "short_name": "CaptureAI",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "Grayson Kramer",
     "description": "AI-powered question capture tool",
     "homepage_url": "https://github.com/TheSuperiorFlash/CaptureAI",
@@ -29,17 +29,26 @@
     "action": {
         "default_popup": "popup.html"
     },
-    "content_scripts": [{
-        "matches": ["<all_urls>"],
-        "js": [ "content.js" ],
-        "run_at": "document_idle"
-    }],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": [ "inject.js" ],
+            "run_at": "document_start",
+            "world": "MAIN"
+        },
+        {
+            "matches": ["<all_urls>"],
+            "js": [ "content.js" ],
+            "run_at": "document_idle"
+        }
+    ],
     "web_accessible_resources": [{
         "resources": [
             "icons/icon128.png",
             "icons/camera.png",
             "icons/attach.png",
             "icons/attached.png",
+            "inject.js",
             "modules/config.js",
             "modules/storage.js",
             "modules/domains.js",
@@ -52,7 +61,8 @@
             "modules/auto-solve.js",
             "modules/messaging.js",
             "modules/keyboard.js",
-            "modules/event-manager.js"
+            "modules/event-manager.js",
+            "modules/privacy-guard.js"
         ],
         "matches": ["<all_urls>"]
     }]

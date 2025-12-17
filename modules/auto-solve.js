@@ -25,7 +25,12 @@ export const AutoSolve = {
       if (!lastCaptureArea) {
         // Don't change the state, keep it disabled
         STATE.isAutoSolveMode = false; // Explicitly set to false
-        this.updateAutoSolveToggleUI(); // Reset toggle to off position
+        // Use debounced version if available, otherwise call directly
+        if (this._debouncedUpdateUI) {
+          this._debouncedUpdateUI();
+        } else {
+          this.updateAutoSolveToggleUI();
+        }
         return;
       }
     }
@@ -36,7 +41,12 @@ export const AutoSolve = {
       await window.CaptureAI.StorageUtils.setValue(STORAGE_KEYS.AUTO_SOLVE_MODE, enabled);
     }
 
-    this.updateAutoSolveToggleUI();
+    // Use debounced version if available, otherwise call directly
+    if (this._debouncedUpdateUI) {
+      this._debouncedUpdateUI();
+    } else {
+      this.updateAutoSolveToggleUI();
+    }
 
     if (enabled) {
       STATE.invalidQuestionCount = 0;
@@ -52,24 +62,6 @@ export const AutoSolve = {
   updateAutoSolveToggleUI() {
     const { STATE } = window.CaptureAI;
 
-    // Update header toggle (the one in the floating UI)
-    const headerToggle = document.getElementById('captureai-header-auto-solve-toggle');
-    if (headerToggle) {
-      headerToggle.checked = STATE.isAutoSolveMode;
-
-      // Update toggle visual appearance
-      const toggleSlider = headerToggle.parentElement.querySelector('span');
-      const toggleButton = toggleSlider?.querySelector('span');
-
-      if (toggleSlider) {
-        toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? '#4caf65' : '#f1f1f1';
-      }
-      if (toggleButton) {
-        toggleButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
-      }
-    }
-
-    // Also update any other toggle with the old ID for backward compatibility
     const toggle = document.getElementById('auto-solve-toggle');
     if (toggle) {
       toggle.checked = STATE.isAutoSolveMode;
@@ -92,7 +84,7 @@ export const AutoSolve = {
          * Schedule next auto-solve cycle
          */
   scheduleNextAutoSolve() {
-    const { STATE, CONFIG } = window.CaptureAI;
+    const { STATE, TIMING } = window.CaptureAI;
 
     if (!STATE.isAutoSolveMode) {
       return;
@@ -104,7 +96,7 @@ export const AutoSolve = {
     // Schedule next capture with delay
     STATE.autoSolveTimer = setTimeout(() => {
       this.performAutoSolve();
-    }, CONFIG.AUTO_SOLVE_CYCLE_DELAY);
+    }, TIMING.AUTO_SOLVE_CYCLE_DELAY);
   },
 
   /**
@@ -214,7 +206,7 @@ export const AutoSolve = {
          * @param {string} response - AI response
          */
   async handleAutoSolveResponse(response) {
-    const { STATE, CONFIG } = window.CaptureAI;
+    const { STATE, CONFIG, TIMING } = window.CaptureAI;
 
     // Simple duplicate prevention - ignore exact same response immediately following
     if (this.lastAutoSolveResponse === response && Date.now() - this.lastAutoSolveTime < 1000) {
@@ -247,7 +239,7 @@ export const AutoSolve = {
       // Press Enter for invalid questions (like backup: simulateKeypress('', true))
       setTimeout(() => {
         this.simulateKeypress('', true);
-      }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+      }, TIMING.AUTO_SOLVE_ANSWER_DELAY);
     } else {
       // Valid response, reset counter (like backup)
       STATE.invalidQuestionCount = 0;
@@ -260,12 +252,12 @@ export const AutoSolve = {
         setTimeout(() => {
           // Like backup: simulateKeypress(answerNumber, true) - number + Enter
           this.simulateKeypress(answerNumber, true);
-        }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+        }, TIMING.AUTO_SOLVE_ANSWER_DELAY);
       } else {
         // If no number found, treat as invalid and just press Enter
         setTimeout(() => {
           this.simulateKeypress('', true);
-        }, CONFIG.AUTO_SOLVE_ANSWER_DELAY);
+        }, TIMING.AUTO_SOLVE_ANSWER_DELAY);
       }
     }
 
@@ -385,6 +377,13 @@ export const AutoSolve = {
   async init() {
     const { STATE, STORAGE_KEYS } = window.CaptureAI;
 
+    // Initialize debounced UI update function
+    if (!this._debouncedUpdateUI && window.CaptureAI.Utils?.debounce) {
+      this._debouncedUpdateUI = window.CaptureAI.Utils.debounce(
+        this.updateAutoSolveToggleUI.bind(this),
+        50
+      );
+    }
 
     // Load auto-solve state from storage
     const isAutoSolveMode = await window.CaptureAI.StorageUtils.getValue(STORAGE_KEYS.AUTO_SOLVE_MODE, false);
