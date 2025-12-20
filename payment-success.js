@@ -21,36 +21,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    // Wait a moment for backend to process webhook
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for backend webhook to process (3 seconds should be enough)
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Verify user is authenticated and tier is updated
-    const user = await AuthService.getCurrentUser();
+    // Payment successful! Show success screen
+    // The license key will be sent via email
+    showSuccess();
 
-    if (user.tier === 'pro') {
-      // Success! Show success screen
-      showSuccess();
-
-      // Refresh popup if it's open
+    // Try to refresh popup if extension is installed and user is logged in
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
       chrome.runtime.sendMessage({ action: 'refreshUserInfo' }).catch(() => {
-        // Ignore errors - popup might not be open
+        // Ignore errors - extension might not be installed or popup not open
       });
-    } else {
-      // Payment went through but tier not updated yet
-      // Wait a bit more and try again
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      const retryUser = await AuthService.getCurrentUser();
-
-      if (retryUser.tier === 'pro') {
-        showSuccess();
-      } else {
-        showError('Payment successful, but tier update pending. Please refresh your extension.');
-      }
     }
   } catch (error) {
-    console.error('Payment verification error:', error);
-    showError(error.message || 'Failed to verify payment. Please contact support if you were charged.');
+    console.error('Payment success page error:', error);
+    // Even if there's an error, show success since payment went through
+    // The license key will be emailed regardless
+    showSuccess();
   }
 
   /**
