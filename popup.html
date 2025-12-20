@@ -410,16 +410,59 @@
             <div id="status-message" class="status"></div>
         </div>
         
-        <!-- API Key Section -->
-        <div id="api-key-section" class="section">
-            <div class="input-group">
-                <input type="password" id="api-key-input" placeholder="Enter OpenAI API key">
-            </div>
-            <button id="save-api-key" class="button button-primary">Save API Key</button>
+        <!-- Migration Notice Section -->
+        <div id="migration-notice" class="section hidden" style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin: 10px 15px; padding: 15px;">
+            <div style="font-size: 14px; color: #856404; margin-bottom: 10px; font-weight: 500;">Important Update</div>
+            <div id="migration-notice-text" style="font-size: 12px; color: #856404; line-height: 1.4;"></div>
         </div>
 
-        <!-- Main Controls Section -->
+        <!-- License Key Section -->
+        <div id="license-key-section" class="section hidden">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="font-size: 16px; color: #333; margin-bottom: 8px;">Activate CaptureAI</h3>
+                <p style="font-size: 12px; color: #666; line-height: 1.4;">
+                    Get your free key at
+                    <a href="https://thesuperiorflash.github.io/CaptureAI/activate.html" target="_blank" style="color: #218aff; text-decoration: none; font-weight: 500;">
+                        activate page
+                    </a>
+                </p>
+            </div>
+
+            <div class="input-group">
+                <label>License Key</label>
+                <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" style="font-family: monospace; text-transform: uppercase; letter-spacing: 1px;">
+            </div>
+            <button id="activate-btn" class="button button-primary">Activate</button>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
+                <a href="https://thesuperiorflash.github.io/CaptureAI/activate.html" target="_blank" class="button button-secondary" style="display: block; text-decoration: none; margin-bottom: 8px;">
+                    Get Free Key (10/day)
+                </a>
+                <button id="buy-pro-btn" class="button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">Buy Pro Key ($9.99/month)</button>
+            </div>
+        </div>
+
+        <!-- Main Controls Section (for activated users) -->
         <div id="main-controls" class="section hidden">
+            <!-- User Info -->
+            <div id="user-info" style="padding: 10px; background-color: #f9f9f9; border-radius: 6px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="font-size: 12px; color: #666;">Logged in as:</div>
+                    <button id="logout-btn" style="background: none; border: none; color: #218aff; font-size: 12px; cursor: pointer; text-decoration: underline;">Logout</button>
+                </div>
+                <div id="user-email" style="font-size: 13px; font-weight: 500; color: #333; margin-bottom: 8px;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div id="user-tier" style="font-size: 11px; padding: 3px 8px; background-color: #218aff; color: white; border-radius: 4px; font-weight: 500;"></div>
+                    <button id="upgrade-btn" class="hidden" style="background: none; border: 1px solid #218aff; color: #218aff; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-weight: 500;">Upgrade to Pro</button>
+                </div>
+            </div>
+
+            <!-- Usage Stats -->
+            <div id="usage-stats" style="padding: 10px; background-color: #f0f7ff; border-radius: 6px; margin-bottom: 15px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Usage</div>
+                <div id="usage-content"></div>
+            </div>
+
             <button id="capture-btn" class="button button-primary button-with-icon">
                 <img src="icons/camera.png" alt="Camera" class="button-icon">
                 Capture a Question
@@ -454,12 +497,12 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="help-item"><button id="reset-api-key-btn" style="margin-top: 8px; background-color: rgba(255,240,240,0.3); border: 1px solid rgba(255,204,204,0.3); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #d32f2f; font-weight: 500; width: 100%; transition: background-color 0.2s;">Clear API Key</button></div>
             </div>
         </div>
     </div>
-    
+
+    <script src="modules/auth-service.js"></script>
+    <script src="modules/migration.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>
