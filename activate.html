@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activate CaptureAI - Get Your Free License Key</title>
+    <title>CaptureAI - Sign Up & Activate</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #218aff 0%, #1a6fd9 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,14 +23,14 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
         }
 
         .card {
             background: white;
-            padding: 40px;
-            border-radius: 16px;
+            padding: 45px;
+            border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
@@ -39,50 +39,85 @@
             margin-bottom: 30px;
         }
 
+        .logo img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+        }
+
         .logo h1 {
             color: #333;
             font-size: 32px;
-            margin-bottom: 5px;
-        }
-
-        .logo .emoji {
-            font-size: 48px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
         .subtitle {
             color: #666;
             text-align: center;
+            margin-bottom: 35px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .pricing-tabs {
+            display: flex;
+            gap: 12px;
             margin-bottom: 30px;
-            line-height: 1.5;
         }
 
-        .features {
-            background: #f5f7fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
+        .pricing-tab {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
         }
 
-        .features h3 {
-            font-size: 14px;
+        .pricing-tab:hover {
+            border-color: #218aff;
+        }
+
+        .pricing-tab.active {
+            border-color: #218aff;
+            background: #f0f7ff;
+        }
+
+        .pricing-tab h3 {
+            font-size: 18px;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .features ul {
-            list-style: none;
+        .pricing-tab .price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #218aff;
+            margin-bottom: 8px;
         }
 
-        .features li {
-            color: #666;
+        .pricing-tab .period {
             font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .pricing-tab ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .pricing-tab li {
+            font-size: 13px;
+            color: #666;
             margin-bottom: 6px;
             padding-left: 20px;
             position: relative;
         }
 
-        .features li::before {
+        .pricing-tab li::before {
             content: "✓";
             position: absolute;
             left: 0;
@@ -90,11 +125,22 @@
             font-weight: bold;
         }
 
+        .pro-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
         input {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-family: 'Inter', sans-serif;
             transition: border-color 0.3s;
@@ -108,30 +154,41 @@
 
         button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: #218aff;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         button:hover {
             background: #1a6fd9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 138, 255, 0.3);
         }
 
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
+        }
+
+        button.pro {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        button.pro:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
         }
 
         #result {
             margin-top: 25px;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             display: none;
             animation: slideIn 0.3s ease;
         }
@@ -159,70 +216,31 @@
 
         .success h3 {
             color: #2e7d32;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 18px;
         }
 
         .error h3 {
             color: #c62828;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 18px;
         }
 
         .result-message {
             color: #333;
             margin-bottom: 15px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        .license-key {
-            font-family: 'Courier New', monospace;
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #218aff;
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
+        .email-icon {
+            font-size: 48px;
             text-align: center;
-            margin: 15px 0;
-            word-break: break-all;
-            user-select: all;
-        }
-
-        .copy-btn {
-            background: #4caf50;
-            margin-top: 10px;
-        }
-
-        .copy-btn:hover {
-            background: #45a049;
-        }
-
-        .instructions {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-        }
-
-        .instructions h4 {
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .instructions ol {
-            padding-left: 20px;
-        }
-
-        .instructions li {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 6px;
-            line-height: 1.5;
+            margin-bottom: 15px;
         }
 
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
             color: white;
             font-size: 14px;
         }
@@ -246,26 +264,65 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .hidden {
+            display: none;
+        }
+
+        .upgrade-note {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upgrade-note a {
+            color: #218aff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .upgrade-note a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
             <div class="logo">
-                <div class="emoji">🎯</div>
+                <img src="icons/icon128.png" alt="CaptureAI Logo">
                 <h1>CaptureAI</h1>
             </div>
 
-            <p class="subtitle">Get your free license key and start solving questions instantly</p>
+            <p class="subtitle">Start solving questions instantly with AI-powered screenshot analysis</p>
 
-            <div class="features">
-                <h3>Free Tier Includes:</h3>
-                <ul>
-                    <li>10 AI requests per day</li>
-                    <li>Screenshot capture & analysis</li>
-                    <li>Instant question solving</li>
-                    <li>Privacy-focused processing</li>
-                </ul>
+            <div class="pricing-tabs">
+                <div class="pricing-tab active" data-tier="free">
+                    <h3>Free</h3>
+                    <div class="price">$0</div>
+                    <div class="period">forever</div>
+                    <ul>
+                        <li>10 requests/day</li>
+                        <li>Screenshot capture</li>
+                        <li>AI question solving</li>
+                        <li>Privacy-focused</li>
+                    </ul>
+                </div>
+
+                <div class="pricing-tab" data-tier="pro">
+                    <h3>Pro <span class="pro-badge">POPULAR</span></h3>
+                    <div class="price">$9.99</div>
+                    <div class="period">per month</div>
+                    <ul>
+                        <li>Unlimited requests</li>
+                        <li>Priority AI processing</li>
+                        <li>Advanced features</li>
+                        <li>Email support</li>
+                    </ul>
+                </div>
             </div>
 
             <input
@@ -274,9 +331,16 @@
                 placeholder="Enter your email address"
                 autocomplete="email"
             />
-            <button id="get-key">Get Free License Key</button>
+            <button id="signup-btn">Start Free Trial</button>
 
             <div id="result"></div>
+
+            <div class="upgrade-note">
+                Already have a license key?
+                <a href="#" onclick="chrome.runtime.sendMessage({action: 'openPopup'}); return false;">
+                    Activate in extension
+                </a>
+            </div>
         </div>
 
         <div class="footer">
@@ -285,18 +349,38 @@
     </div>
 
     <script>
-        const button = document.getElementById('get-key');
+        const button = document.getElementById('signup-btn');
         const emailInput = document.getElementById('email');
         const result = document.getElementById('result');
+        const tabs = document.querySelectorAll('.pricing-tab');
 
-        button.addEventListener('click', handleGetKey);
+        let selectedTier = 'free';
+
+        // Handle tier selection
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                selectedTier = tab.dataset.tier;
+
+                if (selectedTier === 'free') {
+                    button.textContent = 'Start Free Trial';
+                    button.className = '';
+                } else {
+                    button.textContent = 'Subscribe to Pro - $9.99/month';
+                    button.className = 'pro';
+                }
+            });
+        });
+
+        button.addEventListener('click', handleSignup);
 
         // Enter key support
         emailInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleGetKey();
+            if (e.key === 'Enter') handleSignup();
         });
 
-        async function handleGetKey() {
+        async function handleSignup() {
             const email = emailInput.value.trim();
 
             // Validation
@@ -312,54 +396,78 @@
 
             // Disable button and show loading
             button.disabled = true;
-            button.innerHTML = '<span class="spinner"></span>Generating your key...';
+            const originalText = button.textContent;
+            button.innerHTML = '<span class="spinner"></span>Processing...';
 
             try {
-                const response = await fetch('https://backend.captureai.workers.dev/api/auth/create-free-key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to create license key');
+                if (selectedTier === 'free') {
+                    await handleFreeSignup(email);
+                } else {
+                    await handleProSignup(email);
                 }
-
-                showSuccess(data.licenseKey, data.existing);
             } catch (error) {
                 showError(error.message);
             } finally {
                 button.disabled = false;
-                button.innerHTML = 'Get Free License Key';
+                button.innerHTML = originalText;
             }
         }
 
-        function showSuccess(licenseKey, existing) {
+        async function handleFreeSignup(email) {
+            const response = await fetch('https://backend.captureai.workers.dev/api/auth/create-free-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create account');
+            }
+
+            showSuccess(email, data.existing);
+        }
+
+        async function handleProSignup(email) {
+            const response = await fetch('https://backend.captureai.workers.dev/api/subscription/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to start checkout');
+            }
+
+            // Redirect to Stripe checkout
+            window.location.href = data.url;
+        }
+
+        function showSuccess(email, existing) {
             result.className = 'success';
             result.style.display = 'block';
             result.innerHTML = `
-                <h3>${existing ? '✅ Welcome Back!' : '✅ Success!'}</h3>
+                <div class="email-icon">📧</div>
+                <h3>${existing ? '✅ Welcome Back!' : '✅ Check Your Email!'}</h3>
                 <p class="result-message">
                     ${existing
-                        ? 'We found your existing free key for this email:'
-                        : 'Your free license key has been created and sent to your email!'}
+                        ? `We've sent your existing license key to <strong>${email}</strong>`
+                        : `Your license key has been sent to <strong>${email}</strong>`
+                    }
                 </p>
-                <div class="license-key" id="key-display">${licenseKey}</div>
-                <button class="copy-btn" onclick="copyKey('${licenseKey}')">
-                    📋 Copy License Key
-                </button>
-
-                <div class="instructions">
-                    <h4>📝 How to Activate:</h4>
-                    <ol>
-                        <li>Copy the license key above</li>
-                        <li>Open the CaptureAI extension in your browser</li>
-                        <li>Paste your key and click "Activate"</li>
-                        <li>Start solving questions instantly!</li>
-                    </ol>
-                </div>
+                <p class="result-message">
+                    <strong>Next steps:</strong><br>
+                    1. Check your email inbox<br>
+                    2. Copy your license key<br>
+                    3. Open the CaptureAI extension<br>
+                    4. Paste and activate!
+                </p>
+                <p style="font-size: 13px; color: #666; margin-top: 15px;">
+                    Don't see the email? Check your spam folder.
+                </p>
             `;
 
             // Scroll to result
@@ -376,31 +484,6 @@
 
             // Scroll to error
             result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        function copyKey(key) {
-            navigator.clipboard.writeText(key).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✓ Copied!';
-                btn.style.background = '#2e7d32';
-
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '#4caf50';
-                }, 2000);
-            }).catch(() => {
-                // Fallback for older browsers
-                const keyDisplay = document.getElementById('key-display');
-                const range = document.createRange();
-                range.selectNode(keyDisplay);
-                window.getSelection().removeAllRanges();
-                window.getSelection().addRange(range);
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges();
-
-                alert('License key copied to clipboard!');
-            });
         }
     </script>
 </body>
