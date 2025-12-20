@@ -141,10 +141,10 @@ export class SubscriptionHandler {
         return;
       }
 
-      // Check if user already exists
+      // Check if user already exists (by email OR stripe_customer_id)
       let user = await this.db
-        .prepare('SELECT * FROM users WHERE email = ?')
-        .bind(customerEmail)
+        .prepare('SELECT * FROM users WHERE email = ? OR stripe_customer_id = ?')
+        .bind(customerEmail, customerId)
         .first();
 
       if (user) {
@@ -157,13 +157,17 @@ export class SubscriptionHandler {
                 stripe_customer_id = ?,
                 stripe_subscription_id = ?,
                 updated_at = datetime('now')
-            WHERE email = ?
+            WHERE id = ?
           `)
-          .bind('pro', 'active', customerId, subscriptionId, customerEmail)
+          .bind('pro', 'active', customerId, subscriptionId, user.id)
           .run();
 
+        console.log(`Upgraded user ${customerEmail} to Pro tier`);
+
         // Send upgrade email with existing license key
-        await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, 'pro');
+        if (this.env.RESEND_API_KEY || this.env.SENDGRID_API_KEY) {
+          await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, 'pro');
+        }
 
       } else {
         // New user - generate license key and create account
@@ -191,8 +195,12 @@ export class SubscriptionHandler {
           .bind(userId, licenseKey, customerEmail, 'pro', customerId, subscriptionId, 'active')
           .run();
 
+        console.log(`Created new Pro user ${customerEmail} with license key`);
+
         // Send welcome email with license key
-        await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, 'pro');
+        if (this.env.RESEND_API_KEY || this.env.SENDGRID_API_KEY) {
+          await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, 'pro');
+        }
       }
 
     } catch (error) {

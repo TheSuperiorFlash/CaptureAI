@@ -15,11 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     licenseKeySection: document.getElementById('license-key-section'),
     licenseKeyInput: document.getElementById('license-key-input'),
     activateBtn: document.getElementById('activate-btn'),
-    buyProBtn: document.getElementById('buy-pro-btn'),
     mainControls: document.getElementById('main-controls'),
     userEmail: document.getElementById('user-email'),
     userTier: document.getElementById('user-tier'),
-    usageStats: document.getElementById('usage-stats'),
+    usageSection: document.getElementById('usage-stats'),
     usageContent: document.getElementById('usage-content'),
     upgradeBtn: document.getElementById('upgrade-btn'),
     logoutBtn: document.getElementById('logout-btn'),
@@ -45,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // License key event listeners
   elements.activateBtn.addEventListener('click', handleActivate);
-  elements.buyProBtn.addEventListener('click', handleBuyPro);
   elements.logoutBtn.addEventListener('click', handleDeactivate);
   elements.upgradeBtn.addEventListener('click', handleUpgrade);
 
@@ -245,8 +243,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.licenseKeyInput.value = '';
     elements.activateBtn.disabled = false;
     elements.activateBtn.textContent = 'Activate';
-    elements.buyProBtn.disabled = false;
-    elements.buyProBtn.textContent = 'Buy Pro Key ($9.99/month)';
   }
 
   /**
@@ -274,14 +270,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Show upgrade button only for free tier
       if (user.tier === 'free') {
         elements.upgradeBtn.classList.remove('hidden');
-        elements.userTier.style.backgroundColor = '#999';
+        elements.userTier.style.background = '#999';
       } else {
         elements.upgradeBtn.classList.add('hidden');
-        elements.userTier.style.backgroundColor = '#218aff';
+        // Purple gradient for Pro tier
+        elements.userTier.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
       }
 
-      // Load and display usage stats
-      await updateUsageStats();
+      // Load and display usage stats (only for free tier)
+      if (user.tier === 'free') {
+        await updateUsageStats();
+        elements.usageSection.classList.remove('hidden');
+      } else {
+        elements.usageSection.classList.add('hidden');
+      }
+
+      // Show reasoning slider only for Pro tier
+      const reasoningSection = document.getElementById('reasoning-section');
+      if (user.tier === 'pro') {
+        reasoningSection.classList.remove('hidden');
+      } else {
+        reasoningSection.classList.add('hidden');
+      }
 
       // Get current state from content script
       await updateStateFromContentScript();

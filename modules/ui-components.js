@@ -76,9 +76,9 @@ export const UIComponents = {
     this.buttonsContainer.appendChild(captureButton);
     this.buttonsContainer.appendChild(quickCaptureButton);
 
+    // Auto-solve only for Pro tier on supported sites
     if (window.CaptureAI.DomainUtils?.isOnSupportedSite()) {
-      const autoSolveContainer = this.createAutoSolveToggle(theme);
-      this.buttonsContainer.appendChild(autoSolveContainer);
+      this.updateAutoSolveForTier();
     }
 
     if (window.CaptureAI.UICore?.attachComponent) {
@@ -505,9 +505,34 @@ export const UIComponents = {
       return;
     }
 
+    if (window.CaptureAI.DomainUtils?.isOnSupportedSite()) {
+      this.updateAutoSolveForTier();
+    } else {
+      const autoSolveContainer = this.buttonsContainer.querySelector('.captureai-toggle-switch')?.closest('div');
+      if (autoSolveContainer) {
+        autoSolveContainer.style.display = 'none';
+      }
+    }
+  },
+
+  async updateAutoSolveForTier() {
+    if (!this.buttonsContainer) {
+      return;
+    }
+
     const autoSolveContainer = this.buttonsContainer.querySelector('.captureai-toggle-switch')?.closest('div');
 
-    if (window.CaptureAI.DomainUtils?.isOnSupportedSite()) {
+    // Check user tier
+    let userTier = 'free';
+    try {
+      const userTierData = await chrome.storage.local.get('captureai-user-tier');
+      userTier = userTierData['captureai-user-tier'] || 'free';
+    } catch (error) {
+      console.error('Failed to get user tier:', error);
+    }
+
+    // Only show auto-solve for Pro tier
+    if (userTier === 'pro') {
       if (autoSolveContainer) {
         autoSolveContainer.style.display = 'flex';
       } else {

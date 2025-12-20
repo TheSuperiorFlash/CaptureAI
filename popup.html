@@ -433,30 +433,10 @@
                 <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" style="font-family: monospace; text-transform: uppercase; letter-spacing: 1px;">
             </div>
             <button id="activate-btn" class="button button-primary">Activate</button>
-
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                <a href="https://thesuperiorflash.github.io/CaptureAI/activate.html" target="_blank" class="button button-secondary" style="display: block; text-decoration: none; margin-bottom: 8px;">
-                    Get Free Key (10/day)
-                </a>
-                <button id="buy-pro-btn" class="button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">Buy Pro Key ($9.99/month)</button>
-            </div>
         </div>
 
         <!-- Main Controls Section (for activated users) -->
         <div id="main-controls" class="section hidden">
-            <!-- User Info -->
-            <div id="user-info" style="padding: 10px; background-color: #f9f9f9; border-radius: 6px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="font-size: 12px; color: #666;">Logged in as:</div>
-                    <button id="logout-btn" style="background: none; border: none; color: #218aff; font-size: 12px; cursor: pointer; text-decoration: underline;">Logout</button>
-                </div>
-                <div id="user-email" style="font-size: 13px; font-weight: 500; color: #333; margin-bottom: 8px;"></div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div id="user-tier" style="font-size: 11px; padding: 3px 8px; background-color: #218aff; color: white; border-radius: 4px; font-weight: 500;"></div>
-                    <button id="upgrade-btn" class="hidden" style="background: none; border: 1px solid #218aff; color: #218aff; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-weight: 500;">Upgrade to Pro</button>
-                </div>
-            </div>
-
             <!-- Usage Stats -->
             <div id="usage-stats" style="padding: 10px; background-color: #f0f7ff; border-radius: 6px; margin-bottom: 15px;">
                 <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Usage</div>
@@ -484,16 +464,33 @@
                 <div class="help-category">Stealth Mode</div>
                 <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
 
-                <div class="help-category">Reasoning Level</div>
-                <div class="help-item">
-                    <div class="reasoning-toggle-container" style="margin-top: 15px; margin-bottom: 30px;">
-                        <input type="range" id="reasoning-slider" min="0" max="2" value="1" step="1" style="display: none;">
-                        <div class="reasoning-toggle-track" id="reasoning-toggle-track">
-                            <div class="reasoning-toggle-progress" id="reasoning-toggle-progress"></div>
-                            <div class="reasoning-toggle-slider" id="reasoning-toggle-slider"></div>
-                            <span class="reasoning-label reasoning-label-low">Low</span>
+                <div id="reasoning-section" class="hidden">
+                    <div class="help-category">Reasoning Level</div>
+                    <div class="help-item">
+                        <div class="reasoning-toggle-container" style="margin-top: 15px; margin-bottom: 30px;">
+                            <input type="range" id="reasoning-slider" min="0" max="2" value="1" step="1" style="display: none;">
+                            <div class="reasoning-toggle-track" id="reasoning-toggle-track">
+                                <div class="reasoning-toggle-progress" id="reasoning-toggle-progress"></div>
+                                <div class="reasoning-toggle-slider" id="reasoning-toggle-slider"></div>
+                                <span class="reasoning-label reasoning-label-low">Low</span>
                             <span class="reasoning-label reasoning-label-medium">Medium</span>
                             <span class="reasoning-label reasoning-label-high">High</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- User Info (moved from main-controls) -->
+                <div class="help-item" style="margin-top: 40px;">
+                    <div id="user-info" style="padding: 10px; background-color: #f9f9f9; border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="font-size: 12px; color: #666;">Logged in as:</div>
+                            <button id="logout-btn" style="background: none; border: none; color: #218aff; font-size: 12px; cursor: pointer; text-decoration: underline;">Logout</button>
+                        </div>
+                        <div id="user-email" style="font-size: 13px; font-weight: 500; color: #333; margin-bottom: 8px;"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div id="user-tier" style="font-size: 11px; padding: 3px 8px; background-color: #218aff; color: white; border-radius: 4px; font-weight: 500;"></div>
+                            <button id="upgrade-btn" class="hidden" style="background: none; border: 1px solid #218aff; color: #218aff; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-weight: 500;">Upgrade to Pro</button>
                         </div>
                     </div>
                 </div>
