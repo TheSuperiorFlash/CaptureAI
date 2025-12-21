@@ -405,3 +405,9 @@ export const AutoSolve = {
 
   }
 };
+
+// For browser: attach to window.CaptureAI
+if (typeof window !== 'undefined') {
+  window.CaptureAI = window.CaptureAI || {};
+  window.CaptureAI.AutoSolve = AutoSolve;
+}

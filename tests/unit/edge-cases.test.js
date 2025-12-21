@@ -6,78 +6,13 @@
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 const { resetChromeMocks, storageMock, tabsMock, setRuntimeError } = require('../setup/chrome-mock');
-
-// Test functions
-const PROMPT_TYPES = {
-  ANSWER: 'answer',
-  AUTO_SOLVE: 'auto_solve',
-  ASK: 'ask'
-};
-
-const PROMPTS = {
-  AUTO_SOLVE: 'Answer with only the number...',
-  ANSWER: 'Reply with answer only...'
-};
-
-const ERROR_MESSAGES = {
-  NO_IMAGE_DATA: 'No image data provided'
-};
-
-function buildMessages(data, promptType) {
-  if (!data?.imageData) {
-    throw new Error(`${ERROR_MESSAGES.NO_IMAGE_DATA} for ${promptType}`);
-  }
-
-  const prompts = {
-    [PROMPT_TYPES.AUTO_SOLVE]: PROMPTS.AUTO_SOLVE,
-    [PROMPT_TYPES.ANSWER]: PROMPTS.ANSWER
-  };
-
-  if (promptType === PROMPT_TYPES.ASK && data.question) {
-    return [{
-      role: 'user',
-      content: [
-        { type: 'text', text: data.question },
-        { type: 'image_url', image_url: { url: data.imageData } }
-      ]
-    }];
-  }
-
-  const prompt = prompts[promptType] || PROMPTS.ANSWER;
-  return [{
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: data.imageData } }
-    ]
-  }];
-}
-
-function isValidUrl(url) {
-  return (url.startsWith('http://') || url.startsWith('https://')) &&
-         !url.startsWith('chrome://') &&
-         !url.startsWith('chrome-extension://') &&
-         !url.startsWith('chrome.google.com');
-}
-
-async function captureScreenshot() {
-  const ERROR_MESSAGES = { CAPTURE_FAILED: 'Failed to capture screenshot' };
-  return new Promise((resolve, reject) => {
-    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (imageUri) => {
-      chrome.runtime.lastError
-        ? reject(new Error(ERROR_MESSAGES.CAPTURE_FAILED))
-        : resolve(imageUri);
-    });
-  });
-}
-
-async function getStoredApiKey() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['captureai-api-key'], (result) => {
-      resolve(result['captureai-api-key'] || '');
-    });
-  });
-}
+const {
+  PROMPT_TYPES,
+  buildMessages,
+  isValidUrl,
+  captureScreenshot,
+  getStoredApiKey
+} = require('../../background.js');
 
 describe('Edge Cases', () => {
   beforeEach(() => {

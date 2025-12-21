@@ -1,0 +1,45 @@
+# Cloudflare Workers Configuration
+# Learn more: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "backend"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Account ID - Get from: https://dash.cloudflare.com/ (right sidebar)
+account_id = "e411f43b15c9122c0056a08f727eef15"
+
+# Workers AI Gateway binding
+# This automatically connects to your AI Gateway
+[ai]
+binding = "AI"
+
+# D1 Database binding
+# Creates a SQLite database at the edge
+[[d1_databases]]
+binding = "DB"
+database_name = "captureai-db"
+database_id = "8056a7db-be99-4c64-8316-daf6c5c9b48f"  # Created when you run: wrangler d1 create captureai-db
+
+# Environment Variables (Secrets)
+# Set these with: wrangler secret put SECRET_NAME
+# Example: wrangler secret put OPENAI_API_KEY
+[vars]
+# Public variables (not sensitive)
+CLOUDFLARE_ACCOUNT_ID = "e411f43b15c9122c0056a08f727eef15"
+CLOUDFLARE_GATEWAY_NAME = "captureai-gateway"
+FREE_TIER_DAILY_LIMIT = "10"
+PRO_TIER_RATE_LIMIT_PER_MINUTE = "60"  # 60 requests per minute for Pro tier
+EXTENSION_URL = "https://thesuperiorflash.github.io/CaptureAI"
+
+# JWT_SECRET - Set with: wrangler secret put JWT_SECRET
+# OPENAI_API_KEY - Set with: wrangler secret put OPENAI_API_KEY
+# STRIPE_SECRET_KEY - Set with: wrangler secret put STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET - Set with: wrangler secret put STRIPE_WEBHOOK_SECRET
+# STRIPE_PRICE_BASIC - Set with: wrangler secret put STRIPE_PRICE_BASIC
+# STRIPE_PRICE_PRO - Set with: wrangler secret put STRIPE_PRICE_PRO
+
+# Route configuration (optional - for custom domains)
+# Uncomment and configure if you have a custom domain
+# routes = [
+#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+# ]

@@ -1,5 +1,7 @@
 /**
  * Keyboard shortcuts and event handling
+ * Note: Main shortcuts (Ctrl+Shift+X, F, E) are handled via manifest commands
+ * This module only handles Escape key for canceling operations
  */
 
 export const Keyboard = {
@@ -24,32 +26,10 @@ export const Keyboard = {
 
   /**
          * Handle keydown events
+         * Only handles Escape key - other shortcuts handled by manifest commands
          * @param {KeyboardEvent} e - Keyboard event
          */
   handleKeyDown(e) {
-    // Ignore if user is typing in an input field
-    if (this.isTypingInInput(e.target)) {
-      return;
-    }
-
-    // Check for CaptureAI shortcuts
-    if (e.ctrlKey && e.shiftKey) {
-      switch (e.key.toLowerCase()) {
-        case 'x':
-          e.preventDefault();
-          this.handleCaptureShortcut();
-          break;
-        case 'f':
-          e.preventDefault();
-          this.handleQuickCaptureShortcut();
-          break;
-        case 'e':
-          e.preventDefault();
-          this.handleToggleShortcut();
-          break;
-      }
-    }
-
     // Handle escape key for canceling operations
     if (e.key === 'Escape') {
       this.handleEscapeKey();
@@ -57,81 +37,35 @@ export const Keyboard = {
   },
 
   /**
-         * Check if user is typing in an input field
-         * @param {HTMLElement} element - Target element
-         * @returns {boolean}
+         * Handle command from manifest keyboard shortcut
+         * Called by content.js when background.js forwards a command
+         * @param {string} command - Command name from manifest.json
          */
-  isTypingInInput(element) {
-    if (!element || !element.tagName) {
-      return false;
-    }
-
-    const tagName = element.tagName.toLowerCase();
-    const inputTypes = ['input', 'textarea', 'select'];
-
-    if (inputTypes.includes(tagName)) {
-      return true;
-    }
-
-    // Check for contenteditable
-    if (element.contentEditable === 'true') {
-      return true;
-    }
-
-    // Check if element is inside an editable area
-    let parent = element.parentElement;
-    while (parent) {
-      if (parent.contentEditable === 'true' ||
-                    ['input', 'textarea'].includes(parent.tagName.toLowerCase())) {
-        return true;
-      }
-      parent = parent.parentElement;
-    }
-
-    return false;
-  },
-
-  /**
-         * Handle capture shortcut (Ctrl+Shift+X)
-         */
-  handleCaptureShortcut() {
+  handleCommand(command) {
     if (!window.CaptureAI || !window.CaptureAI.STATE) {
       return;
     }
 
     const { STATE } = window.CaptureAI;
 
-    if (STATE.isProcessing) {
-      return;
-    }
+    switch (command) {
+      case 'capture_shortcut':
+        if (!STATE.isProcessing && window.CaptureAI.CaptureSystem?.startCapture) {
+          window.CaptureAI.CaptureSystem.startCapture();
+        }
+        break;
 
-    if (window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.startCapture) {
-      // Always start normal capture
-      window.CaptureAI.CaptureSystem.startCapture();
-    }
-  },
+      case 'quick_capture_shortcut':
+        if (window.CaptureAI.CaptureSystem?.quickCapture) {
+          window.CaptureAI.CaptureSystem.quickCapture();
+        }
+        break;
 
-  /**
-         * Handle toggle shortcut (Ctrl+Shift+E)
-         */
-  handleToggleShortcut() {
-    // Toggle panel visibility
-    if (window.CaptureAI && window.CaptureAI.UICore && window.CaptureAI.UICore.togglePanelVisibility) {
-      window.CaptureAI.UICore.togglePanelVisibility();
-    }
-  },
-
-  /**
-         * Handle quick capture shortcut (Ctrl+Shift+F)
-         */
-  handleQuickCaptureShortcut() {
-    if (!window.CaptureAI || !window.CaptureAI.CaptureSystem) {
-      return;
-    }
-
-    if (window.CaptureAI.CaptureSystem.quickCapture) {
-      // Always process image, never attach
-      window.CaptureAI.CaptureSystem.quickCapture();
+      case 'toggle_ui_shortcut':
+        if (window.CaptureAI.UICore?.togglePanelVisibility) {
+          window.CaptureAI.UICore.togglePanelVisibility();
+        }
+        break;
     }
   },
 
@@ -190,34 +124,6 @@ export const Keyboard = {
     }
   },
 
-  /**
-         * Add custom keyboard event listener
-         * @param {string} key - Key combination
-         * @param {Function} handler - Event handler
-         * @param {Object} options - Options (ctrl, shift, alt)
-         */
-  addShortcut(key, handler, options = {}) {
-    const shortcut = {
-      key: key.toLowerCase(),
-      handler: handler,
-      ctrl: options.ctrl || false,
-      shift: options.shift || false,
-      alt: options.alt || false
-    };
-
-    // Store shortcut for cleanup
-    window.CaptureAI.STATE.eventListeners.push({
-      type: 'keyboard',
-      shortcut: shortcut
-    });
-  },
-
-  /**
-         * Remove keyboard event listeners
-         */
-  cleanup() {
-    document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-  },
 
   /**
          * Get help text for keyboard shortcuts

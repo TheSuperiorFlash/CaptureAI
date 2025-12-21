@@ -5,26 +5,38 @@
  * for use in Jest tests
  */
 
-// Storage API mock
+// Storage API mock - supports both callback and Promise APIs (Manifest V3)
 const storageMock = {
   local: {
     get: jest.fn((keys, callback) => {
-      callback({});
+      // Support both callback and Promise APIs
+      if (callback) {
+        callback({});
+        return undefined;
+      }
+      // Return Promise for Manifest V3 API
+      return Promise.resolve({});
     }),
     set: jest.fn((items, callback) => {
       if (callback) {
         callback();
+        return undefined;
       }
+      return Promise.resolve();
     }),
     remove: jest.fn((keys, callback) => {
       if (callback) {
         callback();
+        return undefined;
       }
+      return Promise.resolve();
     }),
     clear: jest.fn((callback) => {
       if (callback) {
         callback();
+        return undefined;
       }
+      return Promise.resolve();
     })
   }
 };
@@ -106,7 +118,7 @@ function clearRuntimeError() {
   runtimeMock.lastError = null;
 }
 
-module.exports = {
+export {
   chromeMock,
   setupChromeMock,
   resetChromeMocks,

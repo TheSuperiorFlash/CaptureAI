@@ -4,33 +4,33 @@
 
 export const DomainUtils = {
   /**
-         * Check if current site supports auto-solve functionality
-         * @returns {boolean}
-         */
+   * Check if current site supports auto-solve functionality
+   * @returns {boolean}
+   */
   isOnSupportedSite() {
     return this.isOnVocabulary() || this.isOnQuizlet();
   },
 
   /**
-         * Check if current site is Quizlet
-         * @returns {boolean}
-         */
+   * Check if current site is Quizlet
+   * @returns {boolean}
+   */
   isOnQuizlet() {
     return window.location.hostname.includes('quizlet.com');
   },
 
   /**
-         * Check if current site is Vocabulary.com
-         * @returns {boolean}
-         */
+   * Check if current site is Vocabulary.com
+   * @returns {boolean}
+   */
   isOnVocabulary() {
     return window.location.hostname.includes('vocabulary.com');
   },
 
   /**
-         * Check if current site has strict CSP that blocks web workers
-         * @returns {boolean}
-         */
+   * Check if current site has strict CSP that blocks web workers
+   * @returns {boolean}
+   */
   isOnStrictCSPSite() {
     const strictCSPDomains = [
       // Google services
@@ -80,14 +80,14 @@ export const DomainUtils = {
   },
 
   /**
-         * Check if URL is valid for extension functionality
-         * @param {string} url - URL to check
-         * @returns {boolean}
-         */
+   * Check if URL is valid for extension functionality
+   * @param {string} url - URL to check
+   * @returns {boolean}
+   */
   isValidUrl(url) {
     return (url.startsWith('http://') || url.startsWith('https://')) &&
-                   !url.startsWith('chrome://') &&
-                   !url.startsWith('chrome-extension://') &&
-                   !url.startsWith('chrome.google.com');
+           !url.startsWith('chrome://') &&
+           !url.startsWith('chrome-extension://') &&
+           !url.startsWith('chrome.google.com');
   }
 };

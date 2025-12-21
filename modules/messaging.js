@@ -58,6 +58,9 @@ export const Messaging = {
       case 'debugLogImage':
         return this.handleDebugLogImage(request, sendResponse);
 
+      case 'keyboardCommand':
+        return this.handleKeyboardCommand(request, sendResponse);
+
       default:
         sendResponse({ success: false, error: 'Unknown action' });
         return false;
@@ -373,6 +376,28 @@ export const Messaging = {
       console.log('CaptureAI Debug - Captured Image Data:');
       console.log(request.imageData);
 
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ success: false, error: error.message });
+    }
+    return false;
+  },
+
+  /**
+         * Handle keyboard command from manifest shortcuts
+         * @param {Object} request - Message request with command name
+         * @param {Function} sendResponse - Response callback
+         * @returns {boolean}
+         */
+  handleKeyboardCommand(request, sendResponse) {
+    try {
+      if (!window.CaptureAI || !window.CaptureAI.Keyboard) {
+        sendResponse({ success: false, error: 'Keyboard module not loaded' });
+        return false;
+      }
+
+      // Forward command to keyboard handler
+      window.CaptureAI.Keyboard.handleCommand(request.command);
       sendResponse({ success: true });
     } catch (error) {
       sendResponse({ success: false, error: error.message });

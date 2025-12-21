@@ -6,18 +6,7 @@
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 const { resetChromeMocks, storageMock } = require('../setup/chrome-mock');
-
-/**
- * Get stored API key from Chrome storage
- * (Copy of function from background.js for testing)
- */
-async function getStoredApiKey() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['captureai-api-key'], (result) => {
-      resolve(result['captureai-api-key'] || '');
-    });
-  });
-}
+const { getStoredApiKey, STORAGE_KEY_API_KEY } = require('../../background.js');
 
 describe('getStoredApiKey', () => {
   beforeEach(() => {
@@ -28,14 +17,14 @@ describe('getStoredApiKey', () => {
     const mockApiKey = 'sk-test123456789abcdef';
 
     storageMock.local.get.mockImplementation((keys, callback) => {
-      callback({ 'captureai-api-key': mockApiKey });
+      callback({ [STORAGE_KEY_API_KEY]: mockApiKey });
     });
 
     const result = await getStoredApiKey();
 
     expect(result).toBe(mockApiKey);
     expect(storageMock.local.get).toHaveBeenCalledWith(
-      ['captureai-api-key'],
+      [STORAGE_KEY_API_KEY],
       expect.any(Function)
     );
     expect(storageMock.local.get).toHaveBeenCalledTimes(1);
@@ -53,7 +42,7 @@ describe('getStoredApiKey', () => {
 
   test('should return empty string when API key is null', async () => {
     storageMock.local.get.mockImplementation((keys, callback) => {
-      callback({ 'captureai-api-key': null });
+      callback({ [STORAGE_KEY_API_KEY]: null });
     });
 
     const result = await getStoredApiKey();
@@ -63,7 +52,7 @@ describe('getStoredApiKey', () => {
 
   test('should return empty string when API key is undefined', async () => {
     storageMock.local.get.mockImplementation((keys, callback) => {
-      callback({ 'captureai-api-key': undefined });
+      callback({ [STORAGE_KEY_API_KEY]: undefined });
     });
 
     const result = await getStoredApiKey();
@@ -85,7 +74,7 @@ describe('getStoredApiKey', () => {
     const apiKeyWithSpaces = '  sk-test123  ';
 
     storageMock.local.get.mockImplementation((keys, callback) => {
-      callback({ 'captureai-api-key': apiKeyWithSpaces });
+      callback({ [STORAGE_KEY_API_KEY]: apiKeyWithSpaces });
     });
 
     const result = await getStoredApiKey();

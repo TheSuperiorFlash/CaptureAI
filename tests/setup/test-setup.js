@@ -4,13 +4,14 @@
  * Runs before all tests to set up the testing environment
  */
 
-const { setupChromeMock } = require('./chrome-mock');
+import { setupChromeMock } from './chrome-mock.js';
+import fetchMock from 'jest-fetch-mock';
 
 // Set up Chrome API mocks globally
 setupChromeMock();
 
 // Set up fetch mock globally
-global.fetch = require('jest-fetch-mock');
+global.fetch = fetchMock;
 global.fetch.enableMocks();
 
 // Suppress console output during tests (optional)

@@ -62,9 +62,6 @@ module.exports = {
   // Verbose output
   verbose: true,
 
-  // Transform settings (none needed for plain JS)
-  transform: {},
-
   // Module file extensions
   moduleFileExtensions: ['js', 'json'],
 

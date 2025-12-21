@@ -5,58 +5,12 @@
  */
 
 const { describe, test, expect } = require('@jest/globals');
-
-// Import constants and function (simulated - in real code these would be exported)
-const PROMPT_TYPES = {
-  ANSWER: 'answer',
-  AUTO_SOLVE: 'auto_solve',
-  ASK: 'ask'
-};
-
-const PROMPTS = {
-  AUTO_SOLVE: 'Answer with only the number (1, 2, 3, or 4) that corresponds to the correct answer choice. Do not include any explanation or additional text.',
-  ANSWER: 'Reply with answer only, avoid choices that are red.'
-};
-
-const ERROR_MESSAGES = {
-  NO_IMAGE_DATA: 'No image data provided'
-};
-
-/**
- * Build OpenAI API message payload based on prompt type
- * (Copy of function from background.js for testing)
- */
-function buildMessages(data, promptType) {
-  if (!data?.imageData) {
-    throw new Error(`${ERROR_MESSAGES.NO_IMAGE_DATA} for ${promptType}`);
-  }
-
-  const prompts = {
-    [PROMPT_TYPES.AUTO_SOLVE]: PROMPTS.AUTO_SOLVE,
-    [PROMPT_TYPES.ANSWER]: PROMPTS.ANSWER
-  };
-
-  // ASK mode with custom question
-  if (promptType === PROMPT_TYPES.ASK && data.question) {
-    return [{
-      role: 'user',
-      content: [
-        { type: 'text', text: data.question },
-        { type: 'image_url', image_url: { url: data.imageData } }
-      ]
-    }];
-  }
-
-  // Standard prompts (ANSWER or AUTO_SOLVE)
-  const prompt = prompts[promptType] || PROMPTS.ANSWER;
-  return [{
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: data.imageData } }
-    ]
-  }];
-}
+const {
+  PROMPT_TYPES,
+  PROMPTS,
+  ERROR_MESSAGES,
+  buildMessages
+} = require('../../background.js');
 
 describe('buildMessages', () => {
   const mockImageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';

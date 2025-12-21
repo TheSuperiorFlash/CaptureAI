@@ -183,7 +183,7 @@ export const UICore = {
         `;
 
     if (!STATE.apiKey) {
-      responseContent.textContent = 'API key is not set, check popup';
+      responseContent.textContent = 'Extension is not activated';
       responseContent.style.color = `${theme.errorText} !important`;
     }
 

@@ -1,0 +1,20 @@
+{
+  "name": "captureai-workers-backend",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers backend for CaptureAI with AI Gateway integration",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "db:init": "wrangler d1 execute captureai-db --file=./schema.sql",
+    "db:migrate": "wrangler d1 migrations apply captureai-db"
+  },
+  "keywords": ["cloudflare", "workers", "ai-gateway", "openai"],
+  "author": "Grayson Kramer",
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {}
+}

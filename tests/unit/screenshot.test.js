@@ -6,22 +6,7 @@
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 const { resetChromeMocks, tabsMock, runtimeMock, setRuntimeError, clearRuntimeError } = require('../setup/chrome-mock');
-
-/**
- * Capture screenshot of currently visible tab
- * (Copy of function from background.js for testing)
- */
-async function captureScreenshot() {
-  const ERROR_MESSAGES = { CAPTURE_FAILED: 'Failed to capture screenshot' };
-
-  return new Promise((resolve, reject) => {
-    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (imageUri) => {
-      chrome.runtime.lastError
-        ? reject(new Error(ERROR_MESSAGES.CAPTURE_FAILED))
-        : resolve(imageUri);
-    });
-  });
-}
+const { captureScreenshot } = require('../../background.js');
 
 describe('captureScreenshot', () => {
   beforeEach(() => {

@@ -5,17 +5,7 @@
  */
 
 const { describe, test, expect } = require('@jest/globals');
-
-/**
- * Check if URL is valid for content script injection
- * (Copy of function from background.js for testing)
- */
-function isValidUrl(url) {
-  return (url.startsWith('http://') || url.startsWith('https://')) &&
-         !url.startsWith('chrome://') &&
-         !url.startsWith('chrome-extension://') &&
-         !url.startsWith('chrome.google.com');
-}
+const { isValidUrl } = require('../../background.js');
 
 describe('isValidUrl', () => {
   describe('valid URLs', () => {

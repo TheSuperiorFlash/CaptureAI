@@ -5,14 +5,7 @@
  */
 
 const { describe, test, expect } = require('@jest/globals');
-
-/**
- * Format error message with consistent "Error: " prefix
- * (Copy from background.js for testing)
- */
-function formatError(message) {
-  return `Error: ${message}`;
-}
+const { formatError } = require('../../background.js');
 
 describe('formatError', () => {
   test('should add Error prefix to message', () => {

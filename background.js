@@ -1,19 +1,30 @@
 /**
  * CaptureAI Background Service Worker
  *
- * Handles screenshot capture, OpenAI API communication, and message routing
+ * Handles screenshot capture, backend API communication, and message routing
  * between content scripts and the extension popup.
  *
  * TABLE OF CONTENTS:
+ * 0. Module Imports & Migration
  * 1. Constants & Configuration
  * 2. Message Routing
  * 3. Request Handlers
- * 4. OpenAI API Client
+ * 4. Backend API Client
  * 5. Chrome APIs - Screenshot
  * 6. Chrome APIs - Messaging
  * 7. Chrome APIs - Tabs & Scripts
  * 8. Storage Utilities
  */
+
+// ============================================================================
+// SECTION 0: MODULE IMPORTS & MIGRATION
+// ============================================================================
+
+/**
+ * Import auth service and migration modules (License Key System)
+ * Note: These modules are loaded dynamically in service worker environment
+ */
+importScripts('modules/auth-service.js', 'modules/migration.js');
 
 // ============================================================================
 // SECTION 1: CONSTANTS & CONFIGURATION
@@ -124,24 +135,109 @@ const STORAGE_KEY_API_KEY = 'captureai-api-key';
 /**
  * Chrome message listener - routes messages to appropriate handlers
  * Handles messages from content scripts and popup
+ * Only runs in browser environment (not in tests)
  */
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  const handlers = {
-    'captureArea': handleCaptureArea,
-    'askQuestion': handleAskQuestion,
-    'enablePrivacyGuard': handleEnablePrivacyGuard,
-    'disablePrivacyGuard': handleDisablePrivacyGuard,
-    'getPrivacyGuardStatus': handleGetPrivacyGuardStatus
-  };
+if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    const handlers = {
+      'captureArea': handleCaptureArea,
+      'askQuestion': handleAskQuestion,
+      'enablePrivacyGuard': handleEnablePrivacyGuard,
+      'disablePrivacyGuard': handleDisablePrivacyGuard,
+      'getPrivacyGuardStatus': handleGetPrivacyGuardStatus
+    };
 
-  const handler = handlers[request.action];
-  if (handler) {
-    handler(request, sender, sendResponse);
-    return true; // Keep message channel open for async response
+    const handler = handlers[request.action];
+    if (handler) {
+      handler(request, sender, sendResponse);
+      return true; // Keep message channel open for async response
+    }
+
+    return false;
+  });
+}
+
+/**
+ * Chrome commands listener - handles keyboard shortcuts from manifest
+ * Commands are defined in manifest.json and work globally
+ * Only runs in browser environment (not in tests)
+ */
+if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
+  chrome.commands.onCommand.addListener((command) => {
+    // Get current active tab and send command to content script
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: 'keyboardCommand',
+          command: command
+        }).catch((error) => {
+          if (DEBUG) {
+            console.error('Failed to send command to content script:', command, error);
+          }
+        });
+      }
+    });
+  });
+}
+
+/**
+ * Create context menu on extension installation and run migration
+ * Only runs in browser environment (not in tests)
+ */
+if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(async () => {
+    // Run migration from API key to backend authentication
+    if (typeof Migration !== 'undefined') {
+      try {
+        await Migration.runMigration();
+      } catch (error) {
+        console.error('Migration error:', error);
+      }
+    }
+
+    // Create context menu
+    chrome.contextMenus.create({
+      id: 'captureai-ask-text',
+      title: 'Ask CaptureAI',
+      contexts: ['selection']
+    });
+  });
+}
+
+/**
+ * Handle context menu clicks
+ * Only runs in browser environment (not in tests)
+ */
+if (typeof chrome !== 'undefined' && chrome.contextMenus?.onClicked) {
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'captureai-ask-text' && info.selectionText) {
+      handleTextSelection(info.selectionText, tab.id);
+    }
+  });
+}
+
+/**
+ * Handle selected text from context menu
+ * Sends text to OpenAI for analysis
+ *
+ * @param {string} selectedText - The text selected by the user
+ * @param {number} tabId - The ID of the tab where text was selected
+ * @returns {Promise<void>}
+ */
+async function handleTextSelection(selectedText, tabId) {
+  try {
+    // Show processing message
+    await showMessage(tabId, 'showProcessingMessage');
+
+    // Send selected text to backend
+    const aiResponse = await sendTextOnlyQuestion(selectedText, null);
+    await displayResponse(tabId, aiResponse);
+
+  } catch (error) {
+    console.error('Text selection error:', error);
+    await displayResponse(tabId, formatError('Failed to process selected text'));
   }
-
-  return false;
-});
+}
 
 
 // ============================================================================
@@ -210,14 +306,13 @@ async function handleCaptureArea(request, sender, sendResponse) {
     // Normal capture flow - process with AI
     await showMessage(sender.tab.id, 'showProcessingMessage');
 
-    const apiKey = await getStoredApiKey();
     const promptType = request.promptType || PROMPT_TYPES.ANSWER;
 
     const aiData = {
       imageData: processedData.compressedImageData
     };
 
-    const aiResponse = await sendToOpenAI(aiData, apiKey, promptType);
+    const aiResponse = await sendToOpenAI(aiData, null, promptType);
     await displayResponse(sender.tab.id, aiResponse, promptType);
     sendResponse({ success: true });
 
@@ -249,18 +344,10 @@ async function handleAskQuestion(request, sender, sendResponse) {
       return;
     }
 
-    // Get API key
-    const apiKey = await getStoredApiKey();
-    if (!apiKey) {
-      await displayResponse(sender.tab.id, formatError(ERROR_MESSAGES.NO_API_KEY_POPUP));
-      sendResponse({ success: false, error: ERROR_MESSAGES.NO_API_KEY });
-      return;
-    }
-
-    // Send to OpenAI (with or without image)
+    // Send to backend (with or without image)
     const aiResponse = imageData
-      ? await sendToOpenAI({ question, imageData }, apiKey, PROMPT_TYPES.ASK)
-      : await sendTextOnlyQuestion(question, apiKey);
+      ? await sendToOpenAI({ question, imageData }, null, PROMPT_TYPES.ASK)
+      : await sendTextOnlyQuestion(question, null);
 
     await displayResponse(sender.tab.id, aiResponse);
     sendResponse({ success: true });
@@ -341,142 +428,90 @@ async function handleGetPrivacyGuardStatus(request, sender, sendResponse) {
 
 
 // ============================================================================
-// SECTION 4: OPENAI API CLIENT
+// SECTION 4: BACKEND API CLIENT
 // ============================================================================
 
 /**
- * Send image data to OpenAI API for analysis
+ * Send image data to backend API for AI analysis
+ * Routes through Cloudflare Workers backend with authentication
  *
  * @param {Object} data - Data to send to API
  * @param {string} data.imageData - Base64-encoded image data URI
  * @param {string} [data.question] - User question (for ASK prompt type)
- * @param {string} apiKey - OpenAI API key
+ * @param {string} apiKey - DEPRECATED - No longer used (kept for backward compatibility)
  * @param {string} promptType - Type of prompt (ANSWER, AUTO_SOLVE, ASK)
  * @returns {Promise<string>} AI response text or error message
  */
 async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
   try {
-    // Validate API key
-    if (!apiKey?.trim()) {
-      return formatError(ERROR_MESSAGES.NO_API_KEY);
+    // Check authentication
+    if (typeof AuthService === 'undefined') {
+      return formatError('Authentication service not available');
+    }
+
+    const isActivated = await AuthService.isActivated();
+    if (!isActivated) {
+      return formatError('Please activate CaptureAI with a license key');
     }
 
     // Get dynamic AI configuration based on reasoning level
     const config = await getAIConfig();
+    const reasoningLevel = config.USE_LEGACY_PARAMS ? 0 :
+      (config.REASONING_EFFORT === 'medium' ? 2 : 1);
 
-    // Build message payload
-    const messages = buildMessages(data, promptType);
-
-    // Select appropriate max tokens based on prompt type
-    const tokenKey = promptType === PROMPT_TYPES.AUTO_SOLVE ? 'AUTO_SOLVE' :
-      promptType === PROMPT_TYPES.ASK ? 'ASK' : 'DEFAULT';
-    const maxTokens = config.MAX_TOKENS[tokenKey];
-
-    // Build request body - handle legacy params for gpt-4.1-nano
-    const requestBody = {
-      model: config.MODEL,
-      messages: messages
-    };
-
-    // Use different parameters based on model
-    if (config.USE_LEGACY_PARAMS) {
-      // For gpt-4.1-nano: use max_tokens, no reasoning_effort or verbosity
-      requestBody.max_tokens = maxTokens;
-    } else {
-      // For gpt-5-nano: use max_completion_tokens, reasoning_effort, and verbosity
-      requestBody.max_completion_tokens = maxTokens;
-      requestBody.verbosity = config.VERBOSITY;
-      if (config.REASONING_EFFORT !== null) {
-        requestBody.reasoning_effort = config.REASONING_EFFORT;
-      }
-    }
-
-    // Make API request
-    const response = await fetch(config.API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
+    // Send request to backend
+    const response = await AuthService.sendAIRequest({
+      question: data.question || undefined,
+      imageData: data.imageData,
+      promptType: promptType,
+      reasoningLevel: reasoningLevel
     });
 
-    // Handle successful response
-    if (response.ok) {
-      const result = await response.json();
-      return result.choices[0]?.message?.content?.trim() || 'No response found';
-    }
-
-    // Handle API errors
-    const errorText = await response.text();
-    console.error('OpenAI API Error:', response.status, errorText);
-    return formatError(`OpenAI API error (${response.status}): ${response.statusText}`);
+    return response.answer || 'No response found';
 
   } catch (error) {
-    console.error('Network error:', error);
-    return formatError(`${ERROR_MESSAGES.NETWORK_ERROR} - ${error.message}`);
+    console.error('Backend API error:', error);
+    return formatError(error.message || 'Failed to get AI response');
   }
 }
 
 /**
- * Send text-only question to OpenAI API (no image)
+ * Send text-only question to backend API (no image)
  *
  * @param {string} question - User's question text
- * @param {string} apiKey - OpenAI API key
+ * @param {string} apiKey - DEPRECATED - No longer used (kept for backward compatibility)
  * @returns {Promise<string>} AI response text or error message
  */
 async function sendTextOnlyQuestion(question, apiKey) {
   try {
+    // Check authentication
+    if (typeof AuthService === 'undefined') {
+      return formatError('Authentication service not available');
+    }
+
+    const isActivated = await AuthService.isActivated();
+    if (!isActivated) {
+      return formatError('Please activate CaptureAI with a license key');
+    }
+
     // Get dynamic AI configuration based on reasoning level
     const config = await getAIConfig();
+    const reasoningLevel = config.USE_LEGACY_PARAMS ? 0 :
+      (config.REASONING_EFFORT === 'medium' ? 2 : 1);
 
-    const messages = [
-      { role: 'system', content: PROMPTS.ASK_SYSTEM },
-      { role: 'user', content: question }
-    ];
-
-    // Build request body - handle legacy params for gpt-4.1-nano
-    const requestBody = {
-      model: config.MODEL,
-      messages: messages
-    };
-
-    // Use different parameters based on model
-    if (config.USE_LEGACY_PARAMS) {
-      // For gpt-4.1-nano: use max_tokens, no reasoning_effort or verbosity
-      requestBody.max_tokens = config.MAX_TOKENS.TEXT_ONLY;
-    } else {
-      // For gpt-5-nano: use max_completion_tokens, reasoning_effort, and verbosity
-      requestBody.max_completion_tokens = config.MAX_TOKENS.TEXT_ONLY;
-      requestBody.verbosity = config.VERBOSITY;
-      if (config.REASONING_EFFORT !== null) {
-        requestBody.reasoning_effort = config.REASONING_EFFORT;
-      }
-    }
-
-    const response = await fetch(config.API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
+    // Send request to backend (text-only, no image)
+    const response = await AuthService.sendAIRequest({
+      question: question,
+      imageData: undefined,
+      promptType: PROMPT_TYPES.ASK,
+      reasoningLevel: reasoningLevel
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      return result.choices[0]?.message?.content?.trim() || 'No response found';
-    }
-
-    const errorData = await response.json().catch(() => ({
-      error: { message: response.statusText }
-    }));
-    console.error('Text-only API Error:', response.status, errorData);
-    return formatError(errorData.error?.message || 'API request failed');
+    return response.answer || 'No response found';
 
   } catch (error) {
-    console.error('Text-only network error:', error);
-    return formatError(`${ERROR_MESSAGES.NETWORK_ERROR} - ${error.message}`);
+    console.error('Backend API error:', error);
+    return formatError(error.message || 'Failed to get AI response');
   }
 }
 
@@ -667,4 +702,43 @@ async function getStoredApiKey() {
  */
 function formatError(message) {
   return `Error: ${message}`;
+}
+
+
+// ============================================================================
+// TEST EXPORTS
+// ============================================================================
+
+/**
+ * Export functions for testing (CommonJS for Jest compatibility)
+ * Only exports when running in test environment
+ */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    // Constants
+    PROMPT_TYPES,
+    OPENAI_CONFIG,
+    PROMPTS,
+    ERROR_MESSAGES,
+    STORAGE_KEY_API_KEY,
+
+    // Functions
+    getAIConfig,
+    formatError,
+    buildMessages,
+    sendToOpenAI,
+    sendTextOnlyQuestion,
+    getStoredApiKey,
+    captureScreenshot,
+    isValidUrl,
+    processImage,
+    showMessage,
+    displayResponse,
+    handleCaptureArea,
+    handleAskQuestion,
+    handleEnablePrivacyGuard,
+    handleDisablePrivacyGuard,
+    handleGetPrivacyGuardStatus,
+    handleTextSelection
+  };
 }

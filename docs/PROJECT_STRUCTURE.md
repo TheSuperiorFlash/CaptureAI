@@ -10,16 +10,20 @@ The root directory contains only essential Chrome extension files:
 
 ```
 CaptureAI/
-├── background.js              # Service worker (screenshot, API, messaging)
-├── build.bat                  # Windows build script for packaging extension
-├── content.js                 # Main entry point, module loader
-├── manifest.json              # Chrome Extension Manifest V3
-├── popup.html                 # Extension popup UI
-├── popup.js                   # Popup logic and state management
-├── privacy-policy.html        # Privacy policy page
-├── README.md                  # Project overview and getting started
-├── package.json               # NPM dependencies and scripts
-└── package-lock.json          # NPM lock file
+├── background.js                     # Service worker (screenshot, API, messaging)
+├── build.bat                         # Windows build script for packaging extension
+├── build.ps1                         # PowerShell build script (alternative)
+├── content.js                        # Main entry point, module loader
+├── inject.js                         # Injected script for page interaction
+├── manifest.json                     # Chrome Extension Manifest V3
+├── popup.html                        # Extension popup UI
+├── popup.js                          # Popup logic and state management
+├── privacy-policy.html               # Privacy policy page
+├── README.md                         # Project overview and getting started
+├── CLOUDFLARE_WORKERS_README.md      # Overview of Cloudflare Workers backend
+├── package.json                      # NPM dependencies and scripts
+├── package-lock.json                 # NPM lock file
+└── babel.config.js                   # Babel configuration for testing
 ```
 
 ## Directory Structure
@@ -36,17 +40,35 @@ config/
 **Note:** Config files are referenced in npm scripts with `--config` flag.
 
 ### `/docs` - Documentation
-All project documentation and planning files:
+All project documentation:
 ```
 docs/
-├── README.md                  # Documentation index (this helps navigate all docs)
-├── CLAUDE.md                  # Development philosophy and coding standards
-├── DEVELOPMENT_ROADMAP.md     # Complete project roadmap
-├── REFACTORING_PLAN.md        # Historical refactoring decisions
-├── GIT_SETUP.md               # Git initialization and GitHub setup
-├── ESLINT_FIXES.md            # ESLint configuration documentation
-├── TESTING_FINAL.md           # Comprehensive testing infrastructure report
-└── TESTING_SUMMARY.md         # Initial testing setup (historical)
+├── README.md                           # Documentation index
+├── CLAUDE.md                           # Development philosophy and coding standards
+├── CLOUDFLARE_WORKERS_SETUP.md         # Complete Cloudflare Workers setup guide
+├── WORKERS_VS_TRADITIONAL.md           # Why Workers is better than traditional backend
+├── PROJECT_STRUCTURE.md                # This file
+├── PRIVACY_GUARD.md                    # Privacy protection features
+├── PRIVACY_IMPLEMENTATION_SUMMARY.md   # Privacy feature implementation details
+└── MONITOR_PROTECTION.md               # Monitor/surveillance protection
+```
+
+### `/cloudflare-workers-backend` - Serverless Backend
+Cloudflare Workers backend with AI Gateway integration:
+```
+cloudflare-workers-backend/
+├── src/
+│   ├── index.js            # Main Worker entry point
+│   ├── router.js           # Request routing
+│   ├── auth.js             # JWT authentication
+│   ├── ai.js               # AI Gateway integration
+│   ├── subscription.js     # Stripe payment processing
+│   └── utils.js            # Helper functions (JWT, crypto, validation)
+├── schema.sql              # D1 database schema (SQLite)
+├── wrangler.toml           # Cloudflare Workers configuration
+├── package.json            # Dependencies
+├── QUICK_START.md          # 10-minute deployment guide
+└── README.md               # Backend overview
 ```
 
 ### `/modules` - Extension Modules
@@ -63,6 +85,7 @@ modules/
 ├── event-manager.js           # Global error handling
 ├── capture-system.js          # Screenshot selection logic
 ├── auto-solve.js              # Auto-solve mode for educational sites
+├── auth-service.js            # Backend authentication & API integration
 ├── ui-core.js                 # Main UI panel
 ├── ui-components.js           # Reusable UI components
 └── ui-stealthy-result.js      # Stealthy answer overlay

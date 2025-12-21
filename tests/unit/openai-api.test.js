@@ -5,167 +5,17 @@
  */
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
-
-// Constants (copied from background.js)
-const PROMPT_TYPES = {
-  ANSWER: 'answer',
-  AUTO_SOLVE: 'auto_solve',
-  ASK: 'ask'
-};
-
-const OPENAI_CONFIG = {
-  MODEL: 'gpt-5-nano',
-  API_URL: 'https://api.openai.com/v1/chat/completions',
-  REASONING_EFFORT: 'low',
-  VERBOSITY: 'low',
-  MAX_TOKENS: {
-    AUTO_SOLVE: 2500,
-    ASK: 8000,
-    TEXT_ONLY: 4000,
-    DEFAULT: 5000
-  }
-};
-
-const PROMPTS = {
-  AUTO_SOLVE: 'Answer with only the number (1, 2, 3, or 4) of the correct choice. Answer choices will go left to right, then top to bottom. If there are not exactly 4 choices or if it says Spell the word, respond with "Invalid question". Avoid choices that are red.',
-  ANSWER: 'Reply with answer only, avoid choices that are red.',
-  ASK_SYSTEM: 'You are a helpful assistant that provides clear, accurate, and concise answers.'
-};
-
-const ERROR_MESSAGES = {
-  NO_API_KEY: 'API key is not set',
-  NO_IMAGE_DATA: 'No image data provided',
-  NETWORK_ERROR: 'Network error or API unavailable'
-};
-
-/**
- * Format error message
- */
-function formatError(message) {
-  return `Error: ${message}`;
-}
-
-/**
- * Build OpenAI API message payload
- */
-function buildMessages(data, promptType) {
-  if (!data?.imageData) {
-    throw new Error(`${ERROR_MESSAGES.NO_IMAGE_DATA} for ${promptType}`);
-  }
-
-  const prompts = {
-    [PROMPT_TYPES.AUTO_SOLVE]: PROMPTS.AUTO_SOLVE,
-    [PROMPT_TYPES.ANSWER]: PROMPTS.ANSWER
-  };
-
-  if (promptType === PROMPT_TYPES.ASK && data.question) {
-    return [{
-      role: 'user',
-      content: [
-        { type: 'text', text: data.question },
-        { type: 'image_url', image_url: { url: data.imageData } }
-      ]
-    }];
-  }
-
-  const prompt = prompts[promptType] || PROMPTS.ANSWER;
-  return [{
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: data.imageData } }
-    ]
-  }];
-}
-
-/**
- * Send image data to OpenAI API for analysis
- * (Copy from background.js for testing)
- */
-async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
-  try {
-    if (!apiKey?.trim()) {
-      return formatError(ERROR_MESSAGES.NO_API_KEY);
-    }
-
-    const messages = buildMessages(data, promptType);
-
-    const tokenKey = promptType === PROMPT_TYPES.AUTO_SOLVE ? 'AUTO_SOLVE' :
-      promptType === PROMPT_TYPES.ASK ? 'ASK' : 'DEFAULT';
-    const maxTokens = OPENAI_CONFIG.MAX_TOKENS[tokenKey];
-
-    const response = await fetch(OPENAI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: OPENAI_CONFIG.MODEL,
-        messages: messages,
-        max_completion_tokens: maxTokens,
-        reasoning_effort: OPENAI_CONFIG.REASONING_EFFORT,
-        verbosity: OPENAI_CONFIG.VERBOSITY
-      })
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return result.choices[0]?.message?.content?.trim() || 'No response found';
-    }
-
-    const errorText = await response.text();
-    console.error('OpenAI API Error:', response.status, errorText);
-    return formatError(`OpenAI API error (${response.status}): ${response.statusText}`);
-
-  } catch (error) {
-    console.error('Network error:', error);
-    return formatError(`${ERROR_MESSAGES.NETWORK_ERROR} - ${error.message}`);
-  }
-}
-
-/**
- * Send text-only question to OpenAI API
- * (Copy from background.js for testing)
- */
-async function sendTextOnlyQuestion(question, apiKey) {
-  try {
-    const messages = [
-      { role: 'system', content: PROMPTS.ASK_SYSTEM },
-      { role: 'user', content: question }
-    ];
-
-    const response = await fetch(OPENAI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: OPENAI_CONFIG.MODEL,
-        messages: messages,
-        max_completion_tokens: OPENAI_CONFIG.MAX_TOKENS.TEXT_ONLY,
-        reasoning_effort: OPENAI_CONFIG.REASONING_EFFORT,
-        verbosity: OPENAI_CONFIG.VERBOSITY
-      })
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return result.choices[0]?.message?.content?.trim() || 'No response found';
-    }
-
-    const errorData = await response.json().catch(() => ({
-      error: { message: response.statusText }
-    }));
-    console.error('Text-only API Error:', response.status, errorData);
-    return formatError(errorData.error?.message || 'API request failed');
-
-  } catch (error) {
-    console.error('Text-only network error:', error);
-    return formatError(`${ERROR_MESSAGES.NETWORK_ERROR} - ${error.message}`);
-  }
-}
+const { resetChromeMocks, storageMock } = require('../setup/chrome-mock');
+const {
+  PROMPT_TYPES,
+  OPENAI_CONFIG,
+  PROMPTS,
+  ERROR_MESSAGES,
+  formatError,
+  buildMessages,
+  sendToOpenAI,
+  sendTextOnlyQuestion
+} = require('../../background.js');
 
 // Tests
 describe('sendToOpenAI', () => {
@@ -174,6 +24,18 @@ describe('sendToOpenAI', () => {
 
   beforeEach(() => {
     fetch.resetMocks();
+    resetChromeMocks();
+
+    // Mock storage to return default reasoning level (medium)
+    // Support both callback and Promise APIs
+    storageMock.local.get.mockImplementation((keys, callback) => {
+      const result = { 'captureai-reasoning-level': 1 };
+      if (callback) {
+        callback(result);
+        return undefined;
+      }
+      return Promise.resolve(result);
+    });
   });
 
   describe('successful API calls', () => {
@@ -414,6 +276,18 @@ describe('sendTextOnlyQuestion', () => {
 
   beforeEach(() => {
     fetch.resetMocks();
+    resetChromeMocks();
+
+    // Mock storage to return default reasoning level (medium)
+    // Support both callback and Promise APIs
+    storageMock.local.get.mockImplementation((keys, callback) => {
+      const result = { 'captureai-reasoning-level': 1 };
+      if (callback) {
+        callback(result);
+        return undefined;
+      }
+      return Promise.resolve(result);
+    });
   });
 
   describe('successful API calls', () => {
