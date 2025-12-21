@@ -2,6 +2,8 @@
  * Image processing utilities
  */
 
+import { OCRService } from './ocr-service.js';
+
 export const ImageProcessing = {
   /**
          * Compress image with advanced optimization for token reduction
@@ -130,12 +132,15 @@ export const ImageProcessing = {
   },
 
   /**
-         * Process captured image: crop, compress, and optimize for token reduction
+         * Process captured image: crop, compress, OCR, and optimize for token reduction
          * @param {string} imageUri - Full screenshot image URI
          * @param {Object} coordinates - Crop coordinates
+         * @param {Object} options - Processing options
+         * @param {boolean} options.enableOCR - Whether to perform OCR extraction (default: true)
          * @returns {Promise<Object>}
          */
-  async captureAndProcess(imageUri, coordinates) {
+  async captureAndProcess(imageUri, coordinates, options = {}) {
+    const { enableOCR = true } = options;
 
     try {
       const croppedImage = await this.cropImage(imageUri, {
@@ -153,10 +158,40 @@ export const ImageProcessing = {
 
       const compressedImageData = await this.compressImage(croppedImage, 0.3, compressionOptions);
 
-      return {
+      const result = {
         success: true,
         compressedImageData: compressedImageData
       };
+
+      // Perform OCR extraction if enabled
+      if (enableOCR) {
+        try {
+          console.log('Starting OCR extraction...');
+          const ocrResult = await OCRService.extractText(compressedImageData);
+
+          result.ocrData = {
+            text: ocrResult.text,
+            confidence: ocrResult.confidence,
+            hasValidText: OCRService.isValidOCRResult(ocrResult),
+            duration: ocrResult.duration
+          };
+
+          console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted`);
+          if (ocrResult.text.length > 0) {
+            console.log('OCR Preview:', ocrResult.text.substring(0, 200));
+          }
+        } catch (ocrError) {
+          console.warn('OCR extraction failed, continuing without OCR data:', ocrError);
+          result.ocrData = {
+            text: '',
+            confidence: 0,
+            hasValidText: false,
+            error: ocrError.message
+          };
+        }
+      }
+
+      return result;
     } catch (error) {
       return {
         hasError: true,

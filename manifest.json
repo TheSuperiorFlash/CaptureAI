@@ -64,7 +64,7 @@
         },
         {
             "matches": ["<all_urls>"],
-            "js": [ "content.js" ],
+            "js": [ "libs/tesseract/tesseract.min.js", "content.js" ],
             "run_at": "document_idle"
         }
     ],
@@ -80,6 +80,7 @@
             "modules/domains.js",
             "modules/utils.js",
             "modules/image-processing.js",
+            "modules/ocr-service.js",
             "modules/ui-stealthy-result.js",
             "modules/ui-core.js",
             "modules/ui-components.js",
@@ -91,6 +92,9 @@
             "modules/privacy-guard.js",
             "modules/auth-service.js",
             "modules/migration.js",
+            "libs/tesseract/tesseract.min.js",
+            "libs/tesseract/worker.min.js",
+            "libs/tesseract/lang-data/eng.traineddata.gz",
             "payment-success.html",
             "payment-success.js"
         ],

@@ -523,10 +523,13 @@ export const UICore = {
     }
   },
 
-  handleAskQuestion(question, imageData = null) {
+  handleAskQuestion(question, imageData = null, ocrData = null) {
     const message = { action: 'askQuestion', question: question };
     if (imageData) {
       message.imageData = imageData;
+    }
+    if (ocrData) {
+      message.ocrData = ocrData;
     }
 
     chrome.runtime.sendMessage(message);

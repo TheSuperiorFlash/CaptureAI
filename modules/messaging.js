@@ -348,9 +348,9 @@ export const Messaging = {
         }
       }
 
-      // Pass image data to ask mode instance
+      // Pass image data and OCR data to ask mode instance
       if (STATE.askModeInstance && STATE.askModeInstance.setAttachedImage) {
-        STATE.askModeInstance.setAttachedImage(request.imageData);
+        STATE.askModeInstance.setAttachedImage(request.imageData, request.ocrData);
       }
 
       // Clear the ask mode instance reference

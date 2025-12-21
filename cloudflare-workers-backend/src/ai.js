@@ -65,17 +65,19 @@ export class AIHandler {
       }
 
       // Parse request
-      const { question, imageData, promptType, reasoningLevel } = await parseJSON(request);
+      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel } = await parseJSON(request);
 
       // Validate
-      if (!question && !imageData) {
-        return jsonResponse({ error: 'Question or image data required' }, 400);
+      if (!question && !imageData && !ocrText) {
+        return jsonResponse({ error: 'Question, image data, or OCR text required' }, 400);
       }
 
       // Build OpenAI payload
       const payload = this.buildPayload({
         question,
         imageData,
+        ocrText,
+        ocrConfidence,
         promptType: promptType || 'answer'
       }, reasoningLevel || 1);
 
@@ -285,7 +287,7 @@ export class AIHandler {
    * Build OpenAI payload
    */
   buildPayload(requestData, reasoningLevel) {
-    const { question, imageData, promptType } = requestData;
+    const { question, imageData, ocrText, ocrConfidence, promptType } = requestData;
 
     // Reasoning level configurations
     // 0 = Low (gpt-4.1-nano, no reasoning)
@@ -301,35 +303,79 @@ export class AIHandler {
 
     let messages = [];
 
+    // Helper to build enhanced prompt with OCR text
+    const buildPromptWithOCR = (basePrompt) => {
+      if (ocrText && ocrText.trim().length > 0) {
+        const confidence = ocrConfidence ? ` (${Math.round(ocrConfidence)}% confidence)` : '';
+        return `${basePrompt}\n\nExtracted text from image${confidence}:\n${ocrText}`;
+      }
+      return basePrompt;
+    };
+
     if (promptType === 'ask' && question && imageData) {
+      // Ask mode with image - include OCR text if available
+      const enhancedQuestion = buildPromptWithOCR(question);
       messages = [{
         role: 'user',
         content: [
-          { type: 'text', text: question },
+          { type: 'text', text: enhancedQuestion },
           { type: 'image_url', image_url: { url: imageData } }
         ]
       }];
+    } else if (promptType === 'ask' && question && ocrText && !imageData) {
+      // Ask mode with OCR text only (no image)
+      messages = [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: buildPromptWithOCR(question) }
+      ];
     } else if (promptType === 'ask' && question) {
+      // Ask mode text-only
       messages = [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: question }
       ];
-    } else if (promptType === 'auto_solve' && imageData) {
+    } else if (promptType === 'auto_solve') {
+      // Auto-solve mode
+      const basePrompt = 'Answer with only the number (1, 2, 3, or 4) of the correct choice.';
+      const enhancedPrompt = buildPromptWithOCR(basePrompt);
+
+      if (imageData) {
+        // Auto-solve with image
+        messages = [{
+          role: 'user',
+          content: [
+            { type: 'text', text: enhancedPrompt },
+            { type: 'image_url', image_url: { url: imageData } }
+          ]
+        }];
+      } else {
+        // Auto-solve with OCR only
+        messages = [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: enhancedPrompt }
+        ];
+      }
+    } else if (ocrText && !imageData) {
+      // OCR text only, no image (normal answer mode)
+      const basePrompt = 'Reply with answer only.';
+      messages = [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: buildPromptWithOCR(basePrompt) }
+      ];
+    } else if (imageData) {
+      // Image-based answer (fallback)
+      const basePrompt = 'Reply with answer only.';
+      const enhancedPrompt = buildPromptWithOCR(basePrompt);
       messages = [{
         role: 'user',
         content: [
-          { type: 'text', text: 'Answer with only the number (1, 2, 3, or 4) of the correct choice.' },
+          { type: 'text', text: enhancedPrompt },
           { type: 'image_url', image_url: { url: imageData } }
         ]
       }];
     } else {
-      messages = [{
-        role: 'user',
-        content: [
-          { type: 'text', text: 'Reply with answer only.' },
-          { type: 'image_url', image_url: { url: imageData } }
-        ]
-      }];
+      // No image, no OCR - error case
+      throw new Error('No image data or OCR text provided');
     }
 
     const payload = {

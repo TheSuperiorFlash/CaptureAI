@@ -426,7 +426,7 @@ export const UIComponents = {
 
   handleAskModeQuestion() {
     const question = this.askTextInput.value.trim();
-    this.handleAskQuestion(question, this.attachedImageData);
+    this.handleAskQuestion(question, this.attachedImageData, this.attachedOCRData);
     this.clearAskInput();
   },
 
@@ -453,8 +453,9 @@ export const UIComponents = {
     }
   },
 
-  setAttachedImage(imageData) {
+  setAttachedImage(imageData, ocrData = null) {
     this.attachedImageData = imageData;
+    this.attachedOCRData = ocrData;
     const previewImage = this.imagePreview.querySelector('img');
     if (previewImage) {
       previewImage.src = imageData;
@@ -470,6 +471,7 @@ export const UIComponents = {
 
   removeAttachedImage() {
     this.attachedImageData = null;
+    this.attachedOCRData = null;
     this.imagePreview.style.display = 'none';
     this.askTextInput.style.paddingTop = '10px';
     const theme = this.getTheme();
@@ -487,9 +489,9 @@ export const UIComponents = {
     }
   },
 
-  handleAskQuestion(question, imageData = null) {
+  handleAskQuestion(question, imageData = null, ocrData = null) {
     if (window.CaptureAI.UICore?.handleAskQuestion) {
-      window.CaptureAI.UICore.handleAskQuestion(question, imageData);
+      window.CaptureAI.UICore.handleAskQuestion(question, imageData, ocrData);
     }
   },
 

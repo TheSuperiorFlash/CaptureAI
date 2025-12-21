@@ -297,7 +297,8 @@ async function handleCaptureArea(request, sender, sendResponse) {
     if (request.isForAskMode) {
       await chrome.tabs.sendMessage(sender.tab.id, {
         action: 'setAskModeImage',
-        imageData: processedData.compressedImageData
+        imageData: processedData.compressedImageData,
+        ocrData: processedData.ocrData
       });
       sendResponse({ success: true });
       return;
@@ -308,9 +309,20 @@ async function handleCaptureArea(request, sender, sendResponse) {
 
     const promptType = request.promptType || PROMPT_TYPES.ANSWER;
 
+    // Check if OCR extraction succeeded
+    const hasValidOCR = processedData.ocrData?.text && processedData.ocrData.text.trim().length > 0;
+
+    // For normal captures: send OCR text instead of image data (token optimization)
+    // Fallback to image if OCR fails
     const aiData = {
-      imageData: processedData.compressedImageData
+      imageData: hasValidOCR ? null : processedData.compressedImageData,  // Send image only if OCR failed
+      ocrText: processedData.ocrData?.text,
+      ocrConfidence: processedData.ocrData?.confidence
     };
+
+    if (DEBUG && !hasValidOCR) {
+      console.warn('OCR extraction failed or returned empty text, falling back to image data');
+    }
 
     const aiResponse = await sendToOpenAI(aiData, null, promptType);
     await displayResponse(sender.tab.id, aiResponse, promptType);
@@ -335,7 +347,7 @@ async function handleCaptureArea(request, sender, sendResponse) {
  */
 async function handleAskQuestion(request, sender, sendResponse) {
   try {
-    const { question, imageData } = request;
+    const { question, imageData, ocrData } = request;
 
     // Validate question
     if (!question?.trim()) {
@@ -344,9 +356,14 @@ async function handleAskQuestion(request, sender, sendResponse) {
       return;
     }
 
-    // Send to backend (with or without image)
+    // Send to backend (with or without image and OCR data)
     const aiResponse = imageData
-      ? await sendToOpenAI({ question, imageData }, null, PROMPT_TYPES.ASK)
+      ? await sendToOpenAI({
+          question,
+          imageData,
+          ocrText: ocrData?.text,
+          ocrConfidence: ocrData?.confidence
+        }, null, PROMPT_TYPES.ASK)
       : await sendTextOnlyQuestion(question, null);
 
     await displayResponse(sender.tab.id, aiResponse);
@@ -463,6 +480,8 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     const response = await AuthService.sendAIRequest({
       question: data.question || undefined,
       imageData: data.imageData,
+      ocrText: data.ocrText,
+      ocrConfidence: data.ocrConfidence,
       promptType: promptType,
       reasoningLevel: reasoningLevel
     });

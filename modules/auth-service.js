@@ -166,11 +166,13 @@ const AuthService = {
    * @param {Object} params - Request parameters
    * @param {string} params.question - User question (optional)
    * @param {string} params.imageData - Base64 image data (optional)
+   * @param {string} params.ocrText - OCR extracted text (optional)
+   * @param {number} params.ocrConfidence - OCR confidence percentage (optional)
    * @param {string} params.promptType - Prompt type (answer, auto_solve, ask)
    * @param {number} params.reasoningLevel - Reasoning level (0, 1, 2)
    * @returns {Promise<Object>} { answer, usage, cached, responseTime }
    */
-  async sendAIRequest({ question, imageData, promptType, reasoningLevel }) {
+  async sendAIRequest({ question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel }) {
     const backendUrl = await this.getBackendUrl();
     const licenseKey = await this.getLicenseKey();
 
@@ -188,6 +190,8 @@ const AuthService = {
         body: JSON.stringify({
           question,
           imageData,
+          ocrText,
+          ocrConfidence,
           promptType,
           reasoningLevel
         })
