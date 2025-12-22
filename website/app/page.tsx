@@ -101,10 +101,10 @@ export default function Home() {
                         Join students using CaptureAI to study smarter, not harder
                     </p>
                     <Link
-                        href="/download"
+                        href="/activate"
                         className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                     >
-                        Add to Chrome - Free
+                        Try Now - Free
                         <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                 </div>

@@ -9,9 +9,7 @@ export default function Navbar() {
     const navigation = [
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/pricing' },
-        { name: 'Docs', href: '/docs' },
-        { name: 'Download', href: '/download' },
-        { name: 'Activate', href: '/activate' },
+        { name: 'Help', href: '/help' },
     ]
 
     return (
@@ -21,7 +19,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg shadow-blue-500/30"></div>
+                            <img src="/icon128.png" alt="CaptureAI" className="w-8 h-8" />
                             <span className="text-xl font-bold text-white">CaptureAI</span>
                         </Link>
                     </div>
@@ -38,10 +36,10 @@ export default function Navbar() {
                             </Link>
                         ))}
                         <Link
-                            href="/download"
+                            href="/activate"
                             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                         >
-                            Get Started
+                            Try Now
                         </Link>
                     </div>
 
@@ -72,11 +70,11 @@ export default function Navbar() {
                             </Link>
                         ))}
                         <Link
-                            href="/download"
+                            href="/activate"
                             className="block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors text-center"
                             onClick={() => setIsOpen(false)}
                         >
-                            Get Started
+                            Try Now
                         </Link>
                     </div>
                 </div>

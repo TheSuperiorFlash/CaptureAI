@@ -1,4 +1,4 @@
-import { Camera, Zap, MessageSquare, Repeat, Eye, KeyboardIcon, LucideIcon } from 'lucide-react'
+import { Camera, Zap, MessageSquare, Repeat, Eye, Shield, MousePointer, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
@@ -9,33 +9,38 @@ interface Feature {
 const features: Feature[] = [
     {
         icon: Camera,
-        title: 'Quick Capture',
-        description: 'Press Ctrl+Shift+X to screenshot any question on your screen. Works with text, images, diagrams, and more.',
+        title: 'Capture',
+        description: 'Screenshot any question with a simple keyboard shortcut. Fast and easy.',
     },
     {
-        icon: MessageSquare,
-        title: 'Instant Answers',
-        description: 'Get AI-powered answers to your questions in seconds. Perfect for homework, quizzes, and studying.',
-    },
-    {
-        icon: Repeat,
-        title: 'Auto-Solve',
-        description: 'Automatically solve multiple-choice questions on Quizlet and Vocabulary.com with one click.',
+        icon: MousePointer,
+        title: 'Floating UI',
+        description: 'Always accessible interface that stays on top. Just click to get started.',
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Work invisibly - websites can\'t detect you\'re using CaptureAI. Stay focused without distractions.',
+        description: 'Work invisibly without websites knowing you\'re using CaptureAI.',
     },
     {
-        icon: KeyboardIcon,
-        title: 'Keyboard Shortcuts',
-        description: 'Lightning-fast shortcuts: Ctrl+Shift+X to capture, Ctrl+Shift+F to repeat, Ctrl+Shift+E to toggle.',
+        icon: Repeat,
+        title: 'Auto-Solve',
+        description: 'Automatically solve questions on Quizlet and Vocabulary.com.',
+    },
+    {
+        icon: Shield,
+        title: 'Privacy Guard',
+        description: 'Your activity stays completely private. No one can detect the extension.',
+    },
+    {
+        icon: MessageSquare,
+        title: 'Ask Mode',
+        description: 'Ask custom questions about anything you capture. Get instant answers.',
     },
     {
         icon: Zap,
         title: 'Works Anywhere',
-        description: 'Use CaptureAI on any website - Canvas, Blackboard, Google Classroom, or any online platform.',
+        description: 'Use on any website - homework sites, quizzes, study platforms, anywhere.',
     },
 ]
 

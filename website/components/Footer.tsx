@@ -8,11 +8,11 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg shadow-lg shadow-blue-500/30"></div>
+                            <img src="/icon128.png" alt="CaptureAI" className="w-8 h-8" />
                             <span className="text-xl font-bold text-white">CaptureAI</span>
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">
-                            AI-powered screenshot analysis. Capture, ask, and get instant answers.
+                            Get instant answers to any question. Screenshot, ask, and learn faster.
                         </p>
                     </div>
 
@@ -30,7 +30,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-white font-semibold mb-4">Support</h3>
                         <ul className="space-y-2">
-                            <li><Link href="/docs" className="text-gray-400 hover:text-blue-400 transition-colors">Documentation</Link></li>
+                            <li><Link href="/help" className="text-gray-400 hover:text-blue-400 transition-colors">Help</Link></li>
                             <li><Link href="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">Contact</Link></li>
                             <li><a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">GitHub</a></li>
                         </ul>

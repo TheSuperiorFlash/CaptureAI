@@ -29,17 +29,17 @@ export default function Hero() {
                     {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
-                            href="/download"
+                            href="/activate"
                             className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                         >
-                            <Download className="w-5 h-5 mr-2" />
-                            Add to Chrome - It's Free
+                            <Zap className="w-5 h-5 mr-2" />
+                            Try Now - Free
                         </Link>
                         <Link
                             href="/#features"
                             className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-gray-200 text-lg font-semibold rounded-lg hover:bg-white/5 transition-all border border-gray-700 hover:border-blue-500/50"
                         >
-                            See How It Works
+                            See Features
                         </Link>
                     </div>
 
