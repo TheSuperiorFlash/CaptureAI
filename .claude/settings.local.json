@@ -12,7 +12,16 @@
       "Bash(rm:*)",
       "Bash(npm run lint:*)",
       "Bash(tree:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(find:*)",
+      "Bash(wrangler deploy:*)",
+      "Bash(wrangler tail:*)",
+      "Bash(wrangler secret list:*)",
+      "Bash(git reset:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

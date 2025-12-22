@@ -17,19 +17,52 @@ export function jsonResponse(data, status = 200) {
 /**
  * Handle CORS preflight
  */
-export function handleCORS() {
+export function handleCORS(request) {
+  // List of allowed origins
+  const allowedOrigins = [
+    'https://thesuperiorflash.github.io',
+  ];
+
+  // Development/testing origins (only if in dev mode)
+  const isDev = typeof globalThis !== 'undefined' && globalThis.env?.ENVIRONMENT === 'development';
+  if (isDev) {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000');
+  }
+
+  // Get origin from request
+  const origin = request?.headers?.get('Origin') || '';
+
+  // Check if origin is allowed
+  let allowedOrigin = 'null';
+  if (origin) {
+    // Exact match for standard origins
+    if (allowedOrigins.includes(origin)) {
+      allowedOrigin = origin;
+    }
+    // Chrome extension support (all extensions allowed)
+    else if (origin.startsWith('chrome-extension://')) {
+      allowedOrigin = origin;
+    }
+    // Match GitHub Pages subdomain
+    else if (origin.match(/^https:\/\/.*\.github\.io$/)) {
+      allowedOrigin = origin;
+    }
+  }
+
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
+      'Access-Control-Allow-Credentials': 'true',
     }
   });
 }
 
 /**
- * Parse JSON body safely
+ * Parse JSON body safely with validation
+ * @deprecated Use validateRequestBody from validation.js instead
  */
 export async function parseJSON(request) {
   try {
@@ -244,4 +277,24 @@ export function generateUUID() {
 export function isValidEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
+}
+
+/**
+ * Constant-time string comparison to prevent timing attacks
+ */
+export function constantTimeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    return false;
+  }
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return result === 0;
 }

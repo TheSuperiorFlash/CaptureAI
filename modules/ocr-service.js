@@ -37,8 +37,15 @@ class OCRService {
                 // Using modern API: createWorker(lang, oem, options)
                 this.worker = await Tesseract.createWorker('eng');
 
+                // Optimize Tesseract parameters for better accuracy and token reduction
+                await this.worker.setParameters({
+                    tessedit_pageseg_mode: Tesseract.PSM.AUTO, // Auto page segmentation
+                    preserve_interword_spaces: '0', // Reduce excessive spacing
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,?!()+-=×÷/:;\'\" \n', // Common chars only
+                });
+
                 this.isInitialized = true;
-                console.log('OCR Service initialized successfully');
+                console.log('OCR Service initialized successfully with optimized parameters');
             } catch (error) {
                 console.error('Failed to initialize OCR Service:', error);
                 this.isInitialized = false;
@@ -51,11 +58,48 @@ class OCRService {
     }
 
     /**
+     * Clean and optimize OCR text to reduce token usage
+     * @param {string} text - Raw OCR text
+     * @returns {string} - Cleaned text
+     */
+    cleanOCRText(text) {
+        if (!text) return '';
+
+        let cleaned = text;
+
+        // Remove excessive whitespace and newlines
+        cleaned = cleaned.replace(/\n{3,}/g, '\n\n'); // Max 2 newlines
+        cleaned = cleaned.replace(/[ \t]{2,}/g, ' '); // Multiple spaces to single space
+        cleaned = cleaned.replace(/\r/g, ''); // Remove carriage returns
+
+        // Remove common OCR artifacts
+        cleaned = cleaned.replace(/[|]{2,}/g, ''); // Multiple pipes
+        cleaned = cleaned.replace(/[_]{3,}/g, ''); // Multiple underscores
+        cleaned = cleaned.replace(/[~]{2,}/g, ''); // Multiple tildes
+        cleaned = cleaned.replace(/[`]{2,}/g, ''); // Multiple backticks
+
+        // Remove standalone special characters (common OCR noise)
+        cleaned = cleaned.replace(/^\s*[|~`_]\s*$/gm, ''); // Lines with only special chars
+
+        // Normalize line breaks
+        cleaned = cleaned.replace(/\n\s*\n/g, '\n'); // Remove empty lines
+
+        // Trim each line
+        cleaned = cleaned.split('\n').map(line => line.trim()).join('\n');
+
+        // Final trim
+        cleaned = cleaned.trim();
+
+        return cleaned;
+    }
+
+    /**
      * Extract text from an image
      * @param {string} imageDataUrl - Base64 encoded image data URL
      * @param {Object} options - OCR options
      * @param {boolean} options.preprocessImage - Whether to preprocess the image for better OCR
-     * @returns {Promise<{text: string, confidence: number, words: Array}>}
+     * @param {number} options.confidenceThreshold - Minimum confidence to accept OCR (default: 60)
+     * @returns {Promise<{text: string, confidence: number, words: Array, shouldFallbackToImage: boolean}>}
      */
     async extractText(imageDataUrl, options = {}) {
         try {
@@ -64,6 +108,7 @@ class OCRService {
                 await this.initialize();
             }
 
+            const confidenceThreshold = options.confidenceThreshold || 60;
             const startTime = performance.now();
 
             // Perform OCR
@@ -72,27 +117,41 @@ class OCRService {
             const endTime = performance.now();
             const duration = Math.round(endTime - startTime);
 
+            // Clean the extracted text
+            const rawText = result.data.text || '';
+            const cleanedText = this.cleanOCRText(rawText);
+
             console.log(`OCR completed in ${duration}ms`);
-            console.log(`Extracted text (${result.data.text.length} chars):`, result.data.text.substring(0, 100));
             console.log(`Confidence: ${result.data.confidence}%`);
+            console.log(`Raw text (${rawText.length} chars):`, rawText);
+            console.log(`Cleaned text (${cleanedText.length} chars):`, cleanedText);
+
+            // Determine if we should fall back to image
+            const shouldFallbackToImage = result.data.confidence < confidenceThreshold || cleanedText.length === 0;
+
+            if (shouldFallbackToImage) {
+                console.log(`OCR confidence too low (${result.data.confidence}% < ${confidenceThreshold}%) or no text extracted - will use image instead`);
+            }
 
             return {
-                text: result.data.text.trim(),
+                text: cleanedText,
                 confidence: result.data.confidence,
                 words: result.data.words || [],
                 lines: result.data.lines || [],
-                duration: duration
+                duration: duration,
+                shouldFallbackToImage: shouldFallbackToImage
             };
         } catch (error) {
             console.error('OCR text extraction failed:', error);
 
-            // Return empty result on error rather than throwing
+            // Return empty result on error with fallback flag
             return {
                 text: '',
                 confidence: 0,
                 words: [],
                 lines: [],
-                error: error.message
+                error: error.message,
+                shouldFallbackToImage: true // Always fall back on error
             };
         }
     }

@@ -10,11 +10,15 @@
     "db:init": "wrangler d1 execute captureai-db --file=./schema.sql",
     "db:migrate": "wrangler d1 migrations apply captureai-db"
   },
-  "keywords": ["cloudflare", "workers", "ai-gateway", "openai"],
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "ai-gateway",
+    "openai"
+  ],
   "author": "Grayson Kramer",
   "license": "ISC",
   "devDependencies": {
-    "wrangler": "^3.0.0"
-  },
-  "dependencies": {}
+    "wrangler": "^4.56.0"
+  }
 }

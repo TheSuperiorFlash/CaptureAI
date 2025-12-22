@@ -167,18 +167,23 @@ export const ImageProcessing = {
       if (enableOCR) {
         try {
           console.log('Starting OCR extraction...');
-          const ocrResult = await OCRService.extractText(compressedImageData);
+          const ocrResult = await OCRService.extractText(compressedImageData, {
+            confidenceThreshold: 60 // Require 60% confidence to use OCR
+          });
 
           result.ocrData = {
             text: ocrResult.text,
             confidence: ocrResult.confidence,
-            hasValidText: OCRService.isValidOCRResult(ocrResult),
+            hasValidText: OCRService.isValidOCRResult(ocrResult) && !ocrResult.shouldFallbackToImage,
+            shouldFallbackToImage: ocrResult.shouldFallbackToImage,
             duration: ocrResult.duration
           };
 
-          console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted`);
-          if (ocrResult.text.length > 0) {
-            console.log('OCR Preview:', ocrResult.text.substring(0, 200));
+          console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
+          if (ocrResult.shouldFallbackToImage) {
+            console.log('OCR quality insufficient - will use image data instead');
+          } else if (ocrResult.text.length > 0) {
+            console.log('OCR Full Text:', ocrResult.text);
           }
         } catch (ocrError) {
           console.warn('OCR extraction failed, continuing without OCR data:', ocrError);
@@ -186,6 +191,7 @@ export const ImageProcessing = {
             text: '',
             confidence: 0,
             hasValidText: false,
+            shouldFallbackToImage: true,
             error: ocrError.message
           };
         }

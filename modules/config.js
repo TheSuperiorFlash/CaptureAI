@@ -78,7 +78,8 @@ export const STATE = {
   invalidQuestionCount: 0,
   autoSolveToggle: null,
   isAskMode: false,
-  currentResponse: ''
+  currentResponse: '',
+  userTier: 'free'  // User tier: 'free' or 'pro'
 };
 
 // Cached DOM elements

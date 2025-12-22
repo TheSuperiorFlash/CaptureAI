@@ -8,11 +8,12 @@ import { SubscriptionHandler } from './subscription';
 import { jsonResponse } from './utils';
 
 export class Router {
-  constructor(env) {
+  constructor(env, logger = null) {
     this.env = env;
-    this.auth = new AuthHandler(env);
-    this.ai = new AIHandler(env);
-    this.subscription = new SubscriptionHandler(env);
+    this.logger = logger;
+    this.auth = new AuthHandler(env, logger);
+    this.ai = new AIHandler(env, logger);
+    this.subscription = new SubscriptionHandler(env, logger);
   }
 
   /**
@@ -68,6 +69,9 @@ export class Router {
     }
     if (path === '/api/ai/models' && method === 'GET') {
       return this.ai.getModels(request);
+    }
+    if (path === '/api/ai/analytics' && method === 'GET') {
+      return this.ai.getAnalytics(request);
     }
 
     // Subscription routes

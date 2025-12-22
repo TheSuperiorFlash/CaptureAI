@@ -309,19 +309,24 @@ async function handleCaptureArea(request, sender, sendResponse) {
 
     const promptType = request.promptType || PROMPT_TYPES.ANSWER;
 
-    // Check if OCR extraction succeeded
-    const hasValidOCR = processedData.ocrData?.text && processedData.ocrData.text.trim().length > 0;
+    // Check if OCR extraction succeeded and has sufficient confidence
+    const hasValidOCR = processedData.ocrData?.text &&
+                        processedData.ocrData.text.trim().length > 0 &&
+                        !processedData.ocrData?.shouldFallbackToImage;
 
     // For normal captures: send OCR text instead of image data (token optimization)
-    // Fallback to image if OCR fails
+    // Fallback to image if OCR fails or has low confidence
     const aiData = {
-      imageData: hasValidOCR ? null : processedData.compressedImageData,  // Send image only if OCR failed
-      ocrText: processedData.ocrData?.text,
-      ocrConfidence: processedData.ocrData?.confidence
+      imageData: hasValidOCR ? null : processedData.compressedImageData,  // Send image only if OCR failed or low confidence
+      ocrText: processedData.ocrData?.text || null,
+      ocrConfidence: processedData.ocrData?.confidence || null
     };
 
     if (DEBUG && !hasValidOCR) {
-      console.warn('OCR extraction failed or returned empty text, falling back to image data');
+      const reason = processedData.ocrData?.shouldFallbackToImage
+        ? `low confidence (${processedData.ocrData?.confidence}%)`
+        : 'no text extracted';
+      console.warn(`OCR ${reason}, falling back to image data`);
     }
 
     const aiResponse = await sendToOpenAI(aiData, null, promptType);
@@ -476,15 +481,28 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     const reasoningLevel = config.USE_LEGACY_PARAMS ? 0 :
       (config.REASONING_EFFORT === 'medium' ? 2 : 1);
 
-    // Send request to backend
-    const response = await AuthService.sendAIRequest({
-      question: data.question || undefined,
-      imageData: data.imageData,
-      ocrText: data.ocrText,
-      ocrConfidence: data.ocrConfidence,
+    // Build request payload, filtering out null/undefined values
+    const requestPayload = {
       promptType: promptType,
       reasoningLevel: reasoningLevel
-    });
+    };
+
+    // Only add fields if they have valid values
+    if (data.question && data.question.trim().length > 0) {
+      requestPayload.question = data.question;
+    }
+    if (data.imageData) {
+      requestPayload.imageData = data.imageData;
+    }
+    if (data.ocrText && data.ocrText.trim().length > 0) {
+      requestPayload.ocrText = data.ocrText;
+    }
+    if (data.ocrConfidence != null) {
+      requestPayload.ocrConfidence = data.ocrConfidence;
+    }
+
+    // Send request to backend
+    const response = await AuthService.sendAIRequest(requestPayload);
 
     return response.answer || 'No response found';
 

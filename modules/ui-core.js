@@ -7,6 +7,7 @@ export const UICore = {
   floatingUICreated: false,
   panel: null,
   currentTheme: null,
+  modeToggleElement: null,  // Store reference to mode toggle
 
   async init() {
     if (this.initialized) {
@@ -149,9 +150,13 @@ export const UICore = {
     titleContainer.appendChild(title);
     header.appendChild(titleContainer);
 
-    // Add mode toggle to right side of header
-    const modeToggle = this.createModeToggle();
-    header.appendChild(modeToggle);
+    // Add mode toggle to right side of header (Pro tier only)
+    // Initially hidden, will be shown for Pro users by updateModeToggleForTier()
+    this.modeToggleElement = this.createModeToggle();
+    if (this.modeToggleElement) {
+      this.modeToggleElement.style.display = 'none';  // Initially hidden
+      header.appendChild(this.modeToggleElement);
+    }
 
     return header;
   },
@@ -374,6 +379,34 @@ export const UICore = {
       default:
         this.panel.appendChild(component);
         break;
+    }
+  },
+
+  async updateModeToggleForTier() {
+    if (!this.modeToggleElement) {
+      return;
+    }
+
+    // Check user tier from storage
+    let userTier = 'free';
+    try {
+      const userTierData = await chrome.storage.local.get('captureai-user-tier');
+      userTier = userTierData['captureai-user-tier'] || 'free';
+    } catch (error) {
+      console.error('Failed to get user tier:', error);
+    }
+
+    // Only show ask mode toggle for Pro tier
+    if (userTier === 'pro') {
+      this.modeToggleElement.style.display = 'inline-block';
+    } else {
+      this.modeToggleElement.style.display = 'none';
+      // Also ensure ask mode is disabled for free users
+      const { STATE } = window.CaptureAI;
+      if (STATE.isAskMode) {
+        STATE.isAskMode = false;
+        this.switchMode(false);
+      }
     }
   },
 

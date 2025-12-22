@@ -67,8 +67,12 @@ export class AIHandler {
       // Parse request
       const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel } = await parseJSON(request);
 
-      // Validate
-      if (!question && !imageData && !ocrText) {
+      // Validate - check if we have any valid input
+      const hasQuestion = question && question.trim().length > 0;
+      const hasImageData = imageData && imageData.length > 0;
+      const hasOcrText = ocrText && ocrText.trim().length > 0;
+
+      if (!hasQuestion && !hasImageData && !hasOcrText) {
         return jsonResponse({ error: 'Question, image data, or OCR text required' }, 400);
       }
 
@@ -89,12 +93,35 @@ export class AIHandler {
       // Extract answer
       const answer = aiResponse.choices[0]?.message?.content?.trim() || 'No response found';
 
-      // Record usage
+      // Extract token usage details
+      const usage = aiResponse.usage || {};
+      const inputTokens = usage.prompt_tokens || 0;
+      const outputTokens = usage.completion_tokens || 0;
+      const reasoningTokens = usage.completion_tokens_details?.reasoning_tokens || 0;
+      const cachedTokens = usage.prompt_tokens_details?.cached_tokens || 0;
+
+      // Determine input method (OCR, image, or text-only)
+      const inputMethod = hasOcrText && !hasImageData ? 'ocr' :
+                          hasImageData ? 'image' : 'text';
+
+      // Map reasoning level to human-readable format
+      const reasoningLevelMap = {
+        0: 'none',      // gpt-4.1-nano (no reasoning)
+        1: 'low',       // gpt-5-nano low reasoning
+        2: 'medium'     // gpt-5-nano medium reasoning
+      };
+
+      // Record usage with detailed token breakdown
       await this.recordUsage({
         userId: user.userId,
         promptType: promptType || 'answer',
-        model: payload.model,
-        tokensUsed: aiResponse.usage?.total_tokens || 0,
+        model: reasoningLevelMap[reasoningLevel] || 'low',
+        tokensUsed: usage.total_tokens || 0,
+        inputTokens,
+        outputTokens,
+        reasoningTokens,
+        cachedTokens,
+        inputMethod,
         responseTime,
         cached: aiResponse.cached || false
       });
@@ -218,6 +245,154 @@ export class AIHandler {
   }
 
   /**
+   * Get cost analytics and usage statistics
+   * GET /api/ai/analytics
+   */
+  async getAnalytics(request) {
+    try {
+      const user = await this.auth.authenticate(request);
+      if (!user) {
+        return jsonResponse({ error: 'Not authenticated' }, 401);
+      }
+
+      // Get query parameters for filtering
+      const url = new URL(request.url);
+      const days = parseInt(url.searchParams.get('days') || '30'); // Default 30 days
+      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+      // Get overall statistics
+      const stats = await this.db
+        .prepare(`
+          SELECT
+            COUNT(*) as total_requests,
+            SUM(input_tokens) as total_input_tokens,
+            SUM(output_tokens) as total_output_tokens,
+            SUM(reasoning_tokens) as total_reasoning_tokens,
+            SUM(cached_tokens) as total_cached_tokens,
+            SUM(total_cost) as total_cost,
+            AVG(input_tokens) as avg_input_tokens,
+            AVG(output_tokens) as avg_output_tokens,
+            AVG(reasoning_tokens) as avg_reasoning_tokens,
+            AVG(total_cost) as avg_cost_per_request,
+            AVG(response_time) as avg_response_time
+          FROM usage_records
+          WHERE user_id = ? AND created_at >= ?
+        `)
+        .bind(user.userId, startDate)
+        .first();
+
+      // Get breakdown by prompt type
+      const byPromptType = await this.db
+        .prepare(`
+          SELECT
+            prompt_type,
+            COUNT(*) as requests,
+            AVG(input_tokens) as avg_input_tokens,
+            AVG(output_tokens) as avg_output_tokens,
+            AVG(total_cost) as avg_cost,
+            SUM(total_cost) as total_cost
+          FROM usage_records
+          WHERE user_id = ? AND created_at >= ?
+          GROUP BY prompt_type
+        `)
+        .bind(user.userId, startDate)
+        .all();
+
+      // Get breakdown by model
+      const byModel = await this.db
+        .prepare(`
+          SELECT
+            model,
+            COUNT(*) as requests,
+            AVG(input_tokens) as avg_input_tokens,
+            AVG(output_tokens) as avg_output_tokens,
+            AVG(total_cost) as avg_cost,
+            SUM(total_cost) as total_cost
+          FROM usage_records
+          WHERE user_id = ? AND created_at >= ?
+          GROUP BY model
+        `)
+        .bind(user.userId, startDate)
+        .all();
+
+      // Get daily breakdown (last 7 days)
+      const dailyStats = await this.db
+        .prepare(`
+          SELECT
+            DATE(created_at) as date,
+            COUNT(*) as requests,
+            SUM(input_tokens) as input_tokens,
+            SUM(output_tokens) as output_tokens,
+            SUM(total_cost) as cost
+          FROM usage_records
+          WHERE user_id = ? AND created_at >= datetime('now', '-7 days')
+          GROUP BY DATE(created_at)
+          ORDER BY date DESC
+        `)
+        .bind(user.userId)
+        .all();
+
+      return jsonResponse({
+        period: {
+          days,
+          start: startDate,
+          end: new Date().toISOString()
+        },
+        overall: {
+          totalRequests: stats.total_requests || 0,
+          totalCost: parseFloat(stats.total_cost || 0).toFixed(6),
+          avgCostPerRequest: parseFloat(stats.avg_cost_per_request || 0).toFixed(8),
+          tokens: {
+            input: {
+              total: stats.total_input_tokens || 0,
+              average: Math.round(stats.avg_input_tokens || 0)
+            },
+            output: {
+              total: stats.total_output_tokens || 0,
+              average: Math.round(stats.avg_output_tokens || 0)
+            },
+            reasoning: {
+              total: stats.total_reasoning_tokens || 0,
+              average: Math.round(stats.avg_reasoning_tokens || 0)
+            },
+            cached: {
+              total: stats.total_cached_tokens || 0
+            }
+          },
+          avgResponseTime: Math.round(stats.avg_response_time || 0)
+        },
+        byPromptType: byPromptType.results?.map(row => ({
+          promptType: row.prompt_type,
+          requests: row.requests,
+          avgInputTokens: Math.round(row.avg_input_tokens || 0),
+          avgOutputTokens: Math.round(row.avg_output_tokens || 0),
+          avgCost: parseFloat(row.avg_cost || 0).toFixed(8),
+          totalCost: parseFloat(row.total_cost || 0).toFixed(6)
+        })) || [],
+        byModel: byModel.results?.map(row => ({
+          model: row.model,
+          requests: row.requests,
+          avgInputTokens: Math.round(row.avg_input_tokens || 0),
+          avgOutputTokens: Math.round(row.avg_output_tokens || 0),
+          avgCost: parseFloat(row.avg_cost || 0).toFixed(8),
+          totalCost: parseFloat(row.total_cost || 0).toFixed(6)
+        })) || [],
+        daily: dailyStats.results?.map(row => ({
+          date: row.date,
+          requests: row.requests,
+          inputTokens: row.input_tokens,
+          outputTokens: row.output_tokens,
+          cost: parseFloat(row.cost || 0).toFixed(6)
+        })) || []
+      });
+
+    } catch (error) {
+      console.error('Analytics fetch error:', error);
+      return jsonResponse({ error: 'Failed to fetch analytics' }, 500);
+    }
+  }
+
+  /**
    * Check if user is within usage limits
    */
   async checkUsageLimit(userId, tier) {
@@ -271,15 +446,82 @@ export class AIHandler {
   }
 
   /**
-   * Record usage in database
+   * Record usage in database with detailed token breakdown and cost calculation
    */
-  async recordUsage({ userId, promptType, model, tokensUsed, responseTime, cached }) {
+  async recordUsage({
+    userId,
+    promptType,
+    model,
+    tokensUsed,
+    inputTokens,
+    outputTokens,
+    reasoningTokens,
+    cachedTokens,
+    inputMethod,
+    responseTime,
+    cached
+  }) {
+    // Pricing per million tokens (based on reasoning level)
+    // model field now stores: 'none' (gpt-4.1-nano), 'low' (gpt-5-nano), 'medium' (gpt-5-nano)
+    const PRICING = {
+      'none': {         // GPT-4.1-nano (no reasoning)
+        input: 0.10,    // $0.10 per 1M input tokens
+        output: 0.40,   // $0.40 per 1M output tokens
+        cached: 0.025   // $0.025 per 1M cached tokens (75% discount)
+      },
+      'low': {          // GPT-5-nano with low reasoning
+        input: 0.05,    // $0.05 per 1M input tokens
+        output: 0.40,   // $0.40 per 1M output tokens (reasoning tokens count as output)
+        cached: 0.005   // $0.005 per 1M cached tokens (90% discount)
+      },
+      'medium': {       // GPT-5-nano with medium reasoning
+        input: 0.05,    // $0.05 per 1M input tokens
+        output: 0.40,   // $0.40 per 1M output tokens (reasoning tokens count as output)
+        cached: 0.005   // $0.005 per 1M cached tokens (90% discount)
+      }
+    };
+
+    // Get pricing for the reasoning level (default to 'low')
+    const modelPricing = PRICING[model] || PRICING['low'];
+
+    // Calculate costs (convert from per million to per token)
+    // Note: reasoning tokens are billed as output tokens
+    const regularInputTokens = inputTokens - (cachedTokens || 0);
+    const inputCost = (regularInputTokens * modelPricing.input) / 1000000;
+    const cachedCost = ((cachedTokens || 0) * modelPricing.cached) / 1000000;
+    const outputCost = (outputTokens * modelPricing.output) / 1000000;
+    const totalCost = inputCost + cachedCost + outputCost;
+
     await this.db
       .prepare(`
-        INSERT INTO usage_records (user_id, prompt_type, model, tokens_used, response_time, cached)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO usage_records (
+          user_id,
+          prompt_type,
+          model,
+          tokens_used,
+          input_tokens,
+          output_tokens,
+          reasoning_tokens,
+          cached_tokens,
+          total_cost,
+          response_time,
+          cached
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
-      .bind(userId, promptType, model, tokensUsed, responseTime, cached ? 1 : 0)
+      .bind(
+        userId,
+        promptType,
+        model,
+        tokensUsed,
+        inputTokens,
+        outputTokens,
+        reasoningTokens || 0,
+        cachedTokens || 0,
+        totalCost,
+        responseTime,
+        cached ? 1 : 0
+      )
       .run();
   }
 
@@ -306,8 +548,7 @@ export class AIHandler {
     // Helper to build enhanced prompt with OCR text
     const buildPromptWithOCR = (basePrompt) => {
       if (ocrText && ocrText.trim().length > 0) {
-        const confidence = ocrConfidence ? ` (${Math.round(ocrConfidence)}% confidence)` : '';
-        return `${basePrompt}\n\nExtracted text from image${confidence}:\n${ocrText}`;
+        return `${basePrompt}\n\nExtracted text from image:\n${ocrText}`;
       }
       return basePrompt;
     };

@@ -31,7 +31,7 @@ export const UIComponents = {
       this.attachAskMode();
 
       // Set initial state
-      setTimeout(() => {
+      setTimeout(async () => {
         const { STATE } = window.CaptureAI;
         if (STATE.isAskMode) {
           this.buttonsContainer.style.display = 'none';
@@ -40,6 +40,11 @@ export const UIComponents = {
         } else {
           this.askModeContainer.style.display = 'none';
           this.buttonsContainer.style.display = 'flex';
+        }
+
+        // Update mode toggle visibility based on tier
+        if (window.CaptureAI.UICore?.updateModeToggleForTier) {
+          await window.CaptureAI.UICore.updateModeToggleForTier();
         }
       }, 50);
 

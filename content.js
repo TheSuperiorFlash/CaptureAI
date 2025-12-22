@@ -142,7 +142,12 @@
           const licenseKeyResult = await chrome.storage.local.get('captureai-license-key');
           const licenseKey = licenseKeyResult['captureai-license-key'];
 
+          // Load user tier
+          const userTierResult = await chrome.storage.local.get('captureai-user-tier');
+          const userTier = userTierResult['captureai-user-tier'] || 'free';
+
           STATE.apiKey = licenseKey || preferences[STORAGE_KEYS.API_KEY] || '';
+          STATE.userTier = userTier;
           STATE.isAutoSolveMode = preferences[STORAGE_KEYS.AUTO_SOLVE_MODE] || false;
           STATE.isAskMode = preferences[STORAGE_KEYS.ASK_MODE] || false;
           STATE.lastCaptureArea = preferences[STORAGE_KEYS.LAST_CAPTURE_AREA] || null;
