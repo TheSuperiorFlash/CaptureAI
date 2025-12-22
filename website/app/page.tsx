@@ -50,7 +50,7 @@ export default function Home() {
                             Get answers in 3 simple steps
                         </h2>
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                            It's incredibly easy to use - no complicated setup required
+                            It&apos;s incredibly easy to use - no complicated setup required
                         </p>
                     </div>
 

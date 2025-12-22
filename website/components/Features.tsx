@@ -1,4 +1,4 @@
-import { Camera, Zap, MessageSquare, Repeat, Eye, Shield, MousePointer, LucideIcon } from 'lucide-react'
+import { Camera, Zap, Repeat, Eye, Shield, MousePointer, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
