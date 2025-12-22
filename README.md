@@ -6,9 +6,9 @@
 
 **Capture questions from your screen and get instant AI-powered answers**
 
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-brightgreen)](https://chrome.google.com/webstore)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-brightgreen)](https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkppmkecmoeomnjd)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-orange.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](manifest.json)
 
 </div>
 
@@ -16,19 +16,22 @@
 
 ## 📋 Overview
 
-CaptureAI is a Chrome extension that lets you capture questions from any webpage and get instant answers powered by OpenAI's GPT models. Perfect for students, researchers, and anyone who needs quick answers while browsing.
+CaptureAI is a Chrome extension that lets you capture questions from any webpage and get instant answers powered by AI. Perfect for students, researchers, and anyone who needs quick answers while browsing.
 
 ### Key Features
 
 - **🖼️ Smart Screenshot Capture** - Select any area on your screen to capture questions
-- **🤖 AI-Powered Answers** - Get instant, accurate responses using OpenAI's GPT-5-nano model
+- **🔤 OCR Technology** - Extracts text from screenshots using Tesseract.js for 90% token cost reduction
+- **🤖 AI-Powered Answers** - Get instant, accurate responses powered by OpenAI
 - **⚡ Quick Capture** - Repeat captures of the same area with one click
-- **🎯 Auto-Solve Mode** - Automatically solve multiple-choice questions (Quizlet, Vocabulary.com)
+- **🎯 Auto-Solve Mode** - Automatically solve multiple-choice questions on Quizlet and Vocabulary.com
 - **💬 Ask Mode** - Ask custom questions with optional image attachments
 - **👻 Stealth Mode** - Invisible operation when UI is hidden
-- **🛡️ Privacy Guard** - Prevents websites from detecting focus loss or tab switches
-- **⌨️ Keyboard Shortcuts** - Fast workflow with hotkeys
-- **🔒 Privacy-First** - No data collection, everything stays local
+- **🛡️ Privacy Guard** - Prevents websites from detecting focus loss, tab switches, or extension usage
+- **🧠 Reasoning Slider** - Adjust AI reasoning level for Pro users (low/medium/high)
+- **⌨️ Keyboard Shortcuts** - Fast workflow with customizable hotkeys
+- **🔑 License Key System** - Free tier (10 requests/day) or Pro tier (unlimited)
+- **🔒 Privacy-First** - No data collection, secure backend processing
 
 ---
 
@@ -36,19 +39,21 @@ CaptureAI is a Chrome extension that lets you capture questions from any webpage
 
 ### Installation
 
-1. **Clone or download** this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable **Developer mode** (toggle in top-right)
-4. Click **Load unpacked** and select the extension folder
-5. Click the CaptureAI icon and enter your OpenAI API key
+1. Visit the [Chrome Web Store](https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkppmkecmoeomnjd)
+2. Click **Add to Chrome**
+3. Click the CaptureAI icon and activate with a license key
 
-### Getting an OpenAI API Key
+### Getting a License Key
 
-1. Visit [platform.openai.com](https://platform.openai.com)
-2. Sign up or log in
-3. Navigate to API keys section
-4. Create a new API key
-5. Copy and paste it into CaptureAI popup
+**Free Tier (10 requests/day):**
+1. Click the CaptureAI extension icon
+2. Visit the [activation page](https://thesuperiorflash.github.io/CaptureAI/activate.html)
+3. Enter your email to receive a free license key
+
+**Pro Tier (Unlimited - $9.99/month):**
+1. Click "Buy Pro Key" in the extension popup
+2. Complete checkout via Stripe
+3. Receive your Pro license key via email
 
 ---
 
@@ -102,20 +107,34 @@ Ask custom questions with optional images:
 
 ---
 
+## 🔤 OCR Technology
+
+CaptureAI uses **Tesseract.js** for optical character recognition, providing significant benefits:
+
+- **90% Token Savings** - Extracted text uses far fewer tokens than images
+- **Faster Processing** - Text-based queries are processed more quickly
+- **Smart Fallback** - Automatically uses image if OCR confidence is below 60%
+- **Text Cleaning** - Removes OCR artifacts and normalizes formatting
+
+---
+
 ## 🏗️ Architecture
 
 ### Core Components
 ```
 CaptureAI/
-├── manifest.json              # Extension configuration
+├── manifest.json              # Extension configuration (Manifest V3)
 ├── background.js              # Service worker (API communication)
 ├── content.js                 # Main content script entry point
 ├── popup.html/js              # Extension popup interface
+├── inject.js                  # MAIN world privacy protection script
 ├── privacy-policy.html        # Privacy policy
 │
 ├── modules/                   # Modular JavaScript components
 │   ├── config.js             # Constants and state management
 │   ├── storage.js            # Chrome storage utilities
+│   ├── auth-service.js       # License key authentication
+│   ├── ocr-service.js        # Tesseract.js OCR integration
 │   ├── domains.js            # Site detection logic
 │   ├── utils.js              # Helper functions
 │   ├── image-processing.js   # Screenshot compression/optimization
@@ -127,44 +146,60 @@ CaptureAI/
 │   ├── messaging.js          # Chrome extension messaging
 │   ├── keyboard.js           # Keyboard shortcut handling
 │   ├── event-manager.js      # Event cleanup and error handling
-│   └── privacy-guard.js      # Privacy protection coordinator
+│   ├── privacy-guard.js      # Privacy protection coordinator
+│   └── migration.js          # API key to license key migration
 │
-├── inject.js                  # MAIN world privacy protection script
+├── libs/tesseract/            # OCR library
+│   ├── tesseract.min.js
+│   ├── worker.min.js
+│   └── lang-data/eng.traineddata.gz
+│
+├── backend/                   # Cloudflare Workers backend
+│   └── src/
+│       ├── index.js          # Main router
+│       ├── auth.js           # License key management
+│       ├── ai.js             # OpenAI API integration
+│       └── subscription.js   # Stripe payment handling
+│
+├── website/                   # Next.js support website
 │
 └── icons/                     # Extension icons
-    ├── icon16.png
-    ├── icon48.png
-    ├── icon128.png
-    ├── camera.png
-    ├── attach.png
-    └── attached.png
 ```
 
 ### Data Flow
 ```
-User Action → Content Script → Background Script → OpenAI API
-                    ↓
-            Image Processing
-                    ↓
-              UI Display ← API Response
+User Action → Content Script → Background Script → Backend API → OpenAI
+                    ↓                                    ↓
+            OCR Processing                        License Validation
+                    ↓                                    ↓
+              UI Display ←←←←←←←←←←←←←←←←←←←←← API Response
 ```
 
 ### Key Technologies
 
 - **Manifest V3** - Modern Chrome extension architecture
 - **ES6 Modules** - Clean, modular code organization
-- **OpenAI GPT-5-nano** - Advanced AI model for accurate answers
-- **Canvas API** - Screenshot processing and optimization
+- **Tesseract.js** - Client-side OCR for text extraction
+- **Cloudflare Workers** - Serverless backend with D1 database
+- **OpenAI API** - GPT models for AI-powered answers
+- **Stripe** - Payment processing for Pro subscriptions
 - **Chrome Storage API** - Secure local data persistence
 
 ---
 
 ## 🎨 Features Deep Dive
 
+### OCR Processing
+
+- **Tesseract.js v5.1.0** - Industry-standard OCR library
+- **60% Confidence Threshold** - Falls back to image if text extraction is unreliable
+- **Text Cleaning** - Removes artifacts, normalizes whitespace
+- **Token Optimization** - Reduces API costs by ~90%
+
 ### Image Processing
 
-- **Smart compression** - Reduces token usage while maintaining quality
-- **Multiple format support** - WebP and JPEG with quality optimization
+- **Smart compression** - Reduces file size while maintaining quality
+- **WebP/JPEG optimization** - Chooses best format for efficiency
 - **Intelligent resizing** - Optimizes dimensions for API efficiency
 - **Zoom-aware capture** - Handles browser zoom levels correctly
 
@@ -186,13 +221,12 @@ When UI is hidden:
 - ✅ **Removes AI honeypots** - Automatically deletes hidden AI detection traps
 - ✅ **MAIN world injection** - Runs before page scripts, undetectable by websites
 
-**How it works:**
-1. Injects into MAIN world (same context as page)
-2. Overrides native browser APIs before page loads
-3. Blocks privacy-sensitive event listeners
-4. Monitors and removes AI detection elements
+### Reasoning Slider (Pro Only)
 
-See [docs/PRIVACY_GUARD.md](docs/PRIVACY_GUARD.md) for technical details.
+Adjust AI reasoning effort:
+- **Low** - Fast responses for simple questions
+- **Medium** - Balanced reasoning
+- **High** - Deep analysis for complex problems
 
 ### Auto-Solve Intelligence
 
@@ -202,44 +236,43 @@ See [docs/PRIVACY_GUARD.md](docs/PRIVACY_GUARD.md) for technical details.
 - Handles "Spell the word" prompts
 - Stops after 2 consecutive invalid questions
 
-### Privacy & Security
+### License Key System
 
-- ✅ **No data collection** - Zero telemetry or analytics
-- ✅ **Local storage only** - API key stored securely in Chrome
-- ✅ **Direct API calls** - No intermediary servers
-- ✅ **HTTPS encryption** - All API communication encrypted
-- ✅ **Minimal permissions** - Only requests necessary access
+- **Free Tier** - 10 requests per day, all core features
+- **Pro Tier** - Unlimited requests, reasoning slider, priority support
+- **Secure Validation** - Backend validates all requests
+- **Usage Tracking** - View remaining requests in popup
+
+---
+
+## 💰 Pricing
+
+| Feature | Free | Pro ($9.99/mo) |
+|---------|------|----------------|
+| Daily Requests | 10 | Unlimited |
+| Screenshot Capture | ✅ | ✅ |
+| OCR Text Extraction | ✅ | ✅ |
+| Auto-Solve Mode | ✅ | ✅ |
+| Ask Mode | ✅ | ✅ |
+| Stealth Mode | ✅ | ✅ |
+| Privacy Guard | ✅ | ✅ |
+| Reasoning Slider | ❌ | ✅ |
+| Priority Support | ❌ | ✅ |
+
+---
+
+## 📊 Supported Websites
+
+### Full Auto-Solve Support
+- ✅ Quizlet.com - Flashcards and practice tests
+- ✅ Vocabulary.com - Vocabulary practice
+
+### Universal Capture Mode
+Works on **all websites** for manual question capture and AI answers.
 
 ---
 
 ## 🔧 Configuration
-
-### API Settings
-
-Modify `background.js` to customize OpenAI parameters:
-```javascript
-const OPENAI_CONFIG = {
-    MODEL: 'gpt-5-nano',           // AI model to use
-    REASONING_EFFORT: 'low',        // Reasoning level
-    VERBOSITY: 'low',               // Response verbosity
-    MAX_TOKENS: {
-        AUTO_SOLVE: 2500,
-        ASK: 8000,
-        DEFAULT: 5000
-    }
-};
-```
-
-### Prompt Customization
-
-Customize prompts in `background.js`:
-```javascript
-const PROMPTS = {
-    AUTO_SOLVE: 'Answer with only the number...',
-    ANSWER: 'Reply with answer only...',
-    ASK_SYSTEM: 'You are a helpful assistant...'
-};
-```
 
 ### Auto-Solve Timing
 
@@ -258,16 +291,25 @@ export const CONFIG = {
 
 ### Prerequisites
 
-- Chrome/Chromium browser
-- OpenAI API key
-- Basic understanding of Chrome extensions
+- Google Chrome browser
+- Node.js (for website development)
+- Cloudflare account (for backend deployment)
 
 ### Local Development
 
-1. Make changes to source files
-2. Go to `chrome://extensions/`
-3. Click refresh icon on CaptureAI card
-4. Test changes on target websites
+1. Clone the repository
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable **Developer mode** (toggle in top-right)
+4. Click **Load unpacked** and select the extension folder
+5. Make changes and click refresh icon on the extension card
+
+### Running Tests
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage report
+```
 
 ### Adding New Supported Sites
 
@@ -284,26 +326,6 @@ isOnYourNewSite() {
 }
 ```
 
-### Testing
-
-Test on various scenarios:
-- Different question formats
-- Multiple-choice vs text questions
-- Various zoom levels
-- Different screen resolutions
-- Supported educational sites
-
----
-
-## 📊 Supported Websites
-
-### Full Auto-Solve Support
-- ✅ Quizlet.com - Flashcards and practice tests
-- ✅ Vocabulary.com - Vocabulary practice
-
-### Universal Capture Mode
-Works on **all websites** for manual question capture and AI answers.
-
 ---
 
 ## 🐛 Troubleshooting
@@ -311,7 +333,7 @@ Works on **all websites** for manual question capture and AI answers.
 ### Extension Not Working
 
 1. Refresh the page after installing
-2. Check if API key is set correctly
+2. Check if license key is activated
 3. Verify you're on a valid webpage (not chrome://)
 4. Check browser console for errors (F12)
 
@@ -321,11 +343,11 @@ Works on **all websites** for manual question capture and AI answers.
 - Try refreshing the extension: `chrome://extensions/`
 - Check if content script loaded: inspect page console
 
-### API Errors
+### License Key Issues
 
-- Verify API key is valid
-- Check API usage limits on OpenAI dashboard
-- Ensure network connection is stable
+- Verify key format: `XXXX-XXXX-XXXX-XXXX-XXXX`
+- Check internet connection
+- Try deactivating and reactivating
 
 ### Auto-Solve Not Working
 
@@ -341,12 +363,18 @@ Works on **all websites** for manual question capture and AI answers.
 CaptureAI respects your privacy:
 
 - **No data collection** - We don't collect any usage data
-- **Local storage only** - API key stored in Chrome's secure storage
-- **Direct API calls** - Screenshots sent directly to OpenAI, never to our servers
+- **Secure backend** - License keys validated via encrypted connection
+- **Direct processing** - Screenshots processed and discarded immediately
 - **No tracking** - Zero analytics or telemetry
 - **Open source** - All code is visible and auditable
 
 See [privacy-policy.html](privacy-policy.html) for full details.
+
+---
+
+## 🌐 Browser Compatibility
+
+CaptureAI is built specifically for **Google Chrome** and uses Chrome-specific APIs for screenshot capture. Compatibility with other Chromium-based browsers (Edge, Brave, Opera, Vivaldi) is not guaranteed and has not been tested.
 
 ---
 
@@ -357,10 +385,9 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 ### Areas for Improvement
 
 - Add more supported educational sites
-- Implement OCR for better text extraction
-- Add support for formula/equation recognition
+- Implement formula/equation recognition
+- Add support for additional languages in OCR
 - Create options page for advanced settings
-- Add support for other AI providers
 
 ---
 
@@ -374,6 +401,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Grayson Kramer**
 
+- GitHub: [@TheSuperiorFlash](https://github.com/TheSuperiorFlash)
 - Contact: wonhappyheart@gmail.com
 
 ---
@@ -381,16 +409,29 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Acknowledgments
 
 - OpenAI for the GPT API
+- Tesseract.js team for the OCR library
+- Cloudflare for Workers platform
 - Chrome Extensions team for excellent documentation
-- All contributors and users
 
 ---
 
 ## 📈 Version History
 
-### v1.0.0 (Current)
+### v2.0.0 (Current)
+- **Backend System** - Cloudflare Workers backend with D1 database
+- **License Key System** - Free tier (10/day) and Pro tier (unlimited)
+- **Stripe Integration** - Secure payment processing for Pro subscriptions
+- **Usage Tracking** - View remaining requests in popup
+
+### v1.1.0
+- **Privacy Guard** - Prevents websites from detecting extension usage
+- **Reasoning Slider** - Adjustable AI reasoning level for Pro users
+- **Improved Stealth Mode** - Enhanced invisible operation
+
+### v1.0.0
 - Initial release
 - Basic capture and AI answer functionality
+- OCR text extraction with Tesseract.js
 - Auto-solve mode for supported sites
 - Ask mode with image attachments
 - Stealth mode for invisible operation
@@ -402,6 +443,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Made with ❤️ for students and learners everywhere**
 
-[Report Bug](https://github.com/yourusername/captureai/issues) · [Request Feature](https://github.com/yourusername/captureai/issues)
+[Report Bug](https://github.com/TheSuperiorFlash/CaptureAI/issues) · [Request Feature](https://github.com/TheSuperiorFlash/CaptureAI/issues)
 
 </div>
