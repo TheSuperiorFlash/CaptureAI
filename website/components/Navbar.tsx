@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
@@ -9,6 +10,7 @@ export default function Navbar() {
     const navigation = [
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/pricing' },
+        { name: 'Download', href: 'https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkpmmkecmoeomnjd?authuser=0&hl=en' },
         { name: 'Help', href: '/help' },
     ]
 
@@ -19,7 +21,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center space-x-2">
-                            <img src="/icon128.png" alt="CaptureAI" className="w-8 h-8" />
+                            <Image src="/icon128.png" alt="CaptureAI" width={32} height={32} />
                             <span className="text-xl font-bold text-white">CaptureAI</span>
                         </Link>
                     </div>

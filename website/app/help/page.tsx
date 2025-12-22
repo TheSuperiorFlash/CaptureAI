@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Documentation - CaptureAI',
+    title: 'Help - CaptureAI',
     description: 'Learn how to use CaptureAI effectively',
 }
 
@@ -9,7 +9,7 @@ export default function DocsPage() {
     return (
         <div className="py-24 bg-[#08070e] min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Documentation</h1>
+                <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Help Center</h1>
                 <p className="text-xl text-gray-300 mb-12">
                     Everything you need to know about using CaptureAI
                 </p>
@@ -21,33 +21,32 @@ export default function DocsPage() {
                     <div className="prose prose-lg max-w-none">
                         <h3 className="text-2xl font-semibold text-white mb-4">Installation</h3>
                         <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Visit the Chrome Web Store</li>
+                            <li>Visit the Chrome Web Store and install CaptureAI</li>
                             <li>Click "Add to Chrome"</li>
-                            <li>Pin the extension to your toolbar for easy access</li>
-                            <li>Create an account to start using CaptureAI</li>
+                            <li>Get your license key from the activation page</li>
+                            <li>Enter your license key in the extension to start using CaptureAI</li>
                         </ol>
 
-                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">Quick Capture</h3>
+                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">How to Use</h3>
                         <p className="text-gray-300 mb-4">
-                            The fastest way to capture and analyze screenshots:
+                            Using CaptureAI is simple:
                         </p>
                         <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Press <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">Ctrl+Shift+X</code> (or <code className="bg-gray-800 px-2 py-1 rounded text-blue-400">Cmd+Shift+X</code> on Mac)</li>
-                            <li>Click and drag to select the area you want to capture</li>
-                            <li>Type your question in the popup</li>
-                            <li>Get instant AI-powered answers!</li>
+                            <li>Click the floating CaptureAI button on any webpage</li>
+                            <li>Take a screenshot of your question using the capture tool</li>
+                            <li>Wait a moment while AI analyzes your question</li>
+                            <li>Get your answer displayed right on the page</li>
                         </ol>
 
-                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">Ask Mode</h3>
+                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">Auto-Solve</h3>
                         <p className="text-gray-300 mb-4">
-                            Capture first, ask questions later:
+                            CaptureAI can automatically solve questions on supported platforms:
                         </p>
-                        <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Click the CaptureAI icon in your toolbar</li>
-                            <li>Click "Ask Mode"</li>
-                            <li>Capture an area of your screen</li>
-                            <li>The screenshot is stored - ask questions anytime</li>
-                        </ol>
+                        <ul className="list-disc list-inside space-y-2 text-gray-300">
+                            <li>Works on Quizlet and Vocabulary.com</li>
+                            <li>Automatically detects and solves questions</li>
+                            <li>Answers appear directly on the page</li>
+                        </ul>
                     </div>
                 </section>
 
@@ -57,31 +56,44 @@ export default function DocsPage() {
 
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">AI Analysis</h3>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Screenshot Capture</h3>
                             <p className="text-gray-300">
-                                CaptureAI uses advanced AI models to analyze your screenshots and provide intelligent answers.
-                                You can ask questions about text, images, diagrams, code, and more.
+                                Capture any question on your screen with a simple click. Works on any website.
                             </p>
                         </div>
 
                         <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Prompt Templates</h3>
-                            <p className="text-gray-300 mb-2">
-                                Choose from built-in prompt templates for common tasks:
+                            <h3 className="text-2xl font-semibold text-white mb-3">Floating UI</h3>
+                            <p className="text-gray-300">
+                                Always accessible interface that stays on top. Click anytime to get started.
                             </p>
-                            <ul className="list-disc list-inside space-y-1 text-gray-300">
-                                <li><strong className="text-blue-400">General:</strong> Get a general analysis of your screenshot</li>
-                                <li><strong className="text-blue-400">Solve Problem:</strong> Get step-by-step solutions to problems</li>
-                                <li><strong className="text-blue-400">Explain:</strong> Get detailed explanations of concepts</li>
-                                <li><strong className="text-blue-400">Summarize:</strong> Get concise summaries of content</li>
-                            </ul>
                         </div>
 
                         <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Usage Tracking</h3>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Stealth Mode</h3>
                             <p className="text-gray-300">
-                                Monitor your API usage in the extension popup. Free tier users get 10 requests per day,
-                                while Pro users get unlimited requests.
+                                Answers appear discreetly right where you need them. No obvious popups or alerts.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Auto-Solve</h3>
+                            <p className="text-gray-300">
+                                Automatically solve questions on Quizlet and Vocabulary.com.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Privacy Guard</h3>
+                            <p className="text-gray-300">
+                                Your activity stays completely private. No one can detect the extension.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Works Anywhere</h3>
+                            <p className="text-gray-300">
+                                Use on any website - homework sites, quizzes, study platforms, anywhere.
                             </p>
                         </div>
                     </div>
@@ -94,21 +106,19 @@ export default function DocsPage() {
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-xl font-semibold text-white mb-2">
-                                How does CaptureAI protect my privacy?
+                                How do I get a license key?
                             </h3>
                             <p className="text-gray-300">
-                                Screenshots are sent directly to OpenAI's API for processing and are never stored on our servers.
-                                We don't collect or store any of your screenshot data.
+                                Visit the activation page and enter your email. You'll receive a license key via email that you can use to activate the extension.
                             </p>
                         </div>
 
                         <div>
                             <h3 className="text-xl font-semibold text-white mb-2">
-                                What happens when I reach my daily limit?
+                                What's the difference between Free and Pro?
                             </h3>
                             <p className="text-gray-300">
-                                Free tier users are limited to 10 AI requests per day. Once you reach this limit, you'll need to
-                                wait for the daily reset (midnight UTC) or upgrade to Pro for unlimited requests.
+                                Free tier gives you 10 requests per day. Pro tier gives you unlimited requests for $9.99/month.
                             </p>
                         </div>
 
@@ -126,8 +136,7 @@ export default function DocsPage() {
                                 How do I upgrade to Pro?
                             </h3>
                             <p className="text-gray-300">
-                                Click the "Upgrade to Pro" button in the extension popup to start your subscription.
-                                You'll be redirected to Stripe for secure payment processing.
+                                Visit the activation page and select the Pro tier. After payment, you'll receive a Pro license key via email.
                             </p>
                         </div>
                     </div>

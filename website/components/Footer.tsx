@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
     return (
@@ -8,7 +9,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <img src="/icon128.png" alt="CaptureAI" className="w-8 h-8" />
+                            <Image src="/icon128.png" alt="CaptureAI" width={32} height={32} />
                             <span className="text-xl font-bold text-white">CaptureAI</span>
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">

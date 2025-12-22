@@ -45,42 +45,82 @@ export default function ActivatePage() {
   };
 
   const handleFreeSignup = async () => {
-    const response = await fetch('https://backend.captureai.workers.dev/api/auth/create-free-key', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
+    try {
+      const response = await fetch('https://backend.captureai.workers.dev/api/auth/create-free-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+        mode: 'cors'
+      });
 
-    const data = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to create license key';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to create account');
+      const data = await response.json();
+
+      setResult({
+        type: 'success',
+        message: data.existing
+          ? `We've sent your existing license key to ${email}`
+          : `Your license key has been sent to ${email}`,
+        existing: data.existing
+      });
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Unable to connect to server. Please check your internet connection.');
+      }
+      throw error;
     }
-
-    setResult({
-      type: 'success',
-      message: data.existing
-        ? `We've sent your existing license key to ${email}`
-        : `Your license key has been sent to ${email}`,
-      existing: data.existing
-    });
   };
 
   const handleProSignup = async () => {
-    const response = await fetch('https://backend.captureai.workers.dev/api/subscription/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
+    try {
+      const response = await fetch('https://backend.captureai.workers.dev/api/subscription/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+        mode: 'cors'
+      });
 
-    const data = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to start checkout';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to start checkout');
+      const data = await response.json();
+
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Unable to connect to server. Please check your internet connection.');
+      }
+      throw error;
     }
-
-    // Redirect to Stripe checkout
-    window.location.href = data.url;
   };
 
   return (
@@ -158,13 +198,10 @@ export default function ActivatePage() {
                   Unlimited requests
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Priority AI processing
+                  All features unlocked
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Advanced features
-                </li>
-                <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Email support
+                  Priority support
                 </li>
               </ul>
             </button>
@@ -199,7 +236,7 @@ export default function ActivatePage() {
                 Processing...
               </span>
             ) : selectedTier === 'free' ? (
-              'Start Free Trial'
+              'Get Free License Key'
             ) : (
               'Subscribe to Pro - $9.99/month'
             )}

@@ -64,15 +64,15 @@ export default function Home() {
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Unlimited questions</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Priority support</span>
+                                    <span className="text-gray-300">Unlimited requests</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">All features unlocked</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Priority support</span>
                                 </li>
                             </ul>
                             <Link

@@ -20,7 +20,7 @@ const features: Feature[] = [
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Work invisibly without websites knowing you\'re using CaptureAI.',
+        description: 'Answers appear discreetly right where you need them. No obvious popups or alerts.',
     },
     {
         icon: Repeat,
@@ -31,11 +31,6 @@ const features: Feature[] = [
         icon: Shield,
         title: 'Privacy Guard',
         description: 'Your activity stays completely private. No one can detect the extension.',
-    },
-    {
-        icon: MessageSquare,
-        title: 'Ask Mode',
-        description: 'Ask custom questions about anything you capture. Get instant answers.',
     },
     {
         icon: Zap,
