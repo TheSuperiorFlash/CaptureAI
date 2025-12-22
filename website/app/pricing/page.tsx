@@ -55,14 +55,18 @@ const plans: Plan[] = [
 
 export default function PricingPage() {
     return (
-        <div className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-24 bg-[#08070e] relative overflow-hidden">
+            {/* Gradient background */}
+            <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500 gradient-blur animate-pulse-glow"></div>
+            <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-cyan-500 gradient-blur animate-float"></div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-5xl font-bold text-gray-900 mb-4">
+                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
                         Simple, transparent pricing
                     </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                         Start free, upgrade when you're ready. No credit card required.
                     </p>
                 </div>
@@ -72,33 +76,33 @@ export default function PricingPage() {
                     {plans.map((plan) => (
                         <div
                             key={plan.name}
-                            className={`relative rounded-2xl p-8 ${
+                            className={`relative rounded-2xl p-8 backdrop-blur-sm ${
                                 plan.popular
-                                    ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-2xl scale-105'
-                                    : 'bg-white border-2 border-gray-200'
+                                    ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-2xl shadow-blue-500/30 scale-105 border border-blue-400/50'
+                                    : 'bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 hover:border-blue-500/50 transition-all'
                             }`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                     Most Popular
                   </span>
                                 </div>
                             )}
 
                             <div className="mb-8">
-                                <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                                <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-white'}`}>
                                     {plan.name}
                                 </h3>
                                 <div className="flex items-baseline mb-2">
-                  <span className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>
+                  <span className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-white'}`}>
                     {plan.price}
                   </span>
-                                    <span className={`ml-2 ${plan.popular ? 'text-blue-100' : 'text-gray-600'}`}>
+                                    <span className={`ml-2 ${plan.popular ? 'text-blue-100' : 'text-gray-400'}`}>
                     {plan.period}
                   </span>
                                 </div>
-                                <p className={plan.popular ? 'text-blue-100' : 'text-gray-600'}>
+                                <p className={plan.popular ? 'text-blue-100' : 'text-gray-400'}>
                                     {plan.description}
                                 </p>
                             </div>
@@ -106,8 +110,8 @@ export default function PricingPage() {
                             <ul className="space-y-4 mb-8">
                                 {plan.features.map((feature, index) => (
                                     <li key={index} className="flex items-start">
-                                        <Check className={`w-5 h-5 mr-3 flex-shrink-0 ${plan.popular ? 'text-white' : 'text-blue-600'}`} />
-                                        <span className={plan.popular ? 'text-white' : 'text-gray-700'}>
+                                        <Check className={`w-5 h-5 mr-3 flex-shrink-0 ${plan.popular ? 'text-white' : 'text-blue-400'}`} />
+                                        <span className={plan.popular ? 'text-white' : 'text-gray-300'}>
                       {feature}
                     </span>
                                     </li>
@@ -118,8 +122,8 @@ export default function PricingPage() {
                                 href={plan.href}
                                 className={`block w-full py-4 rounded-lg text-center font-semibold transition-all ${
                                     plan.popular
-                                        ? 'bg-white text-blue-600 hover:bg-gray-100'
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                        ? 'bg-white text-blue-600 hover:bg-gray-100 shadow-lg'
+                                        : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40'
                                 }`}
                             >
                                 {plan.cta}
@@ -130,33 +134,33 @@ export default function PricingPage() {
 
                 {/* FAQ Section */}
                 <div className="mt-24 max-w-3xl mx-auto">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">
                         Frequently Asked Questions
                     </h2>
                     <div className="space-y-6">
-                        <div className="bg-white rounded-lg p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-lg p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
                                 Can I upgrade or downgrade anytime?
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-gray-400">
                                 Yes! You can upgrade to Pro anytime, and cancel your subscription whenever you want.
                                 No questions asked.
                             </p>
                         </div>
-                        <div className="bg-white rounded-lg p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-lg p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
                                 What happens when I hit the free tier limit?
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-gray-400">
                                 You'll receive a notification when you approach your daily limit. You can either wait
                                 for the daily reset or upgrade to Pro for unlimited requests.
                             </p>
                         </div>
-                        <div className="bg-white rounded-lg p-6 shadow-sm">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-lg p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
                                 Is my data secure?
                             </h3>
-                            <p className="text-gray-600">
+                            <p className="text-gray-400">
                                 Absolutely. We process screenshots securely and never store them on our servers.
                                 Your privacy is our top priority.
                             </p>
