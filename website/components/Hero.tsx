@@ -11,24 +11,19 @@ export default function Hero() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-8 backdrop-blur-sm">
-                        <Zap className="w-4 h-4 text-blue-400 mr-2" />
-                        <span className="text-sm font-medium text-blue-300">Now with AI-powered analysis</span>
-                    </div>
-
                     {/* Heading */}
                     <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
-                        Screenshot + AI =
+                        Get answers to any question
+                        <br />
                         <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-              {' '}Instant Answers
-            </span>
+                            instantly
+                        </span>
                     </h1>
 
                     {/* Subheading */}
                     <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        Capture any part of your screen and ask questions. CaptureAI analyzes images instantly
-                        and provides intelligent answers powered by advanced AI.
+                        Screenshot your homework, quizzes, or study materials and get instant AI-powered answers.
+                        Works on any website.
                     </p>
 
                     {/* CTA Buttons */}
@@ -50,9 +45,9 @@ export default function Hero() {
 
                     {/* Trust Badges */}
                     <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
-                        <div>✅ Free Plan Available</div>
-                        <div>🔒 Privacy-Focused</div>
-                        <div>⚡ 90% Token Cost Savings with OCR</div>
+                        <div>✅ Free to start</div>
+                        <div>⚡ Works on any website</div>
+                        <div>🔒 Your screenshots stay private</div>
                     </div>
                 </div>
             </div>

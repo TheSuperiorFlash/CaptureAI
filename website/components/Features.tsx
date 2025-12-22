@@ -1,4 +1,4 @@
-import { Camera, Zap, Lock, Sparkles, Eye, Repeat, LucideIcon } from 'lucide-react'
+import { Camera, Zap, MessageSquare, Repeat, Eye, KeyboardIcon, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
@@ -9,33 +9,33 @@ interface Feature {
 const features: Feature[] = [
     {
         icon: Camera,
-        title: 'OCR Technology',
-        description: 'Uses Tesseract.js for local OCR text extraction, achieving 90% token cost savings compared to vision models.',
+        title: 'Quick Capture',
+        description: 'Press Ctrl+Shift+X to screenshot any question on your screen. Works with text, images, diagrams, and more.',
     },
     {
-        icon: Sparkles,
-        title: 'AI-Powered Answers',
-        description: 'Extracted text is sent to OpenAI for intelligent analysis and accurate question answering.',
+        icon: MessageSquare,
+        title: 'Instant Answers',
+        description: 'Get AI-powered answers to your questions in seconds. Perfect for homework, quizzes, and studying.',
     },
     {
         icon: Repeat,
-        title: 'Auto-Solve Mode',
-        description: 'Automatically solve multiple-choice questions on Quizlet and Vocabulary.com with intelligent detection.',
-    },
-    {
-        icon: Lock,
-        title: 'Privacy Guard',
-        description: 'Prevents websites from detecting extension usage by blocking focus/blur events and spoofing focus state.',
+        title: 'Auto-Solve',
+        description: 'Automatically solve multiple-choice questions on Quizlet and Vocabulary.com with one click.',
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Operate invisibly when UI is hidden - no overlays, no selection boxes, just subtle results.',
+        description: 'Work invisibly - websites can\'t detect you\'re using CaptureAI. Stay focused without distractions.',
+    },
+    {
+        icon: KeyboardIcon,
+        title: 'Keyboard Shortcuts',
+        description: 'Lightning-fast shortcuts: Ctrl+Shift+X to capture, Ctrl+Shift+F to repeat, Ctrl+Shift+E to toggle.',
     },
     {
         icon: Zap,
-        title: 'Quick Capture',
-        description: 'Press Ctrl+Shift+X to capture, Ctrl+Shift+F to repeat last area, Ctrl+Shift+E to toggle UI.',
+        title: 'Works Anywhere',
+        description: 'Use CaptureAI on any website - Canvas, Blackboard, Google Classroom, or any online platform.',
     },
 ]
 
@@ -49,10 +49,10 @@ export default function Features() {
                 {/* Section Header */}
                 <div className="text-center mb-16">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                        Everything you need to work smarter
+                        How it works
                     </h2>
                     <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                        Powerful features designed to help you solve problems faster and boost your productivity
+                        Simple, fast, and designed for students
                     </p>
                 </div>
 

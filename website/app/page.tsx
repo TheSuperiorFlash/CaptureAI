@@ -9,58 +9,78 @@ export default function Home() {
             <Hero />
             <Features />
 
-            {/* How It Works Section */}
+            {/* Pricing Section */}
             <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                            How It Works
+                            Simple pricing
                         </h2>
                         <p className="text-xl text-gray-400">
-                            Three simple steps to get instant AI-powered answers
+                            Start free, upgrade when you need more
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        {/* Step 1 */}
-                        <div className="text-center group">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-110">
-                                1
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        {/* Free Tier */}
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 hover:border-blue-500/50 transition-all">
+                            <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
+                            <div className="text-4xl font-bold text-white mb-6">
+                                $0<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
-                            <h3 className="text-2xl font-semibold text-white mb-4">
-                                Capture
-                            </h3>
-                            <p className="text-gray-400 leading-relaxed">
-                                Press Ctrl+Shift+X and select any area of your screen to capture
-                            </p>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">10 questions per day</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">All core features</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Works on any website</span>
+                                </li>
+                            </ul>
+                            <Link
+                                href="/activate"
+                                className="block w-full text-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-all font-semibold"
+                            >
+                                Start Free
+                            </Link>
                         </div>
 
-                        {/* Step 2 */}
-                        <div className="text-center group">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-110">
-                                2
+                        {/* Pro Tier */}
+                        <div className="bg-gradient-to-b from-blue-900/30 to-blue-900/10 border border-blue-500/50 rounded-2xl p-8 hover:border-blue-500 transition-all relative">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-white text-sm font-semibold rounded-full">
+                                Most Popular
                             </div>
-                            <h3 className="text-2xl font-semibold text-white mb-4">
-                                Ask
-                            </h3>
-                            <p className="text-gray-400 leading-relaxed">
-                                Type your question about the captured image or let AI analyze it automatically
-                            </p>
-                        </div>
-
-                        {/* Step 3 */}
-                        <div className="text-center group">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all group-hover:scale-110">
-                                3
+                            <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+                            <div className="text-4xl font-bold text-white mb-6">
+                                $9.99<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
-                            <h3 className="text-2xl font-semibold text-white mb-4">
-                                Get Answers
-                            </h3>
-                            <p className="text-gray-400 leading-relaxed">
-                                Receive intelligent, AI-powered answers in seconds - no manual work required
-                            </p>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Unlimited questions</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Priority support</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">All features unlocked</span>
+                                </li>
+                            </ul>
+                            <Link
+                                href="/activate"
+                                className="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all font-semibold shadow-lg shadow-blue-500/20"
+                            >
+                                Get Pro
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -75,16 +95,16 @@ export default function Home() {
 
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                        Ready to work smarter?
+                        Ready to ace your next assignment?
                     </h2>
                     <p className="text-xl text-gray-300 mb-10">
-                        Join thousands of users who are already using CaptureAI to boost their productivity
+                        Join students using CaptureAI to study smarter, not harder
                     </p>
                     <Link
                         href="/download"
                         className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                     >
-                        Get Started for Free
+                        Add to Chrome - Free
                         <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                 </div>
