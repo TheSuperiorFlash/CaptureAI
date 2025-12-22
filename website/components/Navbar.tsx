@@ -10,7 +10,7 @@ export default function Navbar() {
     const navigation = [
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/pricing' },
-        { name: 'Download', href: 'https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkpmmkecmoeomnjd?authuser=0&hl=en' },
+        { name: 'Download', href: '/download' },
         { name: 'Help', href: '/help' },
     ]
 
