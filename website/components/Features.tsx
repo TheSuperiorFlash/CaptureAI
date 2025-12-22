@@ -17,7 +17,7 @@ const features: Feature[] = [
     {
         icon: Zap,
         title: 'AI-Powered Answers',
-        description: 'Get accurate answers in seconds powered by advanced AI technology. Never get stuck again.',
+        description: 'Get accurate answers in seconds powered by advanced AI technology.  Never get stuck again.',
         gradient: 'from-cyan-500 to-blue-500',
     },
     {
@@ -29,7 +29,7 @@ const features: Feature[] = [
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Answers appear discreetly where you need them. No obvious popups that draw attention.',
+        description: 'Answers appear discreetly where you need them.  No obvious popups that draw attention.',
         gradient: 'from-purple-500 to-blue-500',
     },
     {
@@ -40,7 +40,7 @@ const features: Feature[] = [
     },
     {
         icon: Shield,
-        title: 'Privacy First',
+        title:  'Privacy First',
         description: 'Your activity stays completely private. No one can detect the extension or track your usage.',
         gradient: 'from-cyan-600 to-blue-600',
     },
@@ -78,7 +78,7 @@ export default function Features() {
                             >
                                 {/* Gradient overlay on hover */}
                                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-300`}></div>
-                                
+
                                 <div className="relative">
                                     <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-5 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
                                         <Icon className="w-7 h-7 text-white" />
