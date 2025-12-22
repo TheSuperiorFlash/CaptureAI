@@ -21,6 +21,7 @@ export function handleCORS(request) {
   // List of allowed origins
   const allowedOrigins = [
     'https://thesuperiorflash.github.io',
+    'https://captureai.dev',
   ];
 
   // Development/testing origins (only if in dev mode)

@@ -33,22 +33,18 @@ export default function DownloadPage() {
                         <Chrome className="w-12 h-12 text-blue-400 mr-4" />
                         <div>
                             <h2 className="text-2xl font-bold text-white">Chrome Extension</h2>
-                            <p className="text-gray-400">For Google Chrome & Chromium-based browsers</p>
+                            <p className="text-gray-400">For Google Chrome</p>
                         </div>
                     </div>
 
                     <a
-                        href="https://chrome.google.com/webstore"
+                        href="https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkpmmkecmoeomnjd"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block w-full py-4 bg-blue-600 text-white text-center text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all mb-6 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                     >
                         Add to Chrome - It's Free
                     </a>
-
-                    <p className="text-sm text-gray-500 text-center">
-                        Compatible with Chrome, Edge, Brave, and other Chromium browsers
-                    </p>
                 </div>
 
                 {/* Installation Steps */}
@@ -120,7 +116,7 @@ export default function DownloadPage() {
                     <ul className="space-y-2">
                         <li className="flex items-center text-gray-300">
                             <CheckCircle className="w-5 h-5 text-blue-400 mr-3" />
-                            Chrome 88 or later (or any Chromium-based browser)
+                            Chrome 88 or later
                         </li>
                         <li className="flex items-center text-gray-300">
                             <CheckCircle className="w-5 h-5 text-blue-400 mr-3" />

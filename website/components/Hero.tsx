@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Zap, Download } from 'lucide-react'
+import { Zap, CheckCircle } from 'lucide-react'
 
 export default function Hero() {
     return (
@@ -30,14 +30,14 @@ export default function Hero() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href="/activate"
-                            className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
+                            className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/50"
                         >
                             <Zap className="w-5 h-5 mr-2" />
                             Try Now - Free
                         </Link>
                         <Link
                             href="/#features"
-                            className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-gray-200 text-lg font-semibold rounded-lg hover:bg-white/5 transition-all border border-gray-700 hover:border-blue-500/50"
+                            className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-gray-200 text-lg font-semibold rounded-lg hover:bg-white/5 transition-all border border-gray-600"
                         >
                             See Features
                         </Link>
@@ -45,9 +45,18 @@ export default function Hero() {
 
                     {/* Trust Badges */}
                     <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
-                        <div>✅ Free to start</div>
-                        <div>⚡ Works on any website</div>
-                        <div>🔒 Your screenshots stay private</div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-blue-400" />
+                            <span>Free to start</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-blue-400" />
+                            <span>Works on any website</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-blue-400" />
+                            <span>Your screenshots stay private</span>
+                        </div>
                     </div>
                 </div>
             </div>
