@@ -1,41 +1,12 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import Link from 'next/link'
-import { ArrowRight, TrendingUp, Users, Zap, CheckCircle2, Camera, Brain, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Camera, Brain, Sparkles } from 'lucide-react'
 
 export default function Home() {
     return (
         <>
             <Hero />
-
-            {/* Stats Section */}
-            <section className="py-16 bg-gradient-to-b from-[#08070e] to-gray-950/50 relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="text-center p-8 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl backdrop-blur-sm hover:scale-105 transition-transform">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl mb-4 shadow-lg">
-                                <TrendingUp className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="text-4xl font-bold text-white mb-2">10,000+</div>
-                            <div className="text-gray-400">Questions Answered Daily</div>
-                        </div>
-                        <div className="text-center p-8 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl backdrop-blur-sm hover:scale-105 transition-transform">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl mb-4 shadow-lg">
-                                <Users className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="text-4xl font-bold text-white mb-2">1,000+</div>
-                            <div className="text-gray-400">Active Students</div>
-                        </div>
-                        <div className="text-center p-8 bg-gradient-to-br from-blue-600/10 to-blue-400/10 border border-blue-600/20 rounded-2xl backdrop-blur-sm hover:scale-105 transition-transform">
-                            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl mb-4 shadow-lg">
-                                <Zap className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="text-4xl font-bold text-white mb-2">95%</div>
-                            <div className="text-gray-400">Accuracy Rate</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* How It Works Section */}
             <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
@@ -213,7 +184,7 @@ export default function Home() {
                         Ready to transform your studying?
                     </h2>
                     <p className="text-xl md:text-2xl text-gray-300 mb-12 leading-relaxed">
-                        Join thousands of students using CaptureAI to study smarter, save time, and get better grades
+                        Join students using CaptureAI to study smarter, save time, and get better grades
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
