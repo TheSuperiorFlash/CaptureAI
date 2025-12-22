@@ -1,0 +1,134 @@
+import type { Metadata } from 'next'
+import { Chrome, Download, CheckCircle } from 'lucide-react'
+
+export const metadata: Metadata = {
+    title: 'Download - CaptureAI',
+    description: 'Download CaptureAI for Chrome and start analyzing screenshots with AI',
+}
+
+export default function DownloadPage() {
+    return (
+        <div className="py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="text-center mb-16">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-full mb-6">
+                        <Download className="w-10 h-10 text-white" />
+                    </div>
+                    <h1 className="text-5xl font-bold text-gray-900 mb-4">
+                        Download CaptureAI
+                    </h1>
+                    <p className="text-xl text-gray-600">
+                        Install the extension and start boosting your productivity today
+                    </p>
+                </div>
+
+                {/* Download Card */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-12">
+                    <div className="flex items-center mb-6">
+                        <Chrome className="w-12 h-12 text-blue-600 mr-4" />
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Chrome Extension</h2>
+                            <p className="text-gray-600">For Google Chrome & Chromium-based browsers</p>
+                        </div>
+                    </div>
+
+                    <a
+                        href="https://chrome.google.com/webstore"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-4 bg-blue-600 text-white text-center text-lg font-semibold rounded-lg hover:bg-blue-700 transition-all mb-6"
+                    >
+                        Add to Chrome - It's Free
+                    </a>
+
+                    <p className="text-sm text-gray-500 text-center">
+                        Compatible with Chrome, Edge, Brave, and other Chromium browsers
+                    </p>
+                </div>
+
+                {/* Installation Steps */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-8">Installation Guide</h3>
+
+                    <div className="space-y-6">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                                1
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Click "Add to Chrome"
+                                </h4>
+                                <p className="text-gray-600">
+                                    Click the button above to open the Chrome Web Store listing
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                                2
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Install the extension
+                                </h4>
+                                <p className="text-gray-600">
+                                    Click "Add to Chrome" in the Chrome Web Store and confirm the installation
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                                3
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Create an account
+                                </h4>
+                                <p className="text-gray-600">
+                                    Click the extension icon and register with your email to start using CaptureAI
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                                4
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                    Start capturing!
+                                </h4>
+                                <p className="text-gray-600">
+                                    Press Ctrl+Shift+X to capture any area of your screen and get instant AI-powered answers
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Requirements */}
+                <div className="mt-12 bg-gray-50 rounded-xl p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">System Requirements</h4>
+                    <ul className="space-y-2">
+                        <li className="flex items-center text-gray-700">
+                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                            Chrome 88 or later (or any Chromium-based browser)
+                        </li>
+                        <li className="flex items-center text-gray-700">
+                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                            Internet connection required
+                        </li>
+                        <li className="flex items-center text-gray-700">
+                            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                            Free Chrome Web Store account
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    )
+}
