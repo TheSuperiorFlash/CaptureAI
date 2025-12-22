@@ -32,14 +32,18 @@ export default function Footer() {
                         <ul className="space-y-2">
                             <li><Link href="/docs" className="text-gray-400 hover:text-blue-400 transition-colors">Documentation</Link></li>
                             <li><Link href="/contact" className="text-gray-400 hover:text-blue-400 transition-colors">Contact</Link></li>
-                            <li><a href="mailto:support@captureai.com" className="text-gray-400 hover:text-blue-400 transition-colors">Email Support</a></li>
+                            <li><a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors">GitHub</a></li>
                         </ul>
                     </div>
                 </div>
 
                 {/* Bottom */}
-                <div className="border-t border-gray-800/50 mt-12 pt-8 text-center text-gray-500">
+                <div className="border-t border-gray-800/50 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-gray-500">
                     <p>&copy; {new Date().getFullYear()} CaptureAI. All rights reserved.</p>
+                    <div className="flex gap-4">
+                        <Link href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
+                    </div>
                 </div>
             </div>
         </footer>

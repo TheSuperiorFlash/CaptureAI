@@ -50,12 +50,9 @@ export default function Hero() {
 
                     {/* Trust Badges */}
                     <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
-                        <div className="flex items-center">
-                            <span className="text-2xl mr-2">⭐⭐⭐⭐⭐</span>
-                            <span>4.8/5 Rating</span>
-                        </div>
-                        <div>10,000+ Users</div>
-                        <div>Free Plan Available</div>
+                        <div>✅ Free Plan Available</div>
+                        <div>🔒 Privacy-Focused</div>
+                        <div>⚡ 90% Token Cost Savings with OCR</div>
                     </div>
                 </div>
             </div>

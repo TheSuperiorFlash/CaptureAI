@@ -1,4 +1,4 @@
-import { Camera, Zap, Lock, Sparkles, Clock, BarChart, LucideIcon } from 'lucide-react'
+import { Camera, Zap, Lock, Sparkles, Eye, Repeat, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
@@ -9,33 +9,33 @@ interface Feature {
 const features: Feature[] = [
     {
         icon: Camera,
-        title: 'Quick Capture',
-        description: 'Press Ctrl+Shift+X to instantly capture any area of your screen. Simple and fast.',
+        title: 'OCR Technology',
+        description: 'Uses Tesseract.js for local OCR text extraction, achieving 90% token cost savings compared to vision models.',
     },
     {
         icon: Sparkles,
-        title: 'AI-Powered Analysis',
-        description: 'Advanced AI analyzes your screenshots and provides intelligent, contextual answers.',
+        title: 'AI-Powered Answers',
+        description: 'Extracted text is sent to OpenAI for intelligent analysis and accurate question answering.',
     },
     {
-        icon: Zap,
-        title: 'Lightning Fast',
-        description: 'Get answers in seconds. No waiting, no hassle - just instant results.',
+        icon: Repeat,
+        title: 'Auto-Solve Mode',
+        description: 'Automatically solve multiple-choice questions on Quizlet and Vocabulary.com with intelligent detection.',
     },
     {
         icon: Lock,
-        title: 'Privacy First',
-        description: 'Your screenshots are processed securely and never stored on our servers.',
+        title: 'Privacy Guard',
+        description: 'Prevents websites from detecting extension usage by blocking focus/blur events and spoofing focus state.',
     },
     {
-        icon: Clock,
-        title: 'Ask Mode',
-        description: 'Capture first, ask questions later. Perfect for when you need to think before asking.',
+        icon: Eye,
+        title: 'Stealth Mode',
+        description: 'Operate invisibly when UI is hidden - no overlays, no selection boxes, just subtle results.',
     },
     {
-        icon: BarChart,
-        title: 'Usage Tracking',
-        description: 'Monitor your API usage with built-in analytics. Know exactly where you stand.',
+        icon: Zap,
+        title: 'Quick Capture',
+        description: 'Press Ctrl+Shift+X to capture, Ctrl+Shift+F to repeat last area, Ctrl+Shift+E to toggle UI.',
     },
 ]
 

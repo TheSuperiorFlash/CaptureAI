@@ -11,6 +11,7 @@ export default function Navbar() {
         { name: 'Pricing', href: '/pricing' },
         { name: 'Docs', href: '/docs' },
         { name: 'Download', href: '/download' },
+        { name: 'Activate', href: '/activate' },
     ]
 
     return (
