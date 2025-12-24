@@ -33,15 +33,15 @@ export default function Home() {
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">10 questions per day</span>
+                                    <span className="text-gray-300">10 requests per day</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">All core features</span>
+                                    <span className="text-gray-300">Question capture</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Works on any website</span>
+                                    <span className="text-gray-300">Basic features</span>
                                 </li>
                             </ul>
                             <Link
@@ -77,7 +77,7 @@ export default function Home() {
                             </ul>
                             <Link
                                 href="/activate"
-                                className="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all font-semibold shadow-lg shadow-blue-500/20"
+                                className="block w-full text-center px-6 py-3 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white rounded-lg hover:opacity-90 transition-all font-semibold shadow-lg shadow-[#667eea]/20"
                             >
                                 Get Pro
                             </Link>

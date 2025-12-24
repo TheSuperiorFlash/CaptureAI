@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Zap, Download } from 'lucide-react'
+import { Zap, Download, CheckCircle, Shield } from 'lucide-react'
 
 export default function Hero() {
     return (
@@ -45,9 +45,18 @@ export default function Hero() {
 
                     {/* Trust Badges */}
                     <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
-                        <div>✅ Free to start</div>
-                        <div>⚡ Works on any website</div>
-                        <div>🔒 Your screenshots stay private</div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-green-400" />
+                            <span>Free to start</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-blue-400" />
+                            <span>Works on any website</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-purple-400" />
+                            <span>Your screenshots stay private</span>
+                        </div>
                     </div>
                 </div>
             </div>

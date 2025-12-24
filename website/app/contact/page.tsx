@@ -34,10 +34,10 @@ export default function ContactPage() {
                             Send us an email and we'll get back to you within 24 hours.
                         </p>
                         <a
-                            href="mailto:support@captureai.com"
+                            href="mailto:support@captureai.dev"
                             className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                         >
-                            support@captureai.com
+                            support@captureai.dev
                         </a>
                     </div>
 
@@ -53,10 +53,10 @@ export default function ContactPage() {
                             Have an idea for a new feature? We'd love to hear it!
                         </p>
                         <a
-                            href="mailto:feedback@captureai.com"
+                            href="mailto:feedback@captureai.dev"
                             className="inline-block px-6 py-3 bg-cyan-600 text-white font-semibold rounded-lg hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105"
                         >
-                            feedback@captureai.com
+                            feedback@captureai.dev
                         </a>
                     </div>
                 </div>
@@ -70,7 +70,7 @@ export default function ContactPage() {
                         Check out our documentation for guides and frequently asked questions
                     </p>
                     <a
-                        href="/docs"
+                        href="/help"
                         className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                     >
                         View Documentation

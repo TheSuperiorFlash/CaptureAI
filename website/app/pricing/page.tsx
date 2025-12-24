@@ -26,9 +26,8 @@ const plans: Plan[] = [
         description: 'Perfect for trying out CaptureAI',
         features: [
             '10 requests per day',
-            'Screenshot capture',
-            'All core features',
-            'Works anywhere',
+            'Question capture',
+            'Basic features',
         ],
         cta: 'Get Started',
         href: '/activate',

@@ -166,13 +166,10 @@ export default function ActivatePage() {
                   10 requests/day
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Screenshot capture
+                  Question capture
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  AI question solving
-                </li>
-                <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Privacy-focused
+                  Basic features
                 </li>
               </ul>
             </button>
@@ -222,10 +219,10 @@ export default function ActivatePage() {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className={`w-full p-4 bg-gradient-to-r text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all shadow-[0_4px_12px_rgba(59,130,246,0.3)] ${
+            className={`w-full p-4 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all ${
               selectedTier === 'free'
-                ? 'from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
-                : 'from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-[0_4px_12px_rgba(59,130,246,0.3)]'
+                : 'bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] hover:opacity-90 shadow-[0_4px_12px_rgba(102,126,234,0.3)]'
             } ${
               loading ? 'opacity-60 cursor-not-allowed' : 'hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)]'
             }`}
@@ -238,7 +235,7 @@ export default function ActivatePage() {
             ) : selectedTier === 'free' ? (
               'Get Free License Key'
             ) : (
-              'Subscribe to Pro - $9.99/month'
+              'Subscribe to Pro'
             )}
           </button>
 

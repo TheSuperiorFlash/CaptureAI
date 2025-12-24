@@ -22,7 +22,7 @@ export default function TermsPage() {
                 solve questions from screenshots. The Service includes:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Screenshot capture and OCR text extraction (performed locally in your browser)</li>
+                <li>Question capture and OCR text extraction (performed locally in your browser)</li>
                 <li>AI-powered question answering using OpenAI&apos;s API</li>
                 <li>Free tier: 10 requests per day</li>
                 <li>Pro tier: Unlimited requests for $9.99/month</li>

@@ -56,7 +56,7 @@ export default function DocsPage() {
 
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Screenshot Capture</h3>
+                            <h3 className="text-2xl font-semibold text-white mb-3">Question Capture</h3>
                             <p className="text-gray-300">
                                 Capture any question on your screen with a simple click. Works on any website.
                             </p>
