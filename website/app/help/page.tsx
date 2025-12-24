@@ -65,10 +65,10 @@ export default function DocsPage() {
 
                         <div>
                             <h3 className="text-xl font-semibold text-white mb-2">
-                                Can I use CaptureAI on other browsers?
+                                Which browser does CaptureAI support?
                             </h3>
                             <p className="text-gray-300">
-                                CaptureAI works on any Chromium-based browser including Chrome, Edge, Brave, Opera, and Vivaldi.
+                                CaptureAI is designed for Google Chrome and has been tested and validated to work reliably on Chrome.
                             </p>
                         </div>
 

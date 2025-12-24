@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Globe, Download, CheckCircle } from 'lucide-react'
+import { Chrome, Download, CheckCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
     title: 'Download - CaptureAI',
@@ -30,7 +30,7 @@ export default function DownloadPage() {
                 {/* Download Card */}
                 <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl backdrop-blur-sm p-8 md:p-12 mb-12">
                     <div className="flex items-center mb-6">
-                        <Globe className="w-12 h-12 text-blue-400 mr-4" />
+                        <Chrome className="w-12 h-12 text-blue-400 mr-4" />
                         <div>
                             <h2 className="text-2xl font-bold text-white">Chrome Extension</h2>
                             <p className="text-gray-400">For Google Chrome</p>
