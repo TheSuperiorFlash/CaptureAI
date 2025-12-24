@@ -87,6 +87,9 @@ export class Router {
     if (path === '/api/subscription/plans' && method === 'GET') {
       return this.subscription.getPlans(request);
     }
+    if (path === '/api/subscription/verify-payment' && method === 'POST') {
+      return this.subscription.verifyPayment(request);
+    }
 
     // 404 Not Found
     return jsonResponse(

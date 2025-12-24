@@ -10,16 +10,20 @@ function PaymentSuccessContent() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const verifyPayment = async () => {
+    const handlePaymentSuccess = async () => {
       const sessionId = searchParams.get('session_id');
 
       if (!sessionId) {
         setStatus('error');
-        setErrorMessage('No session ID provided');
+        setErrorMessage('No payment session found');
         return;
       }
 
       try {
+        // Wait for backend webhook to process (3 seconds should be enough)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Verify the payment with Stripe
         const response = await fetch(
           'https://backend.captureai.workers.dev/api/subscription/verify-payment',
           {
@@ -35,14 +39,16 @@ function PaymentSuccessContent() {
           throw new Error(data.error || 'Payment verification failed');
         }
 
+        // Payment verified and successful
         setStatus('success');
       } catch (error) {
+        console.error('Payment verification error:', error);
         setStatus('error');
-        setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
+        setErrorMessage(error instanceof Error ? error.message : 'Payment verification failed. If you completed payment, please check your email for your license key.');
       }
     };
 
-    verifyPayment();
+    handlePaymentSuccess();
   }, [searchParams]);
 
   return (
@@ -64,7 +70,7 @@ function PaymentSuccessContent() {
           {/* Success State */}
           {status === 'success' && (
             <>
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in shadow-[0_8px_24px_rgba(16,185,129,0.4)]">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in shadow-[0_8px_24px_rgba(59,130,246,0.4)]">
                 <div className="text-white text-5xl font-bold">✓</div>
               </div>
 
@@ -73,7 +79,7 @@ function PaymentSuccessContent() {
                 Check your email for your Pro license key
               </p>
 
-              <div className="inline-block bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-full text-base font-semibold mb-8 uppercase tracking-wide shadow-[0_4px_12px_rgba(139,92,246,0.3)]">
+              <div className="inline-block bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white px-6 py-3 rounded-full text-base font-semibold mb-8 uppercase tracking-wide shadow-[0_4px_12px_rgba(102,126,234,0.3)]">
                 PRO TIER
               </div>
 

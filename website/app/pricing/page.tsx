@@ -76,13 +76,13 @@ export default function PricingPage() {
                             key={plan.name}
                             className={`relative rounded-2xl p-8 backdrop-blur-sm ${
                                 plan.popular
-                                    ? 'bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-2xl shadow-blue-500/30 scale-105 border border-blue-400/50'
+                                    ? 'bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white shadow-2xl shadow-[#667eea]/30 scale-105 border border-[#667eea]/50'
                                     : 'bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 hover:border-blue-500/50 transition-all'
                             }`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-cyan-400 to-blue-400 text-gray-900 px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                  <span className="bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                     Most Popular
                   </span>
                                 </div>

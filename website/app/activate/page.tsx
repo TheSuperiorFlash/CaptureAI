@@ -179,17 +179,17 @@ export default function ActivatePage() {
 
             <button
               onClick={() => setSelectedTier('pro')}
-              className={`flex-1 p-5 border rounded-xl transition-all cursor-pointer text-center ${
+              className={`flex-1 p-5 border rounded-xl transition-all cursor-pointer text-center relative ${
                 selectedTier === 'pro'
                   ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.2)]'
                   : 'border-gray-700/50 bg-gray-800/50 hover:border-blue-500/50 hover:bg-gray-800/70'
               }`}
             >
-              <h3 className="text-lg text-white mb-2">
-                Pro{' '}
-                <span className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white text-[11px] px-2 py-0.5 rounded ml-2 font-semibold">
-                  POPULAR
-                </span>
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-block bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-[11px] px-2 py-0.5 rounded font-semibold">
+                POPULAR
+              </span>
+              <h3 className="text-lg text-white mb-2 mt-1">
+                Pro
               </h3>
               <div className="text-2xl font-bold text-blue-400 mb-2">$9.99</div>
               <div className="text-[13px] text-gray-400 mb-3">per month</div>

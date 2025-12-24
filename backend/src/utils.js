@@ -20,6 +20,7 @@ export function jsonResponse(data, status = 200) {
 export function handleCORS(request) {
   // List of allowed origins
   const allowedOrigins = [
+    'https://captureai.dev',
     'https://thesuperiorflash.github.io',
   ];
 

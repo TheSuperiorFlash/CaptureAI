@@ -53,8 +53,8 @@ export default function Home() {
                         </div>
 
                         {/* Pro Tier */}
-                        <div className="bg-gradient-to-b from-blue-900/30 to-blue-900/10 border border-blue-500/50 rounded-2xl p-8 hover:border-blue-500 transition-all relative">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-white text-sm font-semibold rounded-full">
+                        <div className="bg-gradient-to-b from-blue-900/30 to-blue-900/10 border border-[#667eea]/50 rounded-2xl p-8 hover:border-[#667eea] transition-all relative">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-sm font-semibold rounded-full">
                                 Most Popular
                             </div>
                             <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>

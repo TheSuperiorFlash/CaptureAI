@@ -349,6 +349,56 @@ export class SubscriptionHandler {
   }
 
   /**
+   * Verify payment session
+   * POST /api/subscription/verify-payment
+   */
+  async verifyPayment(request) {
+    try {
+      const body = await validateRequestBody(request);
+      const sessionId = body.sessionId;
+
+      if (!sessionId) {
+        return jsonResponse({ error: 'Session ID is required' }, 400);
+      }
+
+      // Retrieve the session from Stripe
+      const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+        headers: {
+          'Authorization': `Bearer ${this.stripeKey}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Stripe session retrieval failed:', error);
+        return jsonResponse({ error: 'Failed to verify payment session' }, 400);
+      }
+
+      const session = await response.json();
+
+      // Check if the session was completed successfully
+      if (session.payment_status === 'paid' && session.status === 'complete') {
+        return jsonResponse({
+          success: true,
+          email: session.customer_details?.email || session.customer_email
+        });
+      } else {
+        return jsonResponse({
+          error: 'Payment not completed',
+          status: session.payment_status
+        }, 400);
+      }
+
+    } catch (error) {
+      if (this.logger) this.logger.error('Payment verification error', error);
+      if (error instanceof ValidationError) {
+        return jsonResponse({ error: error.message, field: error.field }, 400);
+      }
+      return jsonResponse({ error: 'Failed to verify payment' }, 500);
+    }
+  }
+
+  /**
    * Create Stripe customer
    */
   async createStripeCustomer(email) {
@@ -380,8 +430,8 @@ export class SubscriptionHandler {
       'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       mode: 'subscription',
-      success_url: `${this.env.EXTENSION_URL || 'https://thesuperiorflash.github.io/CaptureAI'}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${this.env.EXTENSION_URL || 'https://thesuperiorflash.github.io/CaptureAI'}/activate.html`
+      success_url: `https://captureai.dev/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://captureai.dev/activate`
     };
 
     // Use customer ID if available, otherwise use email
@@ -421,7 +471,7 @@ export class SubscriptionHandler {
       },
       body: new URLSearchParams({
         customer: customerId,
-        return_url: `${this.env.EXTENSION_URL || 'https://thesuperiorflash.github.io/CaptureAI'}/activate.html`
+        return_url: `https://captureai.dev/activate`
       })
     });
 

@@ -61,11 +61,11 @@ export default {
 /**
  * Add CORS headers to response
  */
-function addCORSHeaders(response) {
+function addCORSHeaders(response, request) {
   const newResponse = new Response(response.body, response);
 
   // Add CORS headers
-  Object.entries(getCORSHeaders()).forEach(([key, value]) => {
+  Object.entries(getCORSHeaders(request)).forEach(([key, value]) => {
     newResponse.headers.set(key, value);
   });
 
@@ -79,7 +79,7 @@ function addCORSHeaders(response) {
 function getCORSHeaders(request) {
   // List of allowed origins
   const allowedOrigins = [
-    'https://thesuperiorflash.github.io',
+    'https://captureai.dev',
   ];
 
   // Development/testing origins (only if in dev mode)
