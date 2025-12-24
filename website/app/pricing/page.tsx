@@ -41,7 +41,7 @@ const plans: Plan[] = [
         features: [
             'Unlimited requests',
             'All features unlocked',
-            'Priority support',
+            'Privacy Guard',
             'Cancel anytime',
         ],
         cta: 'Get Pro',

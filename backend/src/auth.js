@@ -285,13 +285,7 @@ You can modify your payment method or cancel your subscription anytime by visiti
 YOUR LICENSE KEY:
 ${licenseKey}
 
-With CaptureAI Pro, you can now:
-• Unlimited question capture and extended analysis
-• Auto-solve mode for instant answers to your questions
-• Access to latest AI models from OpenAI and others in one subscription
-• Ask mode with unlimited uploads to get help and guidance on any topic
-
-For any further questions, visit our website: https://thesuperiorflash.github.io/CaptureAI`;
+For any further questions, visit our website: https://captureai.dev`;
 
         await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
         return;
@@ -682,47 +676,6 @@ https://thesuperiorflash.github.io/CaptureAI`;
                                   <table class="text_block block-6" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                                     <tr>
                                       <td class="pad" style="padding: 0;">
-                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 24px;">
-                                          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                            <div style="font-size: 20px; font-weight: 600; color: #ffffff; line-height: 1.5; margin-bottom: 20px;">With CaptureAI Pro, you can now:</div>
-
-                                            <!-- 2x2 Grid -->
-                                            <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-                                              <tr>
-                                                <!-- Top Left: Question Capture -->
-                                                <td width="50%" style="padding: 0 16px 24px 0; vertical-align: top;">
-                                                  <div style="text-align: left;">
-                                                    <div style="font-size: 28px; margin-bottom: 12px;">🔍</div>
-                                                    <div style="font-size: 15px; font-weight: 400; color: #ffffff; line-height: 1.5; opacity: 0.95;">Unlimited question capture and extended analysis</div>
-                                                  </div>
-                                                </td>
-                                                <!-- Top Right: Auto-Solve Mode -->
-                                                <td width="50%" style="padding: 0 0 24px 16px; vertical-align: top;">
-                                                  <div style="text-align: left;">
-                                                    <div style="font-size: 28px; margin-bottom: 12px;">⚡</div>
-                                                    <div style="font-size: 15px; font-weight: 400; color: #ffffff; line-height: 1.5; opacity: 0.95;">Auto-solve mode for instant answers to your questions</div>
-                                                  </div>
-                                                </td>
-                                              </tr>
-                                              <tr>
-                                                <!-- Bottom Left: AI Models -->
-                                                <td width="50%" style="padding: 0 16px 0 0; vertical-align: top;">
-                                                  <div style="text-align: left;">
-                                                    <div style="font-size: 28px; margin-bottom: 12px;">🤖</div>
-                                                    <div style="font-size: 15px; font-weight: 400; color: #ffffff; line-height: 1.5; opacity: 0.95;">Access to latest AI models from OpenAI and others in one subscription</div>
-                                                  </div>
-                                                </td>
-                                                <!-- Bottom Right: Ask Mode -->
-                                                <td width="50%" style="padding: 0 0 0 16px; vertical-align: top;">
-                                                  <div style="text-align: left;">
-                                                    <div style="font-size: 28px; margin-bottom: 12px;">💬</div>
-                                                    <div style="font-size: 15px; font-weight: 400; color: #ffffff; line-height: 1.5; opacity: 0.95;">Ask mode with unlimited uploads to get help and guidance on any topic</div>
-                                                  </div>
-                                                </td>
-                                              </tr>
-                                            </table>
-                                          </div>
-                                        </div>
                                       </td>
                                     </tr>
                                   </table>
@@ -753,7 +706,7 @@ https://thesuperiorflash.github.io/CaptureAI`;
                               <td class="pad" style="padding: 0 30px;">
                                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                   <div style="font-size: 13px; color: #a3a299; line-height: 1.6;">
-                                    <p style="margin: 0; text-align: center;">For any further questions, visit our <a href="https://thesuperiorflash.github.io/CaptureAI" style="color: #218aff; text-decoration: none;">website</a>.</p>
+                                    <p style="margin: 0; text-align: center;">For any further questions, visit our <a href="https://captureai.dev" style="color: #218aff; text-decoration: none;">website</a>.</p>
                                   </div>
                                 </div>
                               </td>

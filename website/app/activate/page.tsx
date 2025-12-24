@@ -198,7 +198,7 @@ export default function ActivatePage() {
                   All features unlocked
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Priority support
+                  Privacy Guard
                 </li>
               </ul>
             </button>
