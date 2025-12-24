@@ -166,10 +166,10 @@ export default function ActivatePage() {
                   10 requests/day
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Question capture
+                  Core features
                 </li>
                 <li className="text-[13px] text-gray-300 pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-blue-400 before:font-bold">
-                  Basic features
+                  Question capture
                 </li>
               </ul>
             </button>

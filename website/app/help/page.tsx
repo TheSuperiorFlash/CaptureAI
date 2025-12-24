@@ -37,65 +37,6 @@ export default function DocsPage() {
                             <li>Wait a moment while AI analyzes your question</li>
                             <li>Get your answer displayed right on the page</li>
                         </ol>
-
-                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">Auto-Solve</h3>
-                        <p className="text-gray-300 mb-4">
-                            CaptureAI can automatically solve questions on supported platforms:
-                        </p>
-                        <ul className="list-disc list-inside space-y-2 text-gray-300">
-                            <li>Works on Quizlet and Vocabulary.com</li>
-                            <li>Automatically detects and solves questions</li>
-                            <li>Answers appear directly on the page</li>
-                        </ul>
-                    </div>
-                </section>
-
-                {/* Features */}
-                <section className="mb-16 bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm">
-                    <h2 className="text-3xl font-bold text-white mb-6">Features</h2>
-
-                    <div className="space-y-8">
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Question Capture</h3>
-                            <p className="text-gray-300">
-                                Capture any question on your screen with a simple click. Works on any website.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Floating UI</h3>
-                            <p className="text-gray-300">
-                                Always accessible interface that stays on top. Click anytime to get started.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Stealth Mode</h3>
-                            <p className="text-gray-300">
-                                Answers appear discreetly right where you need them. No obvious popups or alerts.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Auto-Solve</h3>
-                            <p className="text-gray-300">
-                                Automatically solve questions on Quizlet and Vocabulary.com.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Privacy Guard</h3>
-                            <p className="text-gray-300">
-                                Your activity stays completely private. No one can detect the extension.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">Works Anywhere</h3>
-                            <p className="text-gray-300">
-                                Use on any website - homework sites, quizzes, study platforms, anywhere.
-                            </p>
-                        </div>
                     </div>
                 </section>
 

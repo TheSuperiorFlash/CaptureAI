@@ -10,7 +10,7 @@ export default function Home() {
             <Features />
 
             {/* Pricing Section */}
-            <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
+            <section id="pricing" className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
 
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -37,11 +37,11 @@ export default function Home() {
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Question capture</span>
+                                    <span className="text-gray-300">Core features</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Basic features</span>
+                                    <span className="text-gray-300">Question capture</span>
                                 </li>
                             </ul>
                             <Link
@@ -81,72 +81,6 @@ export default function Home() {
                             >
                                 Get Pro
                             </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Pro Features Section */}
-            <section className="py-24 bg-[#08070e] relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#667eea]/5 to-transparent"></div>
-
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                            Unlock everything with Pro
-                        </h2>
-                        <p className="text-xl text-gray-400">
-                            Get access to all features and unlimited requests
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">∞</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Unlimited Requests</h3>
-                            <p className="text-gray-400">No daily limits. Solve as many questions as you need.</p>
-                        </div>
-
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🔒</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Privacy Guard</h3>
-                            <p className="text-gray-400">Your activity stays completely private. Undetectable by websites.</p>
-                        </div>
-
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">⚡</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Auto-Solve</h3>
-                            <p className="text-gray-400">Automatically solve questions on Quizlet and Vocabulary.com.</p>
-                        </div>
-
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🎯</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Floating UI</h3>
-                            <p className="text-gray-400">Always accessible interface that stays on top of any website.</p>
-                        </div>
-
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">👁️</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Stealth Mode</h3>
-                            <p className="text-gray-400">Answers appear discreetly. No obvious popups or alerts.</p>
-                        </div>
-
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-[#667eea]/50 transition-all">
-                            <div className="w-12 h-12 bg-[#667eea]/10 border border-[#667eea]/20 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-2xl">🌐</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Works Anywhere</h3>
-                            <p className="text-gray-400">Use on any website - homework sites, quizzes, study platforms.</p>
                         </div>
                     </div>
                 </div>

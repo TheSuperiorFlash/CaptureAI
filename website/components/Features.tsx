@@ -1,9 +1,10 @@
-import { Camera, Zap, MessageSquare, Repeat, Eye, Shield, MousePointer, LucideIcon } from 'lucide-react'
+import { Camera, Zap, MessageSquare, Repeat, Eye, Shield, MousePointer, Infinity, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
     title: string
     description: string
+    isPro?: boolean
 }
 
 const features: Feature[] = [
@@ -11,31 +12,49 @@ const features: Feature[] = [
         icon: Camera,
         title: 'Capture',
         description: 'Screenshot any question with a simple keyboard shortcut. Fast and easy.',
+        isPro: false,
     },
     {
         icon: MousePointer,
         title: 'Floating UI',
         description: 'Always accessible interface that stays on top. Just click to get started.',
+        isPro: false,
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
         description: 'Answers appear discreetly right where you need them. No obvious popups or alerts.',
-    },
-    {
-        icon: Repeat,
-        title: 'Auto-Solve',
-        description: 'Automatically solve questions on Quizlet and Vocabulary.com.',
-    },
-    {
-        icon: Shield,
-        title: 'Privacy Guard',
-        description: 'Your activity stays completely private. No one can detect the extension.',
+        isPro: false,
     },
     {
         icon: Zap,
         title: 'Works Anywhere',
         description: 'Use on any website - homework sites, quizzes, study platforms, anywhere.',
+        isPro: false,
+    },
+    {
+        icon: Repeat,
+        title: 'Auto-Solve',
+        description: 'Automatically solve questions on Quizlet and Vocabulary.com.',
+        isPro: true,
+    },
+    {
+        icon: Shield,
+        title: 'Privacy Guard',
+        description: 'Your activity stays completely private. No one can detect the extension.',
+        isPro: true,
+    },
+    {
+        icon: MessageSquare,
+        title: 'Ask Mode',
+        description: 'Ask follow-up questions and get detailed explanations for any topic.',
+        isPro: true,
+    },
+    {
+        icon: Infinity,
+        title: 'Unlimited Requests',
+        description: 'No daily limits. Solve as many questions as you need.',
+        isPro: true,
     },
 ]
 
@@ -57,14 +76,19 @@ export default function Features() {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {features.map((feature, index) => {
                         const Icon = feature.icon
                         return (
                             <div
                                 key={index}
-                                className="group p-6 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/50 to-gray-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all backdrop-blur-sm"
+                                className="group p-6 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/50 to-gray-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all backdrop-blur-sm relative"
                             >
+                                {feature.isPro && (
+                                    <div className="absolute -top-2 -right-2 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                        PRO
+                                    </div>
+                                )}
                                 <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors border border-blue-500/20">
                                     <Icon className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
                                 </div>
