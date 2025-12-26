@@ -85,7 +85,7 @@ export default function Features() {
                                 className="group p-6 rounded-xl border border-gray-800 bg-gradient-to-b from-gray-900/50 to-gray-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all backdrop-blur-sm relative"
                             >
                                 {feature.isPro && (
-                                    <div className="absolute top-3 right-3 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                                    <div className="absolute top-3 right-3 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
                                         PRO
                                     </div>
                                 )}
