@@ -136,7 +136,7 @@ export default function Home() {
                             <span className="text-white text-sm font-semibold">PRO Feature</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            Complete privacy protection
+                            Privacy Guard
                         </h2>
                         <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                             Privacy Guard keeps your activity completely hidden. When enabled, your quiz platform won't detect any extension usage - it's like you're browsing normally.
