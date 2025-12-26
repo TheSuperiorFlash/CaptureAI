@@ -152,7 +152,7 @@ export default function Home() {
                                     ✗ Privacy Guard OFF
                                 </span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/20">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/50">
                                 <Image
                                     src="/action-log-canvas-1.png"
                                     alt="Canvas Action Log without Privacy Guard - shows extension activity"
@@ -161,6 +161,9 @@ export default function Home() {
                                     className="w-full h-auto block"
                                 />
                             </div>
+                            <p className="text-center text-gray-400 mt-4">
+                                Extension activity is visible and traceable
+                            </p>
                         </div>
 
                         {/* With Privacy Guard */}
@@ -170,7 +173,7 @@ export default function Home() {
                                     ✓ Privacy Guard ON
                                 </span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/20">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/50">
                                 <Image
                                     src="/action-log-canvas-2.png"
                                     alt="Canvas Action Log with Privacy Guard - shows clean activity"
@@ -179,6 +182,9 @@ export default function Home() {
                                     className="w-full h-auto block"
                                 />
                             </div>
+                            <p className="text-center text-gray-400 mt-4">
+                                Clean logs showing only natural browsing
+                            </p>
                         </div>
                     </div>
                 </div>
