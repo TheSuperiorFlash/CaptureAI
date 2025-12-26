@@ -22,7 +22,7 @@ export default function Hero() {
                 setCurrentIndex((prev) => (prev + 1) % headlines.length)
                 setIsVisible(true)
             }, 500)
-        }, 4000)
+        }, 6000)
 
         return () => clearInterval(interval)
     }, [])
