@@ -1,6 +1,7 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
 export default function Home() {
@@ -81,6 +82,130 @@ export default function Home() {
                             >
                                 Get Pro
                             </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Floating UI Section */}
+            <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        {/* Image on the left */}
+                        <div className="relative">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/20">
+                                <Image
+                                    src="/floating-ui.png"
+                                    alt="CaptureAI Floating UI"
+                                    width={600}
+                                    height={600}
+                                    className="w-full h-auto"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Content on the right */}
+                        <div>
+                            <div className="inline-block px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-4">
+                                <span className="text-blue-400 text-sm font-semibold">Always Accessible</span>
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                                Floating UI that stays with you
+                            </h2>
+                            <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                                Access CaptureAI anytime with our intuitive floating interface. No need to search for the extension - it's always just one click away, ready to help you solve problems instantly.
+                            </p>
+                            <p className="text-lg text-gray-400 leading-relaxed">
+                                The floating UI keeps your workflow smooth and uninterrupted. Whether you're taking a quiz, doing homework, or studying, CaptureAI is right there when you need it.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Privacy Guard Section */}
+            <section className="py-24 bg-gradient-to-b from-[#08070e] to-gray-950/50 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
+                            <span className="text-purple-400 text-sm font-semibold">PRO Feature</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                            Complete privacy protection
+                        </h2>
+                        <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                            Privacy Guard keeps your activity completely hidden. When enabled, your quiz platform won't detect any extension usage - it's like you're browsing normally.
+                        </p>
+                    </div>
+
+                    {/* Comparison */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                        {/* Without Privacy Guard */}
+                        <div className="relative">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                                <span className="inline-block px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-full text-red-400 text-sm font-semibold">
+                                    ✗ Privacy Guard OFF
+                                </span>
+                            </div>
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/20">
+                                <Image
+                                    src="/action-log-canvas-1.png"
+                                    alt="Canvas Action Log without Privacy Guard - shows extension activity"
+                                    width={600}
+                                    height={600}
+                                    className="w-full h-auto"
+                                />
+                            </div>
+                            <p className="text-center text-gray-400 mt-4">
+                                Extension activity is visible and traceable
+                            </p>
+                        </div>
+
+                        {/* With Privacy Guard */}
+                        <div className="relative">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                                <span className="inline-block px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full text-green-400 text-sm font-semibold">
+                                    ✓ Privacy Guard ON
+                                </span>
+                            </div>
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/20">
+                                <Image
+                                    src="/action-log-canvas-2.png"
+                                    alt="Canvas Action Log with Privacy Guard - shows clean activity"
+                                    width={600}
+                                    height={600}
+                                    className="w-full h-auto"
+                                />
+                            </div>
+                            <p className="text-center text-gray-400 mt-4">
+                                Clean logs showing only natural browsing
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Features List */}
+                    <div className="max-w-3xl mx-auto">
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-8">
+                            <h3 className="text-xl font-semibold text-white mb-4">What Privacy Guard does:</h3>
+                            <div className="space-y-3 text-gray-300">
+                                <p>
+                                    <span className="text-green-400 font-semibold">✓</span> Hides all extension activity from action logs
+                                </p>
+                                <p>
+                                    <span className="text-green-400 font-semibold">✓</span> Makes your browsing look completely natural
+                                </p>
+                                <p>
+                                    <span className="text-green-400 font-semibold">✓</span> Undetectable by quiz platforms and learning management systems
+                                </p>
+                                <p>
+                                    <span className="text-green-400 font-semibold">✓</span> Works seamlessly in the background - just enable and forget
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
