@@ -76,17 +76,17 @@ export default function Hero() {
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
                                 <Image src="/platforms/canvas.png" alt="Canvas" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 mt-1">
                                 <Image src="/platforms/respondus.png" alt="Respondus" width={120} height={40} className="h-9 w-auto" />
                             </div>
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
                                 <Image src="/platforms/moodle.png" alt="Moodle" width={120} height={40} className="h-10 w-auto" />
                             </div>
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
-                                <Image src="/platforms/blackboard.png" alt="Blackboard" width={120} height={40} className="h-8 w-auto" />
+                                <Image src="/platforms/blackboard.png" alt="Blackboard" width={120} height={40} className="h-6 w-auto" />
                             </div>
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
-                                <Image src="/platforms/tophat.png" alt="Top Hat" width={120} height={40} className="h-8 w-auto" />
+                                <Image src="/platforms/tophat.png" alt="Top Hat" width={120} height={40} className="h-6 w-auto" />
                             </div>
                         </div>
                     </div>
