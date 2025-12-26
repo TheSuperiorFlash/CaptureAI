@@ -144,7 +144,7 @@ export default function Home() {
                     </div>
 
                     {/* Comparison */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Without Privacy Guard */}
                         <div className="relative">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
