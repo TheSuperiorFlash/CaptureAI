@@ -72,7 +72,7 @@ export default function Hero() {
                         <p className="text-sm text-gray-400 mb-6 uppercase tracking-wider">
                             Works on all learning platforms & sites, including these:
                         </p>
-                        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                        <div className="flex items-center justify-center gap-8 md:gap-12">
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
                                 <Image src="/platforms/canvas.png" alt="Canvas" width={120} height={40} className="h-10 w-auto" />
                             </div>
