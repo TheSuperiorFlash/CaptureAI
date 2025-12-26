@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Zap, Download, CheckCircle, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -72,20 +73,20 @@ export default function Hero() {
                             Works on all learning platforms & sites, including these:
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
-                                Canvas
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                                <Image src="/platforms/canvas.png" alt="Canvas" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
-                                Respondus
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                                <Image src="/platforms/respondus.png" alt="Respondus" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
-                                Moodle
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                                <Image src="/platforms/moodle.png" alt="Moodle" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
-                                Blackboard
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                                <Image src="/platforms/blackboard.png" alt="Blackboard" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
-                                Top Hat
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                                <Image src="/platforms/tophat.png" alt="Top Hat" width={120} height={40} className="h-10 w-auto" />
                             </div>
                         </div>
                     </div>
