@@ -66,19 +66,27 @@ export default function Hero() {
                         </Link>
                     </div>
 
-                    {/* Trust Badges */}
-                    <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-400">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-400" />
-                            <span>Free to start</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-blue-400" />
-                            <span>Works on any website</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-purple-400" />
-                            <span>Your screenshots stay private</span>
+                    {/* Platform Compatibility */}
+                    <div className="mt-16">
+                        <p className="text-sm text-gray-400 mb-6 uppercase tracking-wider">
+                            Works on all learning platforms & sites, including these:
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
+                                Canvas
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
+                                Respondus
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
+                                Moodle
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
+                                Blackboard
+                            </div>
+                            <div className="text-2xl md:text-3xl font-bold text-gray-300 hover:text-white transition-colors">
+                                Top Hat
+                            </div>
                         </div>
                     </div>
                 </div>
