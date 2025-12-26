@@ -3,9 +3,10 @@
  * Handles license key validation and user management
  */
 
-import { jsonResponse, parseJSON, generateUUID } from './utils';
+import { jsonResponse, parseJSON, generateUUID, fetchWithTimeout } from './utils';
 import { validateRequestBody, validateEmail, validateLicenseKey, ValidationError } from './validation';
 import { logAuth, logLicenseCreation, logValidationError } from './logger';
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
 export class AuthHandler {
   constructor(env, logger = null) {
@@ -17,6 +18,7 @@ export class AuthHandler {
   /**
    * Generate a unique license key
    * Format: XXXX-XXXX-XXXX-XXXX-XXXX
+   * Uses cryptographically secure random number generation
    */
   generateLicenseKey() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars like I, O, 0, 1
@@ -27,7 +29,10 @@ export class AuthHandler {
     for (let i = 0; i < segments; i++) {
       if (i > 0) key += '-';
       for (let j = 0; j < segmentLength; j++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
+        // Use cryptographically secure random number generation
+        const randomValues = crypto.getRandomValues(new Uint8Array(1));
+        const randomIndex = randomValues[0] % chars.length;
+        key += chars.charAt(randomIndex);
       }
     }
 
@@ -40,6 +45,18 @@ export class AuthHandler {
    */
   async validateKey(request) {
     try {
+      // Rate limiting - prevent brute force attacks
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `validate:${clientId}`,
+        RateLimitPresets.LICENSE_VALIDATION.limit,
+        RateLimitPresets.LICENSE_VALIDATION.windowMs,
+        this.env
+      );
+      if (rateLimitError) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
       const body = await validateRequestBody(request);
       const normalizedKey = validateLicenseKey(body.licenseKey, true);
 
@@ -121,12 +138,24 @@ export class AuthHandler {
         return null;
       }
 
+      // Check subscription status for Pro users
+      if (user.tier === 'pro' && user.subscription_status !== 'active') {
+        if (this.logger) {
+          this.logger.security('Pro user with inactive subscription attempted access', {
+            userId: user.id,
+            subscriptionStatus: user.subscription_status
+          });
+        }
+        return null; // Treat as unauthorized
+      }
+
       // Return user data in JWT-like format for compatibility
       return {
         userId: user.id,
         email: user.email,
         tier: user.tier,
-        licenseKey: user.license_key
+        licenseKey: user.license_key,
+        subscriptionStatus: user.subscription_status
       };
 
     } catch (error) {
@@ -178,6 +207,18 @@ export class AuthHandler {
    */
   async createFreeKey(request) {
     try {
+      // Rate limiting - prevent abuse of free key creation
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `freekey:${clientId}`,
+        RateLimitPresets.FREE_KEY_CREATION.limit,
+        RateLimitPresets.FREE_KEY_CREATION.windowMs,
+        this.env
+      );
+      if (rateLimitError) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
       const body = await validateRequestBody(request);
       const normalizedEmail = validateEmail(body.email, true);
 
@@ -188,18 +229,16 @@ export class AuthHandler {
         .first();
 
       if (existingUser) {
-        // Resend email with existing key
+        // Resend email with existing key (don't return it in response to prevent enumeration)
         if (this.env.RESEND_API_KEY) {
           await this.sendLicenseKeyEmail(normalizedEmail, existingUser.license_key, 'free');
         }
 
-        // Return existing free key instead of creating a new one
+        // Return same response as new key creation to prevent email enumeration
         return jsonResponse({
-          message: 'Using existing free license key for this email',
-          licenseKey: existingUser.license_key,
-          tier: 'free',
-          existing: true
-        }, 200);
+          message: 'Free license key created successfully. Please check your email.',
+          tier: 'free'
+        }, 201);
       }
 
       // Generate unique license key
@@ -234,13 +273,28 @@ export class AuthHandler {
       if (this.logger) logLicenseCreation(this.logger, userId, normalizedEmail, 'free');
 
       // If email service configured, send the key
+      let emailSent = false;
       if (this.env.RESEND_API_KEY) {
-        await this.sendLicenseKeyEmail(normalizedEmail, licenseKey, 'free');
+        emailSent = await this.sendLicenseKeyEmail(normalizedEmail, licenseKey, 'free');
+      }
+
+      // Return appropriate message based on email status
+      if (!this.env.RESEND_API_KEY) {
+        return jsonResponse({
+          message: 'Free license key created successfully. Email service not configured.',
+          licenseKey, // Include key in response if email can't be sent
+          tier: 'free'
+        }, 201);
+      } else if (!emailSent) {
+        return jsonResponse({
+          message: 'Free license key created but email delivery failed. Please contact support.',
+          tier: 'free',
+          emailFailed: true
+        }, 201);
       }
 
       return jsonResponse({
-        message: 'Free license key created successfully',
-        licenseKey: licenseKey,
+        message: 'Free license key created successfully. Please check your email.',
         tier: 'free'
       }, 201);
 
@@ -256,13 +310,14 @@ export class AuthHandler {
 
   /**
    * Send license key via email using Resend
+   * @returns {boolean} - True if email sent successfully, false otherwise
    */
   async sendLicenseKeyEmail(email, licenseKey, tier) {
     try {
       // Check if Resend is configured
       if (!this.env.RESEND_API_KEY) {
         console.warn('Resend API key not configured, skipping email');
-        return;
+        return false;
       }
 
       const subject = tier === 'pro'
@@ -287,8 +342,7 @@ ${licenseKey}
 
 For any further questions, visit our website: https://captureai.dev`;
 
-        await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
-        return;
+        return await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
       }
 
       // Plain text version for free tier (prevents spam filtering)
@@ -311,7 +365,7 @@ Keep this email safe - you'll need your license key to use CaptureAI.
 
 ---
 CaptureAI - AI-Powered Screenshot Analysis
-https://thesuperiorflash.github.io/CaptureAI`;
+https://captureai.dev`;
 
       // HTML version - Anthropic-style email template for free tier
       const htmlContent = `<!DOCTYPE html>
@@ -345,7 +399,7 @@ https://thesuperiorflash.github.io/CaptureAI`;
                               <td class="pad" style="padding-bottom: 30px; padding-left: 25px; padding-top: 30px; width: 100%; padding-right: 0;" width="100%">
                                 <div class="alignment" align="left" style="line-height: 10px;">
                                   <div class="alignment" align="left" style="line-height: 10px;">
-                                    <img src="https://raw.githubusercontent.com/TheSuperiorFlash/CaptureAI/main/icons/icon-text.png" style="display: block; height: auto; border: 0; width: 180px;" width="180" alt="CaptureAI logo" title="CaptureAI logo" height="auto">
+                                    <img src="https://captureai.dev/assets/logo-email.png" style="display: block; height: auto; border: 0; width: 180px;" width="180" alt="CaptureAI logo" title="CaptureAI logo" height="auto">
                                   </div>
                                 </div>
                               </td>
@@ -536,7 +590,7 @@ https://thesuperiorflash.github.io/CaptureAI`;
                               <td class="pad" style="padding: 0 30px;">
                                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                   <div style="font-size: 13px; color: #a3a299; line-height: 1.6;">
-                                    <p style="margin: 0; text-align: center;">Questions? <a href="https://thesuperiorflash.github.io/CaptureAI" style="color: #218aff; text-decoration: none;">Visit our website</a></p>
+                                    <p style="margin: 0; text-align: center;">Questions? <a href="https://captureai.dev" style="color: #218aff; text-decoration: none;">Visit our website</a></p>
                                   </div>
                                 </div>
                               </td>
@@ -559,11 +613,14 @@ https://thesuperiorflash.github.io/CaptureAI`;
 </html>`;
 
       // Send via Resend
-      await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
+      return await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
 
     } catch (error) {
       console.error('Email sending error:', error);
-      // Don't throw - email is not critical
+      if (this.logger) {
+        this.logger.error('Email sending failed', error, { email, tier });
+      }
+      return false; // Email failed
     }
   }
 
@@ -611,7 +668,7 @@ https://thesuperiorflash.github.io/CaptureAI`;
                                     <tr>
                                       <td class="pad" style="width: 100%; padding: 0 0 12px 0;">
                                         <div class="alignment" align="left" style="line-height: 10px;">
-                                          <img src="https://raw.githubusercontent.com/TheSuperiorFlash/CaptureAI/main/icons/icon-text.png" style="display: block; height: auto; border: 0; width: 220px;" width="220" alt="CaptureAI" title="CaptureAI" height="auto">
+                                          <img src="https://captureai.dev/assets/logo-email.png" style="display: block; height: auto; border: 0; width: 220px;" width="220" alt="CaptureAI" title="CaptureAI" height="auto">
                                         </div>
                                       </td>
                                     </tr>
@@ -731,48 +788,60 @@ https://thesuperiorflash.github.io/CaptureAI`;
 
   /**
    * Send email via Resend
+   * @returns {boolean} - True if email sent successfully, false otherwise
    */
   async sendEmailViaResend(email, subject, htmlContent, textContent, tier = 'free') {
     console.log('Attempting to send email via Resend to:', email);
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: this.env.FROM_EMAIL || 'CaptureAI <onboarding@resend.dev>',
-        to: [email],
-        subject: subject,
-        html: htmlContent,
-        text: textContent,
+    try {
+      const response = await fetchWithTimeout('https://api.resend.com/emails', {
+        method: 'POST',
         headers: {
-          'X-Entity-Ref-ID': crypto.randomUUID(),
+          'Authorization': `Bearer ${this.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
         },
-        tags: [
-          {
-            name: 'category',
-            value: tier === 'pro' ? 'license_pro' : 'license_free'
-          }
-        ]
-      })
-    });
+        body: JSON.stringify({
+          from: this.env.FROM_EMAIL || 'CaptureAI <no-reply@mail.captureai.dev>',
+          to: [email],
+          subject: subject,
+          html: htmlContent,
+          text: textContent,
+          headers: {
+            'X-Entity-Ref-ID': crypto.randomUUID(),
+          },
+          tags: [
+            {
+              name: 'category',
+              value: tier === 'pro' ? 'license_pro' : 'license_free'
+            }
+          ]
+        })
+      }, 5000); // 5 second timeout for email API
 
-    console.log('Resend API response status:', response.status);
+      console.log('Resend API response status:', response.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Resend API error response:', errorText);
-      if (this.logger) {
-        this.logger.error('Resend email error', null, { error: errorText, status: response.status });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Resend API error response:', errorText);
+        if (this.logger) {
+          this.logger.error('Resend email error', null, { error: errorText, status: response.status });
+        }
+        return false;
       }
-    } else {
+
       const result = await response.json();
       console.log('Email sent successfully! Resend response:', result);
       if (this.logger) {
         this.logger.info('Email sent successfully', { provider: 'resend', to: email, id: result.id });
       }
+      return true;
+
+    } catch (error) {
+      console.error('Resend API request failed:', error);
+      if (this.logger) {
+        this.logger.error('Resend email request failed', error);
+      }
+      return false;
     }
   }
 

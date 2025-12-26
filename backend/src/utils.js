@@ -15,9 +15,37 @@ export function jsonResponse(data, status = 200) {
 }
 
 /**
+ * Fetch with timeout
+ * Wrapper around fetch that enforces a timeout
+ * @param {string} url - URL to fetch
+ * @param {object} options - Fetch options
+ * @param {number} timeout - Timeout in milliseconds (default: 10000ms = 10s)
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeout}ms`);
+    }
+    throw error;
+  }
+}
+
+/**
  * Handle CORS preflight
  */
-export function handleCORS(request) {
+export function handleCORS(request, env) {
   // List of allowed origins
   const allowedOrigins = [
     'https://captureai.dev',
@@ -25,7 +53,7 @@ export function handleCORS(request) {
   ];
 
   // Development/testing origins (only if in dev mode)
-  const isDev = typeof globalThis !== 'undefined' && globalThis.env?.ENVIRONMENT === 'development';
+  const isDev = env?.ENVIRONMENT === 'development';
   if (isDev) {
     allowedOrigins.push('http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000');
   }
@@ -40,9 +68,21 @@ export function handleCORS(request) {
     if (allowedOrigins.includes(origin)) {
       allowedOrigin = origin;
     }
-    // Chrome extension support (all extensions allowed)
+    // Chrome extension support - only allow specific extension IDs
     else if (origin.startsWith('chrome-extension://')) {
-      allowedOrigin = origin;
+      const extensionIds = env?.CHROME_EXTENSION_IDS;
+      if (extensionIds) {
+        // Support comma-separated list of extension IDs
+        const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
+        const allowedExtensions = allowedExtensionIds.map(id => `chrome-extension://${id}`);
+
+        if (allowedExtensions.includes(origin)) {
+          allowedOrigin = origin;
+        }
+      } else if (isDev) {
+        // In development, allow any extension for testing
+        allowedOrigin = origin;
+      }
     }
     // Match GitHub Pages subdomain
     else if (origin.match(/^https:\/\/.*\.github\.io$/)) {

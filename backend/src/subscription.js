@@ -3,10 +3,11 @@
  * Handles Stripe subscription payments and license key generation
  */
 
-import { jsonResponse, parseJSON, generateUUID, constantTimeCompare } from './utils';
+import { jsonResponse, parseJSON, generateUUID, constantTimeCompare, fetchWithTimeout } from './utils';
 import { AuthHandler } from './auth';
 import { validateRequestBody, validateEmail, validateStripeSignature, ValidationError } from './validation';
 import { logSubscription, logWebhook, logValidationError } from './logger';
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
 export class SubscriptionHandler {
   constructor(env, logger = null) {
@@ -24,6 +25,18 @@ export class SubscriptionHandler {
    */
   async createCheckout(request) {
     try {
+      // Rate limiting - prevent checkout spam
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `checkout:${clientId}`,
+        RateLimitPresets.CHECKOUT.limit,
+        RateLimitPresets.CHECKOUT.windowMs,
+        this.env
+      );
+      if (rateLimitError) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
       const body = await validateRequestBody(request);
       const email = validateEmail(body.email, true);
 
@@ -135,11 +148,11 @@ export class SubscriptionHandler {
 
       // If email not in session, fetch from Stripe customer
       if (!customerEmail && customerId) {
-        const customerResponse = await fetch(`https://api.stripe.com/v1/customers/${customerId}`, {
+        const customerResponse = await fetchWithTimeout(`https://api.stripe.com/v1/customers/${customerId}`, {
           headers: {
             'Authorization': `Bearer ${this.stripeKey}`
           }
-        });
+        }, 5000);
 
         if (customerResponse.ok) {
           const customer = await customerResponse.json();
@@ -362,11 +375,11 @@ export class SubscriptionHandler {
       }
 
       // Retrieve the session from Stripe
-      const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
+      const response = await fetchWithTimeout(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
         headers: {
           'Authorization': `Bearer ${this.stripeKey}`
         }
-      });
+      }, 5000);
 
       if (!response.ok) {
         const error = await response.json();
@@ -402,7 +415,7 @@ export class SubscriptionHandler {
    * Create Stripe customer
    */
   async createStripeCustomer(email) {
-    const response = await fetch('https://api.stripe.com/v1/customers', {
+    const response = await fetchWithTimeout('https://api.stripe.com/v1/customers', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.stripeKey}`,
@@ -411,7 +424,7 @@ export class SubscriptionHandler {
       body: new URLSearchParams({
         email: email
       })
-    });
+    }, 5000);
 
     if (!response.ok) {
       const error = await response.json();
@@ -426,12 +439,13 @@ export class SubscriptionHandler {
    * Create Stripe checkout session
    */
   async createStripeCheckout(customerId, priceId, email) {
+    const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const params = {
       'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       mode: 'subscription',
-      success_url: `https://captureai.dev/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://captureai.dev/activate`
+      success_url: `${extensionUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${extensionUrl}/activate`
     };
 
     // Use customer ID if available, otherwise use email
@@ -441,14 +455,14 @@ export class SubscriptionHandler {
       params.customer_email = email;
     }
 
-    const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.stripeKey}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: new URLSearchParams(params)
-    });
+    }, 5000);
 
     if (!response.ok) {
       const error = await response.json();
@@ -463,7 +477,8 @@ export class SubscriptionHandler {
    * Create billing portal session
    */
   async createBillingPortal(customerId) {
-    const response = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
+    const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
+    const response = await fetchWithTimeout('https://api.stripe.com/v1/billing_portal/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.stripeKey}`,
@@ -471,9 +486,9 @@ export class SubscriptionHandler {
       },
       body: new URLSearchParams({
         customer: customerId,
-        return_url: `https://captureai.dev/activate`
+        return_url: `${extensionUrl}/activate`
       })
-    });
+    }, 5000);
 
     if (!response.ok) {
       throw new Error('Failed to create portal session');

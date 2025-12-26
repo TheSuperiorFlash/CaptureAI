@@ -260,77 +260,109 @@ export class AIHandler {
       const days = parseInt(url.searchParams.get('days') || '30'); // Default 30 days
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-      // Get overall statistics
-      const stats = await this.db
+      // Optimized: Single query with CTEs to get all analytics in one DB call
+      const analytics = await this.db
         .prepare(`
+          WITH filtered_records AS (
+            SELECT *
+            FROM usage_records
+            WHERE user_id = ? AND created_at >= ?
+          ),
+          overall_stats AS (
+            SELECT
+              COUNT(*) as total_requests,
+              SUM(input_tokens) as total_input_tokens,
+              SUM(output_tokens) as total_output_tokens,
+              SUM(reasoning_tokens) as total_reasoning_tokens,
+              SUM(cached_tokens) as total_cached_tokens,
+              SUM(total_cost) as total_cost,
+              AVG(input_tokens) as avg_input_tokens,
+              AVG(output_tokens) as avg_output_tokens,
+              AVG(reasoning_tokens) as avg_reasoning_tokens,
+              AVG(total_cost) as avg_cost_per_request,
+              AVG(response_time) as avg_response_time
+            FROM filtered_records
+          ),
+          by_prompt AS (
+            SELECT
+              prompt_type,
+              COUNT(*) as requests,
+              AVG(input_tokens) as avg_input_tokens,
+              AVG(output_tokens) as avg_output_tokens,
+              AVG(total_cost) as avg_cost,
+              SUM(total_cost) as total_cost
+            FROM filtered_records
+            GROUP BY prompt_type
+          ),
+          by_model_stats AS (
+            SELECT
+              model,
+              COUNT(*) as requests,
+              AVG(input_tokens) as avg_input_tokens,
+              AVG(output_tokens) as avg_output_tokens,
+              AVG(total_cost) as avg_cost,
+              SUM(total_cost) as total_cost
+            FROM filtered_records
+            GROUP BY model
+          ),
+          daily_breakdown AS (
+            SELECT
+              DATE(created_at) as date,
+              COUNT(*) as requests,
+              SUM(input_tokens) as input_tokens,
+              SUM(output_tokens) as output_tokens,
+              SUM(total_cost) as cost
+            FROM usage_records
+            WHERE user_id = ? AND created_at >= datetime('now', '-7 days')
+            GROUP BY DATE(created_at)
+            ORDER BY date DESC
+          )
           SELECT
-            COUNT(*) as total_requests,
-            SUM(input_tokens) as total_input_tokens,
-            SUM(output_tokens) as total_output_tokens,
-            SUM(reasoning_tokens) as total_reasoning_tokens,
-            SUM(cached_tokens) as total_cached_tokens,
-            SUM(total_cost) as total_cost,
-            AVG(input_tokens) as avg_input_tokens,
-            AVG(output_tokens) as avg_output_tokens,
-            AVG(reasoning_tokens) as avg_reasoning_tokens,
-            AVG(total_cost) as avg_cost_per_request,
-            AVG(response_time) as avg_response_time
-          FROM usage_records
-          WHERE user_id = ? AND created_at >= ?
+            (SELECT json_group_object('overall', json_object(
+              'total_requests', total_requests,
+              'total_input_tokens', total_input_tokens,
+              'total_output_tokens', total_output_tokens,
+              'total_reasoning_tokens', total_reasoning_tokens,
+              'total_cached_tokens', total_cached_tokens,
+              'total_cost', total_cost,
+              'avg_input_tokens', avg_input_tokens,
+              'avg_output_tokens', avg_output_tokens,
+              'avg_reasoning_tokens', avg_reasoning_tokens,
+              'avg_cost_per_request', avg_cost_per_request,
+              'avg_response_time', avg_response_time
+            )) FROM overall_stats) as overall,
+            (SELECT json_group_array(json_object(
+              'prompt_type', prompt_type,
+              'requests', requests,
+              'avg_input_tokens', avg_input_tokens,
+              'avg_output_tokens', avg_output_tokens,
+              'avg_cost', avg_cost,
+              'total_cost', total_cost
+            )) FROM by_prompt) as by_prompt_type,
+            (SELECT json_group_array(json_object(
+              'model', model,
+              'requests', requests,
+              'avg_input_tokens', avg_input_tokens,
+              'avg_output_tokens', avg_output_tokens,
+              'avg_cost', avg_cost,
+              'total_cost', total_cost
+            )) FROM by_model_stats) as by_model,
+            (SELECT json_group_array(json_object(
+              'date', date,
+              'requests', requests,
+              'input_tokens', input_tokens,
+              'output_tokens', output_tokens,
+              'cost', cost
+            )) FROM daily_breakdown) as daily
         `)
-        .bind(user.userId, startDate)
+        .bind(user.userId, startDate, user.userId)
         .first();
 
-      // Get breakdown by prompt type
-      const byPromptType = await this.db
-        .prepare(`
-          SELECT
-            prompt_type,
-            COUNT(*) as requests,
-            AVG(input_tokens) as avg_input_tokens,
-            AVG(output_tokens) as avg_output_tokens,
-            AVG(total_cost) as avg_cost,
-            SUM(total_cost) as total_cost
-          FROM usage_records
-          WHERE user_id = ? AND created_at >= ?
-          GROUP BY prompt_type
-        `)
-        .bind(user.userId, startDate)
-        .all();
-
-      // Get breakdown by model
-      const byModel = await this.db
-        .prepare(`
-          SELECT
-            model,
-            COUNT(*) as requests,
-            AVG(input_tokens) as avg_input_tokens,
-            AVG(output_tokens) as avg_output_tokens,
-            AVG(total_cost) as avg_cost,
-            SUM(total_cost) as total_cost
-          FROM usage_records
-          WHERE user_id = ? AND created_at >= ?
-          GROUP BY model
-        `)
-        .bind(user.userId, startDate)
-        .all();
-
-      // Get daily breakdown (last 7 days)
-      const dailyStats = await this.db
-        .prepare(`
-          SELECT
-            DATE(created_at) as date,
-            COUNT(*) as requests,
-            SUM(input_tokens) as input_tokens,
-            SUM(output_tokens) as output_tokens,
-            SUM(total_cost) as cost
-          FROM usage_records
-          WHERE user_id = ? AND created_at >= datetime('now', '-7 days')
-          GROUP BY DATE(created_at)
-          ORDER BY date DESC
-        `)
-        .bind(user.userId)
-        .all();
+      // Parse JSON results
+      const overall = JSON.parse(analytics.overall || '{}').overall || {};
+      const byPromptType = JSON.parse(analytics.by_prompt_type || '[]');
+      const byModel = JSON.parse(analytics.by_model || '[]');
+      const dailyStats = JSON.parse(analytics.daily || '[]');
 
       return jsonResponse({
         period: {
@@ -339,51 +371,51 @@ export class AIHandler {
           end: new Date().toISOString()
         },
         overall: {
-          totalRequests: stats.total_requests || 0,
-          totalCost: parseFloat(stats.total_cost || 0).toFixed(6),
-          avgCostPerRequest: parseFloat(stats.avg_cost_per_request || 0).toFixed(8),
+          totalRequests: overall.total_requests || 0,
+          totalCost: parseFloat(overall.total_cost || 0).toFixed(6),
+          avgCostPerRequest: parseFloat(overall.avg_cost_per_request || 0).toFixed(8),
           tokens: {
             input: {
-              total: stats.total_input_tokens || 0,
-              average: Math.round(stats.avg_input_tokens || 0)
+              total: overall.total_input_tokens || 0,
+              average: Math.round(overall.avg_input_tokens || 0)
             },
             output: {
-              total: stats.total_output_tokens || 0,
-              average: Math.round(stats.avg_output_tokens || 0)
+              total: overall.total_output_tokens || 0,
+              average: Math.round(overall.avg_output_tokens || 0)
             },
             reasoning: {
-              total: stats.total_reasoning_tokens || 0,
-              average: Math.round(stats.avg_reasoning_tokens || 0)
+              total: overall.total_reasoning_tokens || 0,
+              average: Math.round(overall.avg_reasoning_tokens || 0)
             },
             cached: {
-              total: stats.total_cached_tokens || 0
+              total: overall.total_cached_tokens || 0
             }
           },
-          avgResponseTime: Math.round(stats.avg_response_time || 0)
+          avgResponseTime: Math.round(overall.avg_response_time || 0)
         },
-        byPromptType: byPromptType.results?.map(row => ({
+        byPromptType: byPromptType.map(row => ({
           promptType: row.prompt_type,
           requests: row.requests,
           avgInputTokens: Math.round(row.avg_input_tokens || 0),
           avgOutputTokens: Math.round(row.avg_output_tokens || 0),
           avgCost: parseFloat(row.avg_cost || 0).toFixed(8),
           totalCost: parseFloat(row.total_cost || 0).toFixed(6)
-        })) || [],
-        byModel: byModel.results?.map(row => ({
+        })),
+        byModel: byModel.map(row => ({
           model: row.model,
           requests: row.requests,
           avgInputTokens: Math.round(row.avg_input_tokens || 0),
           avgOutputTokens: Math.round(row.avg_output_tokens || 0),
           avgCost: parseFloat(row.avg_cost || 0).toFixed(8),
           totalCost: parseFloat(row.total_cost || 0).toFixed(6)
-        })) || [],
-        daily: dailyStats.results?.map(row => ({
+        })),
+        daily: dailyStats.map(row => ({
           date: row.date,
           requests: row.requests,
           inputTokens: row.input_tokens,
           outputTokens: row.output_tokens,
           cost: parseFloat(row.cost || 0).toFixed(6)
-        })) || []
+        }))
       });
 
     } catch (error) {

@@ -20,23 +20,40 @@ binding = "DB"
 database_name = "captureai-db"
 database_id = "8056a7db-be99-4c64-8316-daf6c5c9b48f"  # Created when you run: wrangler d1 create captureai-db
 
+# Durable Objects binding for distributed rate limiting
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiterDO"
+script_name = "backend"
+
+# Durable Objects migrations
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiterDO"]
+
 # Environment Variables (Secrets)
 # Set these with: wrangler secret put SECRET_NAME
-# Example: wrangler secret put OPENAI_API_KEY
 [vars]
 # Public variables (not sensitive)
 CLOUDFLARE_ACCOUNT_ID = "e411f43b15c9122c0056a08f727eef15"
 CLOUDFLARE_GATEWAY_NAME = "captureai-gateway"
 FREE_TIER_DAILY_LIMIT = "10"
 PRO_TIER_RATE_LIMIT_PER_MINUTE = "60"  # 60 requests per minute for Pro tier
-EXTENSION_URL = "https://thesuperiorflash.github.io/CaptureAI"
+EXTENSION_URL = "https://captureai.dev"
+# Chrome Extension IDs - Comma-separated list of allowed extension IDs
+# First ID: Production extension from Chrome Web Store
+# Second ID: Development/unpacked extension for testing
+CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickcaicecbkdio"
 
-# JWT_SECRET - Set with: wrangler secret put JWT_SECRET
-# OPENAI_API_KEY - Set with: wrangler secret put OPENAI_API_KEY
-# STRIPE_SECRET_KEY - Set with: wrangler secret put STRIPE_SECRET_KEY
-# STRIPE_WEBHOOK_SECRET - Set with: wrangler secret put STRIPE_WEBHOOK_SECRET
-# STRIPE_PRICE_BASIC - Set with: wrangler secret put STRIPE_PRICE_BASIC
-# STRIPE_PRICE_PRO - Set with: wrangler secret put STRIPE_PRICE_PRO
+# Secrets - Set with: wrangler secret put SECRET_NAME
+# Required secrets:
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put STRIPE_WEBHOOK_SECRET
+#   wrangler secret put STRIPE_PRICE_PRO
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put FROM_EMAIL
+# Recommended FROM_EMAIL format: CaptureAI <hello@mail.captureai.dev>
+# Note: Avoid "noreply" addresses for better deliverability
 
 # Route configuration (optional - for custom domains)
 # Uncomment and configure if you have a custom domain

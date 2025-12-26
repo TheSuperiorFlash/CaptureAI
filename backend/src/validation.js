@@ -94,8 +94,20 @@ export function validateEmail(email, required = true) {
     throw new ValidationError('Email domain is too long (max 255 characters)', 'email');
   }
 
-  // Check for common disposable email domains (optional - can be expanded)
-  const disposableDomains = ['tempmail.com', 'throwaway.email', 'guerrillamail.com'];
+  // Check for common disposable email domains
+  // Comprehensive list of popular disposable email services
+  const disposableDomains = [
+    'tempmail.com', 'throwaway.email', 'guerrillamail.com',
+    '10minutemail.com', '10minutemail.net', 'mailinator.com',
+    'maildrop.cc', 'temp-mail.org', 'getnada.com', 'trashmail.com',
+    'sharklasers.com', 'guerrillamailblock.com', 'grr.la',
+    'fakeinbox.com', 'yopmail.com', 'mohmal.com', 'dispostable.com',
+    'emailondeck.com', 'mintemail.com', 'mytemp.email',
+    'tempmail.net', 'spamgourmet.com', 'mailnesia.com',
+    'throwawaymail.com', 'temp-mail.io', 'guerrillamail.de',
+    'inboxkitten.com', 'getairmail.com', 'anonbox.net'
+  ];
+
   if (disposableDomains.some(d => domain.toLowerCase().endsWith(d))) {
     throw new ValidationError('Disposable email addresses are not allowed', 'email');
   }
