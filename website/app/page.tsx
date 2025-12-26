@@ -132,8 +132,8 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     {/* Header */}
                     <div className="text-center mb-16">
-                        <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
-                            <span className="text-purple-400 text-sm font-semibold">PRO Feature</span>
+                        <div className="inline-block px-4 py-2 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] rounded-full mb-4">
+                            <span className="text-white text-sm font-semibold">PRO Feature</span>
                         </div>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
                             Complete privacy protection
@@ -148,7 +148,7 @@ export default function Home() {
                         {/* Without Privacy Guard */}
                         <div className="relative">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-red-500/80 border border-red-500 rounded-full text-white text-sm font-semibold shadow-lg">
+                                <span className="inline-block px-4 py-2 bg-red-500 border border-red-500 rounded-full text-white text-sm font-semibold shadow-lg">
                                     ✗ Privacy Guard OFF
                                 </span>
                             </div>
@@ -170,7 +170,7 @@ export default function Home() {
                         {/* With Privacy Guard */}
                         <div className="relative">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-green-500/80 border border-green-500 rounded-full text-white text-sm font-semibold shadow-lg">
+                                <span className="inline-block px-4 py-2 bg-green-500 border border-green-500 rounded-full text-white text-sm font-semibold shadow-lg">
                                     ✓ Privacy Guard ON
                                 </span>
                             </div>
@@ -187,27 +187,6 @@ export default function Home() {
                             <p className="text-center text-gray-400 mt-4">
                                 Clean logs showing only natural browsing
                             </p>
-                        </div>
-                    </div>
-
-                    {/* Features List */}
-                    <div className="max-w-3xl mx-auto">
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-8">
-                            <h3 className="text-xl font-semibold text-white mb-4">What Privacy Guard does:</h3>
-                            <div className="space-y-3 text-gray-300">
-                                <p>
-                                    <span className="text-green-400 font-semibold">✓</span> Hides all extension activity from action logs
-                                </p>
-                                <p>
-                                    <span className="text-green-400 font-semibold">✓</span> Makes your browsing look completely natural
-                                </p>
-                                <p>
-                                    <span className="text-green-400 font-semibold">✓</span> Undetectable by quiz platforms and learning management systems
-                                </p>
-                                <p>
-                                    <span className="text-green-400 font-semibold">✓</span> Works seamlessly in the background - just enable and forget
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>
