@@ -399,7 +399,7 @@ https://captureai.dev`;
                               <td class="pad" style="padding-bottom: 30px; padding-left: 25px; padding-top: 30px; width: 100%; padding-right: 0;" width="100%">
                                 <div class="alignment" align="left" style="line-height: 10px;">
                                   <div class="alignment" align="left" style="line-height: 10px;">
-                                    <img src="https://captureai.dev/assets/logo-email.png" style="display: block; height: auto; border: 0; width: 180px;" width="180" alt="CaptureAI logo" title="CaptureAI logo" height="auto">
+                                    <img src="https://captureai.dev/logo-email.png" style="display: block; height: auto; border: 0; width: 180px;" width="180" alt="CaptureAI logo" title="CaptureAI logo" height="auto">
                                   </div>
                                 </div>
                               </td>
@@ -668,7 +668,7 @@ https://captureai.dev`;
                                     <tr>
                                       <td class="pad" style="width: 100%; padding: 0 0 12px 0;">
                                         <div class="alignment" align="left" style="line-height: 10px;">
-                                          <img src="https://captureai.dev/assets/logo-email.png" style="display: block; height: auto; border: 0; width: 220px;" width="220" alt="CaptureAI" title="CaptureAI" height="auto">
+                                          <img src="https://captureai.dev/logo-email.png" style="display: block; height: auto; border: 0; width: 220px;" width="220" alt="CaptureAI" title="CaptureAI" height="auto">
                                         </div>
                                       </td>
                                     </tr>
