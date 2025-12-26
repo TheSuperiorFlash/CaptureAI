@@ -148,17 +148,18 @@ export default function Home() {
                         {/* Without Privacy Guard */}
                         <div className="relative">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-full text-red-400 text-sm font-semibold">
+                                <span className="inline-block px-4 py-2 bg-red-500/80 border border-red-500 rounded-full text-white text-sm font-semibold shadow-lg">
                                     ✗ Privacy Guard OFF
                                 </span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/20">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/20 h-full flex items-start">
                                 <Image
                                     src="/action-log-canvas-1.png"
                                     alt="Canvas Action Log without Privacy Guard - shows extension activity"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto"
+                                    className="w-full object-cover object-top"
+                                    style={{ height: 'auto' }}
                                 />
                             </div>
                             <p className="text-center text-gray-400 mt-4">
@@ -169,17 +170,18 @@ export default function Home() {
                         {/* With Privacy Guard */}
                         <div className="relative">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full text-green-400 text-sm font-semibold">
+                                <span className="inline-block px-4 py-2 bg-green-500/80 border border-green-500 rounded-full text-white text-sm font-semibold shadow-lg">
                                     ✓ Privacy Guard ON
                                 </span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/20">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/20 h-full flex items-start">
                                 <Image
                                     src="/action-log-canvas-2.png"
                                     alt="Canvas Action Log with Privacy Guard - shows clean activity"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto"
+                                    className="w-full object-cover object-top"
+                                    style={{ height: 'auto' }}
                                 />
                             </div>
                             <p className="text-center text-gray-400 mt-4">
