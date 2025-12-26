@@ -56,7 +56,7 @@ const Migration = {
     // Update if not set or if it's the old placeholder URL
     if (!currentUrl || currentUrl.includes('YOUR-SUBDOMAIN')) {
       await chrome.storage.local.set({
-        'captureai-backend-url': 'https://backend.captureai.workers.dev'
+        'captureai-backend-url': 'https://api.captureai.dev'
       });
       console.log('[Migration] Updated backend URL to production');
     }

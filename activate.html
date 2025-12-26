@@ -473,7 +473,7 @@
         }
 
         async function handleFreeSignup(email) {
-            const response = await fetch('https://backend.captureai.workers.dev/api/auth/create-free-key', {
+            const response = await fetch('https://api.captureai.dev/api/auth/create-free-key', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -489,7 +489,7 @@
         }
 
         async function handleProSignup(email) {
-            const response = await fetch('https://backend.captureai.workers.dev/api/subscription/create-checkout', {
+            const response = await fetch('https://api.captureai.dev/api/subscription/create-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })

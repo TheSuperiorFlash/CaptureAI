@@ -1,7 +1,7 @@
 # Cloudflare Workers Configuration
 # Learn more: https://developers.cloudflare.com/workers/wrangler/configuration/
 
-name = "backend"
+name = "api"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
@@ -24,7 +24,7 @@ database_id = "8056a7db-be99-4c64-8316-daf6c5c9b48f"  # Created when you run: wr
 [[durable_objects.bindings]]
 name = "RATE_LIMITER"
 class_name = "RateLimiterDO"
-script_name = "backend"
+script_name = "api"
 
 # Durable Objects migrations
 [[migrations]]
@@ -55,8 +55,7 @@ CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickca
 # Recommended FROM_EMAIL format: CaptureAI <hello@mail.captureai.dev>
 # Note: Avoid "noreply" addresses for better deliverability
 
-# Route configuration (optional - for custom domains)
-# Uncomment and configure if you have a custom domain
-# routes = [
-#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
-# ]
+# Route configuration - Custom domain for API
+[[routes]]
+pattern = "api.captureai.dev/*"
+zone_name = "captureai.dev"

@@ -20,12 +20,12 @@
 ## Implementation Plan
 
 ### 1. **Update Backend Webhook Security**
-- **File**: `cloudflare-workers-backend/src/subscription.js`
+- **File**: `cloudflare-workers-api/src/subscription.js`
 - Add proper Stripe webhook signature verification (line 72-74)
 - Currently just parsing JSON - needs `stripe-signature` header verification
 
 ### 2. **Fix Checkout URLs**
-- **File**: `cloudflare-workers-backend/src/subscription.js` (line 350-351)
+- **File**: `cloudflare-workers-api/src/subscription.js` (line 350-351)
 - Update success URL: `https://thesuperiorflash.github.io/CaptureAI/payment-success.html`
 - Update cancel URL: `https://thesuperiorflash.github.io/CaptureAI/activate.html`
 
@@ -93,7 +93,7 @@
 
 ## Key Files to Modify
 
-1. `cloudflare-workers-backend/src/subscription.js` - Webhook security & URLs
+1. `cloudflare-workers-api/src/subscription.js` - Webhook security & URLs
 2. `popup.js` - Complete handleUpgrade()
 3. `payment-success.html` - Branding update
 4. `wrangler.toml` - Add EXTENSION_URL variable

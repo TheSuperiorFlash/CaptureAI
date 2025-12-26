@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS usage_records (
   prompt_type TEXT,
   model TEXT,
   tokens_used INTEGER DEFAULT 0,
+  input_tokens INTEGER DEFAULT 0,
+  output_tokens INTEGER DEFAULT 0,
+  reasoning_tokens INTEGER DEFAULT 0,
+  cached_tokens INTEGER DEFAULT 0,
+  total_cost REAL DEFAULT 0.0,
   response_time INTEGER DEFAULT 0,
   cached INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now')),
@@ -57,6 +62,8 @@ CREATE INDEX IF NOT EXISTS idx_usage_records_user_id ON usage_records(user_id);
 CREATE INDEX IF NOT EXISTS idx_usage_records_created_at ON usage_records(created_at);
 CREATE INDEX IF NOT EXISTS idx_usage_records_user_date ON usage_records(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_usage_records_model ON usage_records(model);
+CREATE INDEX IF NOT EXISTS idx_usage_records_cost ON usage_records(total_cost);
+CREATE INDEX IF NOT EXISTS idx_usage_records_user_cost ON usage_records(user_id, total_cost);
 
 -- Indexes for webhook_events table
 CREATE INDEX IF NOT EXISTS idx_webhook_events_event_id ON webhook_events(event_id);

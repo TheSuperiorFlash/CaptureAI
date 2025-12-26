@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       showResponseMessage('License key activated successfully!', 'success');
 
       setTimeout(async () => {
+        // Clear response message before showing main controls
+        clearResponseMessage();
         await showMainControls();
       }, 500);
     } catch (error) {
@@ -238,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showLicenseKeyInput() {
     elements.licenseKeySection.classList.remove('hidden');
     elements.mainControls.classList.add('hidden');
+    elements.responseSection.classList.add('hidden'); // Hide response section when not activated
 
     // Clear input
     elements.licenseKeyInput.value = '';
@@ -257,6 +260,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Update UI
       elements.licenseKeySection.classList.add('hidden');
       elements.mainControls.classList.remove('hidden');
+      elements.responseSection.classList.remove('hidden'); // Show response section when activated
+
+      // Clear any previous error messages
+      clearResponseMessage();
 
       // Display user info
       if (user.email) {
@@ -561,6 +568,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       elements.responseContent.className = 'response-content';
     }
+  }
+
+  /**
+   * Clear the response message
+   */
+  function clearResponseMessage() {
+    elements.responseContent.textContent = '';
+    elements.responseContent.className = 'response-content empty';
+    elements.responseContent.style.color = '';
   }
 
   /**

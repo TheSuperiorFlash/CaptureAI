@@ -25,7 +25,7 @@ function PaymentSuccessContent() {
 
         // Verify the payment with Stripe
         const response = await fetch(
-          'https://backend.captureai.workers.dev/api/subscription/verify-payment',
+          'https://api.captureai.dev/api/subscription/verify-payment',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

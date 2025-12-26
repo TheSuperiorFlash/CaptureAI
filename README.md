@@ -31,7 +31,7 @@ CaptureAI is a Chrome extension that lets you capture questions from any webpage
 - **🧠 Reasoning Slider** - Adjust AI reasoning level for Pro users (low/medium/high)
 - **⌨️ Keyboard Shortcuts** - Fast workflow with customizable hotkeys
 - **🔑 License Key System** - Free tier (10 requests/day) or Pro tier (unlimited)
-- **🔒 Privacy-First** - No data collection, secure backend processing
+- **🔒 Privacy-First** - No data collection, secure API processing
 
 ---
 
@@ -154,7 +154,7 @@ CaptureAI/
 │   ├── worker.min.js
 │   └── lang-data/eng.traineddata.gz
 │
-├── backend/                   # Cloudflare Workers backend
+├── api/                       # Cloudflare Workers API
 │   └── src/
 │       ├── index.js          # Main router
 │       ├── auth.js           # License key management
@@ -168,7 +168,7 @@ CaptureAI/
 
 ### Data Flow
 ```
-User Action → Content Script → Background Script → Backend API → OpenAI
+User Action → Content Script → Background Script → API Server → OpenAI
                     ↓                                    ↓
             OCR Processing                        License Validation
                     ↓                                    ↓
@@ -180,7 +180,7 @@ User Action → Content Script → Background Script → Backend API → OpenAI
 - **Manifest V3** - Modern Chrome extension architecture
 - **ES6 Modules** - Clean, modular code organization
 - **Tesseract.js** - Client-side OCR for text extraction
-- **Cloudflare Workers** - Serverless backend with D1 database
+- **Cloudflare Workers** - Serverless API with D1 database
 - **OpenAI API** - GPT models for AI-powered answers
 - **Stripe** - Payment processing for Pro subscriptions
 - **Chrome Storage API** - Secure local data persistence
@@ -293,7 +293,7 @@ export const CONFIG = {
 
 - Google Chrome browser
 - Node.js (for website development)
-- Cloudflare account (for backend deployment)
+- Cloudflare account (for API deployment)
 
 ### Local Development
 
@@ -363,7 +363,7 @@ isOnYourNewSite() {
 CaptureAI respects your privacy:
 
 - **No data collection** - We don't collect any usage data
-- **Secure backend** - License keys validated via encrypted connection
+- **Secure API** - License keys validated via encrypted connection
 - **Direct processing** - Screenshots processed and discarded immediately
 - **No tracking** - Zero analytics or telemetry
 - **Open source** - All code is visible and auditable
@@ -418,7 +418,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📈 Version History
 
 ### v2.0.0 (Current)
-- **Backend System** - Cloudflare Workers backend with D1 database
+- **API System** - Cloudflare Workers API with D1 database
 - **License Key System** - Free tier (10/day) and Pro tier (unlimited)
 - **Stripe Integration** - Secure payment processing for Pro subscriptions
 - **Usage Tracking** - View remaining requests in popup

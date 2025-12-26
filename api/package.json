@@ -1,7 +1,7 @@
 {
-  "name": "captureai-workers-backend",
+  "name": "captureai-api",
   "version": "1.0.0",
-  "description": "Cloudflare Workers backend for CaptureAI with AI Gateway integration",
+  "description": "Cloudflare Workers API for CaptureAI with AI Gateway integration",
   "main": "src/index.js",
   "scripts": {
     "dev": "wrangler dev",

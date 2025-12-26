@@ -716,7 +716,7 @@ https://captureai.dev`;
                                   <!-- License Key -->
                                   <table class="text_block block-5" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                                     <tr>
-                                      <td class="pad" style="padding: 0 0 32px 0;">
+                                      <td class="pad" style="padding: 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 14px; color: #666666; line-height: 1.2; margin-bottom: 8px;">
                                             <p style="margin: 0;">Your License Key</p>

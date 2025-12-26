@@ -95,7 +95,7 @@ CaptureAI/
 │   ├── ui-core.js             # Main UI panel with tier logic
 │   ├── ui-components.js       # Reusable UI components, Pro indicators
 │   └── ui-stealthy-result.js  # Stealthy answer overlay
-└── backend/                   # Cloudflare Workers backend
+└── api/                   # Cloudflare Workers backend
     ├── wrangler.toml          # Cloudflare Workers configuration
     ├── package.json           # Backend dependencies
     ├── schema.sql             # D1 database schema
@@ -170,20 +170,20 @@ Domain detection:
 
 ### Core Files - Backend
 
-#### backend/src/index.js
+#### api/src/index.js
 Main Cloudflare Worker:
 - CORS handling for allowed origins
 - Request routing to handler functions
 - Error handling and logging
 - Health check endpoint
 
-#### backend/src/router.js
+#### api/src/router.js
 Request routing system:
 - Route matching and parameter extraction
 - Handler function mapping
 - 404 handling
 
-#### backend/src/auth.js
+#### api/src/auth.js
 Authentication and authorization:
 - License key validation against D1 database
 - Tier verification (Free/Pro)
@@ -191,7 +191,7 @@ Authentication and authorization:
 - Rate limiting enforcement (tier-based)
 - License key generation (format: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX)
 
-#### backend/src/subscription.js
+#### api/src/subscription.js
 Stripe integration:
 - `createCheckoutSession()`: Create Stripe payment session
 - `handleWebhook()`: Process Stripe webhook events
@@ -201,7 +201,7 @@ Stripe integration:
 - Webhook signature verification (HMAC SHA256)
 - License key generation and email delivery
 
-#### backend/src/ai.js
+#### api/src/ai.js
 AI Gateway integration:
 - OpenAI API proxy via Cloudflare AI Gateway
 - Model selection (gpt-4.1-nano, gpt-5-nano)
@@ -210,7 +210,7 @@ AI Gateway integration:
 - Caching via AI Gateway
 - Analytics aggregation
 
-#### backend/src/validation.js
+#### api/src/validation.js
 Input validation and security:
 - Email format validation (RFC 5322)
 - License key format validation
@@ -218,7 +218,7 @@ Input validation and security:
 - SQL injection prevention
 - XSS protection
 
-#### backend/src/logger.js
+#### api/src/logger.js
 Structured logging:
 - Log levels: DEBUG, INFO, WARN, ERROR, SECURITY
 - Request tracking with unique IDs
@@ -331,7 +331,7 @@ window.CaptureAI = {
 
 ### Database Schema (D1)
 
-**Location:** `backend/schema.sql`
+**Location:** `api/schema.sql`
 
 ```sql
 -- Users table
@@ -447,7 +447,7 @@ GET /api/subscription/portal
 - Sliding window implementation
 - No daily limit
 
-**Implementation:** `backend/src/auth.js` checks usage before allowing requests
+**Implementation:** `api/src/auth.js` checks usage before allowing requests
 
 ### AI Gateway Integration
 
@@ -578,7 +578,7 @@ User gets license key → Extension calls backend → Backend validates → Back
 
 ### Key Generation
 
-**Location:** `backend/src/auth.js`
+**Location:** `api/src/auth.js`
 
 ```javascript
 function generateLicenseKey() {
@@ -664,7 +664,7 @@ Resend API → User receives HTML email with Pro license key
 
 ### Webhook Processing
 
-**Location:** `backend/src/subscription.js`
+**Location:** `api/src/subscription.js`
 
 ```javascript
 // 1. Verify signature
@@ -871,7 +871,7 @@ STATE.eventListeners.forEach(({ element, event, handler }) => {
 4. Test on web page
 
 ### Development Workflow - Backend
-1. Edit backend source file in `backend/src/`
+1. Edit backend source file in `api/src/`
 2. Test locally: `npm run dev` (starts local server)
 3. Test with extension: Set backend URL to `http://localhost:8787`
 4. Deploy: `npm run deploy` (deploy to Cloudflare Workers)
@@ -1061,7 +1061,7 @@ zip -r captureai-extension.zip \
   icons/ \
   libs/ \
   modules/ \
-  -x "*.git*" "*.DS_Store" "backend/*" "docs/*" ".claude/*" "node_modules/*"
+  -x "*.git*" "*.DS_Store" "api/*" "docs/*" ".claude/*" "node_modules/*"
 ```
 
 ### Post-Deployment Verification
@@ -1105,7 +1105,7 @@ window.CaptureAI.NewFeature = newFeature.NewFeature;
 
 **Add new backend API endpoint:**
 ```javascript
-// 1. Add route in backend/src/router.js
+// 1. Add route in api/src/router.js
 routes.push({
   method: 'POST',
   path: '/api/new-endpoint',
@@ -1128,7 +1128,7 @@ async function newEndpoint(request, env, params) {
 
 **Add database migration:**
 ```bash
-cd backend/migrations
+cd api/migrations
 # Create migration file: YYYY-MM-DD-description.sql
 
 -- Add migration SQL
@@ -1166,9 +1166,9 @@ User Action
   → Content Script (content.js)
   → Background Worker (background.js)
   → Auth Service (modules/auth-service.js)
-  → Cloudflare Workers (backend/src/index.js)
-  → Auth Validation (backend/src/auth.js)
-  → AI Gateway (backend/src/ai.js)
+  → Cloudflare Workers (api/src/index.js)
+  → Auth Validation (api/src/auth.js)
+  → AI Gateway (api/src/ai.js)
   → OpenAI API
   → Response flows back
   → Display in UI (modules/ui-*.js)
@@ -1193,9 +1193,9 @@ User Action
 ### Support Documentation
 
 Additional docs in project:
-- `backend/README.md` - Backend setup and deployment
-- `backend/DEPLOYMENT_GUIDE.md` - Detailed deployment instructions
-- `backend/QUICK_START.md` - Quick start guide
+- `api/README.md` - Backend setup and deployment
+- `api/DEPLOYMENT_GUIDE.md` - Detailed deployment instructions
+- `api/QUICK_START.md` - Quick start guide
 - `STRIPE_SETUP_GUIDE.md` - Stripe integration guide
 - `LICENSE_KEY_SYSTEM.md` - License key documentation
 - `docs/OCR_IMPLEMENTATION.md` - OCR implementation details

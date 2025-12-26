@@ -7,7 +7,7 @@ const AuthService = {
   /**
    * Default backend URL (production Cloudflare Workers)
    */
-  DEFAULT_BACKEND_URL: 'https://backend.captureai.workers.dev',
+  DEFAULT_BACKEND_URL: 'https://api.captureai.dev',
 
   /**
    * Get backend URL from storage
