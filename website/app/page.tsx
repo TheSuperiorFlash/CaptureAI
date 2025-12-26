@@ -158,7 +158,7 @@ export default function Home() {
                                     alt="Canvas Action Log without Privacy Guard - shows extension activity"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto"
+                                    className="w-full h-auto block"
                                 />
                             </div>
                         </div>
@@ -176,7 +176,7 @@ export default function Home() {
                                     alt="Canvas Action Log with Privacy Guard - shows clean activity"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto"
+                                    className="w-full h-auto block"
                                 />
                             </div>
                         </div>
