@@ -1,7 +1,32 @@
+'use client'
+
 import Link from 'next/link'
 import { Zap, Download, CheckCircle, Shield } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+const headlines = [
+    { text: 'Get answers to any question', highlight: 'instantly' },
+    { text: 'Solve homework problems', highlight: 'effortlessly' },
+    { text: 'Ace your exams with AI', highlight: 'guaranteed' },
+    { text: 'Study smarter, not harder', highlight: 'with CaptureAI' },
+]
 
 export default function Hero() {
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [isVisible, setIsVisible] = useState(true)
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsVisible(false)
+            setTimeout(() => {
+                setCurrentIndex((prev) => (prev + 1) % headlines.length)
+                setIsVisible(true)
+            }, 500)
+        }, 4000)
+
+        return () => clearInterval(interval)
+    }, [])
+
     return (
         <section className="relative bg-[#08070e] pt-20 pb-32 overflow-hidden">
             {/* Animated gradient blobs */}
@@ -12,11 +37,15 @@ export default function Hero() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center">
                     {/* Heading */}
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
-                        Get answers to any question
-                        <br />
-                        <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                            instantly
+                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight min-h-[200px] md:min-h-[240px] flex flex-col items-center justify-center">
+                        <span
+                            className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+                        >
+                            {headlines[currentIndex].text}
+                            <br />
+                            <span className="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                                {headlines[currentIndex].highlight}
+                            </span>
                         </span>
                     </h1>
 
@@ -33,13 +62,7 @@ export default function Hero() {
                             className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                         >
                             <Zap className="w-5 h-5 mr-2" />
-                            Try Now - Free
-                        </Link>
-                        <Link
-                            href="/#features"
-                            className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-gray-200 text-lg font-semibold rounded-lg hover:bg-white/5 transition-all border border-gray-700 hover:border-blue-500/50"
-                        >
-                            See Features
+                            Try Now
                         </Link>
                     </div>
 
