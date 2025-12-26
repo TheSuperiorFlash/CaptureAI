@@ -248,9 +248,9 @@ export const UICore = {
     toggleSlider.style.cssText = `
             position: absolute !important;
             width: ${STATE.isAskMode ? '38px' : '54px'} !important;
-            height: 22px !important;
+            height: 24px !important;
             background-color: ${theme.buttonPrimary} !important;
-            border-radius: 11px !important;
+            border-radius: 12px !important;
             top: 0px !important;
             left: ${STATE.isAskMode ? '52px' : '0px'} !important;
             transition: all 0.3s ease !important;
