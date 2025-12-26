@@ -69,8 +69,8 @@ export default function Hero() {
 
                     {/* Platform Compatibility */}
                     <div className="mt-16">
-                        <p className="text-sm text-gray-400 mb-6 tracking-wider">
-                            works on all learning platforms & sites, including these:
+                        <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                            Works on all learning platforms & sites, including these:
                         </p>
                         <div className="flex items-center justify-center gap-8 md:gap-12">
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
