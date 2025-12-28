@@ -112,7 +112,7 @@ export default function Home() {
                                 <span className="text-blue-400 text-sm font-semibold">Always Accessible</span>
                             </div>
                             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                                Floating UI that stays with you
+                                Floating UI
                             </h2>
                             <p className="text-xl text-gray-300 mb-6 leading-relaxed">
                                 Access CaptureAI anytime with our intuitive floating interface. No need to search for the extension - it's always just one click away, ready to help you solve problems instantly.
