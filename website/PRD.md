@@ -181,7 +181,7 @@ A modern, dark-themed support website for CaptureAI - an AI-powered Chrome exten
 - ✅ **Ask Mode**: Custom questions with image attachments
 
 ### 6.2 Backend Architecture to Document
-- ✅ **Cloudflare Workers**: Serverless backend (backend.captureai.workers.dev)
+- ✅ **Cloudflare Workers**: Serverless backend (api.captureai.workers.dev)
 - ✅ **Stripe Integration**: Payment processing for Pro tier
 - ✅ **Email System**: License key delivery via email
 - ✅ **API Endpoints**:

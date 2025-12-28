@@ -52,10 +52,5 @@ CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickca
 #   wrangler secret put STRIPE_PRICE_PRO
 #   wrangler secret put RESEND_API_KEY
 #   wrangler secret put FROM_EMAIL
-# Recommended FROM_EMAIL format: CaptureAI <hello@mail.captureai.dev>
+# Recommended FROM_EMAIL format: CaptureAI <license@mail.captureai.dev>
 # Note: Avoid "noreply" addresses for better deliverability
-
-# Route configuration - Custom domain for API
-[[routes]]
-pattern = "api.captureai.dev/*"
-zone_name = "captureai.dev"

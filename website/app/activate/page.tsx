@@ -46,7 +46,7 @@ export default function ActivatePage() {
 
   const handleFreeSignup = async () => {
     try {
-      const response = await fetch('https://api.captureai.dev/api/auth/create-free-key', {
+      const response = await fetch('https://api.captureai.workers.dev/api/auth/create-free-key', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ export default function ActivatePage() {
 
   const handleProSignup = async () => {
     try {
-      const response = await fetch('https://api.captureai.dev/api/subscription/create-checkout', {
+      const response = await fetch('https://api.captureai.workers.dev/api/subscription/create-checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
