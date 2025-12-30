@@ -60,7 +60,7 @@ export default function Hero() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Link
                             href="/activate"
-                            className="inline-flex items-center justify-center px-6 sm:px-12 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105 w-fit"
+                            className="inline-flex items-center justify-center px-12 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105 w-fit"
                         >
                             <Zap className="w-5 h-5 mr-2" />
                             Try Now
