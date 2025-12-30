@@ -60,7 +60,7 @@ export default function Hero() {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href="/activate"
-                            className="inline-flex items-center justify-center px-12 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
+                            className="inline-flex items-center justify-center px-8 sm:px-12 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
                         >
                             <Zap className="w-5 h-5 mr-2" />
                             Try Now
@@ -72,20 +72,20 @@ export default function Hero() {
                         <p className="text-xl text-gray-300 mb-6 leading-relaxed">
                             Works on all learning platforms & sites, including these:
                         </p>
-                        <div className="flex items-center justify-center gap-8 md:gap-12">
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                        <div className="grid grid-cols-3 md:flex md:items-center md:justify-center gap-6 md:gap-12 max-w-md md:max-w-none mx-auto">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center">
                                 <Image src="/platforms/canvas.png" alt="Canvas" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 mt-1">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center mt-1">
                                 <Image src="/platforms/respondus.png" alt="Respondus" width={120} height={40} className="h-9 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center">
                                 <Image src="/platforms/moodle.png" alt="Moodle" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center col-start-1 col-span-1 md:col-auto">
                                 <Image src="/platforms/blackboard.png" alt="Blackboard" width={120} height={40} className="h-6 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center col-start-2 col-span-2 md:col-auto">
                                 <Image src="/platforms/tophat.png" alt="Top Hat" width={120} height={40} className="h-6 w-auto" />
                             </div>
                         </div>
