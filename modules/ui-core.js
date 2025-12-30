@@ -479,6 +479,15 @@ export const UICore = {
     }
   },
 
+  clearMessage() {
+    const { CONFIG } = window.CaptureAI || {};
+    const resultElement = document.getElementById(CONFIG?.RESULT_ID || 'captureai-result');
+
+    if (resultElement) {
+      resultElement.textContent = '';
+    }
+  },
+
   showInFloatingPanel(message, isError) {
     const { CONFIG } = window.CaptureAI || {};
     const resultElement = document.getElementById(CONFIG?.RESULT_ID || 'captureai-result');

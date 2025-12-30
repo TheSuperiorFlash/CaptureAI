@@ -431,6 +431,10 @@ export const UIComponents = {
 
   handleAskModeQuestion() {
     const question = this.askTextInput.value.trim();
+
+    // Show "Processing..." message
+    this.showMessage('Processing...', false);
+
     this.handleAskQuestion(question, this.attachedImageData, this.attachedOCRData);
     this.clearAskInput();
   },
@@ -446,6 +450,9 @@ export const UIComponents = {
   startImageCapture() {
     try {
       if (window.CaptureAI.CaptureSystem?.startCapture) {
+        // Show "Capturing..." message
+        this.showMessage('Capturing...', false);
+
         window.CaptureAI.STATE.askModeInstance = this;
         window.CaptureAI.STATE.isForAskMode = true;
         window.CaptureAI.CaptureSystem.startCapture();
@@ -471,6 +478,11 @@ export const UIComponents = {
     const attachIcon = this.attachImageButton.querySelector('img');
     if (attachIcon && window.CaptureAI?.ICONS?.ATTACHED) {
       attachIcon.src = window.CaptureAI.ICONS.ATTACHED;
+    }
+
+    // Clear the "Capturing..." message now that image is attached
+    if (window.CaptureAI.UICore?.clearMessage) {
+      window.CaptureAI.UICore.clearMessage();
     }
   },
 
