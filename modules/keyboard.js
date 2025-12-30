@@ -71,24 +71,14 @@ export const Keyboard = {
 
   /**
          * Handle escape key functionality
+         * Two-stage behavior:
+         * 1. If auto-solve is enabled, disable it (don't hide UI)
+         * 2. If auto-solve is already disabled, hide the UI
          */
   handleEscapeKey() {
     const { STATE, DOM_CACHE } = window.CaptureAI;
 
-    // Always turn off auto-solve mode
-    if (STATE.isAutoSolveMode) {
-      if (window.CaptureAI.AutoSolve && window.CaptureAI.AutoSolve.toggleAutoSolveMode) {
-        window.CaptureAI.AutoSolve.toggleAutoSolveMode(false);
-      }
-    }
-
-    // Always hide the floating UI panel
-    if (STATE.isPanelVisible && DOM_CACHE.panel) {
-      DOM_CACHE.panel.style.display = 'none';
-      STATE.isPanelVisible = false;
-    }
-
-    // Cancel any ongoing selection
+    // Cancel any ongoing selection first (highest priority)
     const overlay = document.getElementById('captureai-overlay');
     if (overlay) {
       window.CaptureAI.CaptureSystem.cancelSelection();
@@ -103,6 +93,21 @@ export const Keyboard = {
       if (resultElement && (resultElement.textContent.includes('Processing') || resultElement.textContent.includes('Capturing'))) {
         window.CaptureAI.UIStealthyResult.hide();
       }
+    }
+
+    // Two-stage escape behavior: disable auto-solve first, then hide UI
+    if (STATE.isAutoSolveMode) {
+      // Stage 1: Auto-solve is enabled, just disable it (don't hide UI)
+      if (window.CaptureAI.AutoSolve && window.CaptureAI.AutoSolve.toggleAutoSolveMode) {
+        window.CaptureAI.AutoSolve.toggleAutoSolveMode(false);
+      }
+      return; // Don't hide UI, just disable auto-solve
+    }
+
+    // Stage 2: Auto-solve is already disabled, now hide the UI
+    if (STATE.isPanelVisible && DOM_CACHE.panel) {
+      DOM_CACHE.panel.style.display = 'none';
+      STATE.isPanelVisible = false;
     }
 
     // Clear fadeout timer but don't automatically clear showing answers
