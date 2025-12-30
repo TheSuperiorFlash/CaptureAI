@@ -72,7 +72,7 @@ export default function Hero() {
                         <p className="text-xl text-gray-300 mb-6 leading-relaxed">
                             Works on all learning platforms & sites, including these:
                         </p>
-                        <div className="grid grid-cols-3 md:flex md:items-center md:justify-center gap-6 md:gap-12 max-w-md md:max-w-none mx-auto">
+                        <div className="grid grid-cols-2 md:flex md:items-center md:justify-center gap-6 md:gap-12 max-w-sm md:max-w-none mx-auto">
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center">
                                 <Image src="/platforms/canvas.png" alt="Canvas" width={120} height={40} className="h-10 w-auto" />
                             </div>
@@ -82,10 +82,10 @@ export default function Hero() {
                             <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center">
                                 <Image src="/platforms/moodle.png" alt="Moodle" width={120} height={40} className="h-10 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center col-start-1 col-span-1 md:col-auto">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center">
                                 <Image src="/platforms/blackboard.png" alt="Blackboard" width={120} height={40} className="h-6 w-auto" />
                             </div>
-                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center col-start-2 col-span-2 md:col-auto">
+                            <div className="grayscale hover:grayscale-0 transition-all opacity-70 hover:opacity-100 flex justify-center col-span-2 md:col-auto">
                                 <Image src="/platforms/tophat.png" alt="Top Hat" width={120} height={40} className="h-6 w-auto" />
                             </div>
                         </div>
