@@ -26,7 +26,7 @@ export default function TermsPage() {
                 <li>AI-powered question answering using OpenAI&apos;s API</li>
                 <li>Free tier: 10 requests per day</li>
                 <li>Pro tier: Unlimited requests for $9.99/month</li>
-                <li>Auto-solve features for supported educational websites</li>
+                <li>Auto-solve feature for Vocabulary.com</li>
               </ul>
             </section>
 

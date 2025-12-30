@@ -35,7 +35,7 @@ const features: Feature[] = [
     {
         icon: Repeat,
         title: 'Auto-Solve',
-        description: 'Automatically solve questions on supported sites.',
+        description: 'Automatically solve questions on Vocabulary.com.',
         isPro: true,
     },
     {

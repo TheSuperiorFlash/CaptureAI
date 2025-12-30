@@ -8,7 +8,7 @@ export const DomainUtils = {
    * @returns {boolean}
    */
   isOnSupportedSite() {
-    return this.isOnVocabulary() || this.isOnQuizlet();
+    return this.isOnVocabulary();
   },
 
   /**

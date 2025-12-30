@@ -274,7 +274,54 @@ export const AutoSolve = {
          * @param {boolean} pressEnter - Whether to press Enter after the key
          */
   simulateKeypress(key, pressEnter = false) {
+    // ALWAYS ensure focus is on the correct element before simulating keypresses
+    // This is critical for sites like Vocabulary.com that use document-level keyboard shortcuts
 
+    const captureAIPanel = document.getElementById(window.CaptureAI?.CONFIG?.PANEL_ID);
+    const currentElement = document.activeElement;
+
+    // Check if we need to refocus (if focus is on our panel, body, or nowhere)
+    const needsRefocus = !currentElement ||
+                        currentElement === document.body ||
+                        (captureAIPanel && captureAIPanel.contains(currentElement));
+
+    if (needsRefocus) {
+      // Blur current element if it's in our panel
+      if (currentElement && captureAIPanel && captureAIPanel.contains(currentElement)) {
+        currentElement.blur();
+      }
+
+      // For sites like Vocabulary.com that use keyboard shortcuts on the document level,
+      // find and focus the challenge container
+      // Try multiple selectors to find the main content area
+      const challengeContainer = document.querySelector('.vcom-challenge[tabindex="0"]') ||
+                                 document.querySelector('.vcom-challenge') ||
+                                 document.querySelector('[tabindex="0"]') ||
+                                 document.body;
+
+      if (challengeContainer) {
+        try {
+          challengeContainer.focus();
+          console.log('CaptureAI: Focused element:', challengeContainer.className || challengeContainer.tagName);
+        } catch (e) {
+          console.log('CaptureAI: Failed to focus element:', e);
+        }
+        // Small delay to ensure focus completes
+        setTimeout(() => this._simulateKeypressImpl(key, pressEnter), 100);
+        return;
+      }
+    }
+
+    // If we already have proper focus, proceed immediately
+    this._simulateKeypressImpl(key, pressEnter);
+  },
+
+  /**
+         * Internal implementation of keypress simulation
+         * @param {string} key - Key to press (or empty for just Enter)
+         * @param {boolean} pressEnter - Whether to press Enter after the key
+         */
+  _simulateKeypressImpl(key, pressEnter = false) {
     const activeElement = document.activeElement;
     let success = false;
 

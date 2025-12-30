@@ -74,12 +74,13 @@ class OCRService {
 
         // Remove common OCR artifacts
         cleaned = cleaned.replace(/[|]{2,}/g, ''); // Multiple pipes
-        cleaned = cleaned.replace(/[_]{3,}/g, ''); // Multiple underscores
+        // Note: Underscores are preserved as they're used for blank spaces in answers
         cleaned = cleaned.replace(/[~]{2,}/g, ''); // Multiple tildes
         cleaned = cleaned.replace(/[`]{2,}/g, ''); // Multiple backticks
 
         // Remove standalone special characters (common OCR noise)
-        cleaned = cleaned.replace(/^\s*[|~`_]\s*$/gm, ''); // Lines with only special chars
+        // Note: Underscores excluded from this pattern as they're used for blank spaces
+        cleaned = cleaned.replace(/^\s*[|~`]\s*$/gm, ''); // Lines with only special chars (excluding underscores)
 
         // Normalize line breaks
         cleaned = cleaned.replace(/\n\s*\n/g, '\n'); // Remove empty lines

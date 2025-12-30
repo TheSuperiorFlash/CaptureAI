@@ -24,7 +24,7 @@ CaptureAI is a Chrome extension that lets you capture questions from any webpage
 - **🔤 OCR Technology** - Extracts text from screenshots using Tesseract.js for 90% token cost reduction
 - **🤖 AI-Powered Answers** - Get instant, accurate responses powered by OpenAI
 - **⚡ Quick Capture** - Repeat captures of the same area with one click
-- **🎯 Auto-Solve Mode** - Automatically solve multiple-choice questions on Quizlet and Vocabulary.com
+- **🎯 Auto-Solve Mode** - Automatically solve multiple-choice questions on Vocabulary.com
 - **💬 Ask Mode** - Ask custom questions with optional image attachments
 - **👻 Stealth Mode** - Invisible operation when UI is hidden
 - **🛡️ Privacy Guard** - Prevents websites from detecting focus loss, tab switches, or extension usage
@@ -76,7 +76,7 @@ Perfect for answering multiple questions in the same location.
 
 ### Auto-Solve Mode
 
-*Available on supported sites: Quizlet, Vocabulary.com*
+*Available on Vocabulary.com*
 
 1. Enable **Auto-solve toggle** in the panel
 2. Perform one manual capture to set the question area
@@ -263,8 +263,7 @@ Adjust AI reasoning effort:
 
 ## 📊 Supported Websites
 
-### Full Auto-Solve Support
-- ✅ Quizlet.com - Flashcards and practice tests
+### Auto-Solve Support
 - ✅ Vocabulary.com - Vocabulary practice
 
 ### Universal Capture Mode
@@ -316,8 +315,7 @@ npm run test:coverage # With coverage report
 Edit `modules/domains.js`:
 ```javascript
 isOnSupportedSite() {
-    return this.isOnVocabulary() || 
-           this.isOnQuizlet() ||
+    return this.isOnVocabulary() ||
            this.isOnYourNewSite();
 },
 

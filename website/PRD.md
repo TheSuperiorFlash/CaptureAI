@@ -174,7 +174,7 @@ A modern, dark-themed support website for CaptureAI - an AI-powered Chrome exten
 ### 6.1 Actual Extension Features to Highlight
 - ✅ **OCR Technology**: 90% token cost reduction using Tesseract.js
 - ✅ **License Key System**: Free tier (10/day) and Pro tier (unlimited)
-- ✅ **Auto-Solve Mode**: For Quizlet and Vocabulary.com
+- ✅ **Auto-Solve Mode**: For Vocabulary.com
 - ✅ **Quick Capture**: Keyboard shortcuts (Ctrl+Shift+X, Ctrl+Shift+F, Ctrl+Shift+E)
 - ✅ **Privacy Guard**: Prevents websites from detecting extension usage
 - ✅ **Stealth Mode**: Invisible operation when UI is hidden
