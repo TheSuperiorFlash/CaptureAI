@@ -226,10 +226,7 @@ export const Messaging = {
          * @returns {boolean}
          */
   handleShowCapturingMessage(sendResponse) {
-    // Don't show "Capturing..." message when ask mode is visible
-    const isAskModeVisible = window.CaptureAI.Utils?.isAskModeActive();
-
-    if (!isAskModeVisible && window.CaptureAI.UICore?.showMessage) {
+    if (window.CaptureAI.UICore?.showMessage) {
       window.CaptureAI.UICore.showMessage('Capturing...', false);
     }
     sendResponse({ success: true });
