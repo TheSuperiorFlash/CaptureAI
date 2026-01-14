@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { X, Sparkles } from 'lucide-react'
 
@@ -21,20 +21,32 @@ export default function AnnouncementBar({
 }: AnnouncementBarProps) {
     const [isVisible, setIsVisible] = useState(false)
     const [isClosing, setIsClosing] = useState(false)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         // Check if announcement was previously dismissed
-        const isDismissed = localStorage.getItem(storageKey)
-        if (!isDismissed) {
-            setIsVisible(true)
+        if (typeof window !== 'undefined') {
+            const isDismissed = localStorage.getItem(storageKey)
+            if (!isDismissed) {
+                setIsVisible(true)
+            }
+        }
+
+        // Cleanup timeout on unmount
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
         }
     }, [storageKey])
 
     const handleDismiss = () => {
         setIsClosing(true)
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             setIsVisible(false)
-            localStorage.setItem(storageKey, 'true')
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(storageKey, 'true')
+            }
         }, 300)
     }
 
