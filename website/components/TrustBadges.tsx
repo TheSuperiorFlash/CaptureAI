@@ -1,7 +1,12 @@
-'use client'
-
 import Link from 'next/link'
 import { Star, Shield, Users } from 'lucide-react'
+
+// Trust metrics configuration
+const TRUST_METRICS = {
+    rating: '4.5+',
+    users: '10,000+',
+    chromeStoreUrl: 'https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkppmkecmoeomnjd'
+}
 
 export default function TrustBadges() {
     return (
@@ -22,7 +27,7 @@ export default function TrustBadges() {
                     {/* Chrome Web Store Badge */}
                     <div className="flex justify-center">
                         <Link
-                            href="https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkppmkecmoeomnjd"
+                            href={TRUST_METRICS.chromeStoreUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block transition-transform hover:scale-105"
@@ -51,7 +56,7 @@ export default function TrustBadges() {
                             <div className="flex justify-center mb-3">
                                 <Star className="w-8 h-8 text-yellow-400" />
                             </div>
-                            <div className="text-2xl font-bold text-white mb-1">4.5+</div>
+                            <div className="text-2xl font-bold text-white mb-1">{TRUST_METRICS.rating}</div>
                             <div className="text-sm text-gray-400">Average Rating</div>
                         </div>
 
@@ -59,7 +64,7 @@ export default function TrustBadges() {
                             <div className="flex justify-center mb-3">
                                 <Users className="w-8 h-8 text-blue-400" />
                             </div>
-                            <div className="text-2xl font-bold text-white mb-1">10,000+</div>
+                            <div className="text-2xl font-bold text-white mb-1">{TRUST_METRICS.users}</div>
                             <div className="text-sm text-gray-400">Active Users</div>
                         </div>
 
