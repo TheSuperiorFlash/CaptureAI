@@ -2,8 +2,13 @@ import type { Metadata } from 'next'
 import { Chrome, Download, CheckCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Download - CaptureAI',
-    description: 'Download CaptureAI for Chrome and start analyzing screenshots with AI',
+    title: 'Download CaptureAI - Free AI Homework Helper Chrome Extension',
+    description: 'Download CaptureAI Chrome extension for free. AI-powered homework helper that gives instant screenshot answers. Works on Canvas, Moodle, Blackboard, and all learning platforms.',
+    openGraph: {
+        title: 'Download CaptureAI - AI Homework Helper Chrome Extension',
+        description: 'Free Chrome extension for students. Screenshot any question and get instant AI-powered answers.',
+        images: ['/og-image.png'],
+    },
 }
 
 export default function DownloadPage() {
