@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 const headlines = [
     { text: 'Get answers to any question', highlight: 'instantly' },
     { text: 'Solve homework problems', highlight: 'effortlessly' },
-    { text: 'Ace your exams with AI', highlight: 'guaranteed' },
+    { text: 'Prepare for your exams', highlight: 'with confidence' },
     { text: 'Study smarter, not harder', highlight: 'with CaptureAI' },
 ]
 
