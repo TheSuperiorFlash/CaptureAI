@@ -2,10 +2,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
+    const pathname = usePathname()
 
     const navigation = [
         { name: 'How It Works', href: '/#features' },
@@ -13,6 +15,16 @@ export default function Navbar() {
         { name: 'Download', href: '/download' },
         { name: 'Help', href: '/help' },
     ]
+
+    // Helper function to check if a nav item is active
+    const isActive = (href: string) => {
+        // For hash links on home page
+        if (href.startsWith('/#')) {
+            return pathname === '/'
+        }
+        // For other pages, match the pathname
+        return pathname === href
+    }
 
     return (
         <nav className="bg-[#08070e]/80 backdrop-blur-lg border-b border-gray-800/50 sticky top-0 z-50">
@@ -32,7 +44,11 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="text-gray-300 hover:text-blue-400 transition-colors"
+                                className={`transition-colors ${
+                                    isActive(item.href)
+                                        ? 'text-blue-400 font-semibold'
+                                        : 'text-gray-300 hover:text-blue-400'
+                                }`}
                             >
                                 {item.name}
                             </Link>
@@ -69,7 +85,11 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="block text-gray-300 hover:text-blue-400 transition-colors"
+                                className={`block transition-colors ${
+                                    isActive(item.href)
+                                        ? 'text-blue-400 font-semibold'
+                                        : 'text-gray-300 hover:text-blue-400'
+                                }`}
                                 onClick={() => setIsOpen(false)}
                             >
                                 {item.name}
