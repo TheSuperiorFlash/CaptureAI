@@ -225,6 +225,30 @@ export default function Home() {
                                 Your privacy is our top priority.
                             </p>
                         </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                Will my school detect I&apos;m using this?
+                            </h3>
+                            <p className="text-gray-400">
+                                With Privacy Guard (included in Pro), your activity stays hidden. The extension focuses on Chrome browser behavior, making your browsing appear natural. Privacy Guard helps keep your extension usage undetectable on quiz platforms.
+                            </p>
+                        </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                How accurate are the answers?
+                            </h3>
+                            <p className="text-gray-400">
+                                CaptureAI uses advanced AI to provide high-quality answers. While the AI is powerful and helpful for learning, we recommend reviewing and understanding the answers as part of your study process.
+                            </p>
+                        </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                Which browsers are supported?
+                            </h3>
+                            <p className="text-gray-400">
+                                CaptureAI is built exclusively for Google Chrome. The extension is optimized for Chrome&apos;s architecture and has been thoroughly tested to ensure reliable performance on this browser.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
