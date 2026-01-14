@@ -57,12 +57,12 @@ export default function AnnouncementBar({
 
     return (
         <div
-            className={`relative bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 transition-all duration-300 ${
+            className={`relative z-[60] bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 transition-all duration-300 ${
                 isClosing ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'
             }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-center py-3 gap-3 flex-wrap">
+                <div className="flex items-center justify-center py-3 gap-3 flex-wrap relative">
                     {/* Badge (optional) */}
                     {badge && (
                         <span className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-xs font-semibold text-white">
@@ -87,10 +87,10 @@ export default function AnnouncementBar({
                         </Link>
                     )}
 
-                    {/* Close button */}
+                    {/* Close button - positioned at the end on desktop, absolute on larger screens */}
                     <button
                         onClick={handleDismiss}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
+                        className="ml-auto sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2 text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full flex-shrink-0"
                         aria-label="Dismiss announcement"
                     >
                         <X className="w-5 h-5" />
