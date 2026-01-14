@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero'
+import TrustBadges from '@/components/TrustBadges'
 import Features from '@/components/Features'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -8,6 +9,7 @@ export default function Home() {
     return (
         <>
             <Hero />
+            <TrustBadges />
 
             {/* Floating UI Section */}
             <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative overflow-hidden">
