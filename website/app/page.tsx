@@ -166,6 +166,10 @@ export default function Home() {
                             <div className="text-4xl font-bold text-white mb-6">
                                 $9.99<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
+                            {/* Promotional Badge - Remove this block when promotion ends */}
+                            <div className="mb-6 px-3 py-2 bg-orange-500/20 border border-orange-500/40 rounded-lg">
+                                <span className="text-orange-300 text-sm font-medium">🔥 Limited time: First month 50% off</span>
+                            </div>
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
