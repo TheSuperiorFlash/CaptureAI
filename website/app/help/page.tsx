@@ -68,7 +68,7 @@ export default function DocsPage() {
                                 Which browser does CaptureAI support?
                             </h3>
                             <p className="text-gray-300">
-                                CaptureAI is designed for Google Chrome and has been tested and validated to work reliably on Chrome.
+                                CaptureAI is designed exclusively for Google Chrome. The extension uses Chrome-specific APIs and is only supported on Google Chrome.
                             </p>
                         </div>
 
