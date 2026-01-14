@@ -3,6 +3,17 @@ import Features from '@/components/Features'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'CaptureAI - AI Homework Helper Chrome Extension | Get Instant Screenshot Answers',
+    description: 'AI-powered homework helper Chrome extension. Screenshot any question and get instant answers. Perfect for students - solve homework, ace quizzes, and study smarter with AI screenshot analysis.',
+    openGraph: {
+        title: 'CaptureAI - AI Homework Helper Chrome Extension | Screenshot Answers',
+        description: 'Screenshot any question and get instant AI-powered answers. Works on Canvas, Moodle, Blackboard, and all learning platforms.',
+        images: ['/og-image.png'],
+    },
+}
 
 export default function Home() {
     return (
