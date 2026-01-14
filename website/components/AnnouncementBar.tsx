@@ -12,6 +12,9 @@ interface AnnouncementBarProps {
     storageKey?: string
 }
 
+// Animation duration in milliseconds (must match CSS transition)
+const ANIMATION_DURATION = 300
+
 export default function AnnouncementBar({
     message,
     linkText,
@@ -47,7 +50,7 @@ export default function AnnouncementBar({
             if (typeof window !== 'undefined') {
                 localStorage.setItem(storageKey, 'true')
             }
-        }, 300)
+        }, ANIMATION_DURATION)
     }
 
     if (!isVisible) return null
