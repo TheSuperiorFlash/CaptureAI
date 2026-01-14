@@ -135,18 +135,44 @@ export default function Home() {
                             <div className="text-4xl font-bold text-white mb-6">
                                 $0<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
-                            <ul className="space-y-4 mb-8">
+                            <ul className="space-y-3 mb-8">
+                                {/* Included in Free */}
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">10 requests per day</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Core features</span>
+                                    <span className="text-gray-300">Question capture</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Question capture</span>
+                                    <span className="text-gray-300">Floating UI</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Stealth Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Works on any website</span>
+                                </li>
+                                {/* Pro-only features (grayed out) */}
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Unlimited requests</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Privacy Guard</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Ask Mode</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Auto-Solve</span>
                                 </li>
                             </ul>
                             <Link
@@ -177,11 +203,31 @@ export default function Home() {
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">All features unlocked</span>
+                                    <span className="text-gray-300">Question capture</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Floating UI</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Stealth Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Works on any website</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">Privacy Guard</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Ask Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Auto-Solve</span>
                                 </li>
                             </ul>
                             <Link
@@ -190,6 +236,11 @@ export default function Home() {
                             >
                                 Get Pro
                             </Link>
+                            <div className="mt-4 text-center">
+                                <span className="inline-flex items-center px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm font-medium">
+                                    <span className="mr-1">🛡️</span> 7-day money-back guarantee
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
