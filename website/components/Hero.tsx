@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 const headlines = [
     { text: 'Get answers to any question', highlight: 'instantly' },
     { text: 'Solve homework problems', highlight: 'effortlessly' },
-    { text: 'Ace your exams with AI', highlight: 'guaranteed' },
+    { text: 'Prepare for your exams', highlight: 'with confidence' },
     { text: 'Study smarter, not harder', highlight: 'with CaptureAI' },
 ]
 
@@ -62,7 +62,7 @@ export default function Hero() {
                             href="/activate"
                             className="inline-flex items-center justify-center px-12 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105 w-fit"
                         >
-                            Try Now
+                            Get Started Free
                             <ArrowRight className="w-5 h-5 ml-2" />
                         </Link>
                     </div>

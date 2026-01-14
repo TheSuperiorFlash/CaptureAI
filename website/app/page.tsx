@@ -192,8 +192,11 @@ export default function Home() {
                             <div className="text-4xl font-bold text-white mb-6">
                                 $9.99<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
-                            <ul className="space-y-3 mb-8">
-                                {/* All features included */}
+                            {/* Promotional Badge - Remove this block when promotion ends */}
+                            <div className="mb-6 px-3 py-2 bg-orange-500/20 border border-orange-500/40 rounded-lg">
+                                <span className="text-orange-300 text-sm font-medium">🔥 Limited time: First month 50% off</span>
+                            </div>
+                            <ul className="space-y-4 mb-8">
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">Unlimited requests</span>
@@ -299,7 +302,7 @@ export default function Home() {
                         href="/activate"
                         className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                     >
-                        Try Now
+                        Start Solving Questions
                         <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                 </div>

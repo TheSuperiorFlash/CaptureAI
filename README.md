@@ -372,7 +372,7 @@ See [privacy-policy.html](privacy-policy.html) for full details.
 
 ## 🌐 Browser Compatibility
 
-CaptureAI is built specifically for **Google Chrome** and uses Chrome-specific APIs for screenshot capture. Compatibility with other Chromium-based browsers (Edge, Brave, Opera, Vivaldi) is not guaranteed and has not been tested.
+CaptureAI is built specifically for **Google Chrome** and uses Chrome-specific APIs for screenshot capture. The extension is designed and tested exclusively for Google Chrome.
 
 ---
 
