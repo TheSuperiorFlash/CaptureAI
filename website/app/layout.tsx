@@ -1,11 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import AnnouncementBar from '@/components/AnnouncementBar'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
     title: 'CaptureAI - AI-Powered Screenshot Analysis',
@@ -23,7 +20,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-        <body className={inter.className}>
+        <body>
         {/* Uncomment to enable announcement bar for promotions/launches */}
         {/* <AnnouncementBar
             badge="50% OFF"
