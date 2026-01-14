@@ -1,5 +1,6 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
+import HowItWorks from '@/components/HowItWorks'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
@@ -114,6 +115,8 @@ export default function Home() {
 
             <Features />
 
+            <HowItWorks />
+
             {/* Pricing Section */}
             <section id="pricing" className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
@@ -135,18 +138,44 @@ export default function Home() {
                             <div className="text-4xl font-bold text-white mb-6">
                                 $0<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
-                            <ul className="space-y-4 mb-8">
+                            <ul className="space-y-3 mb-8">
+                                {/* Included in Free */}
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">10 requests per day</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Core features</span>
+                                    <span className="text-gray-300">Question capture</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Question capture</span>
+                                    <span className="text-gray-300">Floating UI</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Stealth Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Works on any website</span>
+                                </li>
+                                {/* Pro-only features (grayed out) */}
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Unlimited requests</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Privacy Guard</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Ask Mode</span>
+                                </li>
+                                <li className="flex items-start opacity-50">
+                                    <span className="text-gray-500 mr-3">✗</span>
+                                    <span className="text-gray-500">Auto-Solve</span>
                                 </li>
                             </ul>
                             <Link
@@ -166,6 +195,10 @@ export default function Home() {
                             <div className="text-4xl font-bold text-white mb-6">
                                 $9.99<span className="text-lg text-gray-400 font-normal">/month</span>
                             </div>
+                            {/* Promotional Badge - Remove this block when promotion ends */}
+                            <div className="mb-6 px-3 py-2 bg-orange-500/20 border border-orange-500/40 rounded-lg">
+                                <span className="text-orange-300 text-sm font-medium">🔥 Limited time: First month 50% off</span>
+                            </div>
                             <ul className="space-y-4 mb-8">
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
@@ -173,11 +206,31 @@ export default function Home() {
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">All features unlocked</span>
+                                    <span className="text-gray-300">Question capture</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Floating UI</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Stealth Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Works on any website</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="text-blue-400 mr-3">✓</span>
                                     <span className="text-gray-300">Privacy Guard</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Ask Mode</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="text-blue-400 mr-3">✓</span>
+                                    <span className="text-gray-300">Auto-Solve</span>
                                 </li>
                             </ul>
                             <Link
@@ -186,6 +239,11 @@ export default function Home() {
                             >
                                 Get Pro
                             </Link>
+                            <div className="mt-4 text-center">
+                                <span className="inline-flex items-center px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm font-medium">
+                                    <span className="mr-1">🛡️</span> 7-day money-back guarantee
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -225,6 +283,30 @@ export default function Home() {
                                 Your privacy is our top priority.
                             </p>
                         </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                Will my school detect I&apos;m using this?
+                            </h3>
+                            <p className="text-gray-400">
+                                With Privacy Guard (included in Pro), your activity stays hidden. The extension focuses on Chrome browser behavior, making your browsing appear natural. Privacy Guard helps keep your extension usage undetectable on quiz platforms.
+                            </p>
+                        </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                How accurate are the answers?
+                            </h3>
+                            <p className="text-gray-400">
+                                CaptureAI uses advanced AI to provide high-quality answers. While the AI is powerful and helpful for learning, we recommend reviewing and understanding the answers as part of your study process.
+                            </p>
+                        </div>
+                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                Which browsers are supported?
+                            </h3>
+                            <p className="text-gray-400">
+                                CaptureAI is built exclusively for Google Chrome. The extension is optimized for Chrome&apos;s architecture and has been thoroughly tested to ensure reliable performance on this browser.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -247,7 +329,7 @@ export default function Home() {
                         href="/activate"
                         className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                     >
-                        Try Now
+                        Start Solving Questions
                         <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                 </div>
