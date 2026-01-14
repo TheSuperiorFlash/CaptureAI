@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AnnouncementBar from '@/components/AnnouncementBar'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
@@ -53,6 +54,14 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body>
+        {/* Uncomment to enable announcement bar for promotions/launches */}
+        {/* <AnnouncementBar
+            badge="50% OFF"
+            message="Limited time offer: Get 50% off Pro subscription!"
+            linkText="Claim Offer"
+            linkHref="/activate"
+            storageKey="promo-50-off"
+        /> */}
         <Navbar />
         <main className="min-h-screen">
             {children}
