@@ -39,13 +39,13 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* Try Now Button - Right Side */}
+                    {/* Start for Free Button - Right Side */}
                     <div className="hidden md:flex items-center">
                         <Link
                             href="/activate"
                             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                         >
-                            Try Now
+                            Start for Free
                         </Link>
                     </div>
 
@@ -80,7 +80,7 @@ export default function Navbar() {
                             className="block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors text-center"
                             onClick={() => setIsOpen(false)}
                         >
-                            Try Now
+                            Start for Free
                         </Link>
                     </div>
                 </div>
