@@ -4,6 +4,23 @@ This directory contains Claude AI skills that enhance Claude's ability to work w
 
 ## Available Skills
 
+### Frontend Design Skill
+
+The `frontend-design` skill produces production-grade UI code with distinctive aesthetic direction and creative craft.
+
+**Source:** [https://github.com/Ilm-Alan/frontend-design](https://github.com/Ilm-Alan/frontend-design)
+
+**Purpose:** 
+- Create bespoke frontend designs with intentional aesthetic direction
+- 10 aesthetic archetypes: Editorial, Swiss, Brutalist, Minimalist, Maximalist, Retro-Futuristic, Organic, Industrial, Art Deco, Lo-Fi
+- Structured design process: Context → Archetype → Differentiator → Token System → Implementation
+- Design token system with CSS custom properties
+
+**Best for:**
+- Landing pages, marketing sites, campaigns
+- Web components and pages requiring distinctive visual execution
+- Any UI requiring aesthetic excellence and creative craft
+
 ### Interface Design Skill
 
 The `interface-design` skill helps Claude build UI components with craft, memory, and consistency.
@@ -24,6 +41,10 @@ The `interface-design` skill helps Claude build UI components with craft, memory
 
 The following commands are available when working with Claude:
 
+**Frontend Design:**
+- `/frontend-design` - Invoke the frontend design skill for aesthetic excellence
+
+**Interface Design:**
 - `/interface-design:init` - Start building UI with design principles
 - `/interface-design:status` - Show current design system state
 - `/interface-design:audit <path>` - Check code against system patterns
@@ -54,6 +75,8 @@ The following commands are available when working with Claude:
 │   ├── audit.md                 # Audit code against system
 │   └── extract.md               # Extract patterns from code
 ├── skills/                       # Skills directory
+│   ├── frontend-design/         # Frontend design skill
+│   │   └── SKILL.md             # Main skill definition
 │   └── interface-design/        # Interface design skill
 │       ├── SKILL.md             # Main skill definition
 │       └── references/          # Reference materials
@@ -79,6 +102,22 @@ This file is loaded automatically in each session to maintain consistency.
 
 ## Usage Example
 
+### Using Frontend Design
+
+```
+You: "/frontend-design Create a pricing page for CaptureAI"
+
+Claude will:
+1. Read the frontend-design skill
+2. Identify context (purpose, users, domain, content density)
+3. Select aesthetic archetype (e.g., Swiss/International, Editorial, etc.)
+4. Define differentiator (signature interaction or visual element)
+5. Create design token system
+6. Build production-grade UI with distinctive aesthetic
+```
+
+### Using Interface Design
+
 ```
 You: "Build a dashboard for CaptureAI extension settings"
 
@@ -93,7 +132,8 @@ Claude will:
 
 ## Notes
 
-- The interface-design skill is for **interface design** (dashboards, apps, tools)
-- Not intended for marketing sites or landing pages
-- Emphasizes craft, consistency, and intentional design choices
-- Maintains design memory across Claude sessions
+**Skill Specialization:**
+- The `frontend-design` skill is for **aesthetic excellence** (landing pages, marketing sites, campaigns, distinctive visual execution)
+- The `interface-design` skill is for **interface design** (dashboards, apps, tools, data interfaces)
+- Both emphasize craft, consistency, and intentional design choices
+- The interface-design skill maintains design memory across Claude sessions via `.interface-design/system.md`
