@@ -10,44 +10,37 @@ export default function Navbar() {
     const pathname = usePathname()
 
     const navigation = [
-        { name: 'How It Works', href: '/#features' },
+        { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
         { name: 'Help', href: '/help' },
     ]
 
-    // Helper function to check if a nav item is active
     const isActive = (href: string) => {
-        // For hash links on home page
-        if (href.startsWith('/#')) {
-            return pathname === '/'
-        }
-        // For other pages, match the pathname
+        if (href.startsWith('/#')) return pathname === '/'
         return pathname === href
     }
 
     return (
-        <nav className="bg-[#08070e]/80 backdrop-blur-lg border-b border-gray-800/50 sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-16">
+        <nav className="sticky top-0 z-50 border-b border-white/[0.04] bg-[--color-background]/80 backdrop-blur-xl">
+            <div className="mx-auto max-w-6xl px-6">
+                <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
-                    <div className="flex items-center">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <Image src="/icon128.png" alt="CaptureAI" width={32} height={32} />
-                            <span className="text-xl font-bold text-white">CaptureAI</span>
-                        </Link>
-                    </div>
+                    <Link href="/" className="flex items-center gap-2.5">
+                        <Image src="/icon128.png" alt="CaptureAI" width={28} height={28} />
+                        <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
+                    </Link>
 
-                    {/* Desktop Navigation - Centered */}
-                    <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
+                    {/* Desktop nav */}
+                    <div className="hidden items-center gap-8 md:flex">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`transition-colors ${
+                                className={`text-sm transition-colors duration-200 ${
                                     isActive(item.href)
-                                        ? 'text-blue-400 font-semibold'
-                                        : 'text-gray-300 hover:text-blue-400'
+                                        ? 'text-[--color-text] font-medium'
+                                        : 'text-[--color-text-tertiary] hover:text-[--color-text-secondary]'
                                 }`}
                             >
                                 {item.name}
@@ -55,53 +48,54 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* Start for Free Button - Right Side */}
-                    <div className="hidden md:flex items-center">
+                    {/* CTA */}
+                    <div className="hidden md:block">
                         <Link
                             href="/activate"
-                            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+                            className="glow-btn inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
-                            Start for Free
+                            Get Started
                         </Link>
                     </div>
 
-                    {/* Mobile menu button */}
-                    <div className="md:hidden flex items-center">
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="text-gray-300 hover:text-blue-400"
-                        >
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-                    </div>
+                    {/* Mobile toggle */}
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="text-[--color-text-tertiary] hover:text-[--color-text] md:hidden"
+                        aria-label="Toggle menu"
+                    >
+                        {isOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
                 </div>
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Mobile menu */}
             {isOpen && (
-                <div className="md:hidden bg-gray-900/95 backdrop-blur-lg border-t border-gray-800">
-                    <div className="px-4 py-4 space-y-3">
+                <div className="border-t border-white/[0.04] bg-[--color-background]/95 backdrop-blur-xl md:hidden">
+                    <div className="space-y-1 px-6 py-4">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block transition-colors ${
+                                className={`block rounded-lg px-3 py-2.5 text-sm transition-colors ${
                                     isActive(item.href)
-                                        ? 'text-blue-400 font-semibold'
-                                        : 'text-gray-300 hover:text-blue-400'
+                                        ? 'text-[--color-text] font-medium'
+                                        : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                 }`}
                                 onClick={() => setIsOpen(false)}
                             >
                                 {item.name}
                             </Link>
                         ))}
-                        <Link
-                            href="/activate"
-                            className="block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors text-center"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            Start for Free
-                        </Link>
+                        <div className="pt-2">
+                            <Link
+                                href="/activate"
+                                className="glow-btn block rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-center text-sm font-medium text-white"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Get Started
+                            </Link>
+                        </div>
                     </div>
                 </div>
             )}

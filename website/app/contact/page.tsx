@@ -1,80 +1,91 @@
 import type { Metadata } from 'next'
-import { Mail, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
+import { Mail, MessageCircle, ArrowRight, BookOpen } from 'lucide-react'
 
 export const metadata: Metadata = {
     title: 'Contact - CaptureAI',
-    description: 'Get in touch with the CaptureAI team',
+    description: 'Get in touch with the CaptureAI team for support or feature requests.',
 }
 
 export default function ContactPage() {
     return (
-        <div className="py-24 bg-[#08070e] min-h-screen relative overflow-hidden">
-            {/* Gradient background */}
-            <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500 gradient-blur animate-pulse-glow"></div>
-            <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-cyan-500 gradient-blur animate-float"></div>
+        <div className="relative py-20 md:py-28">
+            {/* Background */}
+            <div className="pointer-events-none absolute inset-0 gradient-mesh" />
+            <div className="absolute left-[-50px] top-[30%] h-[350px] w-[350px] rounded-full bg-cyan-500 gradient-blur" />
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="text-center mb-16">
-                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">Get in Touch</h1>
-                    <p className="text-xl text-gray-300">
-                        Have questions? We'd love to hear from you.
+            <div className="relative z-10 mx-auto max-w-3xl px-6">
+                {/* Header */}
+                <div className="mb-14 text-center">
+                    <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
+                        Get in touch
+                    </span>
+                    <h1 className="mb-3">
+                        <span className="text-[--color-text]">Contact </span>
+                        <span className="text-gradient-static">us</span>
+                    </h1>
+                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                        Questions, bugs, or feature ideas — we read everything.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Email */}
-                    <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl backdrop-blur-sm p-8 hover:border-blue-500/50 transition-all">
-                        <div className="flex items-center mb-6">
-                            <div className="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center justify-center mr-4">
-                                <Mail className="w-6 h-6 text-blue-400" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-white">Email Support</h2>
+                {/* Contact cards */}
+                <div className="mb-8 grid gap-6 sm:grid-cols-2">
+                    {/* Email Support */}
+                    <div className="glass-card rounded-2xl p-7">
+                        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
+                            <Mail className="h-6 w-6 text-blue-400" />
                         </div>
-                        <p className="text-gray-400 mb-6">
-                            Send us an email and we'll get back to you within 24 hours.
+                        <h2 className="mb-1.5 text-lg font-semibold text-[--color-text]">Support</h2>
+                        <p className="mb-6 text-sm text-[--color-text-tertiary]">
+                            Bug reports, account issues, or general questions. We respond within 24 hours.
                         </p>
                         <a
                             href="mailto:support@captureai.dev"
-                            className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
+                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
+                            <Mail className="h-4 w-4" />
                             support@captureai.dev
                         </a>
                     </div>
 
-                    {/* Feedback */}
-                    <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl backdrop-blur-sm p-8 hover:border-cyan-500/50 transition-all">
-                        <div className="flex items-center mb-6">
-                            <div className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/20 rounded-full flex items-center justify-center mr-4">
-                                <MessageCircle className="w-6 h-6 text-cyan-400" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-white">Feature Requests</h2>
+                    {/* Feature Requests */}
+                    <div className="glass-card rounded-2xl p-7">
+                        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
+                            <MessageCircle className="h-6 w-6 text-violet-400" />
                         </div>
-                        <p className="text-gray-400 mb-6">
-                            Have an idea for a new feature? We'd love to hear it!
+                        <h2 className="mb-1.5 text-lg font-semibold text-[--color-text]">Feedback</h2>
+                        <p className="mb-6 text-sm text-[--color-text-tertiary]">
+                            Feature requests, suggestions, or ideas for improvement.
                         </p>
                         <a
                             href="mailto:feedback@captureai.dev"
-                            className="inline-block px-6 py-3 bg-cyan-600 text-white font-semibold rounded-lg hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105"
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-white/[0.15] hover:text-[--color-text]"
                         >
+                            <MessageCircle className="h-4 w-4" />
                             feedback@captureai.dev
                         </a>
                     </div>
                 </div>
 
-                {/* FAQ Link */}
-                <div className="mt-16 text-center bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl backdrop-blur-sm p-8">
-                    <h3 className="text-2xl font-bold text-white mb-4">
-                        Looking for answers?
-                    </h3>
-                    <p className="text-gray-300 mb-6">
-                        Check out our documentation for guides and frequently asked questions
-                    </p>
-                    <a
-                        href="/help"
-                        className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
-                    >
-                        View Documentation
-                    </a>
+                {/* Help link */}
+                <div className="gradient-border rounded-2xl">
+                    <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8 text-center">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
+                            <BookOpen className="h-6 w-6 text-emerald-400" />
+                        </div>
+                        <h3 className="mb-2 text-[--color-text]">Looking for answers first?</h3>
+                        <p className="mx-auto mb-6 max-w-sm text-sm text-[--color-text-tertiary]">
+                            Check the help center for guides and frequently asked questions.
+                        </p>
+                        <Link
+                            href="/help"
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-white/[0.15] hover:text-[--color-text]"
+                        >
+                            Help Center
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,13 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import AnnouncementBar from '@/components/AnnouncementBar'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-    title: 'CaptureAI - AI Homework Helper Chrome Extension | Get Instant Screenshot Answers',
-    description: 'AI-powered homework helper Chrome extension. Screenshot any question and get instant answers. Perfect for students - solve homework, ace quizzes, and study smarter with AI screenshot analysis.',
-    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, screenshot to answer, homework help AI, study helper, quiz solver, AI screenshot analysis, instant homework answers, student AI assistant, exam helper, academic AI tool',
+    title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
+    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
+    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant',
     icons: {
         icon: '/icon128.png',
     },
@@ -16,21 +15,21 @@ export const metadata: Metadata = {
         locale: 'en_US',
         url: 'https://captureai.dev',
         siteName: 'CaptureAI',
-        title: 'CaptureAI - AI Homework Helper Chrome Extension | Screenshot Answers',
-        description: 'AI-powered homework helper Chrome extension. Screenshot any question and get instant answers. Perfect for students studying smarter.',
+        title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
+        description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
         images: [
             {
                 url: '/og-image.png',
                 width: 1737,
                 height: 1584,
-                alt: 'CaptureAI - AI Homework Helper Chrome Extension',
+                alt: 'CaptureAI Chrome Extension',
             },
         ],
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'CaptureAI - AI Homework Helper Chrome Extension',
-        description: 'Screenshot any question and get instant AI-powered answers. The ultimate study companion.',
+        title: 'CaptureAI - Screenshot Any Question, Get the Answer',
+        description: 'Chrome extension that gives you instant AI-powered answers from screenshots.',
         images: ['/og-image.png'],
     },
     robots: {
@@ -47,21 +46,21 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({
-                                       children,
-                                   }: {
+    children,
+}: {
     children: React.ReactNode
 }) {
     return (
         <html lang="en">
-        <body>
-        {/* Uncomment to enable announcement bar for promotions/launches */}
-        {/* <AnnouncementBar
-            badge="50% OFF"
-            message="Limited time offer: Get 50% off Pro subscription!"
-            linkText="Claim Offer"
-            linkHref="/activate"
-            storageKey="promo-50-off"
-        /> */}
+        <head>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link
+                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+                rel="stylesheet"
+            />
+        </head>
+        <body className="noise">
         <Navbar />
         <main className="min-h-screen">
             {children}
