@@ -60,6 +60,8 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={`noise ${inter.className}`}>
+        {/* Blue glow behind translucent navbar */}
+        <div className="pointer-events-none fixed top-0 left-0 right-0 z-40 h-32 bg-[radial-gradient(ellipse_at_50%_0%,rgba(37,99,235,0.15)_0%,transparent_70%)]" />
         <Navbar />
         <main className="min-h-screen">
             {children}
