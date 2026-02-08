@@ -12,7 +12,7 @@ const platformLogos = [
 
 export default function Hero() {
     return (
-        <section className="relative overflow-hidden pb-28 pt-28 md:pb-36 md:pt-36">
+        <section className="relative overflow-x-hidden pb-28 pt-28 md:pb-36 md:pt-36">
             {/* Layered gradient mesh background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
             <div className="absolute left-1/2 top-[-200px] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />

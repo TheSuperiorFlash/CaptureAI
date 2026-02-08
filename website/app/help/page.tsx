@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function HelpPage() {
     return (
-        <div className="relative overflow-hidden py-20 md:py-28">
+        <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
             <div className="absolute right-[-100px] top-[20%] h-[400px] w-[400px] rounded-full bg-blue-600 gradient-blur" />
