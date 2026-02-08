@@ -2,37 +2,27 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
-    const router = useRouter()
     const [activeHash, setActiveHash] = useState('')
 
     useEffect(() => {
         const updateHash = () => setActiveHash(window.location.hash)
         
-        // Update hash immediately on mount
+        // Update hash immediately on mount and when pathname changes
         updateHash()
 
-        // Listen for native hashchange events
+        // Listen for native hashchange events (e.g., clicking anchor links)
         window.addEventListener('hashchange', updateHash)
-
-        // Listen for Next.js route changes
-        const handleRouteChange = () => {
-            updateHash()
-        }
-
-        // Subscribe to router events using pathname changes
-        // In Next.js 13+ App Router, we use pathname and router.asPath is not available
-        // So we'll rely on hashchange for hash updates and pathname for route updates
         
         return () => {
             window.removeEventListener('hashchange', updateHash)
         }
-    }, [pathname, router])
+    }, [pathname])
 
     useEffect(() => {
         if (isOpen) {
