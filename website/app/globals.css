@@ -41,6 +41,7 @@ html {
 }
 
 body {
+  overflow-x: hidden;
   background: var(--color-background);
   color: var(--color-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
