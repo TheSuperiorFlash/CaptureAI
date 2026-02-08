@@ -1,13 +1,38 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
+    const [activeHash, setActiveHash] = useState('')
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const updateHash = () => setActiveHash(window.location.hash)
+        updateHash()
+
+        window.addEventListener('hashchange', updateHash)
+        return () => window.removeEventListener('hashchange', updateHash)
+    }, [])
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        if (isOpen) {
+            document.body.classList.add('overflow-hidden')
+        } else {
+            document.body.classList.remove('overflow-hidden')
+        }
+
+        return () => {
+            document.body.classList.remove('overflow-hidden')
+        }
+    }, [isOpen])
 
     const navigation = [
         { name: 'Features', href: '/#features' },
@@ -17,7 +42,10 @@ export default function Navbar() {
     ]
 
     const isActive = (href: string) => {
-        if (href.startsWith('/#')) return pathname === '/'
+        if (href.startsWith('/#')) {
+            const hash = href.slice(1)
+            return pathname === '/' && activeHash === hash
+        }
         return pathname === href
     }
 
@@ -60,6 +88,7 @@ export default function Navbar() {
 
                     {/* Mobile toggle */}
                     <button
+                        type="button"
                         onClick={() => setIsOpen(!isOpen)}
                         className="text-[--color-text-tertiary] hover:text-[--color-text] md:hidden"
                         aria-label="Toggle menu"

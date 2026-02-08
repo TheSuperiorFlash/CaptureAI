@@ -5,13 +5,18 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.captureai.workers.dev'
+
+const MAX_RETRIES = 5
+const INITIAL_DELAY_MS = 1000
+
 function PaymentSuccessContent() {
     const searchParams = useSearchParams()
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
     const [errorMessage, setErrorMessage] = useState('')
 
     useEffect(() => {
-        const handlePaymentSuccess = async () => {
+        const verifyPayment = async (attempt: number): Promise<void> => {
             const sessionId = searchParams.get('session_id')
 
             if (!sessionId) {
@@ -21,10 +26,8 @@ function PaymentSuccessContent() {
             }
 
             try {
-                await new Promise(resolve => setTimeout(resolve, 3000))
-
                 const response = await fetch(
-                    'https://api.captureai.workers.dev/api/subscription/verify-payment',
+                    `${API_BASE_URL}/api/subscription/verify-payment`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -32,14 +35,38 @@ function PaymentSuccessContent() {
                     }
                 )
 
-                const data = await response.json()
+                const contentType = response.headers.get('content-type')
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Payment verification failed')
+                    let errorMsg: string
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json()
+                        errorMsg = data.error || 'Payment verification failed'
+                    } else {
+                        errorMsg = `Server error: ${response.status} ${response.statusText}`
+                    }
+
+                    if (attempt < MAX_RETRIES) {
+                        const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
+                        await new Promise(resolve => setTimeout(resolve, delay))
+                        return verifyPayment(attempt + 1)
+                    }
+
+                    throw new Error(errorMsg)
+                }
+
+                if (contentType && contentType.includes('application/json')) {
+                    await response.json()
                 }
 
                 setStatus('success')
             } catch (error) {
+                if (attempt < MAX_RETRIES && !(error instanceof Error && error.message.includes('No payment session'))) {
+                    const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
+                    await new Promise(resolve => setTimeout(resolve, delay))
+                    return verifyPayment(attempt + 1)
+                }
+
                 console.error('Payment verification error:', error)
                 setStatus('error')
                 setErrorMessage(
@@ -50,7 +77,7 @@ function PaymentSuccessContent() {
             }
         }
 
-        handlePaymentSuccess()
+        verifyPayment(0)
     }, [searchParams])
 
     return (

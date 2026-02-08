@@ -1,5 +1,4 @@
-'use client'
-import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity, LucideIcon } from 'lucide-react'
+import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
 
 interface Feature {
     icon: LucideIcon
@@ -64,7 +63,7 @@ const features: Feature[] = [
         glow: 'group-hover:shadow-[0_0_20px_rgba(244,63,94,0.1)]',
     },
     {
-        icon: Infinity,
+        icon: InfinityIcon,
         title: 'Unlimited Requests',
         description: 'Free users get 10 requests per day. Pro removes that limit entirely — use CaptureAI as much as you need.',
         pro: true,

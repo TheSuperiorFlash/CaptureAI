@@ -35,6 +35,8 @@ export default function Home() {
                                     alt="CaptureAI floating interface on a webpage"
                                     width={600}
                                     height={600}
+                                    priority
+                                    sizes="(max-width: 1024px) 100vw, 50vw"
                                     className="block h-auto w-full"
                                 />
                             </div>
@@ -248,13 +250,13 @@ export default function Home() {
                             <span className="text-gradient-static">try it?</span>
                         </h2>
                         <p className="mb-10 text-lg text-[--color-text-secondary]">
-                            Install the extension, get a free license key, and start getting answers in under a minute.
+                            Install the extension, get a license key, and start getting answers in under a minute.
                         </p>
                         <Link
                             href="/activate"
                             className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-4 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
-                            Get Started Free
+                            Get Started
                             <ArrowRight className="h-4 w-4" />
                         </Link>
                     </div>
