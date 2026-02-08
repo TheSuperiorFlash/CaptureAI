@@ -72,10 +72,10 @@ export default function FAQ() {
                                             }`}
                                         />
                                     </button>
-                                    <div
+                                    <section
                                         id={panelId}
-                                        role="region"
                                         aria-labelledby={buttonId}
+                                        aria-hidden={openIndex !== index}
                                         className={`grid transition-all duration-300 ease-out ${
                                             openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                                         }`}
@@ -85,7 +85,7 @@ export default function FAQ() {
                                                 {faq.answer}
                                             </p>
                                         </div>
-                                    </div>
+                                    </section>
                                 </div>
                             )
                         })}

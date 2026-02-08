@@ -4,8 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.captureai.workers.dev'
+import { API_BASE_URL } from '@/lib/api'
 
 const MAX_RETRIES = 5
 const INITIAL_DELAY_MS = 1000
@@ -46,12 +45,16 @@ function PaymentSuccessContent() {
                         errorMsg = `Server error: ${response.status} ${response.statusText}`
                     }
 
-                    if (attempt < MAX_RETRIES) {
+                    // Only retry on transient errors: 429 or 5xx
+                    const shouldRetry = response.status === 429 || (response.status >= 500 && response.status < 600)
+                    
+                    if (shouldRetry && attempt < MAX_RETRIES) {
                         const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
                         await new Promise(resolve => setTimeout(resolve, delay))
                         return verifyPayment(attempt + 1)
                     }
 
+                    // For 4xx client errors (except 429), throw immediately without retry
                     throw new Error(errorMsg)
                 }
 

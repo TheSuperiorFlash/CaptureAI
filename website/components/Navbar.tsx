@@ -11,18 +11,20 @@ export default function Navbar() {
     const [activeHash, setActiveHash] = useState('')
 
     useEffect(() => {
-        if (typeof window === 'undefined') return
-
         const updateHash = () => setActiveHash(window.location.hash)
+        
+        // Update hash immediately on mount and when pathname changes
         updateHash()
 
+        // Listen for native hashchange events (e.g., clicking anchor links)
         window.addEventListener('hashchange', updateHash)
-        return () => window.removeEventListener('hashchange', updateHash)
-    }, [])
+        
+        return () => {
+            window.removeEventListener('hashchange', updateHash)
+        }
+    }, [pathname])
 
     useEffect(() => {
-        if (typeof window === 'undefined') return
-
         if (isOpen) {
             document.body.classList.add('overflow-hidden')
         } else {

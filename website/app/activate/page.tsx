@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye } from 'lucide-react'
-import { Infinity as InfinityIcon } from 'lucide-react'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.captureai.workers.dev'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon } from 'lucide-react'
+import { API_BASE_URL } from '@/lib/api'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -45,21 +43,35 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
             mode: 'cors',
         })
 
+        const contentType = response.headers.get('content-type')
+
         if (!response.ok) {
-            const errorText = await response.text()
             let errorMessage = 'Request failed'
-            try {
-                const errorData = JSON.parse(errorText)
-                errorMessage = errorData.error || errorMessage
-            } catch {
-                errorMessage = errorText || errorMessage
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    const errorData = await response.json()
+                    errorMessage = errorData.error || errorMessage
+                } catch {
+                    errorMessage = `Server error: ${response.status}`
+                }
+            } else {
+                const errorText = await response.text()
+                errorMessage = errorText || `Server error: ${response.status}`
             }
             throw new Error(errorMessage)
         }
 
-        return await response.json()
+        // Parse JSON only when content-type includes 'application/json'
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json()
+        } else {
+            // For non-JSON 2xx responses, return empty object or plain text
+            const text = await response.text()
+            return { response: text }
+        }
     } catch (error) {
-        if (error instanceof TypeError && error.message.includes('fetch')) {
+        // Only treat actual fetch-related TypeErrors as connectivity issues
+        if (error instanceof TypeError && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
             throw new Error('Unable to connect to server. Please check your internet connection.')
         }
         throw error
@@ -109,12 +121,15 @@ export default function ActivatePage() {
     const handleFreeSignup = async () => {
         const data = await apiPost(`${API_BASE_URL}/api/auth/create-free-key`, { email })
 
+        // Validate data.existing with runtime type guard
+        const existingValue = typeof data.existing === 'boolean' ? data.existing : undefined
+
         setResult({
             type: 'success',
-            message: data.existing
+            message: existingValue
                 ? `We've sent your existing license key to ${email}`
                 : `Your license key has been sent to ${email}`,
-            existing: data.existing as boolean | undefined,
+            existing: existingValue,
         })
     }
 
