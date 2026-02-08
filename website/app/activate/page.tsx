@@ -2,11 +2,42 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Check } from 'lucide-react'
+import Link from 'next/link'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, Infinity, MessageSquare, Repeat, Eye } from 'lucide-react'
+
+const freeFeatures = [
+    { text: '10 requests per day', included: true },
+    { text: 'Screenshot capture', included: true },
+    { text: 'Floating interface', included: true },
+    { text: 'Stealth Mode', included: true },
+    { text: 'Works on any website', included: true },
+    { text: 'Unlimited requests', included: false },
+    { text: 'Privacy Guard', included: false },
+    { text: 'Ask Mode', included: false },
+    { text: 'Auto-Solve', included: false },
+]
+
+const proFeatures = [
+    { text: 'Unlimited requests', included: true },
+    { text: 'Screenshot capture', included: true },
+    { text: 'Floating interface', included: true },
+    { text: 'Stealth Mode', included: true },
+    { text: 'Works on any website', included: true },
+    { text: 'Privacy Guard', included: true },
+    { text: 'Ask Mode', included: true },
+    { text: 'Auto-Solve', included: true },
+]
+
+const proHighlights = [
+    { icon: Infinity, title: 'Unlimited', desc: 'No daily caps' },
+    { icon: Shield, title: 'Privacy Guard', desc: 'Stay undetected' },
+    { icon: MessageSquare, title: 'Ask Mode', desc: 'Follow-up questions' },
+    { icon: Repeat, title: 'Auto-Solve', desc: 'Hands-free answers' },
+]
 
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
-    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('free')
+    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
         type: 'success' | 'error'
@@ -119,86 +150,180 @@ export default function ActivatePage() {
     }
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center px-6 py-20">
-            {/* Background ambient glow */}
+        <div className="relative py-20 md:py-28">
+            {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
-            <div className="absolute left-1/2 top-[20%] h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
+            <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
+            <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
 
-            <div className="relative z-10 w-full max-w-md">
-                <div className="gradient-border rounded-2xl">
-                    <div className="rounded-2xl bg-gradient-to-b from-[--color-surface]/80 to-[--color-background]/90 p-8 backdrop-blur-xl">
-                        {/* Logo + header */}
-                        <div className="mb-8 text-center">
-                            <div className="mb-4 flex justify-center">
-                                <Image src="/icon128.png" alt="CaptureAI" width={48} height={48} />
+            <div className="relative z-10 mx-auto max-w-5xl px-6">
+                {/* Header */}
+                <div className="mb-14 text-center">
+                    <div className="mb-5 flex justify-center">
+                        <Image src="/icon128.png" alt="CaptureAI" width={48} height={48} />
+                    </div>
+                    <h1 className="mb-3">
+                        <span className="text-[--color-text]">Choose your </span>
+                        <span className="text-gradient-static">plan</span>
+                    </h1>
+                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                        Start free with 10 requests per day, or unlock everything with Pro.
+                    </p>
+                </div>
+
+                {/* Plans grid */}
+                <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+                    {/* Free plan */}
+                    <div
+                        className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${
+                            selectedTier === 'free'
+                                ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
+                                : ''
+                        }`}
+                        onClick={() => setSelectedTier('free')}
+                    >
+                        <div className="mb-6 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-[--color-text]">Free</h2>
+                                <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                             </div>
-                            <h1 className="mb-1 text-2xl font-bold text-[--color-text]">Get started</h1>
-                            <p className="text-sm text-[--color-text-tertiary]">
-                                Choose a plan and enter your email to receive a license key.
+                            <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
+                                selectedTier === 'free'
+                                    ? 'border-blue-500 bg-blue-500'
+                                    : 'border-white/20'
+                            }`}>
+                                {selectedTier === 'free' && <Check className="h-3 w-3 text-white" />}
+                            </div>
+                        </div>
+
+                        <div className="mb-7">
+                            <span className="text-4xl font-extrabold text-[--color-text]">$0</span>
+                            <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                        </div>
+
+                        <ul className="space-y-3">
+                            {freeFeatures.map((f) => (
+                                <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
+                                    {f.included ? (
+                                        <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                    ) : (
+                                        <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                    )}
+                                    <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Pro plan */}
+                    <div
+                        className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${
+                            selectedTier === 'pro'
+                                ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
+                                : ''
+                        }`}
+                        onClick={() => setSelectedTier('pro')}
+                    >
+                        <div className="gradient-border rounded-2xl">
+                            <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                                <div className="mb-6 flex items-center justify-between">
+                                    <div>
+                                        <div className="flex items-center gap-2.5">
+                                            <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
+                                            <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+                                                Recommended
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
+                                    </div>
+                                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
+                                        selectedTier === 'pro'
+                                            ? 'border-cyan-400 bg-cyan-400'
+                                            : 'border-white/20'
+                                    }`}>
+                                        {selectedTier === 'pro' && <Check className="h-3 w-3 text-[--color-background]" />}
+                                    </div>
+                                </div>
+
+                                <div className="mb-7">
+                                    <span className="text-4xl font-extrabold text-gradient-static">$9.99</span>
+                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                </div>
+
+                                {/* Pro highlights grid */}
+                                <div className="mb-7 grid grid-cols-2 gap-2.5">
+                                    {proHighlights.map((h) => {
+                                        const Icon = h.icon
+                                        return (
+                                            <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
+                                                <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
+                                                <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
+                                                <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+
+                                <ul className="space-y-3">
+                                    {proFeatures.map((f) => (
+                                        <li key={f.text} className="flex items-center gap-3">
+                                            <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                            <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Email + CTA section */}
+                <div className="mx-auto mt-12 max-w-md">
+                    <div className="glass-card rounded-2xl p-7">
+                        <h3 className="mb-1 text-center text-lg font-semibold text-[--color-text]">
+                            {selectedTier === 'free' ? 'Get your free license key' : 'Start your Pro subscription'}
+                        </h3>
+                        <p className="mb-6 text-center text-sm text-[--color-text-tertiary]">
+                            {selectedTier === 'free'
+                                ? 'Enter your email and we\'ll send you a key instantly.'
+                                : 'Enter your email to proceed to secure checkout via Stripe.'}
+                        </p>
+
+                        <div className="mb-4 flex gap-3">
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
+                                placeholder="you@email.com"
+                                autoComplete="email"
+                                className="min-w-0 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                            />
+                            <button
+                                onClick={handleSignup}
+                                disabled={loading}
+                                className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all ${
+                                    loading
+                                        ? 'cursor-not-allowed bg-blue-600/40'
+                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500'
+                                }`}
+                            >
+                                {loading ? (
+                                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                ) : (
+                                    <>
+                                        {selectedTier === 'free' ? 'Get Key' : 'Continue'}
+                                        <ArrowRight className="h-4 w-4" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {selectedTier === 'pro' && (
+                            <p className="text-center text-xs text-[--color-text-tertiary]">
+                                7-day money-back guarantee. Cancel anytime.
                             </p>
-                        </div>
-
-                        {/* Tier selection */}
-                        <div className="mb-6 grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => setSelectedTier('free')}
-                                className={`rounded-xl border p-4 text-left transition-all ${
-                                    selectedTier === 'free'
-                                        ? 'border-blue-500/40 bg-blue-500/[0.06] shadow-[0_0_20px_rgba(59,130,246,0.08)]'
-                                        : 'border-white/[0.06] hover:border-white/[0.1]'
-                                }`}
-                            >
-                                <div className="mb-1 text-sm font-medium text-[--color-text]">Free</div>
-                                <div className="mb-2 text-xl font-bold text-[--color-text]">$0</div>
-                                <div className="text-xs text-[--color-text-tertiary]">10 requests/day</div>
-                            </button>
-
-                            <button
-                                onClick={() => setSelectedTier('pro')}
-                                className={`rounded-xl border p-4 text-left transition-all ${
-                                    selectedTier === 'pro'
-                                        ? 'border-cyan-500/40 bg-cyan-500/[0.06] shadow-[0_0_20px_rgba(34,211,238,0.08)]'
-                                        : 'border-white/[0.06] hover:border-white/[0.1]'
-                                }`}
-                            >
-                                <div className="mb-1 text-sm font-medium text-[--color-text]">Pro</div>
-                                <div className="mb-2 text-xl font-bold text-gradient-static">$9.99<span className="text-xs font-normal text-[--color-text-tertiary]">/mo</span></div>
-                                <div className="text-xs text-[--color-text-tertiary]">Unlimited + all features</div>
-                            </button>
-                        </div>
-
-                        {/* Email input */}
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
-                            placeholder="you@email.com"
-                            autoComplete="email"
-                            className="mb-4 w-full rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
-                        />
-
-                        {/* Submit button */}
-                        <button
-                            onClick={handleSignup}
-                            disabled={loading}
-                            className={`w-full rounded-xl py-3 text-sm font-semibold text-white transition-all ${
-                                loading
-                                    ? 'cursor-not-allowed bg-blue-600/40'
-                                    : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500'
-                            }`}
-                        >
-                            {loading ? (
-                                <span className="inline-flex items-center gap-2">
-                                    <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                    Processing...
-                                </span>
-                            ) : selectedTier === 'free' ? (
-                                'Get Free License Key'
-                            ) : (
-                                'Continue to Checkout'
-                            )}
-                        </button>
+                        )}
 
                         {/* Result message */}
                         {result && (
@@ -240,26 +365,13 @@ export default function ActivatePage() {
                                 )}
                             </div>
                         )}
-
-                        {/* Footer note */}
-                        <div className="mt-6 border-t border-white/[0.04] pt-5 text-center text-xs text-[--color-text-tertiary]">
-                            Already have a key? Open the CaptureAI extension popup to activate it.
-                        </div>
                     </div>
-                </div>
 
-                {/* Help link */}
-                <p className="mt-5 text-center text-xs text-[--color-text-tertiary]">
-                    Need help?{' '}
-                    <a
-                        href="https://github.com/TheSuperiorFlash/CaptureAI"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-cyan-400 underline underline-offset-2"
-                    >
-                        Visit GitHub
-                    </a>
-                </p>
+                    {/* Footer */}
+                    <p className="mt-6 text-center text-xs text-[--color-text-tertiary]">
+                        Already have a key? Open the CaptureAI extension popup to activate it.
+                    </p>
+                </div>
             </div>
         </div>
     )
