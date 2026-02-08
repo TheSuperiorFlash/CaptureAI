@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Terms of Service - CaptureAI',
+    description: 'Terms of Service for the CaptureAI Chrome extension.',
+}
+
 export default function TermsPage() {
     return (
         <div className="py-20 md:py-28">
@@ -19,10 +26,10 @@ export default function TermsPage() {
                     <section>
                         <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Description of Service</h2>
                         <p className="mb-3">
-                            CaptureAI is a Chrome extension that uses OCR and AI to help users solve questions from screenshots. The Service includes:
+                            CaptureAI is a Chrome extension that uses AI to help users solve questions from screenshots. The Service includes:
                         </p>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Question capture and OCR text extraction (performed locally in your browser)</li>
+                            <li>Question capture and text extraction (performed locally in your browser)</li>
                             <li>AI-powered question answering using OpenAI&apos;s API</li>
                             <li>Free tier: 10 requests per day</li>
                             <li>Pro tier: Unlimited requests for $9.99/month</li>
@@ -135,7 +142,7 @@ export default function TermsPage() {
                     <section>
                         <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Disclaimers</h2>
                         <p className="mb-3">
-                            THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND. We do not guarantee the accuracy of AI-generated answers. The Service is intended as a study aid, not a definitive source of information. OCR technology may not perfectly extract text from all images.
+                            THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND. We do not guarantee the accuracy of AI-generated answers. The Service is intended as a study aid, not a definitive source of information. Text extraction may not perfectly capture text from all images.
                         </p>
                     </section>
 

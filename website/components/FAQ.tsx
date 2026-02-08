@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 
-const faqs = [
+export const faqs = [
     {
         question: 'Which browsers are supported?',
         answer: 'CaptureAI is built for Google Chrome only. It uses Chrome-specific extension APIs and has been tested exclusively on Chrome.',
@@ -50,34 +50,45 @@ export default function FAQ() {
 
                     {/* Right column — accordion */}
                     <div className="glass-card rounded-2xl p-1">
-                        {faqs.map((faq, index) => (
-                            <div key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
-                                <button
-                                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.02]"
-                                >
-                                    <span className="text-[15px] font-medium text-[--color-text]">
-                                        {faq.question}
-                                    </span>
-                                    <ChevronDown
-                                        className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-300 ease-out ${
-                                            openIndex === index ? 'rotate-180' : ''
+                        {faqs.map((faq, index) => {
+                            const panelId = `faq-panel-${index}`
+                            const buttonId = `faq-button-${index}`
+                            return (
+                                <div key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
+                                    <button
+                                        type="button"
+                                        id={buttonId}
+                                        aria-expanded={openIndex === index}
+                                        aria-controls={panelId}
+                                        onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.02]"
+                                    >
+                                        <span className="text-[15px] font-medium text-[--color-text]">
+                                            {faq.question}
+                                        </span>
+                                        <ChevronDown
+                                            className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-300 ease-out ${
+                                                openIndex === index ? 'rotate-180' : ''
+                                            }`}
+                                        />
+                                    </button>
+                                    <div
+                                        id={panelId}
+                                        role="region"
+                                        aria-labelledby={buttonId}
+                                        className={`grid transition-all duration-300 ease-out ${
+                                            openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                                         }`}
-                                    />
-                                </button>
-                                <div
-                                    className={`grid transition-all duration-300 ease-out ${
-                                        openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                                    }`}
-                                >
-                                    <div className="overflow-hidden">
-                                        <p className="px-6 pb-5 text-sm leading-relaxed text-[--color-text-tertiary]">
-                                            {faq.answer}
-                                        </p>
+                                    >
+                                        <div className="overflow-hidden">
+                                            <p className="px-6 pb-5 text-sm leading-relaxed text-[--color-text-tertiary]">
+                                                {faq.answer}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             </div>

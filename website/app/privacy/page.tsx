@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Privacy Policy - CaptureAI',
+    description: 'Privacy Policy for the CaptureAI Chrome extension. Learn how we handle your data.',
+}
+
 export default function PrivacyPage() {
     return (
         <div className="py-20 md:py-28">
@@ -35,7 +42,7 @@ export default function PrivacyPage() {
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Screenshots and Queries</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Screenshots are processed using OCR locally in your browser</li>
+                            <li>Screenshots are processed locally in your browser to extract text</li>
                             <li>Extracted text is sent to OpenAI&apos;s API for processing</li>
                             <li>We do NOT store your screenshots or queries on our servers</li>
                             <li>OpenAI processes data according to their own privacy policy</li>
@@ -63,7 +70,7 @@ export default function PrivacyPage() {
                             <span className="font-medium text-[--color-text-secondary]">Backend Storage:</span> We store license keys, email addresses, tier information, and usage counts on our Cloudflare Workers backend with Cloudflare D1 database.
                         </p>
                         <p>
-                            <span className="font-medium text-[--color-text-secondary]">No Screenshot Storage:</span> We do NOT store your screenshots or the questions you ask. OCR is performed locally in your browser using Tesseract.js.
+                            <span className="font-medium text-[--color-text-secondary]">No Screenshot Storage:</span> We do NOT store your screenshots or the questions you ask. Text extraction is performed locally in your browser.
                         </p>
                     </section>
 

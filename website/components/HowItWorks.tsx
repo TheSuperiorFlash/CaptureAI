@@ -1,21 +1,16 @@
-import { Camera, Cpu, CheckCircle } from 'lucide-react'
-
 const steps = [
     {
         number: '1',
-        icon: Camera,
         title: 'Capture',
         description: 'Press a keyboard shortcut or click the floating button. Drag to select the area of your screen that contains the question.',
     },
     {
         number: '2',
-        icon: Cpu,
         title: 'Analyze',
-        description: 'The extension reads the text from your screenshot using OCR, then sends it to an AI model for analysis.',
+        description: 'The extension reads the text from your screenshot, then sends it to an AI model for analysis.',
     },
     {
         number: '3',
-        icon: CheckCircle,
         title: 'Answer',
         description: 'The answer appears on-screen in seconds. In Stealth Mode, it shows up subtly right where you need it.',
     },
@@ -44,7 +39,7 @@ export default function HowItWorks() {
                     {/* Connecting gradient line (desktop only) */}
                     <div className="absolute left-[16.67%] right-[16.67%] top-[22px] hidden h-px bg-gradient-to-r from-blue-500/30 via-cyan-500/20 to-blue-500/30 md:block" />
 
-                    {steps.map((step, index) => (
+                    {steps.map((step) => (
                         <div key={step.number} className="relative text-center">
                             {/* Glowing step number */}
                             <div className="relative mx-auto mb-6 flex h-11 w-11 items-center justify-center">

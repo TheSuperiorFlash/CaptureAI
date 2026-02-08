@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, Infinity, MessageSquare, Repeat, Eye } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye } from 'lucide-react'
+import { Infinity as InfinityIcon } from 'lucide-react'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.captureai.workers.dev'
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const freeFeatures = [
     { text: '10 requests per day', included: true },
@@ -18,22 +23,48 @@ const freeFeatures = [
 ]
 
 const proFeatures = [
-    { text: 'Unlimited requests', included: true },
     { text: 'Screenshot capture', included: true },
     { text: 'Floating interface', included: true },
     { text: 'Stealth Mode', included: true },
     { text: 'Works on any website', included: true },
-    { text: 'Privacy Guard', included: true },
-    { text: 'Ask Mode', included: true },
-    { text: 'Auto-Solve', included: true },
 ]
 
 const proHighlights = [
-    { icon: Infinity, title: 'Unlimited', desc: 'No daily caps' },
+    { icon: InfinityIcon, title: 'Unlimited', desc: 'No daily caps' },
     { icon: Shield, title: 'Privacy Guard', desc: 'Stay undetected' },
     { icon: MessageSquare, title: 'Ask Mode', desc: 'Follow-up questions' },
     { icon: Repeat, title: 'Auto-Solve', desc: 'Hands-free answers' },
 ]
+
+async function apiPost(url: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            mode: 'cors',
+        })
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            let errorMessage = 'Request failed'
+            try {
+                const errorData = JSON.parse(errorText)
+                errorMessage = errorData.error || errorMessage
+            } catch {
+                errorMessage = errorText || errorMessage
+            }
+            throw new Error(errorMessage)
+        }
+
+        return await response.json()
+    } catch (error) {
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+            throw new Error('Unable to connect to server. Please check your internet connection.')
+        }
+        throw error
+    }
+}
 
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
@@ -51,7 +82,7 @@ export default function ActivatePage() {
             return
         }
 
-        if (!email.includes('@') || !email.includes('.')) {
+        if (!EMAIL_REGEX.test(email)) {
             setResult({ type: 'error', message: 'Please enter a valid email address' })
             return
         }
@@ -76,76 +107,24 @@ export default function ActivatePage() {
     }
 
     const handleFreeSignup = async () => {
-        try {
-            const response = await fetch('https://api.captureai.workers.dev/api/auth/create-free-key', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-                mode: 'cors',
-            })
+        const data = await apiPost(`${API_BASE_URL}/api/auth/create-free-key`, { email })
 
-            if (!response.ok) {
-                const errorText = await response.text()
-                let errorMessage = 'Failed to create license key'
-                try {
-                    const errorData = JSON.parse(errorText)
-                    errorMessage = errorData.error || errorMessage
-                } catch {
-                    errorMessage = errorText || errorMessage
-                }
-                throw new Error(errorMessage)
-            }
-
-            const data = await response.json()
-
-            setResult({
-                type: 'success',
-                message: data.existing
-                    ? `We've sent your existing license key to ${email}`
-                    : `Your license key has been sent to ${email}`,
-                existing: data.existing,
-            })
-        } catch (error) {
-            if (error instanceof TypeError && error.message.includes('fetch')) {
-                throw new Error('Unable to connect to server. Please check your internet connection.')
-            }
-            throw error
-        }
+        setResult({
+            type: 'success',
+            message: data.existing
+                ? `We've sent your existing license key to ${email}`
+                : `Your license key has been sent to ${email}`,
+            existing: data.existing as boolean | undefined,
+        })
     }
 
     const handleProSignup = async () => {
-        try {
-            const response = await fetch('https://api.captureai.workers.dev/api/subscription/create-checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-                mode: 'cors',
-            })
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email })
 
-            if (!response.ok) {
-                const errorText = await response.text()
-                let errorMessage = 'Failed to start checkout'
-                try {
-                    const errorData = JSON.parse(errorText)
-                    errorMessage = errorData.error || errorMessage
-                } catch {
-                    errorMessage = errorText || errorMessage
-                }
-                throw new Error(errorMessage)
-            }
-
-            const data = await response.json()
-
-            if (data.url) {
-                window.location.href = data.url
-            } else {
-                throw new Error('No checkout URL received')
-            }
-        } catch (error) {
-            if (error instanceof TypeError && error.message.includes('fetch')) {
-                throw new Error('Unable to connect to server. Please check your internet connection.')
-            }
-            throw error
+        if (data.url) {
+            window.location.href = data.url as string
+        } else {
+            throw new Error('No checkout URL received')
         }
     }
 
@@ -294,12 +273,18 @@ export default function ActivatePage() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSignup()}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !loading) {
+                                        e.preventDefault()
+                                        handleSignup()
+                                    }
+                                }}
                                 placeholder="you@email.com"
                                 autoComplete="email"
                                 className="min-w-0 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
                             />
                             <button
+                                type="button"
                                 onClick={handleSignup}
                                 disabled={loading}
                                 className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all ${
