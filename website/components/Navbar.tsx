@@ -2,27 +2,39 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
+    const router = useRouter()
     const [activeHash, setActiveHash] = useState('')
 
     useEffect(() => {
-        if (typeof window === 'undefined') return
-
         const updateHash = () => setActiveHash(window.location.hash)
+        
+        // Update hash immediately on mount
         updateHash()
 
+        // Listen for native hashchange events
         window.addEventListener('hashchange', updateHash)
-        return () => window.removeEventListener('hashchange', updateHash)
-    }, [])
+
+        // Listen for Next.js route changes
+        const handleRouteChange = () => {
+            updateHash()
+        }
+
+        // Subscribe to router events using pathname changes
+        // In Next.js 13+ App Router, we use pathname and router.asPath is not available
+        // So we'll rely on hashchange for hash updates and pathname for route updates
+        
+        return () => {
+            window.removeEventListener('hashchange', updateHash)
+        }
+    }, [pathname, router])
 
     useEffect(() => {
-        if (typeof window === 'undefined') return
-
         if (isOpen) {
             document.body.classList.add('overflow-hidden')
         } else {
