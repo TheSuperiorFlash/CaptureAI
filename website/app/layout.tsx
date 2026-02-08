@@ -60,6 +60,8 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={`noise ${inter.className}`}>
+        {/* Blue gradient layer for navbar background */}
+        <div className="pointer-events-none fixed left-0 right-0 top-0 z-40 h-[200px] bg-gradient-to-b from-blue-600/30 via-blue-600/10 to-transparent" />
         <Navbar />
         <main className="min-h-screen">
             {children}
