@@ -1,16 +1,17 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import HowItWorks from '@/components/HowItWorks'
+import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check, X as XIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    description: 'AI-powered homework helper Chrome extension. Screenshot any question and get instant answers. Perfect for students - solve homework, ace quizzes, and study smarter with AI screenshot analysis.',
+    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
     openGraph: {
-        title: 'CaptureAI - AI Homework Helper Chrome Extension | Screenshot Answers',
-        description: 'Screenshot any question and get instant AI-powered answers. Works on Canvas, Moodle, Blackboard, and all learning platforms.',
+        title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
+        description: 'Screenshot any question and get instant AI-powered answers. Works on every learning platform.',
         images: ['/og-image.png'],
     },
 }
@@ -20,103 +21,93 @@ export default function Home() {
         <>
             <Hero />
 
-            {/* Floating UI Section */}
-            <section className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {/* Image on the left */}
-                        <div className="relative">
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-500/20">
-                                <Image
-                                    src="/floating-ui.png"
-                                    alt="CaptureAI Floating UI"
-                                    width={600}
-                                    height={600}
-                                    className="w-full h-auto"
-                                />
-                            </div>
+            {/* ---- Floating UI Showcase ---- */}
+            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
+                <div className="mx-auto max-w-6xl px-6">
+                    <div className="grid items-center gap-12 lg:grid-cols-2">
+                        {/* Image */}
+                        <div className="overflow-hidden rounded-xl border border-[--color-border]">
+                            <Image
+                                src="/floating-ui.png"
+                                alt="CaptureAI floating interface on a webpage"
+                                width={600}
+                                height={600}
+                                className="block h-auto w-full"
+                            />
                         </div>
 
-                        {/* Content on the right */}
+                        {/* Copy */}
                         <div>
-                            <div className="inline-block px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-4">
-                                <span className="text-blue-400 text-sm font-semibold">Always Accessible</span>
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                                Floating UI
+                            <p className="mb-3 text-sm font-medium text-[--color-accent-hover]">Always accessible</p>
+                            <h2 className="mb-4 text-[--color-text]">
+                                A floating panel that stays out of your way
                             </h2>
-                            <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-                                Access CaptureAI anytime with our intuitive floating interface. No need to search for the extension - it's always just one click away, ready to help you solve problems instantly.
+                            <p className="mb-4 text-[--color-text-secondary]">
+                                The CaptureAI interface sits on top of any webpage as a small, draggable button. Click it to open the capture tool, view your last answer, or adjust settings.
                             </p>
-                            <p className="text-lg text-gray-400 leading-relaxed">
-                                The floating UI keeps your workflow smooth and uninterrupted. Whether you're taking a quiz, doing homework, or studying, CaptureAI is right there when you need it.
+                            <p className="text-sm text-[--color-text-tertiary]">
+                                No need to open the extension popup or switch tabs. It&apos;s always one click away, on every site you visit.
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Privacy Guard Section */}
-            <section className="py-24 bg-gradient-to-b from-[#08070e] to-gray-950/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* ---- Privacy Guard Showcase ---- */}
+            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
+                <div className="mx-auto max-w-6xl px-6">
                     {/* Header */}
-                    <div className="text-center mb-16">
-                        <div className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
-                            <span className="text-purple-400 text-sm font-semibold">PRO Feature</span>
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                            Privacy Guard
-                        </h2>
-                        <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                            Privacy Guard keeps your activity completely hidden. When enabled, your quiz platform won't detect any extension usage - it's like you're browsing normally.
+                    <div className="mb-12">
+                        <p className="mb-3 text-sm font-medium text-[--color-accent-hover]">Pro feature</p>
+                        <h2 className="mb-3 text-[--color-text]">Privacy Guard</h2>
+                        <p className="max-w-2xl text-[--color-text-secondary]">
+                            Quiz platforms can log browser extension activity. Privacy Guard intercepts those detection methods so your activity logs stay clean.
                         </p>
                     </div>
 
-                    {/* Comparison */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Without Privacy Guard */}
-                        <div className="relative">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-red-500 border border-red-500 rounded-full text-white text-sm font-semibold shadow-lg">
-                                    ✗ Privacy Guard OFF
+                    {/* Before / After comparison */}
+                    <div className="grid gap-6 md:grid-cols-2">
+                        {/* Without */}
+                        <div>
+                            <div className="mb-3 flex items-center gap-2">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10">
+                                    <XIcon className="h-3 w-3 text-red-400" />
                                 </span>
+                                <span className="text-sm font-medium text-[--color-text-secondary]">Privacy Guard off</span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-red-500/10 border-2 border-red-500/50">
+                            <div className="overflow-hidden rounded-xl border border-[--color-border]">
                                 <Image
                                     src="/action-log-canvas-1.png"
-                                    alt="Canvas Action Log without Privacy Guard - shows extension activity"
+                                    alt="Canvas action log showing extension activity detected"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto block"
+                                    className="block h-auto w-full"
                                 />
                             </div>
-                            <p className="text-center text-gray-400 mt-4">
-                                Extension activity is visible and traceable
+                            <p className="mt-3 text-sm text-[--color-text-tertiary]">
+                                Extension activity visible in platform logs
                             </p>
                         </div>
 
-                        {/* With Privacy Guard */}
-                        <div className="relative">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                                <span className="inline-block px-4 py-2 bg-green-500 border border-green-500 rounded-full text-white text-sm font-semibold shadow-lg">
-                                    ✓ Privacy Guard ON
+                        {/* With */}
+                        <div>
+                            <div className="mb-3 flex items-center gap-2">
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/10">
+                                    <Check className="h-3 w-3 text-green-400" />
                                 </span>
+                                <span className="text-sm font-medium text-[--color-text-secondary]">Privacy Guard on</span>
                             </div>
-                            <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-500/10 border-2 border-green-500/50">
+                            <div className="overflow-hidden rounded-xl border border-[--color-border]">
                                 <Image
                                     src="/action-log-canvas-2.png"
-                                    alt="Canvas Action Log with Privacy Guard - shows clean activity"
+                                    alt="Canvas action log showing clean browsing activity"
                                     width={600}
                                     height={600}
-                                    className="w-full h-auto block"
+                                    className="block h-auto w-full"
                                 />
                             </div>
-                            <p className="text-center text-gray-400 mt-4">
-                                Clean logs showing only natural browsing
+                            <p className="mt-3 text-sm text-[--color-text-tertiary]">
+                                Logs show only normal browsing activity
                             </p>
                         </div>
                     </div>
@@ -127,221 +118,121 @@ export default function Home() {
 
             <HowItWorks />
 
-            {/* Pricing Section */}
-            <section id="pricing" className="py-24 bg-gradient-to-b from-gray-950/50 to-[#08070e] relative">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                            Simple pricing
-                        </h2>
-                        <p className="text-xl text-gray-400">
-                            Start free, upgrade when you need more
+            {/* ---- Pricing ---- */}
+            <section id="pricing" className="border-t border-[--color-border-subtle] py-20 md:py-28">
+                <div className="mx-auto max-w-6xl px-6">
+                    <div className="mb-14">
+                        <h2 className="mb-3 text-[--color-text]">Pricing</h2>
+                        <p className="text-[--color-text-secondary]">
+                            Start free. Upgrade when you need more.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        {/* Free Tier */}
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 hover:border-blue-500/50 transition-all">
-                            <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
-                            <div className="text-4xl font-bold text-white mb-6">
-                                $0<span className="text-lg text-gray-400 font-normal">/month</span>
+                    <div className="grid gap-6 md:grid-cols-2 md:max-w-3xl">
+                        {/* Free */}
+                        <div className="rounded-xl border border-[--color-border] p-6">
+                            <h3 className="mb-1 text-[--color-text]">Free</h3>
+                            <div className="mb-6">
+                                <span className="text-3xl font-bold text-[--color-text]">$0</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
-                            <ul className="space-y-3 mb-8">
-                                {/* Included in Free */}
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">10 requests per day</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Question capture</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Floating UI</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Stealth Mode</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Works on any website</span>
-                                </li>
-                                {/* Pro-only features (grayed out) */}
-                                <li className="flex items-start opacity-50">
-                                    <span className="text-gray-500 mr-3">✗</span>
-                                    <span className="text-gray-500">Unlimited requests</span>
-                                </li>
-                                <li className="flex items-start opacity-50">
-                                    <span className="text-gray-500 mr-3">✗</span>
-                                    <span className="text-gray-500">Privacy Guard</span>
-                                </li>
-                                <li className="flex items-start opacity-50">
-                                    <span className="text-gray-500 mr-3">✗</span>
-                                    <span className="text-gray-500">Ask Mode</span>
-                                </li>
-                                <li className="flex items-start opacity-50">
-                                    <span className="text-gray-500 mr-3">✗</span>
-                                    <span className="text-gray-500">Auto-Solve</span>
-                                </li>
+
+                            <ul className="mb-8 space-y-3">
+                                {[
+                                    '10 requests per day',
+                                    'Screenshot capture',
+                                    'Floating interface',
+                                    'Stealth Mode',
+                                    'Works on any website',
+                                ].map((item) => (
+                                    <li key={item} className="flex items-start gap-3">
+                                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        <span className="text-sm text-[--color-text-secondary]">{item}</span>
+                                    </li>
+                                ))}
+                                {[
+                                    'Unlimited requests',
+                                    'Privacy Guard',
+                                    'Ask Mode',
+                                    'Auto-Solve',
+                                ].map((item) => (
+                                    <li key={item} className="flex items-start gap-3 opacity-40">
+                                        <XIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        <span className="text-sm text-[--color-text-tertiary]">{item}</span>
+                                    </li>
+                                ))}
                             </ul>
+
                             <Link
                                 href="/activate"
-                                className="block w-full text-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-all font-semibold"
+                                className="block rounded-lg border border-[--color-border] bg-transparent py-2.5 text-center text-sm font-medium text-[--color-text-secondary] transition-colors hover:border-[--color-text-tertiary] hover:text-[--color-text]"
                             >
-                                Start Free
+                                Get Started
                             </Link>
                         </div>
 
-                        {/* Pro Tier */}
-                        <div className="bg-gradient-to-b from-blue-900/30 to-blue-900/10 border border-[#667eea]/50 rounded-2xl p-8 hover:border-[#667eea] transition-all relative">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white text-sm font-semibold rounded-full">
-                                Most Popular
+                        {/* Pro */}
+                        <div className="rounded-xl border border-[--color-accent-border] bg-[--color-accent-muted] p-6">
+                            <div className="mb-1 flex items-center gap-3">
+                                <h3 className="text-[--color-text]">Pro</h3>
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
-                            <div className="text-4xl font-bold text-white mb-6">
-                                $9.99<span className="text-lg text-gray-400 font-normal">/month</span>
+                            <div className="mb-6">
+                                <span className="text-3xl font-bold text-[--color-text]">$9.99</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
-                            {/* Promotional Badge - Remove this block when promotion ends */}
-                            <div className="mb-6 px-3 py-2 bg-orange-500/20 border border-orange-500/40 rounded-lg">
-                                <span className="text-orange-300 text-sm font-medium">🔥 Limited time: First month 50% off</span>
-                            </div>
-                            <ul className="space-y-4 mb-8">
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Unlimited requests</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Question capture</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Floating UI</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Stealth Mode</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Works on any website</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Privacy Guard</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Ask Mode</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="text-blue-400 mr-3">✓</span>
-                                    <span className="text-gray-300">Auto-Solve</span>
-                                </li>
+
+                            <ul className="mb-8 space-y-3">
+                                {[
+                                    'Unlimited requests',
+                                    'Screenshot capture',
+                                    'Floating interface',
+                                    'Stealth Mode',
+                                    'Works on any website',
+                                    'Privacy Guard',
+                                    'Ask Mode',
+                                    'Auto-Solve',
+                                ].map((item) => (
+                                    <li key={item} className="flex items-start gap-3">
+                                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-accent-hover]" />
+                                        <span className="text-sm text-[--color-text-secondary]">{item}</span>
+                                    </li>
+                                ))}
                             </ul>
+
                             <Link
                                 href="/activate"
-                                className="block w-full text-center px-6 py-3 bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)] text-white rounded-lg hover:opacity-90 transition-all font-semibold shadow-lg shadow-[#667eea]/20"
+                                className="block rounded-lg bg-[--color-accent] py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
                             >
                                 Get Pro
                             </Link>
-                            <div className="mt-4 text-center">
-                                <span className="inline-flex items-center px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm font-medium">
-                                    <span className="mr-1">🛡️</span> 7-day money-back guarantee
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* FAQ Section */}
-            <section className="py-24 bg-gradient-to-b from-[#08070e] to-gray-950/50 relative">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
-                        Frequently Asked Questions
-                    </h2>
-                    <div className="space-y-6">
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                Can I upgrade or downgrade anytime?
-                            </h3>
-                            <p className="text-gray-400">
-                                Yes! You can upgrade to Pro anytime, and cancel your subscription whenever you want.
-                                No questions asked.
-                            </p>
-                        </div>
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                What happens when I hit the free tier limit?
-                            </h3>
-                            <p className="text-gray-400">
-                                You'll receive a notification when you approach your daily limit. You can either wait
-                                for the daily reset or upgrade to Pro for unlimited requests.
-                            </p>
-                        </div>
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                Is my data secure?
-                            </h3>
-                            <p className="text-gray-400">
-                                Absolutely. We process screenshots securely and never store them on our servers.
-                                Your privacy is our top priority.
-                            </p>
-                        </div>
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                Will my school detect I&apos;m using this?
-                            </h3>
-                            <p className="text-gray-400">
-                                With Privacy Guard (included in Pro), your activity stays hidden. The extension focuses on Chrome browser behavior, making your browsing appear natural. Privacy Guard helps keep your extension usage undetectable on quiz platforms.
-                            </p>
-                        </div>
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                How accurate are the answers?
-                            </h3>
-                            <p className="text-gray-400">
-                                CaptureAI uses advanced AI to provide high-quality answers. While the AI is powerful and helpful for learning, we recommend reviewing and understanding the answers as part of your study process.
-                            </p>
-                        </div>
-                        <div className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-xl p-6 backdrop-blur-sm hover:border-blue-500/50 transition-all">
-                            <h3 className="text-lg font-semibold text-white mb-2">
-                                Which browsers are supported?
-                            </h3>
-                            <p className="text-gray-400">
-                                CaptureAI is built exclusively for Google Chrome. The extension is optimized for Chrome&apos;s architecture and has been thoroughly tested to ensure reliable performance on this browser.
+                            <p className="mt-3 text-center text-xs text-[--color-text-tertiary]">
+                                7-day money-back guarantee
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="py-24 bg-[#08070e] relative overflow-hidden">
-                {/* Gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-transparent to-cyan-600/20"></div>
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 gradient-blur"></div>
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500 gradient-blur"></div>
+            <FAQ />
 
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                        Ready to ace your next assignment?
-                    </h2>
-                    <p className="text-xl text-gray-300 mb-10">
-                        Join students using CaptureAI to study smarter, not harder
-                    </p>
-                    <Link
-                        href="/activate"
-                        className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
-                    >
-                        Start Solving Questions
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                    </Link>
+            {/* ---- Final CTA ---- */}
+            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
+                <div className="mx-auto max-w-6xl px-6">
+                    <div className="mx-auto max-w-lg text-center">
+                        <h2 className="mb-4 text-[--color-text]">
+                            Ready to try it?
+                        </h2>
+                        <p className="mb-8 text-[--color-text-secondary]">
+                            Install the extension, get a free license key, and start getting answers in under a minute.
+                        </p>
+                        <Link
+                            href="/activate"
+                            className="inline-flex items-center gap-2 rounded-lg bg-[--color-accent] px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
+                        >
+                            Get Started Free
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
             </section>
         </>

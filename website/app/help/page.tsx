@@ -1,100 +1,109 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
     title: 'Help - CaptureAI',
-    description: 'Learn how to use CaptureAI effectively',
+    description: 'Learn how to use CaptureAI. Guides, keyboard shortcuts, and FAQ.',
 }
 
-export default function DocsPage() {
+export default function HelpPage() {
     return (
-        <div className="py-24 bg-[#08070e] min-h-screen">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Help Center</h1>
-                <p className="text-xl text-gray-300 mb-12">
-                    Everything you need to know about using CaptureAI
-                </p>
+        <div className="py-20 md:py-28">
+            <div className="mx-auto max-w-2xl px-6">
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="mb-3 text-[--color-text]">Help Center</h1>
+                    <p className="text-[--color-text-secondary]">
+                        Guides and answers for using CaptureAI.
+                    </p>
+                </div>
 
                 {/* Getting Started */}
-                <section className="mb-16 bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm">
-                    <h2 className="text-3xl font-bold text-white mb-6">Getting Started</h2>
+                <section className="mb-10 rounded-xl border border-[--color-border] p-6">
+                    <h2 className="mb-5 text-lg font-semibold text-[--color-text]">Getting Started</h2>
 
-                    <div className="prose prose-lg max-w-none">
-                        <h3 className="text-2xl font-semibold text-white mb-4">Installation</h3>
-                        <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Visit the Chrome Web Store and install CaptureAI</li>
-                            <li>Click "Add to Chrome"</li>
-                            <li>Get your license key from the activation page</li>
-                            <li>Enter your license key in the extension to start using CaptureAI</li>
+                    <div className="mb-6">
+                        <h3 className="mb-3 text-sm font-medium text-[--color-text-secondary]">Installation</h3>
+                        <ol className="list-inside list-decimal space-y-2 text-sm text-[--color-text-tertiary]">
+                            <li>Install CaptureAI from the Chrome Web Store</li>
+                            <li>Get your license key from the <Link href="/activate" className="text-[--color-accent-hover] underline underline-offset-2">activation page</Link></li>
+                            <li>Open the extension popup and enter your license key</li>
+                            <li>Start using CaptureAI on any webpage</li>
                         </ol>
+                    </div>
 
-                        <h3 className="text-2xl font-semibold text-white mb-4 mt-8">How to Use</h3>
-                        <p className="text-gray-300 mb-4">
-                            Using CaptureAI is simple:
-                        </p>
-                        <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                            <li>Click the floating CaptureAI button on any webpage</li>
-                            <li>Take a screenshot of your question using the capture tool</li>
-                            <li>Wait a moment while AI analyzes your question</li>
-                            <li>Get your answer displayed right on the page</li>
+                    <div>
+                        <h3 className="mb-3 text-sm font-medium text-[--color-text-secondary]">Basic usage</h3>
+                        <ol className="list-inside list-decimal space-y-2 text-sm text-[--color-text-tertiary]">
+                            <li>Click the floating CaptureAI button on any page</li>
+                            <li>Select the area containing your question</li>
+                            <li>Wait a moment while the AI analyzes the screenshot</li>
+                            <li>Read the answer displayed on the page</li>
                         </ol>
+                    </div>
+                </section>
+
+                {/* Keyboard Shortcuts */}
+                <section className="mb-10 rounded-xl border border-[--color-border] p-6">
+                    <h2 className="mb-5 text-lg font-semibold text-[--color-text]">Keyboard Shortcuts</h2>
+                    <div className="space-y-3">
+                        {[
+                            { keys: 'Ctrl + Shift + X', action: 'Capture an area of the screen' },
+                            { keys: 'Ctrl + Shift + F', action: 'Quick capture (full visible area)' },
+                            { keys: 'Ctrl + Shift + E', action: 'Toggle the floating panel' },
+                        ].map((shortcut) => (
+                            <div key={shortcut.keys} className="flex items-center justify-between gap-4">
+                                <span className="text-sm text-[--color-text-tertiary]">{shortcut.action}</span>
+                                <code className="whitespace-nowrap rounded-md bg-[--color-surface] px-2.5 py-1 text-xs font-medium text-[--color-text-secondary]">
+                                    {shortcut.keys}
+                                </code>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
                 {/* FAQ */}
-                <section className="mb-16 bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm">
-                    <h2 className="text-3xl font-bold text-white mb-6">FAQ</h2>
-
+                <section className="mb-10 rounded-xl border border-[--color-border] p-6">
+                    <h2 className="mb-5 text-lg font-semibold text-[--color-text]">FAQ</h2>
                     <div className="space-y-6">
-                        <div>
-                            <h3 className="text-xl font-semibold text-white mb-2">
-                                How do I get a license key?
-                            </h3>
-                            <p className="text-gray-300">
-                                Visit the activation page and enter your email. You'll receive a license key via email that you can use to activate the extension.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold text-white mb-2">
-                                What's the difference between Free and Pro?
-                            </h3>
-                            <p className="text-gray-300">
-                                Free tier gives you 10 requests per day. Pro tier gives you unlimited requests for $9.99/month.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold text-white mb-2">
-                                Which browser does CaptureAI support?
-                            </h3>
-                            <p className="text-gray-300">
-                                CaptureAI is designed exclusively for Google Chrome. The extension uses Chrome-specific APIs and is only supported on Google Chrome.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xl font-semibold text-white mb-2">
-                                How do I upgrade to Pro?
-                            </h3>
-                            <p className="text-gray-300">
-                                Visit the activation page and select the Pro tier. After payment, you'll receive a Pro license key via email.
-                            </p>
-                        </div>
+                        {[
+                            {
+                                q: 'How do I get a license key?',
+                                a: <>Visit the <Link href="/activate" className="text-[--color-accent-hover] underline underline-offset-2">activation page</Link> and enter your email. You&apos;ll receive a key via email.</>,
+                            },
+                            {
+                                q: 'What\'s the difference between Free and Pro?',
+                                a: 'Free gives you 10 requests per day. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
+                            },
+                            {
+                                q: 'Which browser is supported?',
+                                a: 'CaptureAI works exclusively on Google Chrome. It uses Chrome-specific extension APIs.',
+                            },
+                            {
+                                q: 'How do I upgrade to Pro?',
+                                a: <>Visit the <Link href="/activate" className="text-[--color-accent-hover] underline underline-offset-2">activation page</Link> and select the Pro tier. You&apos;ll be redirected to Stripe for payment.</>,
+                            },
+                        ].map((item, i) => (
+                            <div key={i}>
+                                <h3 className="mb-1.5 text-sm font-medium text-[--color-text]">{item.q}</h3>
+                                <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
-                {/* Support */}
-                <section className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm text-center">
-                    <h2 className="text-3xl font-bold text-white mb-6">Need Help?</h2>
-                    <p className="text-gray-300 mb-4">
-                        Can't find what you're looking for? We're here to help!
+                {/* Contact CTA */}
+                <section className="rounded-xl border border-[--color-border-subtle] p-6 text-center">
+                    <h3 className="mb-2 text-[--color-text]">Still need help?</h3>
+                    <p className="mb-5 text-sm text-[--color-text-tertiary]">
+                        Reach out and we&apos;ll get back to you within 24 hours.
                     </p>
-                    <a
+                    <Link
                         href="/contact"
-                        className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-105"
+                        className="inline-flex rounded-lg bg-[--color-accent] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
                     >
                         Contact Support
-                    </a>
+                    </Link>
                 </section>
             </div>
         </div>
