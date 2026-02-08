@@ -30,7 +30,7 @@
 /* ---- Base ---- */
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
 
