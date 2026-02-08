@@ -74,3 +74,6 @@ coverage/
 ### Package Files ###
 *.zip
 captureai-extension.zip
+
+### Interface Design System ###
+.interface-design/
