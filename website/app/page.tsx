@@ -22,30 +22,36 @@ export default function Home() {
             <Hero />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
+            <section className="relative py-24 md:py-32">
+                <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
-                        {/* Image */}
-                        <div className="overflow-hidden rounded-xl border border-[--color-border]">
-                            <Image
-                                src="/floating-ui.png"
-                                alt="CaptureAI floating interface on a webpage"
-                                width={600}
-                                height={600}
-                                className="block h-auto w-full"
-                            />
+                        {/* Image with glow frame */}
+                        <div className="relative">
+                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-500/20 via-transparent to-cyan-500/10 blur-sm" />
+                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+                                <Image
+                                    src="/floating-ui.png"
+                                    alt="CaptureAI floating interface on a webpage"
+                                    width={600}
+                                    height={600}
+                                    className="block h-auto w-full"
+                                />
+                            </div>
                         </div>
 
                         {/* Copy */}
                         <div>
-                            <p className="mb-3 text-sm font-medium text-[--color-accent-hover]">Always accessible</p>
-                            <h2 className="mb-4 text-[--color-text]">
+                            <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
+                                Always accessible
+                            </span>
+                            <h2 className="mb-5 text-[--color-text]">
                                 A floating panel that stays out of your way
                             </h2>
-                            <p className="mb-4 text-[--color-text-secondary]">
+                            <p className="mb-4 leading-relaxed text-[--color-text-secondary]">
                                 The CaptureAI interface sits on top of any webpage as a small, draggable button. Click it to open the capture tool, view your last answer, or adjust settings.
                             </p>
-                            <p className="text-sm text-[--color-text-tertiary]">
+                            <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
                                 No need to open the extension popup or switch tabs. It&apos;s always one click away, on every site you visit.
                             </p>
                         </div>
@@ -54,13 +60,17 @@ export default function Home() {
             </section>
 
             {/* ---- Privacy Guard Showcase ---- */}
-            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
-                <div className="mx-auto max-w-6xl px-6">
+            <section className="relative py-24 md:py-32">
+                <div className="divider-gradient absolute left-0 right-0 top-0" />
+                <div className="pointer-events-none absolute inset-0 gradient-section" />
+                <div className="relative z-10 mx-auto max-w-6xl px-6">
                     {/* Header */}
-                    <div className="mb-12">
-                        <p className="mb-3 text-sm font-medium text-[--color-accent-hover]">Pro feature</p>
-                        <h2 className="mb-3 text-[--color-text]">Privacy Guard</h2>
-                        <p className="max-w-2xl text-[--color-text-secondary]">
+                    <div className="mb-14 text-center">
+                        <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+                            Pro feature
+                        </span>
+                        <h2 className="mb-4 text-[--color-text]">Privacy Guard</h2>
+                        <p className="mx-auto max-w-2xl text-[--color-text-secondary]">
                             Quiz platforms can log browser extension activity. Privacy Guard intercepts those detection methods so your activity logs stay clean.
                         </p>
                     </div>
@@ -68,14 +78,14 @@ export default function Home() {
                     {/* Before / After comparison */}
                     <div className="grid gap-6 md:grid-cols-2">
                         {/* Without */}
-                        <div>
-                            <div className="mb-3 flex items-center gap-2">
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/10">
-                                    <XIcon className="h-3 w-3 text-red-400" />
+                        <div className="glass-card overflow-hidden rounded-2xl p-5">
+                            <div className="mb-4 flex items-center gap-2.5">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/15">
+                                    <XIcon className="h-3.5 w-3.5 text-red-400" />
                                 </span>
                                 <span className="text-sm font-medium text-[--color-text-secondary]">Privacy Guard off</span>
                             </div>
-                            <div className="overflow-hidden rounded-xl border border-[--color-border]">
+                            <div className="overflow-hidden rounded-xl border border-white/[0.04]">
                                 <Image
                                     src="/action-log-canvas-1.png"
                                     alt="Canvas action log showing extension activity detected"
@@ -84,20 +94,20 @@ export default function Home() {
                                     className="block h-auto w-full"
                                 />
                             </div>
-                            <p className="mt-3 text-sm text-[--color-text-tertiary]">
+                            <p className="mt-4 text-sm text-[--color-text-tertiary]">
                                 Extension activity visible in platform logs
                             </p>
                         </div>
 
                         {/* With */}
-                        <div>
-                            <div className="mb-3 flex items-center gap-2">
-                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/10">
-                                    <Check className="h-3 w-3 text-green-400" />
+                        <div className="glass-card overflow-hidden rounded-2xl p-5">
+                            <div className="mb-4 flex items-center gap-2.5">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15">
+                                    <Check className="h-3.5 w-3.5 text-emerald-400" />
                                 </span>
                                 <span className="text-sm font-medium text-[--color-text-secondary]">Privacy Guard on</span>
                             </div>
-                            <div className="overflow-hidden rounded-xl border border-[--color-border]">
+                            <div className="overflow-hidden rounded-xl border border-white/[0.04]">
                                 <Image
                                     src="/action-log-canvas-2.png"
                                     alt="Canvas action log showing clean browsing activity"
@@ -106,7 +116,7 @@ export default function Home() {
                                     className="block h-auto w-full"
                                 />
                             </div>
-                            <p className="mt-3 text-sm text-[--color-text-tertiary]">
+                            <p className="mt-4 text-sm text-[--color-text-tertiary]">
                                 Logs show only normal browsing activity
                             </p>
                         </div>
@@ -119,25 +129,29 @@ export default function Home() {
             <HowItWorks />
 
             {/* ---- Pricing ---- */}
-            <section id="pricing" className="border-t border-[--color-border-subtle] py-20 md:py-28">
+            <section id="pricing" className="relative py-24 md:py-32">
+                <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="mb-14">
-                        <h2 className="mb-3 text-[--color-text]">Pricing</h2>
-                        <p className="text-[--color-text-secondary]">
+                    <div className="mb-16 text-center">
+                        <h2 className="mb-4">
+                            <span className="text-[--color-text]">Simple </span>
+                            <span className="text-gradient-static">pricing</span>
+                        </h2>
+                        <p className="mx-auto max-w-md text-[--color-text-secondary]">
                             Start free. Upgrade when you need more.
                         </p>
                     </div>
 
-                    <div className="grid gap-6 md:grid-cols-2 md:max-w-3xl">
+                    <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                         {/* Free */}
-                        <div className="rounded-xl border border-[--color-border] p-6">
+                        <div className="glass-card rounded-2xl p-7">
                             <h3 className="mb-1 text-[--color-text]">Free</h3>
-                            <div className="mb-6">
-                                <span className="text-3xl font-bold text-[--color-text]">$0</span>
+                            <div className="mb-7">
+                                <span className="text-4xl font-bold text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
 
-                            <ul className="mb-8 space-y-3">
+                            <ul className="mb-8 space-y-3.5">
                                 {[
                                     '10 requests per day',
                                     'Screenshot capture',
@@ -156,7 +170,7 @@ export default function Home() {
                                     'Ask Mode',
                                     'Auto-Solve',
                                 ].map((item) => (
-                                    <li key={item} className="flex items-start gap-3 opacity-40">
+                                    <li key={item} className="flex items-start gap-3 opacity-30">
                                         <XIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
                                         <span className="text-sm text-[--color-text-tertiary]">{item}</span>
                                     </li>
@@ -165,49 +179,54 @@ export default function Home() {
 
                             <Link
                                 href="/activate"
-                                className="block rounded-lg border border-[--color-border] bg-transparent py-2.5 text-center text-sm font-medium text-[--color-text-secondary] transition-colors hover:border-[--color-text-tertiary] hover:text-[--color-text]"
+                                className="glass block rounded-xl py-3 text-center text-sm font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text]"
                             >
                                 Get Started
                             </Link>
                         </div>
 
-                        {/* Pro */}
-                        <div className="rounded-xl border border-[--color-accent-border] bg-[--color-accent-muted] p-6">
-                            <div className="mb-1 flex items-center gap-3">
-                                <h3 className="text-[--color-text]">Pro</h3>
-                            </div>
-                            <div className="mb-6">
-                                <span className="text-3xl font-bold text-[--color-text]">$9.99</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
-                            </div>
+                        {/* Pro — gradient border treatment */}
+                        <div className="gradient-border relative rounded-2xl">
+                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                                <div className="mb-1 flex items-center gap-3">
+                                    <h3 className="text-[--color-text]">Pro</h3>
+                                    <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+                                        Popular
+                                    </span>
+                                </div>
+                                <div className="mb-7">
+                                    <span className="text-4xl font-bold text-gradient-static">$9.99</span>
+                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                </div>
 
-                            <ul className="mb-8 space-y-3">
-                                {[
-                                    'Unlimited requests',
-                                    'Screenshot capture',
-                                    'Floating interface',
-                                    'Stealth Mode',
-                                    'Works on any website',
-                                    'Privacy Guard',
-                                    'Ask Mode',
-                                    'Auto-Solve',
-                                ].map((item) => (
-                                    <li key={item} className="flex items-start gap-3">
-                                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-accent-hover]" />
-                                        <span className="text-sm text-[--color-text-secondary]">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                                <ul className="mb-8 space-y-3.5">
+                                    {[
+                                        'Unlimited requests',
+                                        'Screenshot capture',
+                                        'Floating interface',
+                                        'Stealth Mode',
+                                        'Works on any website',
+                                        'Privacy Guard',
+                                        'Ask Mode',
+                                        'Auto-Solve',
+                                    ].map((item) => (
+                                        <li key={item} className="flex items-start gap-3">
+                                            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                            <span className="text-sm text-[--color-text-secondary]">{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
 
-                            <Link
-                                href="/activate"
-                                className="block rounded-lg bg-[--color-accent] py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
-                            >
-                                Get Pro
-                            </Link>
-                            <p className="mt-3 text-center text-xs text-[--color-text-tertiary]">
-                                7-day money-back guarantee
-                            </p>
+                                <Link
+                                    href="/activate"
+                                    className="glow-btn block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                                >
+                                    Get Pro
+                                </Link>
+                                <p className="mt-3.5 text-center text-xs text-[--color-text-tertiary]">
+                                    7-day money-back guarantee
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -216,18 +235,24 @@ export default function Home() {
             <FAQ />
 
             {/* ---- Final CTA ---- */}
-            <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
-                <div className="mx-auto max-w-6xl px-6">
+            <section className="relative overflow-hidden py-28 md:py-36">
+                <div className="divider-gradient absolute left-0 right-0 top-0" />
+                {/* Background glow */}
+                <div className="absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
+                <div className="absolute left-[30%] top-[30%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
+
+                <div className="relative z-10 mx-auto max-w-6xl px-6">
                     <div className="mx-auto max-w-lg text-center">
-                        <h2 className="mb-4 text-[--color-text]">
-                            Ready to try it?
+                        <h2 className="mb-5">
+                            <span className="text-[--color-text]">Ready to </span>
+                            <span className="text-gradient-static">try it?</span>
                         </h2>
-                        <p className="mb-8 text-[--color-text-secondary]">
+                        <p className="mb-10 text-lg text-[--color-text-secondary]">
                             Install the extension, get a free license key, and start getting answers in under a minute.
                         </p>
                         <Link
                             href="/activate"
-                            className="inline-flex items-center gap-2 rounded-lg bg-[--color-accent] px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
+                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-4 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
                             Get Started Free
                             <ArrowRight className="h-4 w-4" />

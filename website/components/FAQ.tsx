@@ -34,42 +34,47 @@ export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     return (
-        <section className="border-t border-[--color-border-subtle] py-20 md:py-28">
+        <section className="relative py-24 md:py-32">
+            <div className="divider-gradient absolute left-0 right-0 top-0" />
             <div className="mx-auto max-w-6xl px-6">
                 <div className="grid gap-12 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">
                     {/* Left column */}
                     <div>
-                        <h2 className="mb-3 text-[--color-text]">FAQ</h2>
-                        <p className="text-sm text-[--color-text-tertiary]">
+                        <h2 className="mb-4">
+                            <span className="text-gradient-static">FAQ</span>
+                        </h2>
+                        <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
                             Common questions about the extension, pricing, and privacy.
                         </p>
                     </div>
 
                     {/* Right column — accordion */}
-                    <div className="divide-y divide-[--color-border-subtle]">
+                    <div className="glass-card rounded-2xl p-1">
                         {faqs.map((faq, index) => (
-                            <div key={index}>
+                            <div key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
                                 <button
                                     onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                    className="flex w-full items-center justify-between gap-4 py-5 text-left"
+                                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.02]"
                                 >
                                     <span className="text-[15px] font-medium text-[--color-text]">
                                         {faq.question}
                                     </span>
                                     <ChevronDown
-                                        className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-200 ${
+                                        className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-300 ease-out ${
                                             openIndex === index ? 'rotate-180' : ''
                                         }`}
                                     />
                                 </button>
                                 <div
-                                    className={`overflow-hidden transition-all duration-200 ${
-                                        openIndex === index ? 'max-h-48 pb-5' : 'max-h-0'
+                                    className={`grid transition-all duration-300 ease-out ${
+                                        openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                                     }`}
                                 >
-                                    <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
-                                        {faq.answer}
-                                    </p>
+                                    <div className="overflow-hidden">
+                                        <p className="px-6 pb-5 text-sm leading-relaxed text-[--color-text-tertiary]">
+                                            {faq.answer}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         ))}

@@ -22,7 +22,7 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="sticky top-0 z-50 border-b border-[--color-border-subtle] bg-[--color-background]/90 backdrop-blur-md">
+        <nav className="sticky top-0 z-50 border-b border-white/[0.04] bg-[--color-background]/80 backdrop-blur-xl">
             <div className="mx-auto max-w-6xl px-6">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
@@ -37,7 +37,7 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`text-sm transition-colors ${
+                                className={`text-sm transition-colors duration-200 ${
                                     isActive(item.href)
                                         ? 'text-[--color-text] font-medium'
                                         : 'text-[--color-text-tertiary] hover:text-[--color-text-secondary]'
@@ -52,7 +52,7 @@ export default function Navbar() {
                     <div className="hidden md:block">
                         <Link
                             href="/activate"
-                            className="inline-flex items-center rounded-lg bg-[--color-accent] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
+                            className="glow-btn inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
                             Get Started
                         </Link>
@@ -71,13 +71,13 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="border-t border-[--color-border-subtle] bg-[--color-background] md:hidden">
+                <div className="border-t border-white/[0.04] bg-[--color-background]/95 backdrop-blur-xl md:hidden">
                     <div className="space-y-1 px-6 py-4">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block rounded-md px-3 py-2 text-sm transition-colors ${
+                                className={`block rounded-lg px-3 py-2.5 text-sm transition-colors ${
                                     isActive(item.href)
                                         ? 'text-[--color-text] font-medium'
                                         : 'text-[--color-text-tertiary] hover:text-[--color-text]'
@@ -90,7 +90,7 @@ export default function Navbar() {
                         <div className="pt-2">
                             <Link
                                 href="/activate"
-                                className="block rounded-lg bg-[--color-accent] px-3 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
+                                className="glow-btn block rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-center text-sm font-medium text-white"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started

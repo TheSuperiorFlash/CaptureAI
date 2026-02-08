@@ -60,7 +60,7 @@ export default function RootLayout({
                 rel="stylesheet"
             />
         </head>
-        <body>
+        <body className="noise">
         <Navbar />
         <main className="min-h-screen">
             {children}
