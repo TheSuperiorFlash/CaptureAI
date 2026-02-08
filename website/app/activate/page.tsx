@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, Infinity, MessageSquare, Repeat, Eye } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon } from 'lucide-react'
+import { API_BASE_URL } from '@/lib/api'
 
 const freeFeatures = [
     { text: '10 requests per day', included: true },
@@ -29,7 +30,7 @@ const proFeatures = [
 ]
 
 const proHighlights = [
-    { icon: Infinity, title: 'Unlimited', desc: 'No daily caps' },
+    { icon: InfinityIcon, title: 'Unlimited', desc: 'No daily caps' },
     { icon: Shield, title: 'Privacy Guard', desc: 'Stay undetected' },
     { icon: MessageSquare, title: 'Ask Mode', desc: 'Follow-up questions' },
     { icon: Repeat, title: 'Auto-Solve', desc: 'Hands-free answers' },
@@ -77,7 +78,7 @@ export default function ActivatePage() {
 
     const handleFreeSignup = async () => {
         try {
-            const response = await fetch('https://api.captureai.workers.dev/api/auth/create-free-key', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/create-free-key`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
@@ -97,13 +98,14 @@ export default function ActivatePage() {
             }
 
             const data = await response.json()
+            const existing = typeof data.existing === 'boolean' ? data.existing : undefined
 
             setResult({
                 type: 'success',
-                message: data.existing
+                message: existing
                     ? `We've sent your existing license key to ${email}`
                     : `Your license key has been sent to ${email}`,
-                existing: data.existing,
+                existing: existing,
             })
         } catch (error) {
             if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -115,7 +117,7 @@ export default function ActivatePage() {
 
     const handleProSignup = async () => {
         try {
-            const response = await fetch('https://api.captureai.workers.dev/api/subscription/create-checkout', {
+            const response = await fetch(`${API_BASE_URL}/api/subscription/create-checkout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),

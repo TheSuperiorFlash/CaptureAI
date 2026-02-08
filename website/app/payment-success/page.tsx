@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
+import { API_BASE_URL } from '@/lib/api'
 
 function PaymentSuccessContent() {
     const searchParams = useSearchParams()
@@ -11,7 +12,10 @@ function PaymentSuccessContent() {
     const [errorMessage, setErrorMessage] = useState('')
 
     useEffect(() => {
-        const handlePaymentSuccess = async () => {
+        const INITIAL_DELAY_MS = 500
+        const MAX_RETRIES = 3
+
+        const verifyPayment = async (attempt: number = 0): Promise<void> => {
             const sessionId = searchParams.get('session_id')
 
             if (!sessionId) {
@@ -24,7 +28,7 @@ function PaymentSuccessContent() {
                 await new Promise(resolve => setTimeout(resolve, 3000))
 
                 const response = await fetch(
-                    'https://api.captureai.workers.dev/api/subscription/verify-payment',
+                    `${API_BASE_URL}/api/subscription/verify-payment`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -35,7 +39,17 @@ function PaymentSuccessContent() {
                 const data = await response.json()
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Payment verification failed')
+                    const errorMsg = data.error || 'Payment verification failed'
+
+                    // Only retry on transient errors
+                    if ((response.status === 429 || (response.status >= 500 && response.status < 600)) && attempt < MAX_RETRIES) {
+                        const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
+                        await new Promise(resolve => setTimeout(resolve, delay))
+                        return verifyPayment(attempt + 1)
+                    }
+
+                    // For 4xx errors (excluding 429), throw immediately
+                    throw new Error(errorMsg)
                 }
 
                 setStatus('success')
@@ -50,7 +64,7 @@ function PaymentSuccessContent() {
             }
         }
 
-        handlePaymentSuccess()
+        verifyPayment()
     }, [searchParams])
 
     return (

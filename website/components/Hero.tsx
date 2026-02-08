@@ -61,11 +61,11 @@ export default function Hero() {
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
                         {[
-                            { src: '/platforms/canvas.png', alt: 'Canvas', h: 'h-8' },
-                            { src: '/platforms/respondus.png', alt: 'Respondus', h: 'h-7' },
-                            { src: '/platforms/moodle.png', alt: 'Moodle', h: 'h-8' },
-                            { src: '/platforms/blackboard.png', alt: 'Blackboard', h: 'h-5' },
-                            { src: '/platforms/tophat.png', alt: 'Top Hat', h: 'h-5' },
+                            { src: '/platforms/canvas.png', alt: 'Canvas', heightClass: 'h-8' },
+                            { src: '/platforms/respondus.png', alt: 'Respondus', heightClass: 'h-7' },
+                            { src: '/platforms/moodle.png', alt: 'Moodle', heightClass: 'h-8' },
+                            { src: '/platforms/blackboard.png', alt: 'Blackboard', heightClass: 'h-5' },
+                            { src: '/platforms/tophat.png', alt: 'Top Hat', heightClass: 'h-5' },
                         ].map((platform) => (
                             <div key={platform.alt} className="opacity-30 grayscale transition-all duration-300 hover:opacity-60 hover:grayscale-0">
                                 <Image
@@ -73,7 +73,7 @@ export default function Hero() {
                                     alt={platform.alt}
                                     width={120}
                                     height={40}
-                                    className={`${platform.h} w-auto`}
+                                    className={`${platform.heightClass} w-auto`}
                                 />
                             </div>
                         ))}

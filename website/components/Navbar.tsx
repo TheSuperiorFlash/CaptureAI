@@ -1,13 +1,36 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
+    const [activeHash, setActiveHash] = useState('')
     const pathname = usePathname()
+    const router = useRouter()
+
+    useEffect(() => {
+        const updateHash = () => {
+            setActiveHash(window.location.hash)
+        }
+
+        // Update immediately on mount
+        updateHash()
+
+        // Listen to hash changes
+        window.addEventListener('hashchange', updateHash)
+
+        // Note: Next.js client-side navigations are handled by the router object,
+        // but hash-based navigation (anchor links) is covered by the hashchange event.
+        // Router.events is not available in Next.js app router, so we rely on
+        // hashchange for hash updates and component re-renders on pathname changes.
+
+        return () => {
+            window.removeEventListener('hashchange', updateHash)
+        }
+    }, [])
 
     const navigation = [
         { name: 'Features', href: '/#features' },
@@ -17,7 +40,9 @@ export default function Navbar() {
     ]
 
     const isActive = (href: string) => {
-        if (href.startsWith('/#')) return pathname === '/'
+        if (href.startsWith('/#')) {
+            return pathname === '/' && activeHash === href.replace('/', '')
+        }
         return pathname === href
     }
 

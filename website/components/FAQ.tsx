@@ -50,34 +50,45 @@ export default function FAQ() {
 
                     {/* Right column — accordion */}
                     <div className="glass-card rounded-2xl p-1">
-                        {faqs.map((faq, index) => (
-                            <div key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
-                                <button
-                                    onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.02]"
-                                >
-                                    <span className="text-[15px] font-medium text-[--color-text]">
-                                        {faq.question}
-                                    </span>
-                                    <ChevronDown
-                                        className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-300 ease-out ${
-                                            openIndex === index ? 'rotate-180' : ''
+                        {faqs.map((faq, index) => {
+                            const buttonId = `faq-button-${index}`
+                            const panelId = `faq-panel-${index}`
+                            return (
+                                <section key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
+                                    <button
+                                        id={buttonId}
+                                        onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                        aria-expanded={openIndex === index}
+                                        aria-controls={panelId}
+                                        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-white/[0.02]"
+                                    >
+                                        <span className="text-[15px] font-medium text-[--color-text]">
+                                            {faq.question}
+                                        </span>
+                                        <ChevronDown
+                                            className={`h-4 w-4 flex-shrink-0 text-[--color-text-tertiary] transition-transform duration-300 ease-out ${
+                                                openIndex === index ? 'rotate-180' : ''
+                                            }`}
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                    <div
+                                        id={panelId}
+                                        aria-labelledby={buttonId}
+                                        aria-hidden={openIndex !== index}
+                                        className={`grid transition-all duration-300 ease-out ${
+                                            openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
                                         }`}
-                                    />
-                                </button>
-                                <div
-                                    className={`grid transition-all duration-300 ease-out ${
-                                        openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                                    }`}
-                                >
-                                    <div className="overflow-hidden">
-                                        <p className="px-6 pb-5 text-sm leading-relaxed text-[--color-text-tertiary]">
-                                            {faq.answer}
-                                        </p>
+                                    >
+                                        <div className="overflow-hidden">
+                                            <p className="px-6 pb-5 text-sm leading-relaxed text-[--color-text-tertiary]">
+                                                {faq.answer}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
+                                </section>
+                            )
+                        })}
                     </div>
                 </div>
             </div>
