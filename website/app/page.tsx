@@ -192,12 +192,10 @@ export default function Home() {
                         {/* Pro — gradient border treatment */}
                         <div className="gradient-border relative flex self-start rounded-2xl">
                             <div className="relative flex flex-1 flex-col rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
-                                <div className="mb-1 flex items-center gap-3">
-                                    <h3 className="text-[--color-text]">Pro</h3>
-                                    <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
-                                        Popular
-                                    </span>
-                                </div>
+                                <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+                                    Popular
+                                </span>
+                                <h3 className="mb-1 text-[--color-text]">Pro</h3>
                                 <div className="mb-7">
                                     <span className="text-4xl font-bold text-gradient-static">$9.99</span>
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>

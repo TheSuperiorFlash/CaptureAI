@@ -50,7 +50,7 @@ export default function HowItWorks() {
                             </div>
 
                             <h3 className="mb-3 text-[--color-text]">{step.title}</h3>
-                            <p className="mx-auto max-w-xs text-sm leading-relaxed text-[--color-text-tertiary]">
+                            <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
                                 {step.description}
                             </p>
                         </div>
