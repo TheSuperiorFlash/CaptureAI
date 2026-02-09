@@ -24,7 +24,7 @@ export default function ContactPage() {
                         <span className="text-[--color-text]">Contact </span>
                         <span className="text-gradient-static">us</span>
                     </h1>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="text-[--color-text-secondary]">
                         Questions, bugs, or feature ideas — we read everything.
                     </p>
                 </div>
@@ -75,7 +75,7 @@ export default function ContactPage() {
                             <BookOpen className="h-6 w-6 text-emerald-400" />
                         </div>
                         <h3 className="mb-2 text-[--color-text]">Looking for answers first?</h3>
-                        <p className="mx-auto mb-6 max-w-sm text-sm text-[--color-text-tertiary]">
+                        <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Check the help center for guides and frequently asked questions.
                         </p>
                         <Link

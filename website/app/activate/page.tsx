@@ -3,18 +3,17 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon, Minus } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const freeFeatures = [
-    { text: '10 requests per day', included: true },
+const freeFeatures: Array<{ text: string; included: boolean; limited?: boolean }> = [
+    { text: '10 requests per day', included: true, limited: true },
     { text: 'Screenshot capture', included: true },
     { text: 'Floating interface', included: true },
     { text: 'Stealth Mode', included: true },
     { text: 'Works on any website', included: true },
-    { text: 'Unlimited requests', included: false },
     { text: 'Privacy Guard', included: false },
     { text: 'Ask Mode', included: false },
     { text: 'Auto-Solve', included: false },
@@ -152,7 +151,7 @@ export default function ActivatePage() {
 
             <div className="relative z-10 mx-auto max-w-5xl px-6">
                 {/* Header */}
-                <div className="mb-14 text-center">
+                <div className="mx-auto mb-14 max-w-xl text-center">
                     <div className="mb-5 flex justify-center">
                         <Image src="/icon128.png" alt="CaptureAI" width={48} height={48} />
                     </div>
@@ -160,7 +159,7 @@ export default function ActivatePage() {
                         <span className="text-[--color-text]">Choose your </span>
                         <span className="text-gradient-static">plan</span>
                     </h1>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="text-[--color-text-secondary]">
                         Start free with 10 requests per day, or unlock everything with Pro.
                     </p>
                 </div>
@@ -198,7 +197,9 @@ export default function ActivatePage() {
                         <ul className="space-y-3">
                             {freeFeatures.map((f) => (
                                 <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
-                                    {f.included ? (
+                                    {f.limited ? (
+                                        <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
+                                    ) : f.included ? (
                                         <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
                                     ) : (
                                         <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />

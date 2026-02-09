@@ -49,7 +49,7 @@ export default function DownloadPage() {
                         <span className="text-[--color-text]">Get </span>
                         <span className="text-gradient-static">CaptureAI</span>
                     </h1>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="text-[--color-text-secondary]">
                         Install the Chrome extension and start getting answers in under a minute.
                     </p>
                 </div>

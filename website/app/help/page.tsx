@@ -24,7 +24,7 @@ export default function HelpPage() {
                         <span className="text-[--color-text]">Help </span>
                         <span className="text-gradient-static">Center</span>
                     </h1>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="text-[--color-text-secondary]">
                         Guides and answers for using CaptureAI.
                     </p>
                 </div>
@@ -145,7 +145,7 @@ export default function HelpPage() {
                             <MessageSquare className="h-6 w-6 text-emerald-400" />
                         </div>
                         <h3 className="mb-2 text-[--color-text]">Still need help?</h3>
-                        <p className="mx-auto mb-6 max-w-sm text-sm text-[--color-text-tertiary]">
+                        <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Reach out and we&apos;ll get back to you within 24 hours.
                         </p>
                         <Link

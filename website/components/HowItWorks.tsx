@@ -24,12 +24,12 @@ export default function HowItWorks() {
 
             <div className="mx-auto max-w-6xl px-6">
                 {/* Header */}
-                <div className="mb-16 text-center">
+                <div className="mx-auto mb-16 max-w-xl text-center">
                     <h2 className="mb-4">
                         <span className="text-[--color-text]">Three steps. </span>
                         <span className="text-gradient-static">That&apos;s it.</span>
                     </h2>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="text-[--color-text-secondary]">
                         No setup complexity. Install, activate, capture.
                     </p>
                 </div>
