@@ -147,7 +147,7 @@ export default function ActivatePage() {
         <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
-            <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
+            <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
             <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
 
             <div className="relative z-10 mx-auto max-w-5xl px-6">
