@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
     return (
-        <div className="relative py-20 md:py-28">
+        <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
             <div className="absolute left-[-50px] top-[30%] h-[350px] w-[350px] rounded-full bg-cyan-500 gradient-blur" />

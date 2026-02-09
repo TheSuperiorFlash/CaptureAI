@@ -237,7 +237,7 @@ export default function Home() {
             <FAQ />
 
             {/* ---- Final CTA ---- */}
-            <section className="relative overflow-hidden py-28 md:py-36">
+            <section className="relative overflow-x-hidden py-28 md:py-36">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 {/* Background glow */}
                 <div className="absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
