@@ -4,7 +4,7 @@ import HowItWorks from '@/components/HowItWorks'
 import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Check, X as XIcon } from 'lucide-react'
+import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -67,12 +67,12 @@ export default function Home() {
                 <div className="pointer-events-none absolute inset-0 gradient-section" />
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
                     {/* Header */}
-                    <div className="mb-14 text-center">
+                    <div className="mx-auto mb-14 max-w-2xl text-center">
                         <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
                             Pro feature
                         </span>
                         <h2 className="mb-4 text-[--color-text]">Privacy Guard</h2>
-                        <p className="mx-auto max-w-2xl text-[--color-text-secondary]">
+                        <p className="text-[--color-text-secondary]">
                             Quiz platforms can log browser extension activity. Privacy Guard intercepts those detection methods so your activity logs stay clean.
                         </p>
                     </div>
@@ -134,28 +134,31 @@ export default function Home() {
             <section id="pricing" className="relative py-24 md:py-32">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="mb-16 text-center">
+                    <div className="mx-auto mb-16 max-w-xl text-center">
                         <h2 className="mb-4">
                             <span className="text-[--color-text]">Simple </span>
                             <span className="text-gradient-static">pricing</span>
                         </h2>
-                        <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                        <p className="text-[--color-text-secondary]">
                             Start free. Upgrade when you need more.
                         </p>
                     </div>
 
                     <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                         {/* Free */}
-                        <div className="glass-card rounded-2xl p-7">
+                        <div className="glass-card flex flex-col rounded-2xl p-7">
                             <h3 className="mb-1 text-[--color-text]">Free</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
 
-                            <ul className="mb-8 space-y-3.5">
+                            <ul className="mb-8 flex-1 space-y-3.5">
+                                <li className="flex items-start gap-3">
+                                    <Minus className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
+                                    <span className="text-sm text-[--color-text-secondary]">10 requests per day</span>
+                                </li>
                                 {[
-                                    '10 requests per day',
                                     'Screenshot capture',
                                     'Floating interface',
                                     'Stealth Mode',
@@ -167,7 +170,6 @@ export default function Home() {
                                     </li>
                                 ))}
                                 {[
-                                    'Unlimited requests',
                                     'Privacy Guard',
                                     'Ask Mode',
                                     'Auto-Solve',
@@ -188,8 +190,8 @@ export default function Home() {
                         </div>
 
                         {/* Pro — gradient border treatment */}
-                        <div className="gradient-border relative rounded-2xl">
-                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                        <div className="gradient-border relative flex rounded-2xl">
+                            <div className="relative flex flex-1 flex-col rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
                                 <div className="mb-1 flex items-center gap-3">
                                     <h3 className="text-[--color-text]">Pro</h3>
                                     <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
@@ -201,7 +203,7 @@ export default function Home() {
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                                 </div>
 
-                                <ul className="mb-8 space-y-3.5">
+                                <ul className="mb-8 flex-1 space-y-3.5">
                                     {[
                                         'Unlimited requests',
                                         'Screenshot capture',
