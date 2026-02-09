@@ -146,14 +146,14 @@ export default function Home() {
 
                     <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                         {/* Free */}
-                        <div className="glass-card flex flex-col rounded-2xl p-7">
+                        <div className="glass-card flex flex-col self-start rounded-2xl p-7">
                             <h3 className="mb-1 text-[--color-text]">Free</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
 
-                            <ul className="mb-8 flex-1 space-y-3.5">
+                            <ul className="mb-8 space-y-3.5">
                                 <li className="flex items-start gap-3">
                                     <Minus className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
                                     <span className="text-sm text-[--color-text-secondary]">10 requests per day</span>
@@ -190,7 +190,7 @@ export default function Home() {
                         </div>
 
                         {/* Pro — gradient border treatment */}
-                        <div className="gradient-border relative flex rounded-2xl">
+                        <div className="gradient-border relative flex self-start rounded-2xl">
                             <div className="relative flex flex-1 flex-col rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
                                 <div className="mb-1 flex items-center gap-3">
                                     <h3 className="text-[--color-text]">Pro</h3>
@@ -203,7 +203,7 @@ export default function Home() {
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                                 </div>
 
-                                <ul className="mb-8 flex-1 space-y-3.5">
+                                <ul className="mb-8 space-y-3.5">
                                     {[
                                         'Unlimited requests',
                                         'Screenshot capture',
@@ -227,9 +227,6 @@ export default function Home() {
                                 >
                                     Get Pro
                                 </Link>
-                                <p className="mt-3.5 text-center text-xs text-[--color-text-tertiary]">
-                                    7-day money-back guarantee
-                                </p>
                             </div>
                         </div>
                     </div>

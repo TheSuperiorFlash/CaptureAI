@@ -322,7 +322,7 @@ export default function ActivatePage() {
 
                         {selectedTier === 'pro' && (
                             <p className="text-center text-xs text-[--color-text-tertiary]">
-                                7-day money-back guarantee. Cancel anytime.
+                                Cancel anytime.
                             </p>
                         )}
 

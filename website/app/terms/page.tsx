@@ -95,8 +95,8 @@ export default function TermsPage() {
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Refund Policy</h3>
                         <p>
-                            We offer a 7-day money-back guarantee for first-time Pro subscribers. To request a refund,
-                            contact us at <a href="mailto:wonhappyheart@gmail.com" className="text-[--color-accent-hover] underline underline-offset-2">wonhappyheart@gmail.com</a> within 7 days of your initial purchase.
+                            For refund inquiries,
+                            contact us at <a href="mailto:wonhappyheart@gmail.com" className="text-[--color-accent-hover] underline underline-offset-2">wonhappyheart@gmail.com</a>.
                         </p>
                     </section>
 
