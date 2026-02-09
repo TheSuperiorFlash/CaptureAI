@@ -90,7 +90,7 @@ export default function HelpPage() {
                     <div className="space-y-3">
                         {[
                             { keys: 'Ctrl + Shift + X', action: 'Capture an area of the screen' },
-                            { keys: 'Ctrl + Shift + F', action: 'Quick capture (full visible area)' },
+                            { keys: 'Ctrl + Shift + F', action: 'Quick capture last area' },
                             { keys: 'Ctrl + Shift + E', action: 'Toggle the floating panel' },
                         ].map((shortcut) => (
                             <div key={shortcut.keys} className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5">
