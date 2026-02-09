@@ -37,7 +37,7 @@ export default function DownloadPage() {
         <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
-            <div className="absolute left-1/2 top-[5%] h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
+            <div className="absolute left-1/2 top-[5%] h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
 
             <div className="relative z-10 mx-auto max-w-3xl px-6">
                 {/* Header */}

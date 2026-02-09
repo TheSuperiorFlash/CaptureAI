@@ -15,9 +15,9 @@ export default function Hero() {
         <section className="relative overflow-hidden pb-28 pt-28 md:pb-36 md:pt-36">
             {/* Layered gradient mesh background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
-            <div className="absolute left-1/2 top-[-200px] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur animate-pulse-glow" />
-            <div className="absolute right-[-200px] top-[100px] h-[400px] w-[400px] rounded-full bg-cyan-500 gradient-blur animate-float-slow" />
-            <div className="absolute bottom-[-100px] left-[-150px] h-[350px] w-[350px] rounded-full bg-blue-500 gradient-blur animate-pulse-glow" style={{ animationDelay: '2s' }} />
+            <div className="absolute left-1/2 top-[-200px] h-[700px] w-[900px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
+            <div className="absolute right-[-200px] top-[100px] h-[400px] w-[400px] rounded-full bg-cyan-500 gradient-blur gradient-blur-animated animate-float-slow" />
+            <div className="absolute bottom-[-100px] left-[-150px] h-[350px] w-[350px] rounded-full bg-blue-500 gradient-blur gradient-blur-animated animate-pulse-glow" style={{ animationDelay: '2s' }} />
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 <div className="mx-auto max-w-3xl text-center">

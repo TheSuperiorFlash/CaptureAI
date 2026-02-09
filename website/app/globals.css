@@ -154,8 +154,11 @@ p {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  contain: layout style;
+}
+
+.gradient-blur-animated {
   will-change: filter, opacity, transform;
-  contain: strict;
 }
 
 .gradient-mesh {
