@@ -83,7 +83,7 @@ export default function Features() {
                         <span className="text-[--color-text]">Everything you need, </span>
                         <span className="text-gradient-static">nothing you don&apos;t</span>
                     </h2>
-                    <p className="mx-auto max-w-lg text-[--color-text-secondary]">
+                    <p className="mx-auto max-w-lg text-center text-[--color-text-secondary]">
                         What the extension does, in plain terms.
                     </p>
                 </div>

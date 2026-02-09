@@ -160,7 +160,7 @@ export default function ActivatePage() {
                         <span className="text-[--color-text]">Choose your </span>
                         <span className="text-gradient-static">plan</span>
                     </h1>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="mx-auto max-w-md text-center text-[--color-text-secondary]">
                         Start free with 10 requests per day, or unlock everything with Pro.
                     </p>
                 </div>

@@ -40,7 +40,7 @@ export default function Hero() {
                     </h1>
 
                     {/* Subheading */}
-                    <p className="mx-auto mb-10 max-w-xl text-lg text-[--color-text-secondary]">
+                    <p className="mx-auto mb-10 max-w-xl text-center text-lg text-[--color-text-secondary]">
                         CaptureAI is a Chrome extension that reads your screen, understands the question, and gives you the answer — in seconds. Works on any website.
                     </p>
 

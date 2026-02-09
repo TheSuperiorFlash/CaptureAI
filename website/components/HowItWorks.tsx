@@ -29,7 +29,7 @@ export default function HowItWorks() {
                         <span className="text-[--color-text]">Three steps. </span>
                         <span className="text-gradient-static">That&apos;s it.</span>
                     </h2>
-                    <p className="mx-auto max-w-md text-[--color-text-secondary]">
+                    <p className="mx-auto max-w-md text-center text-[--color-text-secondary]">
                         No setup complexity. Install, activate, capture.
                     </p>
                 </div>
