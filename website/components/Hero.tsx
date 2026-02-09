@@ -48,7 +48,7 @@ export default function Hero() {
                     <div className="flex flex-col items-center gap-4">
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-7 py-3.5 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-10 py-3.5 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
                             Get Started
                             <ArrowRight className="h-4 w-4" />

@@ -220,15 +220,13 @@ export default function ActivatePage() {
                         onClick={() => setSelectedTier('pro')}
                     >
                         <div className="gradient-border rounded-2xl">
-                            <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                                <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+                                    Recommended
+                                </span>
                                 <div className="mb-6 flex items-center justify-between">
                                     <div>
-                                        <div className="flex items-center gap-2.5">
-                                            <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
-                                            <span className="rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
-                                                Recommended
-                                            </span>
-                                        </div>
+                                        <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
                                         <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
                                     </div>
                                     <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
