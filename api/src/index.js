@@ -4,7 +4,7 @@
  */
 
 import { Router } from './router';
-import { handleCORS } from './utils';
+import { handleCORS, getAllowedOrigin } from './utils';
 import { createRequestLogger, logCorsRejection } from './logger';
 
 // Export Durable Object for rate limiting
@@ -144,55 +144,12 @@ function addSecurityHeaders(response) {
 }
 
 /**
- * Get CORS headers
- * Restricts requests to trusted origins only
+ * Get CORS headers using shared origin validation
  */
 function getCORSHeaders(request, env) {
-  // List of allowed origins
-  const allowedOrigins = [
-    'https://captureai.dev',
-  ];
-
-  // Development/testing origins (only if in dev mode)
-  const isDev = env?.ENVIRONMENT === 'development';
-  if (isDev) {
-    allowedOrigins.push('http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000');
-  }
-
-  // Get origin from request
   const origin = request?.headers?.get('Origin') || '';
-
-  // Check if origin is allowed
-  let allowedOrigin = 'null';
-  if (origin) {
-    // Exact match for standard origins
-    if (allowedOrigins.includes(origin)) {
-      allowedOrigin = origin;
-    }
-    // Chrome extension support - only allow specific extension IDs
-    else if (origin.startsWith('chrome-extension://')) {
-      const extensionIds = env?.CHROME_EXTENSION_IDS;
-      if (extensionIds) {
-        // Support comma-separated list of extension IDs
-        const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
-        const allowedExtensions = allowedExtensionIds.map(id => `chrome-extension://${id}`);
-
-        if (allowedExtensions.includes(origin)) {
-          allowedOrigin = origin;
-        }
-      } else if (isDev) {
-        // In development, allow any extension for testing
-        allowedOrigin = origin;
-      }
-    }
-    // Match GitHub Pages subdomain
-    else if (origin.match(/^https:\/\/.*\.github\.io$/)) {
-      allowedOrigin = origin;
-    }
-  }
-
   return {
-    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Origin': getAllowedOrigin(origin, env),
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',

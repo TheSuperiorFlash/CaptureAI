@@ -43,52 +43,60 @@ export async function fetchWithTimeout(url, options = {}, timeout = 10000) {
 }
 
 /**
- * Handle CORS preflight
+ * Check if an origin is allowed for CORS
+ * Single source of truth for allowed origins across preflight and responses
+ * @param {string} origin - The request origin
+ * @param {object} env - Environment object
+ * @returns {string} - The allowed origin or 'null'
  */
-export function handleCORS(request, env) {
-  // List of allowed origins
+export function getAllowedOrigin(origin, env) {
+  if (!origin) return 'null';
+
   const allowedOrigins = [
     'https://captureai.dev',
     'https://thesuperiorflash.github.io',
   ];
 
-  // Development/testing origins (only if in dev mode)
   const isDev = env?.ENVIRONMENT === 'development';
   if (isDev) {
-    allowedOrigins.push('http://localhost:3000', 'http://localhost:8080', 'http://127.0.0.1:3000');
+    allowedOrigins.push(
+      'http://localhost:3000',
+      'http://localhost:8080',
+      'http://127.0.0.1:3000'
+    );
   }
 
-  // Get origin from request
-  const origin = request?.headers?.get('Origin') || '';
+  // Exact match for standard origins
+  if (allowedOrigins.includes(origin)) {
+    return origin;
+  }
 
-  // Check if origin is allowed
-  let allowedOrigin = 'null';
-  if (origin) {
-    // Exact match for standard origins
-    if (allowedOrigins.includes(origin)) {
-      allowedOrigin = origin;
-    }
-    // Chrome extension support - only allow specific extension IDs
-    else if (origin.startsWith('chrome-extension://')) {
-      const extensionIds = env?.CHROME_EXTENSION_IDS;
-      if (extensionIds) {
-        // Support comma-separated list of extension IDs
-        const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
-        const allowedExtensions = allowedExtensionIds.map(id => `chrome-extension://${id}`);
-
-        if (allowedExtensions.includes(origin)) {
-          allowedOrigin = origin;
-        }
-      } else if (isDev) {
-        // In development, allow any extension for testing
-        allowedOrigin = origin;
+  // Chrome extension support
+  if (origin.startsWith('chrome-extension://')) {
+    const extensionIds = env?.CHROME_EXTENSION_IDS;
+    if (extensionIds) {
+      const allowedExtensionIds = extensionIds
+        .split(',')
+        .map(id => id.trim());
+      const allowedExtensions = allowedExtensionIds
+        .map(id => `chrome-extension://${id}`);
+      if (allowedExtensions.includes(origin)) {
+        return origin;
       }
-    }
-    // Match GitHub Pages subdomain
-    else if (origin.match(/^https:\/\/.*\.github\.io$/)) {
-      allowedOrigin = origin;
+    } else if (isDev) {
+      return origin;
     }
   }
+
+  return 'null';
+}
+
+/**
+ * Handle CORS preflight
+ */
+export function handleCORS(request, env) {
+  const origin = request?.headers?.get('Origin') || '';
+  const allowedOrigin = getAllowedOrigin(origin, env);
 
   return new Response(null, {
     headers: {

@@ -83,21 +83,6 @@ const Migration = {
    */
   async clearMigrationNotice() {
     await chrome.storage.local.remove('captureai-migration-notice');
-  },
-
-  /**
-   * Reset migration (for testing purposes only)
-   * @returns {Promise<void>}
-   */
-  async resetMigration() {
-    await chrome.storage.local.remove([
-      this.MIGRATION_KEY,
-      'captureai-migration-notice',
-      'captureai-license-key',
-      'captureai-user-email',
-      'captureai-user-tier'
-    ]);
-    console.log('[Migration] Migration reset complete');
   }
 };
 

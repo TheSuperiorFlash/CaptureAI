@@ -136,7 +136,12 @@ export default function ActivatePage() {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email })
 
         if (data.url) {
-            window.location.href = data.url as string
+            const url = data.url as string
+            // Validate the redirect URL points to Stripe
+            if (!url.startsWith('https://checkout.stripe.com/')) {
+                throw new Error('Invalid checkout URL received')
+            }
+            window.location.href = url
         } else {
             throw new Error('No checkout URL received')
         }
@@ -167,13 +172,15 @@ export default function ActivatePage() {
                 {/* Plans grid */}
                 <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
                     {/* Free plan */}
-                    <div
-                        className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${
+                    <button
+                        type="button"
+                        className={`glass-card cursor-pointer rounded-2xl p-7 text-left transition-all duration-300 w-full ${
                             selectedTier === 'free'
                                 ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 : ''
                         }`}
                         onClick={() => setSelectedTier('free')}
+                        aria-pressed={selectedTier === 'free'}
                     >
                         <div className="mb-6 flex items-center justify-between">
                             <div>
@@ -208,16 +215,18 @@ export default function ActivatePage() {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </button>
 
                     {/* Pro plan */}
-                    <div
-                        className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${
+                    <button
+                        type="button"
+                        className={`relative cursor-pointer rounded-2xl text-left transition-all duration-300 w-full ${
                             selectedTier === 'pro'
                                 ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
                                 : ''
                         }`}
                         onClick={() => setSelectedTier('pro')}
+                        aria-pressed={selectedTier === 'pro'}
                     >
                         <div className="gradient-border rounded-2xl">
                             <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
@@ -267,7 +276,7 @@ export default function ActivatePage() {
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </button>
                 </div>
 
                 {/* Email + CTA section */}

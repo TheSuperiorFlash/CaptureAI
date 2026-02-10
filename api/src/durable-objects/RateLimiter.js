@@ -52,6 +52,12 @@ export class RateLimiterDO {
         };
         await this.state.storage.put(key, record);
 
+        // Schedule cleanup alarm if not already set
+        const currentAlarm = await this.state.storage.getAlarm();
+        if (!currentAlarm) {
+          await this.state.storage.setAlarm(Date.now() + 3600000);
+        }
+
         return new Response(
           JSON.stringify({
             allowed: true,

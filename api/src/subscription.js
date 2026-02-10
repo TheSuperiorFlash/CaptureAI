@@ -374,6 +374,11 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'Session ID is required' }, 400);
       }
 
+      // Validate session ID format to prevent SSRF via path traversal
+      if (!/^cs_(test_|live_)?[a-zA-Z0-9]+$/.test(sessionId)) {
+        return jsonResponse({ error: 'Invalid session ID format' }, 400);
+      }
+
       // Retrieve the session from Stripe
       const response = await fetchWithTimeout(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
         headers: {

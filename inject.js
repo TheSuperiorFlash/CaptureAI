@@ -94,24 +94,30 @@
   // ============================================================================
 
   /**
-   * List of privacy-sensitive events to block
-   * Websites cannot subscribe to these events
+   * Events blocked on ALL targets (visibility detection)
    */
-  const BLOCKED_EVENTS = new Set([
-    'visibilitychange',         // Tab visibility
-    'webkitvisibilitychange',   // Webkit tab visibility
-    'mozvisibilitychange',      // Mozilla tab visibility
-    'msvisibilitychange',       // IE/Edge tab visibility
-    'blur',                     // Window loses focus
-    'focus',                    // Window gains focus
-    'focusin',                  // Element gains focus
-    'focusout',                 // Element loses focus
-    'pagehide',                 // Page unload
-    'pageshow'                  // Page load
+  const ALWAYS_BLOCKED_EVENTS = new Set([
+    'visibilitychange',
+    'webkitvisibilitychange',
+    'mozvisibilitychange',
+    'msvisibilitychange',
+    'pagehide',
+    'pageshow'
+  ]);
+
+  /**
+   * Events blocked only on window and document (focus detection)
+   * Allowed on individual elements so forms/inputs work normally
+   */
+  const WINDOW_DOC_BLOCKED_EVENTS = new Set([
+    'blur',
+    'focus',
+    'focusin',
+    'focusout'
   ]);
 
   // Debug mode - set to true to log blocked events
-  const DEBUG_PRIVACY_GUARD = true;
+  const DEBUG_PRIVACY_GUARD = false;
 
   /**
    * Store blocked listeners so removeEventListener works correctly
@@ -131,7 +137,9 @@
    */
   EventTarget.prototype.addEventListener = function(type, listener, options) {
     // Check if this event type should be blocked
-    if (BLOCKED_EVENTS.has(type)) {
+    if (ALWAYS_BLOCKED_EVENTS.has(type) ||
+        (WINDOW_DOC_BLOCKED_EVENTS.has(type) &&
+          (this === window || this === document))) {
       // Debug logging (optional)
       if (DEBUG_PRIVACY_GUARD) {
         safeLog(`[Privacy Guard] '${type}' event listener subscription prevented.`);
@@ -168,7 +176,9 @@
    */
   EventTarget.prototype.removeEventListener = function(type, listener, options) {
     // Check if this is a blocked event type
-    if (BLOCKED_EVENTS.has(type)) {
+    if (ALWAYS_BLOCKED_EVENTS.has(type) ||
+        (WINDOW_DOC_BLOCKED_EVENTS.has(type) &&
+          (this === window || this === document))) {
       // Debug logging (optional)
       if (DEBUG_PRIVACY_GUARD) {
         safeLog(`[Privacy Guard] '${type}' event listener removal prevented.`);
@@ -196,14 +206,6 @@
     // Allow normal removeEventListener for other events
     return originalRemoveEventListener.call(this, type, listener, options);
   };
-
-  // Also create backup references for internal use
-  Window.prototype._addEventListener = originalAddEventListener;
-  Window.prototype._removeEventListener = originalRemoveEventListener;
-  Document.prototype._addEventListener = originalAddEventListener;
-  Document.prototype._removeEventListener = originalRemoveEventListener;
-  Element.prototype._addEventListener = originalAddEventListener;
-  Element.prototype._removeEventListener = originalRemoveEventListener;
 
   // ============================================================================
   // SECTION 2.5: BLOCK DIRECT EVENT PROPERTY ASSIGNMENTS
@@ -612,7 +614,8 @@
       safeLog('  - Text selection: Enabled');
       safeLog('  - Right-click: Enabled');
       safeLog('  - Honeypot protection: Active');
-      safeLog(`  - Events blocked: ${Array.from(BLOCKED_EVENTS).join(', ')}`);
+      safeLog(`  - Events always blocked: ${Array.from(ALWAYS_BLOCKED_EVENTS).join(', ')}`);
+      safeLog(`  - Events blocked on window/document: ${Array.from(WINDOW_DOC_BLOCKED_EVENTS).join(', ')}`);
     }
   }
 

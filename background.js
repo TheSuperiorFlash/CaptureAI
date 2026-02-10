@@ -34,7 +34,7 @@ importScripts('modules/auth-service.js', 'modules/migration.js');
  * Debug flag for console logging
  * NOTE: Matches CONFIG.DEBUG in modules/config.js
  */
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Prompt type constants
