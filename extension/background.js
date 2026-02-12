@@ -226,8 +226,8 @@ if (typeof chrome !== 'undefined' && chrome.contextMenus?.onClicked) {
  */
 async function handleTextSelection(selectedText, tabId) {
   try {
-    // Show processing message
-    await showMessage(tabId, 'showProcessingMessage');
+    // Show processing message (optimization #6: fire-and-forget, don't await)
+    showMessage(tabId, 'showProcessingMessage');
 
     // Send selected text to backend
     const aiResponse = await sendTextOnlyQuestion(selectedText, null);
@@ -262,8 +262,8 @@ async function handleTextSelection(selectedText, tabId) {
  */
 async function handleCaptureArea(request, sender, sendResponse) {
   try {
-    // Show capturing message to user
-    await showMessage(sender.tab.id, 'showCapturingMessage');
+    // Show capturing message to user (optimization #6: fire-and-forget, don't await)
+    showMessage(sender.tab.id, 'showCapturingMessage');
 
     // Capture screenshot of visible tab
     const imageUri = await captureScreenshot();
@@ -304,8 +304,8 @@ async function handleCaptureArea(request, sender, sendResponse) {
       return;
     }
 
-    // Normal capture flow - process with AI
-    await showMessage(sender.tab.id, 'showProcessingMessage');
+    // Normal capture flow - process with AI (optimization #6: fire-and-forget, don't await)
+    showMessage(sender.tab.id, 'showProcessingMessage');
 
     const promptType = request.promptType || PROMPT_TYPES.ANSWER;
 
@@ -384,6 +384,7 @@ async function handleAskQuestion(request, sender, sendResponse) {
 /**
  * Handle privacy guard enable request
  * Injects privacy protection script into MAIN world
+ * Requires Pro tier subscription
  *
  * @param {Object} request - Message request object
  * @param {Object} sender - Message sender object with tab info
@@ -392,6 +393,24 @@ async function handleAskQuestion(request, sender, sendResponse) {
  */
 async function handleEnablePrivacyGuard(request, sender, sendResponse) {
   try {
+    // Check if user has Pro tier access
+    const tierResult = await chrome.storage.local.get('captureai-user-tier');
+    const tier = tierResult['captureai-user-tier'];
+
+    if (tier !== 'pro') {
+      sendResponse({ success: false, error: 'Privacy Guard requires Pro tier subscription' });
+      return;
+    }
+
+    // Check if Privacy Guard is enabled in settings
+    const settingsResult = await chrome.storage.local.get('captureai-settings');
+    const settings = settingsResult['captureai-settings'] || {};
+
+    if (!settings.privacyGuard?.enabled) {
+      sendResponse({ success: false, error: 'Privacy Guard is disabled in settings' });
+      return;
+    }
+
     const tabId = sender.tab.id;
     const url = sender.tab.url;
 

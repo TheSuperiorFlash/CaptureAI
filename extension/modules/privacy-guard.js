@@ -10,9 +10,28 @@ export const PrivacyGuard = {
   /**
    * Initialize privacy protection
    * Checks if MAIN world script successfully overrode APIs
+   * Requires Pro tier subscription and enabled in settings
    */
   async init() {
     if (this.enabled) {
+      return;
+    }
+
+    // Check if user has Pro tier access
+    const hasProAccess = await this.checkProAccess();
+    if (!hasProAccess) {
+      if (window.CaptureAI?.CONFIG?.DEBUG) {
+        console.log('⚠️ Privacy Guard: Pro tier required');
+      }
+      return;
+    }
+
+    // Check if Privacy Guard is enabled in settings
+    const isEnabledInSettings = await this.checkSettings();
+    if (!isEnabledInSettings) {
+      if (window.CaptureAI?.CONFIG?.DEBUG) {
+        console.log('⚠️ Privacy Guard: Disabled in settings');
+      }
       return;
     }
 
@@ -43,6 +62,42 @@ export const PrivacyGuard = {
           console.warn('Privacy Guard: Could not inject MAIN world script', error);
         }
       }
+    }
+  },
+
+  /**
+   * Check if user has Pro tier access
+   * Uses cached tier from storage to avoid API calls on every page load
+   */
+  async checkProAccess() {
+    try {
+      // Get cached tier from storage
+      const result = await chrome.storage.local.get('captureai-user-tier');
+      const tier = result['captureai-user-tier'];
+
+      return tier === 'pro';
+    } catch (error) {
+      if (window.CaptureAI?.CONFIG?.DEBUG) {
+        console.error('Privacy Guard: Error checking tier', error);
+      }
+      return false;
+    }
+  },
+
+  /**
+   * Check if Privacy Guard is enabled in settings
+   */
+  async checkSettings() {
+    try {
+      const result = await chrome.storage.local.get('captureai-settings');
+      const settings = result['captureai-settings'] || {};
+
+      return settings.privacyGuard?.enabled === true;
+    } catch (error) {
+      if (window.CaptureAI?.CONFIG?.DEBUG) {
+        console.error('Privacy Guard: Error checking settings', error);
+      }
+      return false;
     }
   },
 

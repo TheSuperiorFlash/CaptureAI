@@ -32,6 +32,13 @@
           throw new Error('Failed to load modules');
         }
 
+        // Check if current domain is blacklisted
+        const isBlacklisted = await this.checkDomainBlacklist();
+        if (isBlacklisted) {
+          console.log('CaptureAI: Domain is blacklisted, extension disabled on this site');
+          return;
+        }
+
         this.initializeSystems();
         await this.loadUserPreferences();
 
@@ -120,6 +127,20 @@
           window.CaptureAI[system].init();
         }
       });
+    },
+
+    async checkDomainBlacklist() {
+      try {
+        const currentDomain = window.location.hostname.toLowerCase();
+        const result = await chrome.storage.local.get('captureai-settings');
+        const settings = result['captureai-settings'] || {};
+        const blacklist = settings.domainBlacklist || [];
+
+        return blacklist.some(domain => currentDomain.includes(domain.toLowerCase()));
+      } catch (error) {
+        console.error('Error checking domain blacklist:', error);
+        return false;
+      }
     },
 
     async loadUserPreferences() {

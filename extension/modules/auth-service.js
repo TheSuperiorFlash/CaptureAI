@@ -185,7 +185,8 @@ const AuthService = {
         method: 'POST',
         headers: {
           'Authorization': `LicenseKey ${licenseKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Priority': 'u=1' // Optimization #8: Request prioritization for faster processing
         },
         body: JSON.stringify({
           question,

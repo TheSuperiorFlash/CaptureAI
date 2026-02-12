@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "CaptureAI",
     "short_name": "CaptureAI",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "author": "Grayson Kramer",
     "description": "AI-powered question capture tool",
     "homepage_url": "https://github.com/TheSuperiorFlash/CaptureAI",
@@ -94,9 +94,7 @@
             "modules/migration.js",
             "libs/tesseract/tesseract.min.js",
             "libs/tesseract/worker.min.js",
-            "libs/tesseract/lang-data/eng.traineddata.gz",
-            "payment-success.html",
-            "payment-success.js"
+            "libs/tesseract/lang-data/eng.traineddata.gz"
         ],
         "matches": ["<all_urls>"]
     }]

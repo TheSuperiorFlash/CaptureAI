@@ -133,6 +133,7 @@ export const ImageProcessing = {
 
   /**
          * Process captured image: crop, compress, OCR, and optimize for token reduction
+         * Optimization #5: OCR and compression run in parallel on the cropped image
          * @param {string} imageUri - Full screenshot image URI
          * @param {Object} coordinates - Crop coordinates
          * @param {Object} options - Processing options
@@ -150,51 +151,30 @@ export const ImageProcessing = {
         height: coordinates.height
       });
 
-      // Use consistent compression settings for all modes
+      // Use consistent compression settings for all modes (optimization #4: reduced from 800x600 to 640x480)
       const compressionOptions = {
-        maxWidth: 800,
-        maxHeight: 600
+        maxWidth: 640,
+        maxHeight: 480
       };
 
-      const compressedImageData = await this.compressImage(croppedImage, 0.3, compressionOptions);
+      // Optimization #5: Run OCR and compression in parallel
+      const [compressedImageData, ocrData] = await Promise.all([
+        // Compression task
+        this.compressImage(croppedImage, 0.3, compressionOptions),
+        // OCR task (only if enabled)
+        enableOCR
+          ? this.performOCR(croppedImage)
+          : Promise.resolve(null)
+      ]);
 
       const result = {
         success: true,
         compressedImageData: compressedImageData
       };
 
-      // Perform OCR extraction if enabled
-      if (enableOCR) {
-        try {
-          console.log('Starting OCR extraction...');
-          const ocrResult = await OCRService.extractText(compressedImageData, {
-            confidenceThreshold: 60 // Require 60% confidence to use OCR
-          });
-
-          result.ocrData = {
-            text: ocrResult.text,
-            confidence: ocrResult.confidence,
-            hasValidText: OCRService.isValidOCRResult(ocrResult) && !ocrResult.shouldFallbackToImage,
-            shouldFallbackToImage: ocrResult.shouldFallbackToImage,
-            duration: ocrResult.duration
-          };
-
-          console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
-          if (ocrResult.shouldFallbackToImage) {
-            console.log('OCR quality insufficient - will use image data instead');
-          } else if (ocrResult.text.length > 0) {
-            console.log('OCR Full Text:', ocrResult.text);
-          }
-        } catch (ocrError) {
-          console.warn('OCR extraction failed, continuing without OCR data:', ocrError);
-          result.ocrData = {
-            text: '',
-            confidence: 0,
-            hasValidText: false,
-            shouldFallbackToImage: true,
-            error: ocrError.message
-          };
-        }
+      // Add OCR data if available
+      if (ocrData) {
+        result.ocrData = ocrData;
       }
 
       return result;
@@ -207,13 +187,51 @@ export const ImageProcessing = {
   },
 
   /**
+   * Perform OCR extraction on image (helper for parallel processing)
+   * @param {string} imageDataUrl - Image data URL
+   * @returns {Promise<Object>} OCR result data
+   */
+  async performOCR(imageDataUrl) {
+    try {
+      console.log('Starting OCR extraction...');
+      const ocrResult = await OCRService.extractText(imageDataUrl, {
+        confidenceThreshold: 60 // Require 60% confidence to use OCR
+      });
+
+      console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
+      if (ocrResult.shouldFallbackToImage) {
+        console.log('OCR quality insufficient - will use image data instead');
+      } else if (ocrResult.text.length > 0) {
+        console.log('OCR Full Text:', ocrResult.text);
+      }
+
+      return {
+        text: ocrResult.text,
+        confidence: ocrResult.confidence,
+        hasValidText: OCRService.isValidOCRResult(ocrResult) && !ocrResult.shouldFallbackToImage,
+        shouldFallbackToImage: ocrResult.shouldFallbackToImage,
+        duration: ocrResult.duration
+      };
+    } catch (ocrError) {
+      console.warn('OCR extraction failed, continuing without OCR data:', ocrError);
+      return {
+        text: '',
+        confidence: 0,
+        hasValidText: false,
+        shouldFallbackToImage: true,
+        error: ocrError.message
+      };
+    }
+  },
+
+  /**
          * Resize image if too large (optimized for faster OCR)
          * @param {string} imageDataUrl - Image data URL
          * @param {number} maxWidth - Maximum width
          * @param {number} maxHeight - Maximum height
          * @returns {Promise<string>}
          */
-  resizeImage(imageDataUrl, maxWidth = 800, maxHeight = 600) {
+  resizeImage(imageDataUrl, maxWidth = 640, maxHeight = 480) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {

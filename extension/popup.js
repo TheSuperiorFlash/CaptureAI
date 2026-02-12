@@ -28,7 +28,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     helpToggle: document.getElementById('help-toggle'),
     helpContent: document.getElementById('help-content'),
     helpArrow: document.getElementById('help-arrow'),
-    reasoningSlider: document.getElementById('reasoning-slider')
+    settingsBtn: document.getElementById('settings-btn'),
+    mainView: document.getElementById('main-view'),
+    settingsView: document.getElementById('settings-view'),
+    backToMainBtn: document.getElementById('back-to-main-btn'),
+    privacyGuardToggle: document.getElementById('privacy-guard-toggle'),
+    privacyGuardItem: document.getElementById('privacy-guard-item'),
+    reasoningLevelItem: document.getElementById('reasoning-level-item'),
+    domainInput: document.getElementById('domain-input'),
+    addDomainBtn: document.getElementById('add-domain-btn'),
+    domainList: document.getElementById('domain-list'),
+    settingsReasoningSlider: document.getElementById('settings-reasoning-slider'),
+    settingsReasoningToggleTrack: document.getElementById('settings-reasoning-toggle-track'),
+    settingsReasoningToggleSlider: document.getElementById('settings-reasoning-toggle-slider'),
+    settingsReasoningToggleProgress: document.getElementById('settings-reasoning-toggle-progress'),
+    ocrToggle: document.getElementById('ocr-toggle')
   };
 
   // State variables
@@ -37,6 +51,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     isPanelVisible: false,
     hasLastCaptureArea: false,
     currentResponse: ''
+  };
+
+  // Settings state
+  let settings = {
+    privacyGuard: {
+      enabled: false
+    },
+    domainBlacklist: [],
+    reasoningLevel: 1,
+    ocr: {
+      disabled: false  // Changed from enabled to disabled
+    }
   };
 
   // Initialize popup state and UI
@@ -52,9 +78,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.quickCaptureBtn.addEventListener('click', quickCapture);
   elements.headerUiToggle.addEventListener('click', togglePanel);
   elements.helpToggle.addEventListener('click', toggleHelp);
+  elements.settingsBtn.addEventListener('click', showSettings);
+  elements.backToMainBtn.addEventListener('click', showMainView);
 
-  // Setup reasoning toggle
-  setupReasoningToggle();
+  // Settings event listeners
+  elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
+  elements.addDomainBtn.addEventListener('click', addDomain);
+  elements.domainInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addDomain();
+  });
+  elements.ocrToggle.addEventListener('click', toggleOCR);
 
   // Add Enter key support for license key input
   elements.licenseKeyInput.addEventListener('keypress', (e) => {
@@ -77,12 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           elements.migrationNotice.classList.add('hidden');
         }, 10000); // Hide after 10 seconds
       }
-
-      // Load reasoning level from storage
-      const result = await chrome.storage.local.get('captureai-reasoning-level');
-      const reasoningLevel = result['captureai-reasoning-level'];
-      const level = reasoningLevel !== undefined ? reasoningLevel : 1;
-      elements.reasoningSlider.value = level;
 
       // Load and display custom keybinds
       await updateKeybindsDisplay();
@@ -274,14 +301,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       elements.userTier.textContent = user.tier.toUpperCase();
 
-      // Show upgrade button only for free tier
+      // Show upgrade button and hide settings button for free tier
       if (user.tier === 'free') {
         elements.upgradeBtn.classList.remove('hidden');
         elements.userTier.style.background = '#999';
+        elements.settingsBtn.style.display = 'none';
       } else {
         elements.upgradeBtn.classList.add('hidden');
         // Purple gradient for Pro tier
         elements.userTier.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        elements.settingsBtn.style.display = 'block';
       }
 
       // Load and display usage stats (only for free tier)
@@ -290,14 +319,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.usageSection.classList.remove('hidden');
       } else {
         elements.usageSection.classList.add('hidden');
-      }
-
-      // Show reasoning slider only for Pro tier
-      const reasoningSection = document.getElementById('reasoning-section');
-      if (user.tier === 'pro') {
-        reasoningSection.classList.remove('hidden');
-      } else {
-        reasoningSection.classList.add('hidden');
       }
 
       // Get current state from content script
@@ -536,6 +557,280 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
+   * Show settings view
+   */
+  async function showSettings() {
+    elements.mainView.classList.add('hidden');
+    elements.settingsView.classList.remove('hidden');
+
+    // Load settings
+    await loadSettings();
+  }
+
+  /**
+   * Show main view
+   */
+  function showMainView() {
+    elements.settingsView.classList.add('hidden');
+    elements.mainView.classList.remove('hidden');
+  }
+
+  /**
+   * Load settings from storage
+   */
+  async function loadSettings() {
+    try {
+      // Load settings from storage
+      const result = await chrome.storage.local.get('captureai-settings');
+      if (result['captureai-settings']) {
+        settings = { ...settings, ...result['captureai-settings'] };
+      }
+
+      // Load reasoning level (stored separately for backward compatibility)
+      const reasoningResult = await chrome.storage.local.get('captureai-reasoning-level');
+      if (reasoningResult['captureai-reasoning-level'] !== undefined) {
+        settings.reasoningLevel = reasoningResult['captureai-reasoning-level'];
+      }
+
+      // Update UI with loaded settings
+      updateSettingsUI();
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  }
+
+  /**
+   * Update settings UI elements
+   */
+  function updateSettingsUI() {
+    // Privacy Guard toggle
+    if (settings.privacyGuard.enabled) {
+      elements.privacyGuardToggle.classList.add('active');
+    } else {
+      elements.privacyGuardToggle.classList.remove('active');
+    }
+
+    // Domain blacklist
+    renderDomainList();
+
+    // Reasoning level slider
+    elements.settingsReasoningSlider.value = settings.reasoningLevel;
+    updateSettingsReasoningToggleUI(settings.reasoningLevel);
+
+    // OCR toggle (inverted - toggle shows disabled state)
+    if (settings.ocr.disabled) {
+      elements.ocrToggle.classList.add('active');
+    } else {
+      elements.ocrToggle.classList.remove('active');
+    }
+
+    // Setup reasoning toggle for settings page
+    setupSettingsReasoningToggle();
+  }
+
+  /**
+   * Toggle Privacy Guard on/off
+   */
+  async function togglePrivacyGuard() {
+    // Toggle state
+    settings.privacyGuard.enabled = !settings.privacyGuard.enabled;
+
+    // Update UI
+    if (settings.privacyGuard.enabled) {
+      elements.privacyGuardToggle.classList.add('active');
+    } else {
+      elements.privacyGuardToggle.classList.remove('active');
+    }
+
+    // Save settings
+    await saveSettings();
+
+    // Show message
+    if (settings.privacyGuard.enabled) {
+      alert('PrivacyGuard enabled. Reload pages for protection to take effect.');
+    }
+  }
+
+  /**
+   * Add domain to blacklist
+   */
+  async function addDomain() {
+    const domain = elements.domainInput.value.trim().toLowerCase();
+
+    if (!domain) {
+      return;
+    }
+
+    // Basic domain validation
+    const domainPattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
+    if (!domainPattern.test(domain)) {
+      alert('Please enter a valid domain (e.g., example.com)');
+      return;
+    }
+
+    // Check if already in blacklist
+    if (settings.domainBlacklist.includes(domain)) {
+      alert('Domain already in blacklist');
+      return;
+    }
+
+    // Add to blacklist
+    settings.domainBlacklist.push(domain);
+
+    // Save and update UI
+    await saveSettings();
+    renderDomainList();
+    elements.domainInput.value = '';
+  }
+
+  /**
+   * Remove domain from blacklist
+   */
+  async function removeDomain(domain) {
+    settings.domainBlacklist = settings.domainBlacklist.filter(d => d !== domain);
+    await saveSettings();
+    renderDomainList();
+  }
+
+  /**
+   * Render domain list
+   */
+  function renderDomainList() {
+    if (settings.domainBlacklist.length === 0) {
+      elements.domainList.innerHTML = '<div style="font-size: 11px; color: #999; font-style: italic; text-align: center; padding: 15px;">No domains in blacklist</div>';
+      return;
+    }
+
+    elements.domainList.innerHTML = settings.domainBlacklist
+      .map(domain => `
+        <div class="domain-item">
+          <span class="domain-name">${domain}</span>
+          <button class="remove-domain-btn" data-domain="${domain}">×</button>
+        </div>
+      `)
+      .join('');
+
+    // Add remove event listeners
+    elements.domainList.querySelectorAll('.remove-domain-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const domain = e.target.getAttribute('data-domain');
+        removeDomain(domain);
+      });
+    });
+  }
+
+  /**
+   * Toggle OCR on/off (inverted logic - toggle controls disabled state)
+   */
+  async function toggleOCR() {
+    settings.ocr.disabled = !settings.ocr.disabled;
+
+    // Update UI
+    if (settings.ocr.disabled) {
+      elements.ocrToggle.classList.add('active');
+    } else {
+      elements.ocrToggle.classList.remove('active');
+    }
+
+    // Save settings
+    await saveSettings();
+  }
+
+  /**
+   * Setup reasoning toggle for settings page
+   */
+  function setupSettingsReasoningToggle() {
+    const track = elements.settingsReasoningToggleTrack;
+    const slider = elements.settingsReasoningToggleSlider;
+    const progress = elements.settingsReasoningToggleProgress;
+
+    if (!track || !slider || !progress) return;
+
+    track.addEventListener('click', async (e) => {
+      const rect = track.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const trackWidth = rect.width;
+
+      let newLevel;
+      if (clickX < trackWidth / 3) {
+        newLevel = 0;
+      } else if (clickX < (trackWidth * 2 / 3)) {
+        newLevel = 1;
+      } else {
+        newLevel = 2;
+      }
+
+      settings.reasoningLevel = newLevel;
+      elements.settingsReasoningSlider.value = newLevel;
+      updateSettingsReasoningToggleUI(newLevel);
+      await saveSettings();
+
+      // Also save to old storage key for backward compatibility
+      await chrome.storage.local.set({ 'captureai-reasoning-level': newLevel });
+    });
+
+    const currentLevel = elements.settingsReasoningSlider.value !== '' ? parseInt(elements.settingsReasoningSlider.value) : 1;
+    updateSettingsReasoningToggleUI(currentLevel);
+  }
+
+  /**
+   * Update settings reasoning toggle UI
+   */
+  function updateSettingsReasoningToggleUI(level) {
+    const track = elements.settingsReasoningToggleTrack;
+    const slider = elements.settingsReasoningToggleSlider;
+    const progress = elements.settingsReasoningToggleProgress;
+
+    if (!track || !slider || !progress) return;
+
+    const trackWidth = track.offsetWidth;
+    const sliderWidth = 40;
+    const sliderHalfWidth = sliderWidth / 2;
+    const edgePadding = sliderHalfWidth;
+
+    const positions = {
+      0: edgePadding,
+      1: trackWidth / 2,
+      2: trackWidth - edgePadding
+    };
+
+    const centerPos = positions[level];
+
+    slider.style.left = (centerPos - sliderHalfWidth) + 'px';
+    progress.style.width = centerPos + 'px';
+
+    // Update labels in settings view
+    const lowLabel = elements.settingsView.querySelector('.reasoning-label-low');
+    const mediumLabel = elements.settingsView.querySelector('.reasoning-label-medium');
+    const highLabel = elements.settingsView.querySelector('.reasoning-label-high');
+
+    if (lowLabel && mediumLabel && highLabel) {
+      lowLabel.style.color = level === 0 ? '#218aff' : '#666666';
+      lowLabel.style.fontWeight = level === 0 ? '600' : '500';
+
+      mediumLabel.style.color = level === 1 ? '#218aff' : '#666666';
+      mediumLabel.style.fontWeight = level === 1 ? '600' : '500';
+
+      highLabel.style.color = level === 2 ? '#218aff' : '#666666';
+      highLabel.style.fontWeight = level === 2 ? '600' : '500';
+    }
+  }
+
+  /**
+   * Save settings to storage
+   */
+  async function saveSettings() {
+    try {
+      await chrome.storage.local.set({ 'captureai-settings': settings });
+
+      // Also save reasoning level to old storage key for backward compatibility
+      await chrome.storage.local.set({ 'captureai-reasoning-level': settings.reasoningLevel });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
+  }
+
+  /**
    * Ensure content script is loaded in the target tab
    */
   async function ensureContentScriptLoaded(tabId) {
@@ -627,78 +922,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  /**
-   * Save reasoning level to storage
-   */
-  async function saveReasoningLevel() {
-    try {
-      const level = parseInt(elements.reasoningSlider.value);
-      await chrome.storage.local.set({ 'captureai-reasoning-level': level });
-    } catch (error) {
-      console.error('Error saving reasoning level:', error);
-    }
-  }
-
-  /**
-   * Setup reasoning toggle interaction
-   */
-  function setupReasoningToggle() {
-    const track = document.getElementById('reasoning-toggle-track');
-    const slider = document.getElementById('reasoning-toggle-slider');
-    const progress = document.getElementById('reasoning-toggle-progress');
-    const lowLabel = document.querySelector('.reasoning-label-low');
-    const mediumLabel = document.querySelector('.reasoning-label-medium');
-    const highLabel = document.querySelector('.reasoning-label-high');
-
-    if (!track || !slider || !progress) return;
-
-    function updateToggleUI(level) {
-      const trackWidth = track.offsetWidth;
-      const sliderWidth = 40;
-      const sliderHalfWidth = sliderWidth / 2;
-      const edgePadding = sliderHalfWidth;
-
-      const positions = {
-        0: edgePadding,
-        1: trackWidth / 2,
-        2: trackWidth - edgePadding
-      };
-
-      const centerPos = positions[level];
-
-      slider.style.left = (centerPos - sliderHalfWidth) + 'px';
-      progress.style.width = centerPos + 'px';
-
-      lowLabel.style.color = level === 0 ? '#218aff' : '#666666';
-      lowLabel.style.fontWeight = level === 0 ? '600' : '500';
-
-      mediumLabel.style.color = level === 1 ? '#218aff' : '#666666';
-      mediumLabel.style.fontWeight = level === 1 ? '600' : '500';
-
-      highLabel.style.color = level === 2 ? '#218aff' : '#666666';
-      highLabel.style.fontWeight = level === 2 ? '600' : '500';
-    }
-
-    track.addEventListener('click', async (e) => {
-      const rect = track.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const trackWidth = rect.width;
-
-      let newLevel;
-      if (clickX < trackWidth / 3) {
-        newLevel = 0;
-      } else if (clickX < (trackWidth * 2 / 3)) {
-        newLevel = 1;
-      } else {
-        newLevel = 2;
-      }
-
-      elements.reasoningSlider.value = newLevel;
-      updateToggleUI(newLevel);
-      await saveReasoningLevel();
-    });
-
-    const currentLevel = elements.reasoningSlider.value !== '' ? parseInt(elements.reasoningSlider.value) : 1;
-    updateToggleUI(currentLevel);
-  }
 });

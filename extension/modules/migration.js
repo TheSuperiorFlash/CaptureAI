@@ -5,9 +5,9 @@
 
 const Migration = {
   /**
-   * Migration version key (v2: fixes backend URL)
+   * Migration version key (v3: forces backend URL to api.captureai.workers.dev)
    */
-  MIGRATION_KEY: 'captureai-migration-license-v2-complete',
+  MIGRATION_KEY: 'captureai-migration-license-v3-complete',
 
   /**
    * Run migration if not already completed
@@ -53,12 +53,12 @@ const Migration = {
     const backendUrlResult = await chrome.storage.local.get('captureai-backend-url');
     const currentUrl = backendUrlResult['captureai-backend-url'];
 
-    // Update if not set or if it's the old placeholder URL
-    if (!currentUrl || currentUrl.includes('YOUR-SUBDOMAIN')) {
+    // Always update to ensure correct URL (v3: fixes backend.captureai.workers.dev -> api.captureai.workers.dev)
+    if (!currentUrl || currentUrl.includes('YOUR-SUBDOMAIN') || currentUrl.includes('backend.captureai.workers.dev')) {
       await chrome.storage.local.set({
         'captureai-backend-url': 'https://api.captureai.workers.dev'
       });
-      console.log('[Migration] Updated backend URL to production');
+      console.log('[Migration] Updated backend URL to api.captureai.workers.dev');
     }
 
     // Mark migration as complete

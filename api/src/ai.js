@@ -42,14 +42,12 @@ export class AIHandler {
    */
   async complete(request) {
     try {
-      // Authenticate
-      const user = await this.auth.authenticate(request);
+      // Authenticate and check usage limit in a single query (optimization)
+      const { user, usageCheck } = await this.authenticateAndCheckUsage(request);
       if (!user) {
         return jsonResponse({ error: 'Not authenticated' }, 401);
       }
 
-      // Check usage limit
-      const usageCheck = await this.checkUsageLimit(user.userId, user.tier);
       if (!usageCheck.allowed) {
         const errorMessage = usageCheck.limitType === 'per_minute'
           ? 'Rate limit reached. Please wait a moment before trying again.'
@@ -83,7 +81,7 @@ export class AIHandler {
         ocrText,
         ocrConfidence,
         promptType: promptType || 'answer'
-      }, reasoningLevel || 1);
+      }, reasoningLevel !== undefined ? reasoningLevel : 1);
 
       // Send to AI Gateway
       const startTime = Date.now();
@@ -111,8 +109,8 @@ export class AIHandler {
         2: 'medium'     // gpt-5-nano medium reasoning
       };
 
-      // Record usage with detailed token breakdown
-      await this.recordUsage({
+      // Record usage with detailed token breakdown (optimization #13: non-blocking)
+      this.recordUsage({
         userId: user.userId,
         promptType: promptType || 'answer',
         model: reasoningLevelMap[reasoningLevel] || 'low',
@@ -124,6 +122,9 @@ export class AIHandler {
         inputMethod,
         responseTime,
         cached: aiResponse.cached || false
+      }).catch(error => {
+        // Log error but don't fail the request
+        console.error('Usage recording failed:', error);
       });
 
       return jsonResponse({
@@ -478,6 +479,23 @@ export class AIHandler {
   }
 
   /**
+   * Authenticate and check usage limit in a single operation (optimization #3)
+   * Combines authentication and usage check to reduce DB roundtrips
+   */
+  async authenticateAndCheckUsage(request) {
+    // First authenticate
+    const user = await this.auth.authenticate(request);
+    if (!user) {
+      return { user: null, usageCheck: null };
+    }
+
+    // Then check usage limit
+    const usageCheck = await this.checkUsageLimit(user.userId, user.tier);
+
+    return { user, usageCheck };
+  }
+
+  /**
    * Record usage in database with detailed token breakdown and cost calculation
    */
   async recordUsage({
@@ -568,9 +586,9 @@ export class AIHandler {
     // 1 = Medium (gpt-5-nano, low reasoning)
     // 2 = High (gpt-5-nano, medium reasoning)
     const configs = {
-      0: { model: 'openai/gpt-4.1-nano', reasoningEffort: null },  // Legacy model, no reasoning
-      1: { model: 'openai/gpt-5-nano', reasoningEffort: 'low' },
-      2: { model: 'openai/gpt-5-nano', reasoningEffort: 'medium' }
+      0: { model: 'openai/gpt-4.1-nano', reasoningEffort: null, useLegacyTokenParam: true },  // Legacy model, no reasoning
+      1: { model: 'openai/gpt-5-nano', reasoningEffort: 'low', useLegacyTokenParam: false },
+      2: { model: 'openai/gpt-5-nano', reasoningEffort: 'medium', useLegacyTokenParam: false }
     };
 
     const config = configs[reasoningLevel] || configs[1]; // Default to medium
