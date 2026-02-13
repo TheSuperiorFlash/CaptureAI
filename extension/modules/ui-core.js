@@ -14,18 +14,9 @@ export const UICore = {
       return;
     }
 
-    this.loadFont();
+    // Font loading removed - using system fonts to avoid CSP violations on third-party sites
     this.currentTheme = this.getThemeColors(false);
     this.initialized = true;
-  },
-
-  loadFont() {
-    if (!document.querySelector('link[href*="Inter"]')) {
-      const fontLink = document.createElement('link');
-      fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-      fontLink.rel = 'stylesheet';
-      document.head.appendChild(fontLink);
-    }
   },
 
   getThemeColors(isDarkMode = false) {
