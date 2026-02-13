@@ -85,7 +85,9 @@
           autoSolveModule, messagingModule, keyboardModule, eventManagerModule, privacyGuardModule
         ] = modules;
 
-        window.CaptureAI = {
+        // Use a non-enumerable, non-configurable property to prevent page scripts
+        // from accessing internals (e.g., AuthService.getLicenseKey())
+        const captureAI = {
           CONFIG: configModule.CONFIG,
           TIMING: configModule.TIMING,
           STORAGE_KEYS: configModule.STORAGE_KEYS,
@@ -109,6 +111,15 @@
           EventManager: eventManagerModule.EventManager,
           PrivacyGuard: privacyGuardModule.PrivacyGuard
         };
+
+        // Expose on window with Object.defineProperty so it's not enumerable
+        // and not easily discoverable by page scripts
+        Object.defineProperty(window, 'CaptureAI', {
+          value: captureAI,
+          writable: false,
+          enumerable: false,
+          configurable: false
+        });
 
         window.CaptureAI.ICONS.init();
         return true;

@@ -22,8 +22,11 @@ export const CaptureSystem = {
       window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
     }
 
+    // Track ask mode state from parameter
+    STATE.isForAskMode = forAskMode;
+
     // Only set prompt type if NOT for ask mode (ask mode will be handled by ask mode submission)
-    if (!STATE.isForAskMode) {
+    if (!forAskMode) {
       STATE.currentPromptType = STATE.isAutoSolveMode ? window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE : window.CaptureAI.PROMPT_TYPES.ANSWER;
     }
 

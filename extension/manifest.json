@@ -74,7 +74,6 @@
             "icons/camera.png",
             "icons/attach.png",
             "icons/attached.png",
-            "inject.js",
             "modules/config.js",
             "modules/storage.js",
             "modules/domains.js",

@@ -119,13 +119,16 @@ export const Keyboard = {
       // Don't clear the message automatically - let it stay until a new message appears
     }
 
-    // Switch back to capture mode if in ask mode
+    // Exit ask mode if active
     if (STATE.isAskMode) {
-      window.CaptureAI.CaptureSystem.startCapture();
+      STATE.isAskMode = false;
+      if (window.CaptureAI.StorageUtils?.setValue && window.CaptureAI.STORAGE_KEYS) {
+        window.CaptureAI.StorageUtils.setValue(window.CaptureAI.STORAGE_KEYS.ASK_MODE, false);
+      }
       // Recreate UI to show capture interface
-      setTimeout(() => {
+      if (window.CaptureAI.UIComponents?.createUI) {
         window.CaptureAI.UIComponents.createUI();
-      }, 100);
+      }
     }
   },
 

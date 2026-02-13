@@ -7,6 +7,7 @@ export const UIStealthyResult = {
   element: null,
   fadeoutTimer: null,
   initialized: false,
+  _showCounter: 0,
 
   /**
      * Initialize stealthy result element immediately
@@ -14,14 +15,6 @@ export const UIStealthyResult = {
   init() {
     if (this.initialized) {
       return;
-    }
-
-    // Add Roboto font if not already added
-    if (!document.querySelector('link[href*="Roboto"]')) {
-      const fontLink = document.createElement('link');
-      fontLink.href = 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap';
-      fontLink.rel = 'stylesheet';
-      document.head.appendChild(fontLink);
     }
 
     // Create stealthy result element
@@ -81,19 +74,24 @@ export const UIStealthyResult = {
 
     // Set content and style
     this.element.textContent = message;
-    this.element.style.color = isError ?
-      'rgba(255, 100, 100, 0.4) !important' :
-      'rgba(150, 150, 150, 0.4) !important';
+    this.element.style.setProperty('color', isError ?
+      'rgba(255, 100, 100, 0.4)' :
+      'rgba(150, 150, 150, 0.4)', 'important');
 
-    // Show with animation
+    // Show with animation - reset opacity before displaying
     this.element.style.display = 'block';
     this.element.style.opacity = '1';
 
+    // Track current show call to prevent stale timers from hiding new messages
+    const showId = ++this._showCounter;
+
     // Auto-hide after delay
     this.fadeoutTimer = setTimeout(() => {
+      // Only fade if no newer show() call has occurred
+      if (this._showCounter !== showId) return;
       this.element.style.opacity = '0';
       setTimeout(() => {
-        if (this.element) {
+        if (this.element && this._showCounter === showId) {
           this.element.style.display = 'none';
         }
       }, 500);

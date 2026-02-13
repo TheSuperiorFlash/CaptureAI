@@ -178,9 +178,14 @@ export const EventManager = {
       }
     });
 
-    // Handle unhandled promise rejections
+    // Handle unhandled promise rejections - only from extension code
     window.addEventListener('unhandledrejection', (event) => {
-      this.handleError(event.reason, 'Unhandled Promise');
+      // Filter: only handle rejections from our extension
+      const reason = event.reason;
+      const stack = reason?.stack || '';
+      if (stack.includes('chrome-extension://')) {
+        this.handleError(reason, 'Unhandled Promise');
+      }
     });
   }
 };

@@ -706,7 +706,7 @@ https://captureai.dev`;
                                       <td class="pad" style="padding: 0 0 32px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 15px; color: #666666; line-height: 1.5;">
-                                            <p style="margin: 0;">You can modify your payment method or cancel your subscription anytime by visiting the Stripe <a href="https://billing.stripe.com/p/login/test_123" style="color: #218aff; text-decoration: underline;">billing settings</a> page.</p>
+                                            <p style="margin: 0;">You can modify your payment method or cancel your subscription anytime by visiting the Stripe <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: underline;">billing settings</a> page.</p>
                                           </div>
                                         </div>
                                       </td>

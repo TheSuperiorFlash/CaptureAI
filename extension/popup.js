@@ -175,9 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    elements.buyProBtn.disabled = true;
-    elements.buyProBtn.textContent = 'Opening checkout...';
-
     try {
       const checkout = await AuthService.createCheckoutSession(email);
 
@@ -185,17 +182,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.tabs.create({ url: checkout.url });
 
       showResponseMessage('Check your email for your license key after payment!', 'success');
-
-      // Re-enable button after a delay
-      setTimeout(() => {
-        elements.buyProBtn.disabled = false;
-        elements.buyProBtn.textContent = 'Buy Pro Key ($9.99/month)';
-      }, 3000);
     } catch (error) {
       console.error('Checkout error:', error);
       showResponseMessage(error.message || 'Failed to start checkout', 'error');
-      elements.buyProBtn.disabled = false;
-      elements.buyProBtn.textContent = 'Buy Pro Key ($9.99/month)';
     }
   }
 
@@ -333,44 +322,81 @@ document.addEventListener('DOMContentLoaded', async () => {
   /**
    * Update usage statistics display
    */
+  /**
+   * Sanitize a value for safe insertion into the DOM (prevent XSS)
+   */
+  function sanitize(value) {
+    const str = String(value);
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   async function updateUsageStats() {
     try {
       const usage = await AuthService.getUsage();
 
-      let html = '';
+      // Build DOM elements instead of innerHTML to prevent XSS from API data
+      elements.usageContent.textContent = '';
 
       if (usage.limitType === 'per_day') {
         // Free tier - show daily stats
-        html = `
-          <div style="font-size: 13px; color: #333; margin-bottom: 4px;">
-            <strong>${usage.today.used}</strong> / ${usage.today.limit} requests today
-          </div>
-          <div style="width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;">
-            <div style="width: ${usage.today.percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;"></div>
-          </div>
-          <div style="font-size: 11px; color: #666; margin-top: 4px;">
-            ${usage.today.remaining} requests remaining
-          </div>
-        `;
+        const used = parseInt(usage.today.used, 10) || 0;
+        const limit = parseInt(usage.today.limit, 10) || 0;
+        const remaining = parseInt(usage.today.remaining, 10) || 0;
+        const percentage = Math.min(100, Math.max(0, parseFloat(usage.today.percentage) || 0));
+
+        const statsDiv = document.createElement('div');
+        statsDiv.style.cssText = 'font-size: 13px; color: #333; margin-bottom: 4px;';
+        const strong = document.createElement('strong');
+        strong.textContent = used;
+        statsDiv.appendChild(strong);
+        statsDiv.appendChild(document.createTextNode(` / ${limit} requests today`));
+
+        const barOuter = document.createElement('div');
+        barOuter.style.cssText = 'width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;';
+        const barInner = document.createElement('div');
+        barInner.style.cssText = `width: ${percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;`;
+        barOuter.appendChild(barInner);
+
+        const remainingDiv = document.createElement('div');
+        remainingDiv.style.cssText = 'font-size: 11px; color: #666; margin-top: 4px;';
+        remainingDiv.textContent = `${remaining} requests remaining`;
+
+        elements.usageContent.appendChild(statsDiv);
+        elements.usageContent.appendChild(barOuter);
+        elements.usageContent.appendChild(remainingDiv);
       } else {
         // Pro tier - show per-minute stats
-        html = `
-          <div style="font-size: 13px; color: #333; margin-bottom: 4px;">
-            <strong>${usage.lastMinute.used}</strong> / ${usage.lastMinute.limit} requests/minute
-          </div>
-          <div style="width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;">
-            <div style="width: ${usage.lastMinute.percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;"></div>
-          </div>
-          <div style="font-size: 11px; color: #666; margin-top: 4px;">
-            ${usage.today.used} requests used today (unlimited)
-          </div>
-        `;
-      }
+        const used = parseInt(usage.lastMinute.used, 10) || 0;
+        const limit = parseInt(usage.lastMinute.limit, 10) || 0;
+        const todayUsed = parseInt(usage.today.used, 10) || 0;
+        const percentage = Math.min(100, Math.max(0, parseFloat(usage.lastMinute.percentage) || 0));
 
-      elements.usageContent.innerHTML = html;
+        const statsDiv = document.createElement('div');
+        statsDiv.style.cssText = 'font-size: 13px; color: #333; margin-bottom: 4px;';
+        const strong = document.createElement('strong');
+        strong.textContent = used;
+        statsDiv.appendChild(strong);
+        statsDiv.appendChild(document.createTextNode(` / ${limit} requests/minute`));
+
+        const barOuter = document.createElement('div');
+        barOuter.style.cssText = 'width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;';
+        const barInner = document.createElement('div');
+        barInner.style.cssText = `width: ${percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;`;
+        barOuter.appendChild(barInner);
+
+        const todayDiv = document.createElement('div');
+        todayDiv.style.cssText = 'font-size: 11px; color: #666; margin-top: 4px;';
+        todayDiv.textContent = `${todayUsed} requests used today (unlimited)`;
+
+        elements.usageContent.appendChild(statsDiv);
+        elements.usageContent.appendChild(barOuter);
+        elements.usageContent.appendChild(todayDiv);
+      }
     } catch (error) {
       console.error('Error loading usage stats:', error);
-      elements.usageContent.innerHTML = '<div style="font-size: 12px; color: #999;">Unable to load usage stats</div>';
+      elements.usageContent.textContent = 'Unable to load usage stats';
     }
   }
 
@@ -842,7 +868,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           target: { tabId: tabId },
           files: ['content.js']
         });
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Wait for content script to be ready (poll instead of fixed delay)
+        for (let i = 0; i < 15; i++) {
+          try {
+            await chrome.tabs.sendMessage(tabId, { action: 'ping' });
+            return;
+          } catch {
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+        }
       } catch (_injectionError) {
         throw new Error('Could not load content script');
       }

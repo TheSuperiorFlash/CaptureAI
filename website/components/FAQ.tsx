@@ -54,7 +54,7 @@ export default function FAQ() {
                             const panelId = `faq-panel-${index}`
                             const buttonId = `faq-button-${index}`
                             return (
-                                <div key={index} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
+                                <div key={faq.q} className={index > 0 ? 'border-t border-white/[0.04]' : ''}>
                                     <button
                                         type="button"
                                         id={buttonId}

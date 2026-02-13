@@ -106,24 +106,24 @@ export const PrivacyGuard = {
    */
   checkProtection() {
     try {
-      // Test if APIs have been overridden
-      // inject.js makes these always return specific values
-      const visibilityOverridden = document.visibilityState === 'visible';
-      const hiddenOverridden = document.hidden === false;
+      // Check if the property descriptor on Document.prototype has been replaced
+      // by inject.js. The native descriptor is on Document.prototype but has
+      // a different getter than what inject.js installs.
+      const descriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState');
 
-      // If both are true, likely overridden (though could be coincidence)
-      // Better test: Try to register a blocked event and see if it's blocked
-      let eventWasBlocked = false;
-      const testListener = () => { eventWasBlocked = false; };
+      // If inject.js ran, the descriptor will be non-configurable (we set configurable: false)
+      // The native browser descriptor IS configurable, so this is a reliable check
+      if (descriptor && descriptor.configurable === false) {
+        return true;
+      }
 
-      // addEventListener should be overridden to block 'visibilitychange'
-      document.addEventListener('visibilitychange', testListener);
+      // Fallback: check if hidden descriptor is also locked
+      const hiddenDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'hidden');
+      if (hiddenDescriptor && hiddenDescriptor.configurable === false) {
+        return true;
+      }
 
-      // If Privacy Guard is active, the listener should be silently blocked
-      // We can't directly test this without triggering the event,
-      // but we can check if the APIs are in the expected state
-
-      return visibilityOverridden && hiddenOverridden;
+      return false;
     } catch (error) {
       return false;
     }

@@ -53,10 +53,6 @@ export class Router {
     if (path === '/api/auth/me' && method === 'GET') {
       return this.auth.getCurrentUser(request);
     }
-    if (path === '/api/auth/usage' && method === 'GET') {
-      return this.ai.getUsage(request);
-    }
-
     // AI routes
     if (path === '/api/ai/solve' && method === 'POST') {
       return this.ai.solve(request);
@@ -91,9 +87,9 @@ export class Router {
       return this.subscription.verifyPayment(request);
     }
 
-    // 404 Not Found
+    // 404 Not Found (don't leak path to prevent reconnaissance)
     return jsonResponse(
-      { error: 'Route not found', path },
+      { error: 'Route not found' },
       404
     );
   }

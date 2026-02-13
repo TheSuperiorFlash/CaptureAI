@@ -17,8 +17,8 @@ async function checkRateLimitDO(identifier, limit, windowMs, env) {
     const id = env.RATE_LIMITER.idFromName(identifier);
     const stub = env.RATE_LIMITER.get(id);
 
-    // Call the Durable Object
-    const response = await fetch(stub.url + '/check', {
+    // Call the Durable Object via stub.fetch() (not global fetch with stub.url)
+    const response = await stub.fetch('https://rate-limiter/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: identifier, limit, windowMs })

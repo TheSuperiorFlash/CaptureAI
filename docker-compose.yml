@@ -1,0 +1,73 @@
+services:
+  # Development environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: captureai-dev
+    volumes:
+      # Mount source code for live editing
+      - .:/app
+      - /app/node_modules
+      - /app/api/node_modules
+      - /app/website/node_modules
+    ports:
+      # Next.js development server
+      - "3000:3000"
+      # Cloudflare Workers development server
+      - "8787:8787"
+      # Node debugging port
+      - "9229:9229"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+    networks:
+      - captureai-network
+
+  # API service (Cloudflare Workers simulation)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: captureai-api
+    volumes:
+      - ./api:/app/api
+      - /app/api/node_modules
+    ports:
+      - "8787:8787"
+    environment:
+      - NODE_ENV=development
+    working_dir: /app/api
+    command: npm run dev
+    networks:
+      - captureai-network
+
+  # Website service (Next.js)
+  website:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: captureai-website
+    volumes:
+      - ./website:/app/website
+      - /app/website/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    working_dir: /app/website
+    command: npm run dev
+    networks:
+      - captureai-network
+    depends_on:
+      - api
+
+networks:
+  captureai-network:
+    driver: bridge

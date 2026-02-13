@@ -133,7 +133,12 @@ export class SubscriptionHandler {
 
     } catch (error) {
       console.error('Webhook error:', error);
-      return jsonResponse({ error: 'Webhook failed' }, 500);
+      // Return 200 for business logic errors to prevent Stripe retries
+      // Only signature verification failures should return 400
+      if (error.message?.includes('Signature verification') || error.message?.includes('signature')) {
+        return jsonResponse({ error: 'Webhook verification failed' }, 400);
+      }
+      return jsonResponse({ error: error.message, received: true }, 200);
     }
   }
 
@@ -229,6 +234,7 @@ export class SubscriptionHandler {
 
     } catch (error) {
       console.error('Checkout completion error:', error);
+      throw error;
     }
   }
 
@@ -241,12 +247,13 @@ export class SubscriptionHandler {
 
       if (customerEmail) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE email = ?')
+          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE LOWER(email) = LOWER(?)')
           .bind('active', 'pro', customerEmail)
           .run();
       }
     } catch (error) {
       console.error('Payment succeeded handler error:', error);
+      throw error;
     }
   }
 
@@ -259,12 +266,13 @@ export class SubscriptionHandler {
 
       if (customerEmail) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ? WHERE email = ?')
+          .prepare('UPDATE users SET subscription_status = ? WHERE LOWER(email) = LOWER(?)')
           .bind('past_due', customerEmail)
           .run();
       }
     } catch (error) {
       console.error('Payment failed handler error:', error);
+      throw error;
     }
   }
 
@@ -281,6 +289,7 @@ export class SubscriptionHandler {
         .run();
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
+      throw error;
     }
   }
 
@@ -292,8 +301,13 @@ export class SubscriptionHandler {
       const subscriptionId = subscription.id;
       const status = subscription.status;
 
-      const newTier = status === 'active' ? 'pro' : 'free';
-      const subscriptionStatus = status === 'active' ? 'active' : 'inactive';
+      // Map Stripe subscription statuses to tier/status
+      // active, trialing = pro (user has access)
+      // past_due = pro (grace period, still has access)
+      // unpaid, canceled, incomplete_expired, paused = free (no access)
+      const activeStatuses = ['active', 'trialing', 'past_due'];
+      const newTier = activeStatuses.includes(status) ? 'pro' : 'free';
+      const subscriptionStatus = activeStatuses.includes(status) ? 'active' : 'inactive';
 
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_subscription_id = ?')
@@ -301,6 +315,7 @@ export class SubscriptionHandler {
         .run();
     } catch (error) {
       console.error('Subscription update handler error:', error);
+      throw error;
     }
   }
 
@@ -367,11 +382,24 @@ export class SubscriptionHandler {
    */
   async verifyPayment(request) {
     try {
+      // Rate limit to prevent session ID brute-forcing
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        this.env, clientId, 'verify-payment', RateLimitPresets.AUTH
+      );
+      if (rateLimitError) return rateLimitError;
+
       const body = await validateRequestBody(request);
       const sessionId = body.sessionId;
 
       if (!sessionId) {
         return jsonResponse({ error: 'Session ID is required' }, 400);
+      }
+
+      // Validate sessionId format to prevent SSRF/path traversal
+      // Stripe checkout session IDs match pattern: cs_test_... or cs_live_...
+      if (!/^cs_(test|live)_[a-zA-Z0-9]+$/.test(sessionId)) {
+        return jsonResponse({ error: 'Invalid session ID format' }, 400);
       }
 
       // Retrieve the session from Stripe

@@ -41,12 +41,11 @@ const Migration = {
       });
     }
 
-    // Remove old authentication data
+    // Remove old authentication data (keep user-tier to avoid downgrading Pro users)
     await chrome.storage.local.remove([
       'captureai-api-key',
       'captureai-auth-token',
-      'captureai-user-email',
-      'captureai-user-tier'
+      'captureai-user-email'
     ]);
 
     // Force update backend URL to correct production URL
@@ -85,28 +84,17 @@ const Migration = {
     await chrome.storage.local.remove('captureai-migration-notice');
   },
 
-  /**
-   * Reset migration (for testing purposes only)
-   * @returns {Promise<void>}
-   */
-  async resetMigration() {
-    await chrome.storage.local.remove([
-      this.MIGRATION_KEY,
-      'captureai-migration-notice',
-      'captureai-license-key',
-      'captureai-user-email',
-      'captureai-user-tier'
-    ]);
-    console.log('[Migration] Migration reset complete');
-  }
 };
+
+// resetMigration() removed - was a test method that could be called by page scripts
+// to delete license keys, emails, and tier data. Use chrome.storage.local.clear()
+// directly in devtools console if needed for testing.
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Migration;
 }
 
-// Make available globally for background scripts
-if (typeof window !== 'undefined') {
-  window.Migration = Migration;
-}
+// Migration is available globally via const declaration for background.js (importScripts)
+// and popup.js (<script> tag). Content scripts load modules via ES module import
+// so this file is NOT loaded in the MAIN world where page scripts could access it.
