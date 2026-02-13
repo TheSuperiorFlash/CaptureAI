@@ -307,9 +307,9 @@ export const Messaging = {
     const isError = response.startsWith('Error:') || response.includes('failed');
 
     // Display AI response via UICore
-    if (window.CaptureAI.UICore?.displayAIResponse) {
+    if (window.CaptureAI?.UICore?.displayAIResponse) {
       window.CaptureAI.UICore.displayAIResponse(response, isError);
-    } else if (window.CaptureAI.UICore?.showMessage) {
+    } else if (window.CaptureAI?.UICore?.showMessage) {
       window.CaptureAI.UICore.showMessage(response, isError);
     }
   },

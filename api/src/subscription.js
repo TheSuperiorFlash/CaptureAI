@@ -385,9 +385,12 @@ export class SubscriptionHandler {
       // Rate limit to prevent session ID brute-forcing
       const clientId = getClientIdentifier(request);
       const rateLimitError = await checkRateLimit(
-        this.env, clientId, 'verify-payment', RateLimitPresets.AUTH
+        'verify:' + clientId,
+        RateLimitPresets.AUTH.limit,
+        RateLimitPresets.AUTH.windowMs,
+        this.env
       );
-      if (rateLimitError) return rateLimitError;
+      if (rateLimitError) return jsonResponse(rateLimitError, 429);
 
       const body = await validateRequestBody(request);
       const sessionId = body.sessionId;

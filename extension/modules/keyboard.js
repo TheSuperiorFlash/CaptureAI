@@ -125,9 +125,9 @@ export const Keyboard = {
       if (window.CaptureAI.StorageUtils?.setValue && window.CaptureAI.STORAGE_KEYS) {
         window.CaptureAI.StorageUtils.setValue(window.CaptureAI.STORAGE_KEYS.ASK_MODE, false);
       }
-      // Recreate UI to show capture interface
-      if (window.CaptureAI.UIComponents?.createUI) {
-        window.CaptureAI.UIComponents.createUI();
+      // Switch UI mode to capture interface
+      if (window.CaptureAI.UICore?.switchMode) {
+        window.CaptureAI.UICore.switchMode(false);
       }
     }
   },
