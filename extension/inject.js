@@ -14,6 +14,22 @@
   'use strict';
 
   // ============================================================================
+  // SECTION -1: PRIVACY GUARD CONDITIONAL CHECK
+  // ============================================================================
+
+  /**
+   * Check if Privacy Guard is enabled via settings
+   * settings-checker.js runs first and sets this flag based on chrome.storage
+   * If flag is not set (shouldn't happen), default to enabled (secure-by-default)
+   */
+  const privacyGuardEnabled = window.__CAPTUREAI_PRIVACY_GUARD_ENABLED__ !== false;
+
+  if (!privacyGuardEnabled) {
+    // Privacy Guard disabled in settings - exit without applying protections
+    return;
+  }
+
+  // ============================================================================
   // SECTION 0: PRESERVE ORIGINAL CONSOLE
   // ============================================================================
 
