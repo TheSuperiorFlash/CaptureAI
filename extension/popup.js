@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         barOuter.className = 'usage-bar-outer';
         const barInner = document.createElement('div');
         barInner.className = 'usage-bar-inner';
-        barInner.style.width = `${percentage}%`;
+        barInner.style.setProperty('--bar-width', `${percentage}%`);
         barOuter.appendChild(barInner);
 
         const remainingDiv = document.createElement('div');
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         barOuter.className = 'usage-bar-outer';
         const barInner = document.createElement('div');
         barInner.className = 'usage-bar-inner';
-        barInner.style.width = `${percentage}%`;
+        barInner.style.setProperty('--bar-width', `${percentage}%`);
         barOuter.appendChild(barInner);
 
         const todayDiv = document.createElement('div');
@@ -826,8 +826,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const centerPos = positions[level];
 
-    slider.style.setProperty('left', (centerPos - sliderHalfWidth) + 'px');
-    progress.style.setProperty('width', centerPos + 'px');
+    slider.style.setProperty('--slider-left', (centerPos - sliderHalfWidth) + 'px');
+    progress.style.setProperty('--progress-width', centerPos + 'px');
 
     // Update labels in settings view
     const lowLabel = elements.settingsView.querySelector('.reasoning-label-low');
