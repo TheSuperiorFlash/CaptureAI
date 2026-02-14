@@ -727,7 +727,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function renderDomainList() {
     if (settings.domainBlacklist.length === 0) {
-      elements.domainList.innerHTML = '<div style="font-size: 11px; color: #999; font-style: italic; text-align: center; padding: 15px;">No domains in blacklist</div>';
+      elements.domainList.innerHTML = '<div class="domain-list-empty">No domains in blacklist</div>';
       return;
     }
 
