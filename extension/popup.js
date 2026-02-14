@@ -293,13 +293,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Show upgrade button and hide settings button for free tier
       if (user.tier === 'free') {
         elements.upgradeBtn.classList.remove('hidden');
-        elements.userTier.style.background = '#999';
-        elements.settingsBtn.style.display = 'none';
+        elements.userTier.classList.add('tier-free');
+        elements.userTier.classList.remove('tier-pro');
+        elements.settingsBtn.classList.add('settings-hidden');
       } else {
         elements.upgradeBtn.classList.add('hidden');
         // Purple gradient for Pro tier
-        elements.userTier.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        elements.settingsBtn.style.display = 'block';
+        elements.userTier.classList.add('tier-pro');
+        elements.userTier.classList.remove('tier-free');
+        elements.settingsBtn.classList.remove('settings-hidden');
       }
 
       // Load and display usage stats (only for free tier)
@@ -347,20 +349,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const percentage = Math.min(100, Math.max(0, parseFloat(usage.today.percentage) || 0));
 
         const statsDiv = document.createElement('div');
-        statsDiv.style.cssText = 'font-size: 13px; color: #333; margin-bottom: 4px;';
+        statsDiv.className = 'usage-stat-text';
         const strong = document.createElement('strong');
         strong.textContent = used;
         statsDiv.appendChild(strong);
         statsDiv.appendChild(document.createTextNode(` / ${limit} requests today`));
 
         const barOuter = document.createElement('div');
-        barOuter.style.cssText = 'width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;';
+        barOuter.className = 'usage-bar-outer';
         const barInner = document.createElement('div');
-        barInner.style.cssText = `width: ${percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;`;
+        barInner.className = 'usage-bar-inner';
+        barInner.style.width = `${percentage}%`;
         barOuter.appendChild(barInner);
 
         const remainingDiv = document.createElement('div');
-        remainingDiv.style.cssText = 'font-size: 11px; color: #666; margin-top: 4px;';
+        remainingDiv.className = 'usage-remaining-text';
         remainingDiv.textContent = `${remaining} requests remaining`;
 
         elements.usageContent.appendChild(statsDiv);
@@ -374,20 +377,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const percentage = Math.min(100, Math.max(0, parseFloat(usage.lastMinute.percentage) || 0));
 
         const statsDiv = document.createElement('div');
-        statsDiv.style.cssText = 'font-size: 13px; color: #333; margin-bottom: 4px;';
+        statsDiv.className = 'usage-stat-text';
         const strong = document.createElement('strong');
         strong.textContent = used;
         statsDiv.appendChild(strong);
         statsDiv.appendChild(document.createTextNode(` / ${limit} requests/minute`));
 
         const barOuter = document.createElement('div');
-        barOuter.style.cssText = 'width: 100%; height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;';
+        barOuter.className = 'usage-bar-outer';
         const barInner = document.createElement('div');
-        barInner.style.cssText = `width: ${percentage}%; height: 100%; background-color: #218aff; transition: width 0.3s;`;
+        barInner.className = 'usage-bar-inner';
+        barInner.style.width = `${percentage}%`;
         barOuter.appendChild(barInner);
 
         const todayDiv = document.createElement('div');
-        todayDiv.style.cssText = 'font-size: 11px; color: #666; margin-top: 4px;';
+        todayDiv.className = 'usage-remaining-text';
         todayDiv.textContent = `${todayUsed} requests used today (unlimited)`;
 
         elements.usageContent.appendChild(statsDiv);
@@ -822,8 +826,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const centerPos = positions[level];
 
-    slider.style.left = (centerPos - sliderHalfWidth) + 'px';
-    progress.style.width = centerPos + 'px';
+    slider.style.setProperty('left', (centerPos - sliderHalfWidth) + 'px');
+    progress.style.setProperty('width', centerPos + 'px');
 
     // Update labels in settings view
     const lowLabel = elements.settingsView.querySelector('.reasoning-label-low');
@@ -831,14 +835,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const highLabel = elements.settingsView.querySelector('.reasoning-label-high');
 
     if (lowLabel && mediumLabel && highLabel) {
-      lowLabel.style.color = level === 0 ? '#218aff' : '#666666';
-      lowLabel.style.fontWeight = level === 0 ? '600' : '500';
-
-      mediumLabel.style.color = level === 1 ? '#218aff' : '#666666';
-      mediumLabel.style.fontWeight = level === 1 ? '600' : '500';
-
-      highLabel.style.color = level === 2 ? '#218aff' : '#666666';
-      highLabel.style.fontWeight = level === 2 ? '600' : '500';
+      lowLabel.classList.toggle('active', level === 0);
+      mediumLabel.classList.toggle('active', level === 1);
+      highLabel.classList.toggle('active', level === 2);
     }
   }
 
@@ -892,8 +891,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (type === 'error') {
       elements.responseContent.className = 'response-content error';
     } else if (type === 'success') {
-      elements.responseContent.className = 'response-content';
-      elements.responseContent.style.color = '#008000';
+      elements.responseContent.className = 'response-content success';
     } else {
       elements.responseContent.className = 'response-content';
     }
@@ -905,7 +903,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   function clearResponseMessage() {
     elements.responseContent.textContent = '';
     elements.responseContent.className = 'response-content empty';
-    elements.responseContent.style.color = '';
   }
 
   /**

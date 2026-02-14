@@ -679,6 +679,58 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Usage stats styling */
+        .usage-stat-text {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .usage-bar-outer {
+            width: 100%;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .usage-bar-inner {
+            height: 100%;
+            background-color: #218aff;
+            transition: width 0.3s;
+        }
+
+        .usage-remaining-text {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* User tier badges */
+        #user-tier.tier-free {
+            background: #999;
+        }
+
+        #user-tier.tier-pro {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Settings button visibility */
+        .settings-hidden {
+            display: none;
+        }
+
+        /* Reasoning level labels - active state */
+        .reasoning-label.active {
+            color: #218aff;
+            font-weight: 600;
+        }
+
+        /* Response content colors */
+        .response-content.success {
+            color: #008000;
+        }
     </style>
 </head>
 <body>
