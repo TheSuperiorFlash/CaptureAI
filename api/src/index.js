@@ -148,9 +148,10 @@ function addSecurityHeaders(response) {
  * Restricts requests to trusted origins only
  */
 function getCORSHeaders(request, env) {
-  // List of allowed origins
+  // List of allowed origins - must be exact matches for security
   const allowedOrigins = [
     'https://captureai.dev',
+    'https://thesuperiorflash.github.io',
   ];
 
   // Development/testing origins (only if in dev mode)
@@ -173,7 +174,6 @@ function getCORSHeaders(request, env) {
     else if (origin.startsWith('chrome-extension://')) {
       const extensionIds = env?.CHROME_EXTENSION_IDS;
       if (extensionIds) {
-        // Support comma-separated list of extension IDs
         const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
         const allowedExtensions = allowedExtensionIds.map(id => `chrome-extension://${id}`);
 
@@ -181,14 +181,10 @@ function getCORSHeaders(request, env) {
           allowedOrigin = origin;
         }
       } else if (isDev) {
-        // In development, allow any extension for testing
         allowedOrigin = origin;
       }
     }
-    // Match GitHub Pages subdomain
-    else if (origin.match(/^https:\/\/.*\.github\.io$/)) {
-      allowedOrigin = origin;
-    }
+    // No wildcard github.io matching - only exact origins above
   }
 
   return {

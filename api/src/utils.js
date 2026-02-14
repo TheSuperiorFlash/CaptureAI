@@ -46,7 +46,8 @@ export async function fetchWithTimeout(url, options = {}, timeout = 10000) {
  * Handle CORS preflight
  */
 export function handleCORS(request, env) {
-  // List of allowed origins
+  // List of allowed origins - must be exact matches for security
+  // Kept in sync with getCORSHeaders() in index.js
   const allowedOrigins = [
     'https://captureai.dev',
     'https://thesuperiorflash.github.io',
@@ -72,7 +73,6 @@ export function handleCORS(request, env) {
     else if (origin.startsWith('chrome-extension://')) {
       const extensionIds = env?.CHROME_EXTENSION_IDS;
       if (extensionIds) {
-        // Support comma-separated list of extension IDs
         const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
         const allowedExtensions = allowedExtensionIds.map(id => `chrome-extension://${id}`);
 
@@ -80,14 +80,10 @@ export function handleCORS(request, env) {
           allowedOrigin = origin;
         }
       } else if (isDev) {
-        // In development, allow any extension for testing
         allowedOrigin = origin;
       }
     }
-    // Match GitHub Pages subdomain
-    else if (origin.match(/^https:\/\/.*\.github\.io$/)) {
-      allowedOrigin = origin;
-    }
+    // No wildcard github.io matching - only exact origins above
   }
 
   return new Response(null, {
@@ -190,14 +186,15 @@ export async function verifyPassword(password, hash) {
 
     const newHash = new Uint8Array(hashBuffer);
 
-    // Compare
+    // Constant-time comparison to prevent timing attacks
     if (originalHash.length !== newHash.length) return false;
 
+    let result = 0;
     for (let i = 0; i < originalHash.length; i++) {
-      if (originalHash[i] !== newHash[i]) return false;
+      result |= originalHash[i] ^ newHash[i];
     }
 
-    return true;
+    return result === 0;
   } catch (error) {
     console.error('Password verification error:', error);
     return false;
@@ -233,9 +230,9 @@ export async function verifyJWT(token, secret) {
     const [encodedHeader, encodedPayload, signature] = parts;
     const message = `${encodedHeader}.${encodedPayload}`;
 
-    // Verify signature
+    // Verify signature using constant-time comparison to prevent timing attacks
     const expectedSignature = await sign(message, secret);
-    if (signature !== expectedSignature) {
+    if (!constantTimeCompare(signature, expectedSignature)) {
       throw new Error('Invalid signature');
     }
 
@@ -328,13 +325,12 @@ export function constantTimeCompare(a, b) {
     return false;
   }
 
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  // Use the longer string length and XOR length difference to avoid
+  // leaking length information via early return timing
+  const len = Math.max(a.length, b.length);
+  let result = a.length ^ b.length;
+  for (let i = 0; i < len; i++) {
+    result |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   }
 
   return result === 0;

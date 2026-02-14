@@ -43,7 +43,7 @@
    * Prevents detection of tab switches, minimization, etc.
    */
   Object.defineProperty(Document.prototype, 'visibilityState', {
-    configurable: true,
+    configurable: false,
     get: function() {
       return 'visible';
     }
@@ -54,7 +54,7 @@
    * Another way pages check if they're visible
    */
   Object.defineProperty(Document.prototype, 'hidden', {
-    configurable: true,
+    configurable: false,
     get: function() {
       return false;
     }
@@ -65,7 +65,7 @@
    */
   if ('webkitVisibilityState' in Document.prototype) {
     Object.defineProperty(Document.prototype, 'webkitVisibilityState', {
-      configurable: true,
+      configurable: false,
       get: function() {
         return 'visible';
       }
@@ -74,7 +74,7 @@
 
   if ('webkitHidden' in Document.prototype) {
     Object.defineProperty(Document.prototype, 'webkitHidden', {
-      configurable: true,
+      configurable: false,
       get: function() {
         return false;
       }
@@ -110,8 +110,8 @@
     'pageshow'                  // Page load
   ]);
 
-  // Debug mode - set to true to log blocked events
-  const DEBUG_PRIVACY_GUARD = true;
+  // Debug mode - set to false in production to avoid leaking info to page console
+  const DEBUG_PRIVACY_GUARD = false;
 
   /**
    * Store blocked listeners so removeEventListener works correctly
@@ -197,13 +197,9 @@
     return originalRemoveEventListener.call(this, type, listener, options);
   };
 
-  // Also create backup references for internal use
-  Window.prototype._addEventListener = originalAddEventListener;
-  Window.prototype._removeEventListener = originalRemoveEventListener;
-  Document.prototype._addEventListener = originalAddEventListener;
-  Document.prototype._removeEventListener = originalRemoveEventListener;
-  Element.prototype._addEventListener = originalAddEventListener;
-  Element.prototype._removeEventListener = originalRemoveEventListener;
+  // Store original references in a closure-scoped variable instead of public prototypes
+  // to prevent page scripts from bypassing privacy protection
+  // (Previously exposed as _addEventListener/_removeEventListener on prototypes)
 
   // ============================================================================
   // SECTION 2.5: BLOCK DIRECT EVENT PROPERTY ASSIGNMENTS
@@ -379,33 +375,21 @@
 
     // Override getComputedStyle to force user-select to be enabled
     const originalGetComputedStyle = window.getComputedStyle;
-    window.getComputedStyle = function(element, pseudoElt) {
-      const styles = originalGetComputedStyle.call(this, element, pseudoElt);
+    const userSelectProps = new Set([
+      'user-select', '-webkit-user-select', '-moz-user-select', '-ms-user-select'
+    ]);
+    const originalGetPropertyValueDesc = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'getPropertyValue');
+    const originalGetPropertyValue = originalGetPropertyValueDesc.value;
 
-      // Create a proxy to intercept property access
-      const originalGetPropertyValue = styles.getPropertyValue.bind(styles);
-
-      styles.getPropertyValue = function(property) {
-        // Force text selection to be allowed
-        if (property === 'user-select' ||
-            property === '-webkit-user-select' ||
-            property === '-moz-user-select' ||
-            property === '-ms-user-select') {
-          return 'text'; // Always allow text selection
-        }
-
-        // Force pointer events to be enabled (some sites disable to prevent selection)
-        if (property === 'pointer-events') {
-          const originalValue = originalGetPropertyValue(property);
-          if (originalValue === 'none') {
-            return 'auto'; // Enable pointer events
-          }
-        }
-
-        return originalGetPropertyValue(property);
-      };
-
-      return styles;
+    CSSStyleDeclaration.prototype.getPropertyValue = function(property) {
+      if (userSelectProps.has(property)) {
+        return 'text';
+      }
+      if (property === 'pointer-events') {
+        const val = originalGetPropertyValue.call(this, property);
+        return val === 'none' ? 'auto' : val;
+      }
+      return originalGetPropertyValue.call(this, property);
     };
 
     if (DEBUG_PRIVACY_GUARD) {

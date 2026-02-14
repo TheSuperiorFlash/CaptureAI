@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Chrome, Check, Download, ArrowRight, Shield, Zap } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Download - CaptureAI',
+    title: 'Download',
     description: 'Download the CaptureAI Chrome extension. Free AI-powered screenshot answers for students.',
     openGraph: {
         title: 'Download CaptureAI',

@@ -76,7 +76,7 @@ export const DomainUtils = {
     ];
 
     const hostname = window.location.hostname.toLowerCase();
-    return strictCSPDomains.some(domain => hostname.includes(domain));
+    return strictCSPDomains.some(domain => hostname === domain || hostname.endsWith('.' + domain));
   },
 
   /**
@@ -88,6 +88,6 @@ export const DomainUtils = {
     return (url.startsWith('http://') || url.startsWith('https://')) &&
            !url.startsWith('chrome://') &&
            !url.startsWith('chrome-extension://') &&
-           !url.startsWith('chrome.google.com');
+           !url.includes('chrome.google.com/webstore');
   }
 };

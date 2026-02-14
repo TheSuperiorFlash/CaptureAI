@@ -34,7 +34,7 @@ importScripts('modules/auth-service.js', 'modules/migration.js');
  * Debug flag for console logging
  * NOTE: Matches CONFIG.DEBUG in modules/config.js
  */
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Prompt type constants
@@ -279,19 +279,7 @@ async function handleCaptureArea(request, sender, sendResponse) {
       return;
     }
 
-    // Debug mode: log captured image to console
-    if (DEBUG && processedData?.compressedImageData) {
-      // Log to service worker console
-      console.log('CaptureAI Debug - Captured Image Data:', processedData.compressedImageData);
-
-      // Also send to page console for easier viewing
-      chrome.tabs.sendMessage(sender.tab.id, {
-        action: 'debugLogImage',
-        imageData: processedData.compressedImageData
-      }).catch(() => {
-        // Ignore errors if content script isn't ready
-      });
-    }
+    // Debug image logging removed - was leaking base64 screenshots to console
 
     // If this is for ask mode, send image data back to content script
     if (request.isForAskMode) {
@@ -723,7 +711,7 @@ function isValidUrl(url) {
   return (url.startsWith('http://') || url.startsWith('https://')) &&
          !url.startsWith('chrome://') &&
          !url.startsWith('chrome-extension://') &&
-         !url.startsWith('chrome.google.com');
+         !url.includes('chrome.google.com/webstore');
 }
 
 

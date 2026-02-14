@@ -8,7 +8,7 @@
     "homepage_url": "https://github.com/TheSuperiorFlash/CaptureAI",
     "offline_enabled": false,
     "content_security_policy": {
-        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self';"
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;"
     },
     "permissions": [
         "storage",
@@ -74,7 +74,6 @@
             "icons/camera.png",
             "icons/attach.png",
             "icons/attached.png",
-            "inject.js",
             "modules/config.js",
             "modules/storage.js",
             "modules/domains.js",

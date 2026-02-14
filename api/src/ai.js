@@ -3,14 +3,17 @@
  * Handles AI requests through Cloudflare AI Gateway
  */
 
-import { jsonResponse, parseJSON } from './utils';
+import { jsonResponse, fetchWithTimeout } from './utils';
 import { AuthHandler } from './auth';
+import { validateRequestBody } from './validation';
+import { checkRateLimit, getClientIdentifier } from './ratelimit';
 
 export class AIHandler {
-  constructor(env) {
+  constructor(env, logger = null) {
     this.env = env;
     this.db = env.DB;
-    this.auth = new AuthHandler(env);
+    this.logger = logger;
+    this.auth = new AuthHandler(env, logger);
     this.gatewayName = env.CLOUDFLARE_GATEWAY_NAME || 'captureai-gateway';
 
     // Get account ID from env or extract from worker URL
@@ -42,6 +45,18 @@ export class AIHandler {
    */
   async complete(request) {
     try {
+      // IP-based rate limit before authentication to prevent abuse
+      const clientId = getClientIdentifier(request);
+      const ipRateLimit = await checkRateLimit(
+        `ai:${clientId}`,
+        30, // 30 requests per minute per IP
+        60000,
+        this.env
+      );
+      if (ipRateLimit) {
+        return jsonResponse(ipRateLimit, 429);
+      }
+
       // Authenticate and check usage limit in a single query (optimization)
       const { user, usageCheck } = await this.authenticateAndCheckUsage(request);
       if (!user) {
@@ -62,8 +77,8 @@ export class AIHandler {
         }, 429);
       }
 
-      // Parse request
-      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel } = await parseJSON(request);
+      // Parse and validate request body with size limit (10MB for base64 images)
+      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel } = await validateRequestBody(request, 10 * 1024 * 1024);
 
       // Validate - check if we have any valid input
       const hasQuestion = question && question.trim().length > 0;
@@ -144,8 +159,7 @@ export class AIHandler {
     } catch (error) {
       console.error('AI completion error:', error);
       return jsonResponse({
-        error: 'AI request failed',
-        message: error.message
+        error: 'AI request failed'
       }, 500);
     }
   }
@@ -429,11 +443,41 @@ export class AIHandler {
    * Check if user is within usage limits
    */
   async checkUsageLimit(userId, tier) {
-    // Pro tier: Rate limited to 30 requests per minute
+    // Pro tier: Use Durable Object rate limiter for atomic check-and-increment
     if (tier === 'pro') {
-      const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '30');
+      const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '60');
 
-      // Get requests from last minute
+      // Use Durable Object rate limiter to prevent race conditions
+      const rateLimitError = await checkRateLimit(
+        `user:${userId}`,
+        rateLimit,
+        60000, // 1 minute window
+        this.env
+      );
+
+      if (rateLimitError) {
+        // Rate limit exceeded - get approximate usage from database for display
+        const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+        const result = await this.db
+          .prepare(`
+            SELECT COUNT(*) as count
+            FROM usage_records
+            WHERE user_id = ? AND created_at > ?
+          `)
+          .bind(userId, oneMinuteAgo)
+          .first();
+
+        const usedInLastMinute = result?.count || rateLimit;
+
+        return {
+          allowed: false,
+          used: usedInLastMinute,
+          limit: rateLimit,
+          limitType: 'per_minute'
+        };
+      }
+
+      // Allowed - get current usage from database for display purposes
       const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
       const result = await this.db
         .prepare(`
@@ -447,7 +491,7 @@ export class AIHandler {
       const usedInLastMinute = result?.count || 0;
 
       return {
-        allowed: usedInLastMinute < rateLimit,
+        allowed: true,
         used: usedInLastMinute,
         limit: rateLimit,
         limitType: 'per_minute'
@@ -707,11 +751,11 @@ export class AIHandler {
           headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
       }
 
-      const response = await fetch(this.apiUrl, {
+      const response = await fetchWithTimeout(this.apiUrl, {
           method: 'POST',
           headers,
       body: JSON.stringify(payload)
-    });
+    }, 30000); // 30 second timeout for AI requests
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));

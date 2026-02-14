@@ -10,6 +10,29 @@ const AuthService = {
   DEFAULT_BACKEND_URL: 'https://api.captureai.workers.dev',
 
   /**
+   * Default request timeout in milliseconds
+   */
+  REQUEST_TIMEOUT: 30000,
+
+  /**
+   * Fetch with timeout using AbortController
+   * @param {string} url - Request URL
+   * @param {Object} options - Fetch options
+   * @param {number} timeout - Timeout in ms
+   * @returns {Promise<Response>}
+   */
+  async fetchWithTimeout(url, options = {}, timeout = this.REQUEST_TIMEOUT) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      return response;
+    } finally {
+      clearTimeout(id);
+    }
+  },
+
+  /**
    * Get backend URL from storage
    * @returns {Promise<string>} Backend URL
    */
@@ -42,7 +65,7 @@ const AuthService = {
     const backendUrl = await this.getBackendUrl();
 
     try {
-      const response = await fetch(`${backendUrl}/api/auth/validate-key`, {
+      const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/validate-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ licenseKey })
@@ -108,7 +131,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/auth/me`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/me`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -148,7 +171,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/ai/usage`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/ai/usage`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -181,12 +204,12 @@ const AuthService = {
     }
 
     try {
-      const response = await fetch(`${backendUrl}/api/ai/complete`, {
+      const response = await this.fetchWithTimeout(`${backendUrl}/api/ai/complete`, {
         method: 'POST',
         headers: {
           'Authorization': `LicenseKey ${licenseKey}`,
           'Content-Type': 'application/json',
-          'Priority': 'u=1' // Optimization #8: Request prioritization for faster processing
+          'Priority': 'u=1'
         },
         body: JSON.stringify({
           question,
@@ -196,7 +219,7 @@ const AuthService = {
           promptType,
           reasoningLevel
         })
-      });
+      }, 60000);
 
       if (!response.ok) {
         let error;
@@ -231,6 +254,10 @@ const AuthService = {
 
       return await response.json();
     } catch (error) {
+      // Timeout errors
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. The server may be overloaded. Please try again.');
+      }
       // Network errors (fetch failed completely)
       if (error.message.includes('fetch') || error.message.includes('network') || error.name === 'TypeError') {
         throw new Error(`Network error: Cannot reach backend at ${backendUrl}. Check your internet connection.`);
@@ -248,7 +275,7 @@ const AuthService = {
   async createCheckoutSession(email) {
     const backendUrl = await this.getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/subscription/create-checkout`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/create-checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -276,7 +303,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/subscription/portal`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/portal`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -296,7 +323,7 @@ const AuthService = {
    */
   async getPlans() {
     const backendUrl = await this.getBackendUrl();
-    const response = await fetch(`${backendUrl}/api/subscription/plans`);
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/plans`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch plans');
@@ -329,7 +356,7 @@ const AuthService = {
   async requestFreeKey(email) {
     const backendUrl = await this.getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/auth/create-free-key`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/create-free-key`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email || undefined })
