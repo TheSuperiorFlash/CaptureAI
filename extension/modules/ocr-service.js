@@ -41,7 +41,7 @@ class OCRService {
                 await this.worker.setParameters({
                     tessedit_pageseg_mode: Tesseract.PSM.AUTO, // Auto page segmentation
                     preserve_interword_spaces: '0', // Reduce excessive spacing
-                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,?!()+-=×÷/:;\'\" \n', // Common chars only
+                    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,?!()+-=×÷/:;\'\"%@#$^&*{}[]<>_|\\~ \n',
                 });
 
                 this.isInitialized = true;
@@ -109,7 +109,7 @@ class OCRService {
                 await this.initialize();
             }
 
-            const confidenceThreshold = options.confidenceThreshold || 60;
+            const confidenceThreshold = options.confidenceThreshold || 40;
             const startTime = performance.now();
 
             // Perform OCR
@@ -188,8 +188,8 @@ class OCRService {
         // Check if text is not empty after trimming
         const hasText = ocrResult.text.trim().length > 0;
 
-        // Check confidence threshold (consider valid if above 30%)
-        const hasConfidence = ocrResult.confidence >= 30;
+        // Check confidence threshold (matches default in extractText)
+        const hasConfidence = ocrResult.confidence >= 40;
 
         return hasText && hasConfidence;
     }

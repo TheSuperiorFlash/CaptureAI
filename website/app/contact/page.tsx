@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Mail, MessageCircle, ArrowRight, BookOpen } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Contact - CaptureAI',
+    title: 'Contact',
     description: 'Get in touch with the CaptureAI team for support or feature requests.',
 }
 

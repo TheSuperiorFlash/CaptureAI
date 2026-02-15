@@ -17,8 +17,26 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
+    // Static JSON-LD structured data - no user input, safe for dangerouslySetInnerHTML
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'CaptureAI',
+        applicationCategory: 'BrowserApplication',
+        operatingSystem: 'Chrome',
+        offers: [
+            { '@type': 'Offer', price: '0', priceCurrency: 'USD', name: 'Free' },
+            { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
+        ],
+        description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
+    }
+
     return (
         <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Hero />
 
             {/* ---- Floating UI Showcase ---- */}

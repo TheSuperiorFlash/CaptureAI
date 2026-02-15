@@ -271,23 +271,8 @@ export const Messaging = {
           }
         }
 
-        // Notify popup if available - don't fail on popup errors
-        try {
-          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-            chrome.runtime.sendMessage({
-              action: 'updateResponse',
-              message: request.response,
-              isError: request.response.startsWith('Error:')
-            }, () => {
-              // Ignore response or errors - popup might not be open
-              if (chrome.runtime.lastError) {
-                // Silent handling of popup communication errors
-              }
-            });
-          }
-        } catch (_error) {
-          // Extension context might be invalidated, continue processing
-        }
+        // Popup update is now sent directly by background.js displayResponse()
+        // No need to relay through the content script
 
         sendResponse({ success: true });
       } catch (error) {
@@ -303,19 +288,14 @@ export const Messaging = {
          * @param {string} response - Response text
          */
   displayRegularResponse(response) {
-    const { STATE } = window.CaptureAI;
-
     // Determine message type
     const isError = response.startsWith('Error:') || response.includes('failed');
 
-    // Use new messaging system to display AI response
-    if (window.CaptureAI.UICore) {
+    // Display AI response via UICore
+    if (window.CaptureAI?.UICore?.displayAIResponse) {
       window.CaptureAI.UICore.displayAIResponse(response, isError);
-    } else {
-      // Fallback to direct UI components call
-      STATE.isShowingAnswer = true;
+    } else if (window.CaptureAI?.UICore?.showMessage) {
       window.CaptureAI.UICore.showMessage(response, isError);
-      STATE.isShowingAnswer = false;
     }
   },
 

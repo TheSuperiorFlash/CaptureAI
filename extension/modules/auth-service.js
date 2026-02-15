@@ -10,6 +10,44 @@ const AuthService = {
   DEFAULT_BACKEND_URL: 'https://api.captureai.workers.dev',
 
   /**
+   * Default request timeout in milliseconds
+   */
+  REQUEST_TIMEOUT: 30000,
+
+  /**
+   * Storage key for the user cache
+   */
+  CACHE_KEY: 'captureai-user-cache',
+
+  /**
+   * Cache freshness threshold - popup skips background refresh if within this
+   */
+  CACHE_FRESHNESS_MS: 5 * 60 * 1000, // 5 minutes
+
+  /**
+   * Cache hard expiry - force synchronous API check if older
+   */
+  CACHE_MAX_AGE_MS: 60 * 60 * 1000, // 1 hour
+
+  /**
+   * Fetch with timeout using AbortController
+   * @param {string} url - Request URL
+   * @param {Object} options - Fetch options
+   * @param {number} timeout - Timeout in ms
+   * @returns {Promise<Response>}
+   */
+  async fetchWithTimeout(url, options = {}, timeout = this.REQUEST_TIMEOUT) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      return response;
+    } finally {
+      clearTimeout(id);
+    }
+  },
+
+  /**
    * Get backend URL from storage
    * @returns {Promise<string>} Backend URL
    */
@@ -42,7 +80,7 @@ const AuthService = {
     const backendUrl = await this.getBackendUrl();
 
     try {
-      const response = await fetch(`${backendUrl}/api/auth/validate-key`, {
+      const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/validate-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ licenseKey })
@@ -91,7 +129,9 @@ const AuthService = {
       await chrome.storage.local.remove([
         'captureai-license-key',
         'captureai-user-email',
-        'captureai-user-tier'
+        'captureai-user-tier',
+        this.CACHE_KEY,
+        'captureai-last-usage'
       ]);
     }
   },
@@ -108,7 +148,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/auth/me`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/me`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -125,12 +165,13 @@ const AuthService = {
 
     const user = await response.json();
 
-    // Update stored user info
+    // Update stored user info and cache
     if (typeof chrome !== 'undefined' && chrome.storage) {
       await chrome.storage.local.set({
         'captureai-user-email': user.email,
         'captureai-user-tier': user.tier
       });
+      await this.setCachedUser(user);
     }
 
     return user;
@@ -148,7 +189,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/ai/usage`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/ai/usage`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -181,12 +222,12 @@ const AuthService = {
     }
 
     try {
-      const response = await fetch(`${backendUrl}/api/ai/complete`, {
+      const response = await this.fetchWithTimeout(`${backendUrl}/api/ai/complete`, {
         method: 'POST',
         headers: {
           'Authorization': `LicenseKey ${licenseKey}`,
           'Content-Type': 'application/json',
-          'Priority': 'u=1' // Optimization #8: Request prioritization for faster processing
+          'Priority': 'u=1'
         },
         body: JSON.stringify({
           question,
@@ -196,7 +237,7 @@ const AuthService = {
           promptType,
           reasoningLevel
         })
-      });
+      }, 60000);
 
       if (!response.ok) {
         let error;
@@ -231,6 +272,10 @@ const AuthService = {
 
       return await response.json();
     } catch (error) {
+      // Timeout errors
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. The server may be overloaded. Please try again.');
+      }
       // Network errors (fetch failed completely)
       if (error.message.includes('fetch') || error.message.includes('network') || error.name === 'TypeError') {
         throw new Error(`Network error: Cannot reach backend at ${backendUrl}. Check your internet connection.`);
@@ -248,7 +293,7 @@ const AuthService = {
   async createCheckoutSession(email) {
     const backendUrl = await this.getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/subscription/create-checkout`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/create-checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -276,7 +321,7 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await fetch(`${backendUrl}/api/subscription/portal`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/portal`, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }
@@ -296,13 +341,112 @@ const AuthService = {
    */
   async getPlans() {
     const backendUrl = await this.getBackendUrl();
-    const response = await fetch(`${backendUrl}/api/subscription/plans`);
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/plans`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch plans');
     }
 
     return await response.json();
+  },
+
+  /**
+   * Read cached user data from chrome.storage.local
+   * @returns {Promise<Object|null>} Cached user object with updatedAt, or null
+   */
+  async getCachedUser() {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      const result = await chrome.storage.local.get(this.CACHE_KEY);
+      return result[this.CACHE_KEY] || null;
+    }
+    return null;
+  },
+
+  /**
+   * Write user data to cache with current timestamp
+   * @param {Object} user - User object from API (must have email, tier)
+   * @returns {Promise<void>}
+   */
+  async setCachedUser(user) {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.set({
+        [this.CACHE_KEY]: {
+          email: user.email,
+          tier: user.tier,
+          updatedAt: Date.now(),
+          userData: user
+        }
+      });
+    }
+  },
+
+  /**
+   * Clear the user cache
+   * @returns {Promise<void>}
+   */
+  async clearCachedUser() {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.remove(this.CACHE_KEY);
+    }
+  },
+
+  /**
+   * In-flight refresh promise to deduplicate concurrent refresh calls
+   */
+  _refreshInFlight: null,
+
+  /**
+   * Refresh the cache by calling the API and storing the result.
+   * Deduplicates concurrent calls - if a refresh is already in-flight, reuses it.
+   * @returns {Promise<Object|null>} Fresh user object, or null on failure
+   */
+  async refreshUserCache() {
+    if (this._refreshInFlight) {
+      return this._refreshInFlight;
+    }
+
+    this._refreshInFlight = this.getCurrentUser()
+      .catch(() => null)
+      .finally(() => { this._refreshInFlight = null; });
+
+    return this._refreshInFlight;
+  },
+
+  /**
+   * Get user from cache, falling back to API if cache is missing or expired.
+   * @param {Object} [options]
+   * @param {boolean} [options.allowStale=false] - If true, return stale cache without API call
+   * @returns {Promise<{user: Object|null, fromCache: boolean, needsRefresh: boolean}>}
+   */
+  async getCachedOrFreshUser({ allowStale = false } = {}) {
+    const cached = await this.getCachedUser();
+
+    if (cached && cached.updatedAt) {
+      const age = Date.now() - cached.updatedAt;
+
+      // Cache is fresh - return immediately, no refresh needed
+      if (age < this.CACHE_FRESHNESS_MS) {
+        return { user: cached.userData, fromCache: true, needsRefresh: false };
+      }
+
+      // Cache is stale but not expired - return it, flag for background refresh
+      if (age < this.CACHE_MAX_AGE_MS) {
+        return { user: cached.userData, fromCache: true, needsRefresh: true };
+      }
+
+      // Cache expired, but caller accepts stale data (e.g., background.js auth check)
+      if (allowStale) {
+        return { user: cached.userData, fromCache: true, needsRefresh: true };
+      }
+    }
+
+    // No cache or hard-expired: must call API synchronously
+    try {
+      const user = await this.getCurrentUser();
+      return { user, fromCache: false, needsRefresh: false };
+    } catch {
+      return { user: null, fromCache: false, needsRefresh: false };
+    }
   },
 
   /**
@@ -313,6 +457,16 @@ const AuthService = {
     const licenseKey = await this.getLicenseKey();
     if (!licenseKey) return false;
 
+    // Try cache first to avoid blocking API call
+    const cached = await this.getCachedUser();
+    if (cached && cached.updatedAt) {
+      const age = Date.now() - cached.updatedAt;
+      if (age < this.CACHE_MAX_AGE_MS) {
+        return true;
+      }
+    }
+
+    // Cache missing or expired: fall back to API call
     try {
       await this.getCurrentUser();
       return true;
@@ -329,7 +483,7 @@ const AuthService = {
   async requestFreeKey(email) {
     const backendUrl = await this.getBackendUrl();
 
-    const response = await fetch(`${backendUrl}/api/auth/create-free-key`, {
+    const response = await this.fetchWithTimeout(`${backendUrl}/api/auth/create-free-key`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email || undefined })

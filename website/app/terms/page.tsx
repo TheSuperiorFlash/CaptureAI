@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Terms of Service - CaptureAI',
+    title: 'Terms of Service',
     description: 'Terms of Service for the CaptureAI Chrome extension.',
 }
 
@@ -96,7 +96,7 @@ export default function TermsPage() {
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Refund Policy</h3>
                         <p>
                             For refund inquiries,
-                            contact us at <a href="mailto:wonhappyheart@gmail.com" className="text-[--color-accent-hover] underline underline-offset-2">wonhappyheart@gmail.com</a>.
+                            contact us at <a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a>.
                         </p>
                     </section>
 
@@ -180,7 +180,7 @@ export default function TermsPage() {
                         <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Contact</h2>
                         <p className="mb-3">For questions about these Terms:</p>
                         <ul className="space-y-1.5">
-                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span> <a href="mailto:wonhappyheart@gmail.com" className="text-[--color-accent-hover] underline underline-offset-2">wonhappyheart@gmail.com</a></li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span> <a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a></li>
                             <li><span className="font-medium text-[--color-text-secondary]">GitHub:</span> <a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">TheSuperiorFlash/CaptureAI</a></li>
                         </ul>
                     </section>

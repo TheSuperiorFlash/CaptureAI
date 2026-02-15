@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, Keyboard, HelpCircle, MessageSquare } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Help - CaptureAI',
+    title: 'Help',
     description: 'Learn how to use CaptureAI. Guides, keyboard shortcuts, and FAQ.',
 }
 

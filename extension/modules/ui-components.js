@@ -454,8 +454,7 @@ export const UIComponents = {
         this.showMessage('Capturing...', false);
 
         window.CaptureAI.STATE.askModeInstance = this;
-        window.CaptureAI.STATE.isForAskMode = true;
-        window.CaptureAI.CaptureSystem.startCapture();
+        window.CaptureAI.CaptureSystem.startCapture(true);
       }
     } catch (error) {
       const { CONFIG } = window.CaptureAI || {};

@@ -3,390 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            width: 300px;
-            min-height: max-content;
-            max-height: 800px;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: #333333 !important;
-            background-color: white;
-        }
-        
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #f5f5f5;
-            color: #333;
-            color: #333333 !important;
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-        }
-        
-        .header-logo {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-        
-        .header-title {
-            font-weight: bold;
-            font-size: 18px;
-            color: #333333 !important;
-        }
-        
-        .header-ui-toggle {
-            background: none;
-            border: 1px solid #d1d1d1;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 11px;
-            color: #666666 !important;
-            cursor: pointer;
-            width: 60px !important;
-            min-width: 60px !important;
-            max-width: 60px !important;
-            box-sizing: border-box;
-        }
-        
-        .header-ui-toggle:hover {
-            background-color: #f0f0f0;
-            color: #333333 !important;
-        }
-        
-        .section {
-            padding: 5px 15px;
-        }
-        
-        .section:first-of-type {
-            padding-top: 15px;
-            margin-bottom: 20px;
-        }
-        
-        #main-controls {
-            padding-bottom: 5px;
-        }
-
-        .button-with-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .button-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 10px;
-        }
-        
-        .button {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 10px;
-            transition: background-color 0.3s;
-            width: 100% !important;
-            box-sizing: border-box;
-        }
-
-        .button-primary {
-            background-color: #218aff;
-            color: white;
-        }
-
-        .button-primary:hover {
-            background-color: #1a6fd9;
-        }
-        
-        .button-secondary {
-            background-color: #f1f1f1;
-            color: #444;
-            border: 1px solid #d1d1d1;
-        }
-        
-        .button-secondary:hover {
-            background-color: #e8e8e8;
-        }
-        
-        .button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .input-group {
-            margin-bottom: 8px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            color: #666;
-            color: #666666 !important;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #d1d1d1;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-            color: #333333 !important;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .response-section {
-            padding: 15px;
-            margin-bottom: 5px;
-        }
-        
-        .response-title {
-            font-size: 14px;
-            color: #666666;
-            margin-bottom: 5px;
-        }
-        
-        .response-content {
-            font-size: 16px;
-            color: #333333;
-            word-break: break-word;
-            min-height: 20px;
-            line-height: 1.4;
-        }
-        
-        .response-content.error {
-            color: #ff0000;
-        }
-        
-        .response-content.empty {
-            color: #999999;
-            font-style: italic;
-        }
-        
-        /* Info icon styles */
-        .info-icon {
-            width: 12px;
-            height: 12px;
-            margin-left: 2px;
-            margin-bottom: 2px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            vertical-align: middle;
-        }
-        
-        .info-icon:hover {
-            opacity: 1;
-        }
-        
-        /* Tooltip styles */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: rgba(70, 70, 70, 0.7);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            border: 1px solid #333;
-            padding: 8px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            line-height: 1.3;
-            text-shadow: 1px 1px 1px rgb(0, 0, 0);
-        }
-        
-        .tooltip .tooltiptext::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 28%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-        
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        /* Help section styles */
-        .help-section {
-            padding: 0px 15px 15px 20px;
-        }
-        
-        .help-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            font-size: 14px;
-            color: #666666;
-            font-weight: 500;
-            padding: 2px 0;
-        }
-        
-        .help-toggle:hover {
-            color: #333333;
-        }
-        
-        .help-arrow {
-            font-size: 12px;
-            transition: transform 0.3s ease-in-out;
-            transform-origin: center;
-        }
-        
-        .help-arrow.expanded {
-            transform: rotate(90deg);
-        }
-        
-        .help-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out;
-        }
-
-        .help-content.expanded {
-            max-height: 800px;
-            padding-top: 5px;
-            overflow-y: auto;
-        }
-
-        .help-content::-webkit-scrollbar {
-            display: none;
-        }
-
-        .help-content {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .help-category {
-            margin: 12px 0 8px 0;
-            font-size: 13px;
-            font-weight: bold;
-            color: #333333;
-        }
-        
-        .help-item {
-            margin: 5px 0;
-            font-size: 12px;
-            color: #666666;
-            line-height: 1.4;
-        }
-
-        .help-shortcut {
-            background-color: #e8e8e8;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 11px;
-            font-weight: bold;
-            color: #218aff;
-        }
-
-        /* Reasoning Toggle Styles */
-        .reasoning-toggle-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .reasoning-toggle-track {
-            position: relative;
-            width: 100%;
-            max-width: 260px;
-            height: 6px;
-            background-color: #e0e0e0;
-            border-radius: 3px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            overflow: visible;
-        }
-
-        .reasoning-toggle-progress {
-            position: absolute;
-            height: 100%;
-            background: linear-gradient(90deg, #218aff 0%, #0066ff 100%);
-            border-radius: 3px;
-            left: 0;
-            transition: width 0.3s ease;
-            z-index: 0;
-        }
-
-        .reasoning-toggle-slider {
-            position: absolute;
-            width: 40px;
-            height: 24px;
-            background-color: white;
-            border-radius: 100px;
-            border: none;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 0px;
-            transition: all 0.3s ease;
-            z-index: 2;
-            pointer-events: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15),
-                        0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .reasoning-label {
-            position: absolute;
-            font-size: 10px;
-            font-weight: 500;
-            font-family: 'Inter', sans-serif;
-            transition: color 0.15s ease;
-            z-index: 3;
-            user-select: none;
-            white-space: nowrap;
-            pointer-events: none;
-            bottom: -28px;
-            color: #666666;
-        }
-
-        .reasoning-label-low {
-            left: 10px;
-        }
-
-        .reasoning-label-medium {
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .reasoning-label-high {
-            right: 7px;
-        }
-    </style>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="header">
@@ -399,7 +16,7 @@
         </div>
     </div>
     
-    <div class="content" style="padding: 0;">
+    <div class="content">
         <!-- Main View -->
         <div id="main-view">
             <!-- Response Section -->
@@ -407,25 +24,25 @@
                 <div class="response-title">Response:</div>
                 <div id="response-content" class="response-content empty"></div>
             </div>
-        
+
         <!-- Status Section -->
         <div id="status-section" class="section hidden">
             <div id="status-message" class="status"></div>
         </div>
-        
+
         <!-- Migration Notice Section -->
-        <div id="migration-notice" class="section hidden" style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; margin: 10px 15px; padding: 15px;">
-            <div style="font-size: 14px; color: #856404; margin-bottom: 10px; font-weight: 500;">Important Update</div>
-            <div id="migration-notice-text" style="font-size: 12px; color: #856404; line-height: 1.4;"></div>
+        <div id="migration-notice" class="section hidden migration-notice">
+            <div class="migration-notice-title">Important Update</div>
+            <div id="migration-notice-text" class="migration-notice-text"></div>
         </div>
 
         <!-- License Key Section -->
         <div id="license-key-section" class="section hidden">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h3 style="font-size: 16px; color: #333; margin-bottom: 8px;">Activate CaptureAI</h3>
-                <p style="font-size: 12px; color: #666; line-height: 1.4;">
+            <div class="activation-header">
+                <h3>Activate CaptureAI</h3>
+                <p>
                     Get your free key at
-                    <a href="https://captureai.dev/activate" target="_blank" style="color: #218aff; text-decoration: none; font-weight: 500;">
+                    <a href="https://captureai.dev/activate" target="_blank" class="activation-link">
                         activate page
                     </a>
                 </p>
@@ -433,7 +50,7 @@
 
             <div class="input-group">
                 <label>License Key</label>
-                <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" style="font-family: monospace; text-transform: uppercase; letter-spacing: 1px;">
+                <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" class="license-key-input">
             </div>
             <button id="activate-btn" class="button button-primary">Activate</button>
         </div>
@@ -441,8 +58,8 @@
         <!-- Main Controls Section (for activated users) -->
         <div id="main-controls" class="section hidden">
             <!-- Usage Stats -->
-            <div id="usage-stats" style="padding: 10px; background-color: #f0f7ff; border-radius: 6px; margin-bottom: 15px;">
-                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Usage</div>
+            <div id="usage-stats" class="usage-stats">
+                <div class="usage-stats-label">Usage</div>
                 <div id="usage-content"></div>
             </div>
 
@@ -468,50 +85,44 @@
                 <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
 
                 <!-- User Info (moved from main-controls) -->
-                <div class="help-item" style="margin-top: 15px;">
-                    <div id="user-info" style="padding: 10px; background-color: #f9f9f9; border-radius: 6px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div style="font-size: 12px; color: #666;">Logged in as:</div>
-                            <button id="logout-btn" style="background: none; border: none; color: #218aff; font-size: 12px; cursor: pointer; text-decoration: underline;">Logout</button>
+                <div class="help-item user-info-container">
+                    <div id="user-info" class="user-info">
+                        <div class="user-info-header">
+                            <div class="user-info-label">Logged in as:</div>
+                            <button id="logout-btn">Logout</button>
                         </div>
-                        <div id="user-email" style="font-size: 13px; font-weight: 500; color: #333; margin-bottom: 8px;"></div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div id="user-tier" style="font-size: 11px; padding: 3px 8px; background-color: #218aff; color: white; border-radius: 4px; font-weight: 500;"></div>
-                            <button id="upgrade-btn" class="hidden" style="background: none; border: 1px solid #218aff; color: #218aff; font-size: 11px; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-weight: 500;">Upgrade to Pro</button>
+                        <div id="user-email"></div>
+                        <div class="user-info-footer">
+                            <div id="user-tier"></div>
+                            <button id="upgrade-btn" class="hidden">Upgrade to Pro</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Settings Button -->
-                <div class="help-item" style="margin-top: 12px;">
-                    <button id="settings-btn" style="width: 100%; padding: 10px; background-color: #f1f1f1; color: #444; border: 1px solid #d1d1d1; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">Settings</button>
+                <div class="help-item settings-button-container">
+                    <button id="settings-btn">Settings</button>
                 </div>
-
-                <style>
-                    #settings-btn:hover {
-                        background-color: #e8e8e8;
-                    }
-                </style>
             </div>
         </div>
         </div>
 
         <!-- Settings View -->
-        <div id="settings-view" class="hidden" style="padding: 20px;">
+        <div id="settings-view" class="hidden">
             <!-- Settings Section Header -->
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                <button id="back-to-main-btn" style="background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; line-height: 1;">
-                    <img src="icons/back-arrow.png" alt="Back" style="width: 20px; height: 20px; opacity: 0.6;">
+            <div class="settings-header">
+                <button id="back-to-main-btn">
+                    <img src="icons/back-arrow.png" alt="Back" class="back-arrow-icon">
                 </button>
-                <h2 style="margin: 0; font-size: 16px; font-weight: 600; color: #333;">Settings</h2>
+                <h2>Settings</h2>
             </div>
 
-            <div class="settings-section" style="margin-bottom: 15px;">
-                <div id="privacy-guard-item" style="padding: 12px; background-color: #f9f9f9; border-radius: 6px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div class="settings-section">
+                <div id="privacy-guard-item" class="settings-card">
+                    <div class="settings-item-header">
                         <div>
-                            <div style="font-size: 13px; font-weight: 500; color: #333;">PrivacyGuard</div>
-                            <div style="font-size: 11px; color: #666; line-height: 1.3; margin-top: 3px;">
+                            <div class="settings-item-title">PrivacyGuard</div>
+                            <div class="settings-item-description">
                                 Prevents websites from detecting extension usage and tab switching
                             </div>
                         </div>
@@ -520,29 +131,29 @@
                         </div>
                     </div>
 
-                    <div style="border-top: 1px solid #e0e0e0; padding-top: 12px; margin-top: 12px;">
-                        <div style="font-size: 11px; color: #666; line-height: 1.3; margin-bottom: 10px;">
+                    <div class="domain-blacklist-section">
+                        <div class="domain-blacklist-label">
                             Disable on specific websites:
                         </div>
-                        <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                            <input type="text" id="domain-input" placeholder="example.com" style="flex: 1; padding: 8px; border: 1px solid #d1d1d1; border-radius: 4px; font-size: 12px; color: #333;">
-                            <button id="add-domain-btn" style="padding: 8px 12px; background-color: #218aff; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer;">Add</button>
+                        <div class="domain-input-group">
+                            <input type="text" id="domain-input" placeholder="example.com">
+                            <button id="add-domain-btn">Add</button>
                         </div>
-                        <div id="domain-list" style="max-height: 150px; overflow-y: auto;">
-                            <div style="font-size: 11px; color: #999; font-style: italic; text-align: center; padding: 15px;">No domains in blacklist</div>
+                        <div id="domain-list">
+                            <div class="domain-list-empty">No domains in blacklist</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="settings-section" style="margin-bottom: 15px;">
-                <div id="reasoning-level-item" style="padding: 12px; background-color: #f9f9f9; border-radius: 6px;">
-                    <div style="font-size: 13px; font-weight: 500; color: #333; margin-bottom: 6px;">Reasoning Level</div>
-                    <div style="font-size: 11px; color: #666; line-height: 1.3; margin-bottom: 15px;">
+            <div class="settings-section">
+                <div id="reasoning-level-item" class="settings-card">
+                    <div class="reasoning-level-title">Reasoning Level</div>
+                    <div class="reasoning-level-description">
                         Control how deeply the AI analyzes questions. Higher levels provide better answers but increase response time
                     </div>
-                    <div class="reasoning-toggle-container" style="margin-bottom: 35px;">
-                        <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1" style="display: none;">
+                    <div class="reasoning-toggle-container reasoning-toggle-wrapper">
+                        <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1">
                         <div class="reasoning-toggle-track" id="settings-reasoning-toggle-track">
                             <div class="reasoning-toggle-progress" id="settings-reasoning-toggle-progress"></div>
                             <div class="reasoning-toggle-slider" id="settings-reasoning-toggle-slider"></div>
@@ -555,11 +166,11 @@
             </div>
 
             <div class="settings-section">
-                <div style="padding: 12px; background-color: #f9f9f9; border-radius: 6px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="settings-card">
+                    <div class="settings-item-header">
                         <div>
-                            <div style="font-size: 13px; font-weight: 500; color: #333;">Disable OCR Extraction</div>
-                            <div style="font-size: 11px; color: #666; line-height: 1.3; margin-top: 3px;">
+                            <div class="settings-item-title">Disable OCR Extraction</div>
+                            <div class="settings-item-description">
                                 Send image data instead of extracting text (not recommended)
                             </div>
                         </div>
@@ -571,103 +182,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .settings-section .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-            background-color: #ccc;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            flex-shrink: 0;
-        }
-
-        .settings-section .toggle-switch.active {
-            background-color: #218aff;
-        }
-
-        .settings-section .toggle-switch.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .settings-section .toggle-slider {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .settings-section .toggle-switch.active .toggle-slider {
-            transform: translateX(20px);
-        }
-
-        #domain-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #domain-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        #domain-list::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
-
-        #domain-list::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-
-        .domain-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            font-size: 12px;
-        }
-
-        .domain-name {
-            font-family: monospace;
-            color: #333;
-        }
-
-        .remove-domain-btn {
-            background: none;
-            border: none;
-            color: #ff4444;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            line-height: 1;
-        }
-
-        .remove-domain-btn:hover {
-            color: #cc0000;
-        }
-
-        #add-domain-btn:hover {
-            background-color: #1a6fd9;
-        }
-
-        #back-to-main-btn:hover {
-            color: #666;
-        }
-    </style>
 
     <script src="modules/auth-service.js"></script>
     <script src="modules/migration.js"></script>

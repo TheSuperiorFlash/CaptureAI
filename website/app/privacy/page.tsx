@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy - CaptureAI',
+    title: 'Privacy Policy',
     description: 'Privacy Policy for the CaptureAI Chrome extension. Learn how we handle your data.',
 }
 
@@ -146,7 +146,7 @@ export default function PrivacyPage() {
                         <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Contact Us</h2>
                         <p className="mb-3">If you have any questions about this Privacy Policy:</p>
                         <ul className="space-y-1.5">
-                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span> <a href="mailto:wonhappyheart@gmail.com" className="text-[--color-accent-hover] underline underline-offset-2">wonhappyheart@gmail.com</a></li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span> <a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a></li>
                             <li><span className="font-medium text-[--color-text-secondary]">GitHub:</span> <a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">TheSuperiorFlash/CaptureAI</a></li>
                         </ul>
                     </section>

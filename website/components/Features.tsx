@@ -94,7 +94,7 @@ export default function Features() {
                         const Icon = feature.icon
                         return (
                             <div
-                                key={index}
+                                key={feature.title}
                                 className={`glass-card group relative flex flex-col rounded-2xl p-6 transition-all duration-300 ${feature.glow}`}
                             >
                                 {feature.pro && (

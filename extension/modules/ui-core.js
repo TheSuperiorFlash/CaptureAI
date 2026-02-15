@@ -453,8 +453,11 @@ export const UICore = {
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
 
-      element.style.left = Math.max(0, initialX + dx) + 'px';
-      element.style.top = Math.max(0, initialY + dy) + 'px';
+      const maxX = window.innerWidth - element.offsetWidth;
+      const maxY = window.innerHeight - element.offsetHeight;
+      element.style.left = Math.min(maxX, Math.max(0, initialX + dx)) + 'px';
+      element.style.top = Math.min(maxY, Math.max(0, initialY + dy)) + 'px';
+      element.style.right = 'auto';
     }
 
     function onMouseUp() {

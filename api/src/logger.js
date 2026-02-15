@@ -31,12 +31,15 @@ export class Logger {
   formatLog(level, message, data = {}) {
     const timestamp = new Date().toISOString();
 
+    // Sanitize data to prevent PII leaks in logs
+    const sanitizedData = sanitizeLogData(data);
+
     const logEntry = {
       timestamp,
       level,
       message,
       ...this.context,
-      ...data
+      ...sanitizedData
     };
 
     // Add environment info in development

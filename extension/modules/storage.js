@@ -9,8 +9,14 @@
  * @returns {Promise<void>}
  */
 export function setValue(key, value) {
-  return new Promise((resolve) => {
-    chrome.storage.local.set({ [key]: value }, resolve);
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
@@ -21,9 +27,13 @@ export function setValue(key, value) {
  * @returns {Promise<*>}
  */
 export function getValue(key, defaultValue = null) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], (result) => {
-      resolve(result[key] !== undefined ? result[key] : defaultValue);
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve(result[key] !== undefined ? result[key] : defaultValue);
+      }
     });
   });
 }
@@ -34,8 +44,14 @@ export function getValue(key, defaultValue = null) {
  * @returns {Promise<Object>}
  */
 export function getValues(keys) {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(keys, resolve);
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(keys, (result) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve(result);
+      }
+    });
   });
 }
 
@@ -45,8 +61,14 @@ export function getValues(keys) {
  * @returns {Promise<void>}
  */
 export function removeValue(key) {
-  return new Promise((resolve) => {
-    chrome.storage.local.remove(key, resolve);
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.remove(key, () => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
@@ -55,8 +77,14 @@ export function removeValue(key) {
  * @returns {Promise<void>}
  */
 export function clear() {
-  return new Promise((resolve) => {
-    chrome.storage.local.clear(resolve);
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.clear(() => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+      } else {
+        resolve();
+      }
+    });
   });
 }
 

@@ -32,13 +32,6 @@
           throw new Error('Failed to load modules');
         }
 
-        // Check if current domain is blacklisted
-        const isBlacklisted = await this.checkDomainBlacklist();
-        if (isBlacklisted) {
-          console.log('CaptureAI: Domain is blacklisted, extension disabled on this site');
-          return;
-        }
-
         this.initializeSystems();
         await this.loadUserPreferences();
 
@@ -85,7 +78,9 @@
           autoSolveModule, messagingModule, keyboardModule, eventManagerModule, privacyGuardModule
         ] = modules;
 
-        window.CaptureAI = {
+        // Use a non-enumerable, non-configurable property to prevent page scripts
+        // from accessing internals (e.g., AuthService.getLicenseKey())
+        const captureAI = {
           CONFIG: configModule.CONFIG,
           TIMING: configModule.TIMING,
           STORAGE_KEYS: configModule.STORAGE_KEYS,
@@ -110,6 +105,15 @@
           PrivacyGuard: privacyGuardModule.PrivacyGuard
         };
 
+        // Expose on window with Object.defineProperty so it's not enumerable
+        // and not easily discoverable by page scripts
+        Object.defineProperty(window, 'CaptureAI', {
+          value: captureAI,
+          writable: false,
+          enumerable: false,
+          configurable: false
+        });
+
         window.CaptureAI.ICONS.init();
         return true;
 
@@ -127,20 +131,6 @@
           window.CaptureAI[system].init();
         }
       });
-    },
-
-    async checkDomainBlacklist() {
-      try {
-        const currentDomain = window.location.hostname.toLowerCase();
-        const result = await chrome.storage.local.get('captureai-settings');
-        const settings = result['captureai-settings'] || {};
-        const blacklist = settings.domainBlacklist || [];
-
-        return blacklist.some(domain => currentDomain.includes(domain.toLowerCase()));
-      } catch (error) {
-        console.error('Error checking domain blacklist:', error);
-        return false;
-      }
     },
 
     async loadUserPreferences() {

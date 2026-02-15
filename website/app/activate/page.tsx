@@ -88,15 +88,18 @@ export default function ActivatePage() {
     } | null>(null)
 
     const handleSignup = async () => {
-        if (!email) {
+        const trimmedEmail = email.trim()
+        if (!trimmedEmail) {
             setResult({ type: 'error', message: 'Please enter your email address' })
             return
         }
 
-        if (!EMAIL_REGEX.test(email)) {
+        if (!EMAIL_REGEX.test(trimmedEmail)) {
             setResult({ type: 'error', message: 'Please enter a valid email address' })
             return
         }
+
+        setEmail(trimmedEmail)
 
         setLoading(true)
         setResult(null)
@@ -136,6 +139,12 @@ export default function ActivatePage() {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email })
 
         if (data.url) {
+            // Validate redirect URL points to a trusted domain (Stripe checkout)
+            const url = new URL(data.url as string)
+            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com']
+            if (!trustedHosts.includes(url.hostname)) {
+                throw new Error('Unexpected checkout URL')
+            }
             window.location.href = data.url as string
         } else {
             throw new Error('No checkout URL received')
@@ -168,12 +177,16 @@ export default function ActivatePage() {
                 <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
                     {/* Free plan */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selectedTier === 'free'}
                         className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${
                             selectedTier === 'free'
                                 ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 : ''
                         }`}
                         onClick={() => setSelectedTier('free')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
                     >
                         <div className="mb-6 flex items-center justify-between">
                             <div>
@@ -212,12 +225,16 @@ export default function ActivatePage() {
 
                     {/* Pro plan */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selectedTier === 'pro'}
                         className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${
                             selectedTier === 'pro'
                                 ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
                                 : ''
                         }`}
                         onClick={() => setSelectedTier('pro')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
                         <div className="gradient-border rounded-2xl">
                             <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
@@ -294,6 +311,7 @@ export default function ActivatePage() {
                                     }
                                 }}
                                 placeholder="you@email.com"
+                                aria-label="Email address"
                                 autoComplete="email"
                                 className="min-w-0 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
                             />
@@ -308,7 +326,7 @@ export default function ActivatePage() {
                                 }`}
                             >
                                 {loading ? (
-                                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
                                 ) : (
                                     <>
                                         {selectedTier === 'free' ? 'Get Key' : 'Continue'}

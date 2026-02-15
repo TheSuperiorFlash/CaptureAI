@@ -244,10 +244,11 @@ export const AutoSolve = {
       // Valid response, reset counter (like backup)
       STATE.invalidQuestionCount = 0;
 
-      // Try to extract answer number [1-4] like backup
-      const answerMatch = cleanResponse.match(/[1-4]/);
-      if (answerMatch) {
-        const answerNumber = answerMatch[0];
+      // Extract answer number [1-4] - use last match to avoid matching
+      // digits in the question text (e.g., "Question 3 is option 2" -> 2)
+      const answerMatches = cleanResponse.match(/[1-4]/g);
+      if (answerMatches) {
+        const answerNumber = answerMatches[answerMatches.length - 1];
 
         setTimeout(() => {
           // Like backup: simulateKeypress(answerNumber, true) - number + Enter
@@ -333,15 +334,24 @@ export const AutoSolve = {
                             activeElement.tagName === 'INPUT' ||
                             activeElement.tagName === 'TEXTAREA')) {
 
+          activeElement.focus();
+          // Use native setter to trigger React/Vue/Angular change detection
+          const nativeSetter = Object.getOwnPropertyDescriptor(
+            HTMLInputElement.prototype, 'value'
+          )?.set || Object.getOwnPropertyDescriptor(
+            HTMLTextAreaElement.prototype, 'value'
+          )?.set;
+          if (nativeSetter) {
+            nativeSetter.call(activeElement, (activeElement.value || '') + key);
+          } else {
+            activeElement.value = (activeElement.value || '') + key;
+          }
           const inputEvent = new InputEvent('input', {
             inputType: 'insertText',
             data: key,
             bubbles: true,
             cancelable: true
           });
-
-          activeElement.focus();
-          activeElement.value = (activeElement.value || '') + key;
           activeElement.dispatchEvent(inputEvent);
           success = true;
         }
@@ -402,13 +412,10 @@ export const AutoSolve = {
             cancelable: true
           });
 
-          if (activeElement && activeElement.dispatchEvent) {
-            activeElement.dispatchEvent(enterEvent);
-          }
-
-          // Also try document.activeElement
-          if (document.activeElement && document.activeElement.dispatchEvent) {
-            document.activeElement.dispatchEvent(enterEvent);
+          // Dispatch to the currently focused element
+          const target = document.activeElement || activeElement;
+          if (target && target.dispatchEvent) {
+            target.dispatchEvent(enterEvent);
           }
         } catch (_e) {
           // Enter dispatch failed
