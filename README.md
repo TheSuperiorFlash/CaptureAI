@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![CaptureAI Logo](icons/icon128.png)
+![CaptureAI Logo](extension/icons/icon128.png)
 
 **Capture questions from your screen and get instant AI-powered answers**
 
