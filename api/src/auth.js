@@ -335,7 +335,7 @@ export class AuthHandler {
 
 Your payment method has been charged. The next charge will be on ${formattedDate}.
 
-You can modify your payment method or cancel your subscription anytime by visiting the Stripe billing settings page.
+You can modify your payment method or cancel your subscription anytime by visiting your account page at https://captureai.dev/activate
 
 YOUR LICENSE KEY:
 ${licenseKey}
@@ -706,7 +706,7 @@ https://captureai.dev`;
                                       <td class="pad" style="padding: 0 0 32px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 15px; color: #666666; line-height: 1.5;">
-                                            <p style="margin: 0;">You can modify your payment method or cancel your subscription anytime by visiting the Stripe <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: underline;">billing settings</a> page.</p>
+                                            <p style="margin: 0;">You can modify your payment method or cancel your subscription anytime by visiting your <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: underline;">account page</a>.</p>
                                           </div>
                                         </div>
                                       </td>

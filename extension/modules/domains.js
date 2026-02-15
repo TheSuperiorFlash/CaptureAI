@@ -16,7 +16,8 @@ export const DomainUtils = {
    * @returns {boolean}
    */
   isOnQuizlet() {
-    return window.location.hostname.includes('quizlet.com');
+    const h = window.location.hostname;
+    return h === 'quizlet.com' || h.endsWith('.quizlet.com');
   },
 
   /**
@@ -24,7 +25,8 @@ export const DomainUtils = {
    * @returns {boolean}
    */
   isOnVocabulary() {
-    return window.location.hostname.includes('vocabulary.com');
+    const h = window.location.hostname;
+    return h === 'vocabulary.com' || h.endsWith('.vocabulary.com');
   },
 
   /**

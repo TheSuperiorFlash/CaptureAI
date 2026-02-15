@@ -253,6 +253,7 @@ export const Messaging = {
          * @returns {boolean}
          */
   handleDisplayResponse(request, sendResponse) {
+    if (!window.CaptureAI) return false;
     const { STATE } = window.CaptureAI;
 
     // Handle async operation with proper error handling
@@ -289,7 +290,7 @@ export const Messaging = {
          */
   displayRegularResponse(response) {
     // Determine message type
-    const isError = response.startsWith('Error:') || response.includes('failed');
+    const isError = typeof response === 'string' && (response.startsWith('Error:') || response.includes('failed'));
 
     // Display AI response via UICore
     if (window.CaptureAI?.UICore?.displayAIResponse) {

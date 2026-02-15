@@ -1,11 +1,18 @@
 'use client'
 
+import { useEffect } from 'react'
+
 export default function Error({
+    error,
     reset,
 }: {
     error: Error & { digest?: string }
     reset: () => void
 }) {
+    useEffect(() => {
+        console.error('Application error:', error)
+    }, [error])
+
     return (
         <div className="relative overflow-x-hidden py-20 md:py-28">
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
@@ -19,6 +26,7 @@ export default function Error({
                     An unexpected error occurred. Please try again.
                 </p>
                 <button
+                    type="button"
                     onClick={reset}
                     className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                 >

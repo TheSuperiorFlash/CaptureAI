@@ -49,7 +49,7 @@ export class AIHandler {
       const clientId = getClientIdentifier(request);
       const ipRateLimit = await checkRateLimit(
         `ai:${clientId}`,
-        30, // 30 requests per minute per IP
+        120, // IP-level abuse prevention (must exceed highest tier limit of 60/min)
         60000,
         this.env
       );
@@ -464,7 +464,11 @@ export class AIHandler {
       }
 
       // Allowed - use count from Durable Object instead of redundant DB query
-      const usedInLastMinute = rateLimitResult?.count || 0;
+      const usedInLastMinute = rateLimitResult?.count ?? 0;
+
+      if (rateLimitResult?.count === null) {
+        console.error('Rate limiter returned null count for user:', userId, '- possible Durable Object outage');
+      }
 
       return {
         allowed: true,

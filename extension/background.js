@@ -840,7 +840,7 @@ async function displayResponse(tabId, response, promptType) {
   chrome.runtime.sendMessage({
     action: 'updateResponse',
     message: response,
-    isError: response.startsWith('Error:')
+    isError: typeof response === 'string' && response.startsWith('Error:')
   }).catch(() => {
     // Popup may not be open - ignore
   });

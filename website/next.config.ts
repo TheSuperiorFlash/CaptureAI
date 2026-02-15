@@ -10,12 +10,14 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.captureai.workers.dev https://captureai-api.graysonkramer.workers.dev",
+              `connect-src 'self' https://api.captureai.workers.dev${process.env.NEXT_PUBLIC_DEV_API_URL ? ` ${process.env.NEXT_PUBLIC_DEV_API_URL}` : ''}`,
               "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
             ].join('; '),
           },
           {
