@@ -15,6 +15,21 @@ const AuthService = {
   REQUEST_TIMEOUT: 30000,
 
   /**
+   * Storage key for the user cache
+   */
+  CACHE_KEY: 'captureai-user-cache',
+
+  /**
+   * Cache freshness threshold - popup skips background refresh if within this
+   */
+  CACHE_FRESHNESS_MS: 5 * 60 * 1000, // 5 minutes
+
+  /**
+   * Cache hard expiry - force synchronous API check if older
+   */
+  CACHE_MAX_AGE_MS: 60 * 60 * 1000, // 1 hour
+
+  /**
    * Fetch with timeout using AbortController
    * @param {string} url - Request URL
    * @param {Object} options - Fetch options
@@ -114,7 +129,9 @@ const AuthService = {
       await chrome.storage.local.remove([
         'captureai-license-key',
         'captureai-user-email',
-        'captureai-user-tier'
+        'captureai-user-tier',
+        this.CACHE_KEY,
+        'captureai-last-usage'
       ]);
     }
   },
@@ -148,12 +165,13 @@ const AuthService = {
 
     const user = await response.json();
 
-    // Update stored user info
+    // Update stored user info and cache
     if (typeof chrome !== 'undefined' && chrome.storage) {
       await chrome.storage.local.set({
         'captureai-user-email': user.email,
         'captureai-user-tier': user.tier
       });
+      await this.setCachedUser(user);
     }
 
     return user;
@@ -333,6 +351,105 @@ const AuthService = {
   },
 
   /**
+   * Read cached user data from chrome.storage.local
+   * @returns {Promise<Object|null>} Cached user object with updatedAt, or null
+   */
+  async getCachedUser() {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      const result = await chrome.storage.local.get(this.CACHE_KEY);
+      return result[this.CACHE_KEY] || null;
+    }
+    return null;
+  },
+
+  /**
+   * Write user data to cache with current timestamp
+   * @param {Object} user - User object from API (must have email, tier)
+   * @returns {Promise<void>}
+   */
+  async setCachedUser(user) {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.set({
+        [this.CACHE_KEY]: {
+          email: user.email,
+          tier: user.tier,
+          updatedAt: Date.now(),
+          userData: user
+        }
+      });
+    }
+  },
+
+  /**
+   * Clear the user cache
+   * @returns {Promise<void>}
+   */
+  async clearCachedUser() {
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      await chrome.storage.local.remove(this.CACHE_KEY);
+    }
+  },
+
+  /**
+   * In-flight refresh promise to deduplicate concurrent refresh calls
+   */
+  _refreshInFlight: null,
+
+  /**
+   * Refresh the cache by calling the API and storing the result.
+   * Deduplicates concurrent calls - if a refresh is already in-flight, reuses it.
+   * @returns {Promise<Object|null>} Fresh user object, or null on failure
+   */
+  async refreshUserCache() {
+    if (this._refreshInFlight) {
+      return this._refreshInFlight;
+    }
+
+    this._refreshInFlight = this.getCurrentUser()
+      .catch(() => null)
+      .finally(() => { this._refreshInFlight = null; });
+
+    return this._refreshInFlight;
+  },
+
+  /**
+   * Get user from cache, falling back to API if cache is missing or expired.
+   * @param {Object} [options]
+   * @param {boolean} [options.allowStale=false] - If true, return stale cache without API call
+   * @returns {Promise<{user: Object|null, fromCache: boolean, needsRefresh: boolean}>}
+   */
+  async getCachedOrFreshUser({ allowStale = false } = {}) {
+    const cached = await this.getCachedUser();
+
+    if (cached && cached.updatedAt) {
+      const age = Date.now() - cached.updatedAt;
+
+      // Cache is fresh - return immediately, no refresh needed
+      if (age < this.CACHE_FRESHNESS_MS) {
+        return { user: cached.userData, fromCache: true, needsRefresh: false };
+      }
+
+      // Cache is stale but not expired - return it, flag for background refresh
+      if (age < this.CACHE_MAX_AGE_MS) {
+        return { user: cached.userData, fromCache: true, needsRefresh: true };
+      }
+
+      // Cache expired, but caller accepts stale data (e.g., background.js auth check)
+      if (allowStale) {
+        return { user: cached.userData, fromCache: true, needsRefresh: true };
+      }
+    }
+
+    // No cache or hard-expired: must call API synchronously
+    try {
+      const user = await this.getCurrentUser();
+      return { user, fromCache: false, needsRefresh: false };
+    } catch {
+      return { user: null, fromCache: false, needsRefresh: false };
+    }
+  },
+
+  /**
    * Check if user has a valid license key
    * @returns {Promise<boolean>} True if has valid key
    */
@@ -340,6 +457,16 @@ const AuthService = {
     const licenseKey = await this.getLicenseKey();
     if (!licenseKey) return false;
 
+    // Try cache first to avoid blocking API call
+    const cached = await this.getCachedUser();
+    if (cached && cached.updatedAt) {
+      const age = Date.now() - cached.updatedAt;
+      if (age < this.CACHE_MAX_AGE_MS) {
+        return true;
+      }
+    }
+
+    // Cache missing or expired: fall back to API call
     try {
       await this.getCurrentUser();
       return true;

@@ -33,7 +33,7 @@ export class SubscriptionHandler {
         RateLimitPresets.CHECKOUT.windowMs,
         this.env
       );
-      if (rateLimitError) {
+      if (rateLimitError && rateLimitError.error) {
         return jsonResponse(rateLimitError, 429);
       }
 
@@ -390,7 +390,7 @@ export class SubscriptionHandler {
         RateLimitPresets.AUTH.windowMs,
         this.env
       );
-      if (rateLimitError) return jsonResponse(rateLimitError, 429);
+      if (rateLimitError && rateLimitError.error) return jsonResponse(rateLimitError, 429);
 
       const body = await validateRequestBody(request);
       const sessionId = body.sessionId;

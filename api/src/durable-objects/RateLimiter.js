@@ -55,6 +55,7 @@ export class RateLimiterDO {
         return new Response(
           JSON.stringify({
             allowed: true,
+            count: record.count,
             remaining: limit - 1,
             resetAt: record.resetAt
           }),
@@ -73,6 +74,7 @@ export class RateLimiterDO {
         return new Response(
           JSON.stringify({
             allowed: true,
+            count: record.count,
             remaining: limit - 1,
             resetAt: record.resetAt
           }),
@@ -88,6 +90,7 @@ export class RateLimiterDO {
         return new Response(
           JSON.stringify({
             allowed: true,
+            count: record.count,
             remaining: limit - record.count,
             resetAt: record.resetAt
           }),
@@ -99,6 +102,7 @@ export class RateLimiterDO {
       return new Response(
         JSON.stringify({
           allowed: false,
+          count: record.count,
           remaining: 0,
           resetAt: record.resetAt
         }),

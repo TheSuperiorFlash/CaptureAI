@@ -36,11 +36,11 @@ async function checkRateLimitDO(identifier, limit, windowMs, env) {
       };
     }
 
-    return null; // Allowed
+    return { allowed: true, count: result.count || 0 };
   } catch (error) {
     console.error('Rate limit check error:', error);
     // Fail open - allow request if rate limiter is unavailable
-    return null;
+    return { allowed: true, count: null };
   }
 }
 
@@ -139,7 +139,7 @@ export async function checkRateLimit(identifier, limit, windowMs, env = null) {
     };
   }
 
-  return null; // Allowed
+  return { allowed: true, count: limit - result.remaining };
 }
 
 /**

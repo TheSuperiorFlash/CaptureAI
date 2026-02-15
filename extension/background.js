@@ -127,6 +127,75 @@ const ERROR_MESSAGES = {
  */
 const STORAGE_KEY_API_KEY = 'captureai-api-key';
 
+/**
+ * Content script ID for dynamic Privacy Guard registration
+ */
+const PRIVACY_GUARD_SCRIPT_ID = 'privacy-guard-main';
+
+
+// ============================================================================
+// SECTION 1.5: PRIVACY GUARD DYNAMIC REGISTRATION
+// ============================================================================
+
+/**
+ * Evaluate storage state and register/unregister inject.js accordingly.
+ * Uses chrome.scripting.registerContentScripts for native document_start
+ * timing in MAIN world — no race conditions with async storage reads.
+ *
+ * Called on install, startup, and whenever relevant storage keys change.
+ */
+async function activatePrivacyGuard() {
+  try {
+    const result = await chrome.storage.local.get([
+      'captureai-settings',
+      'captureai-user-tier'
+    ]);
+    const settings = result['captureai-settings'] || {};
+    const tier = result['captureai-user-tier'];
+
+    const shouldEnable = (tier === 'pro' && settings.privacyGuard?.enabled === true);
+
+    // Build excludeMatches from domainBlacklist
+    // Each domain needs two patterns: exact match and wildcard subdomain match
+    // e.g. "example.com" → ["*://example.com/*", "*://*.example.com/*"]
+    const blockedDomains = settings.domainBlacklist || [];
+    const excludeMatches = blockedDomains.flatMap(d => [
+      `*://${d}/*`,
+      `*://*.${d}/*`
+    ]);
+
+    // Get current registrations
+    const existing = await chrome.scripting.getRegisteredContentScripts({
+      ids: [PRIVACY_GUARD_SCRIPT_ID]
+    });
+
+    if (shouldEnable) {
+      const scriptConfig = {
+        id: PRIVACY_GUARD_SCRIPT_ID,
+        matches: ['<all_urls>'],
+        js: ['inject.js'],
+        runAt: 'document_start',
+        world: 'MAIN',
+        ...(excludeMatches.length > 0 && { excludeMatches })
+      };
+
+      if (existing.length > 0) {
+        await chrome.scripting.updateContentScripts([scriptConfig]);
+      } else {
+        await chrome.scripting.registerContentScripts([scriptConfig]);
+      }
+    } else {
+      if (existing.length > 0) {
+        await chrome.scripting.unregisterContentScripts({
+          ids: [PRIVACY_GUARD_SCRIPT_ID]
+        });
+      }
+    }
+  } catch (error) {
+    if (DEBUG) console.error('Privacy Guard activation error:', error);
+  }
+}
+
 
 // ============================================================================
 // SECTION 2: MESSAGE ROUTING
@@ -201,6 +270,53 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
       title: 'Ask CaptureAI',
       contexts: ['selection']
     });
+
+    // Register/unregister Privacy Guard content script based on settings
+    activatePrivacyGuard();
+
+    // Set up periodic user cache refresh and refresh immediately
+    chrome.alarms.create('captureai-refresh-user-cache', { periodInMinutes: 30 });
+    AuthService.refreshUserCache();
+  });
+}
+
+/**
+ * Re-evaluate Privacy Guard registration on browser startup
+ */
+if (typeof chrome !== 'undefined' && chrome.runtime?.onStartup) {
+  chrome.runtime.onStartup.addListener(() => {
+    activatePrivacyGuard();
+
+    // Re-create alarm on startup (alarms may not persist across restarts)
+    chrome.alarms.create('captureai-refresh-user-cache', { periodInMinutes: 30 });
+    AuthService.refreshUserCache();
+  });
+}
+
+/**
+ * Re-evaluate Privacy Guard registration when settings or tier change
+ */
+if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return;
+    if (changes['captureai-settings'] || changes['captureai-user-tier']) {
+      activatePrivacyGuard();
+    }
+  });
+}
+
+/**
+ * Handle periodic alarm to refresh user cache
+ */
+if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
+  chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === 'captureai-refresh-user-cache') {
+      try {
+        await AuthService.refreshUserCache();
+      } catch (error) {
+        if (DEBUG) console.error('Scheduled cache refresh failed:', error);
+      }
+    }
   });
 }
 
@@ -478,8 +594,14 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
       return formatError('Authentication service not available');
     }
 
-    const isActivated = await AuthService.isActivated();
-    if (!isActivated) {
+    // Use cached user to verify activation without a blocking API call.
+    // The actual sendAIRequest() call handles 401/403 by clearing the key.
+    const licenseKey = await AuthService.getLicenseKey();
+    if (!licenseKey) {
+      return formatError('Please activate CaptureAI with a license key');
+    }
+    const { user } = await AuthService.getCachedOrFreshUser({ allowStale: true });
+    if (!user) {
       return formatError('Please activate CaptureAI with a license key');
     }
 
@@ -511,6 +633,13 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     // Send request to backend
     const response = await AuthService.sendAIRequest(requestPayload);
 
+    // Cache usage data from response so popup can display it without a separate API call
+    if (response.usage) {
+      chrome.storage.local.set({
+        'captureai-last-usage': { data: response.usage, updatedAt: Date.now() }
+      });
+    }
+
     return response.answer || 'No response found';
 
   } catch (error) {
@@ -533,8 +662,14 @@ async function sendTextOnlyQuestion(question, apiKey) {
       return formatError('Authentication service not available');
     }
 
-    const isActivated = await AuthService.isActivated();
-    if (!isActivated) {
+    // Use cached user to verify activation without a blocking API call.
+    // The actual sendAIRequest() call handles 401/403 by clearing the key.
+    const licenseKey = await AuthService.getLicenseKey();
+    if (!licenseKey) {
+      return formatError('Please activate CaptureAI with a license key');
+    }
+    const { user } = await AuthService.getCachedOrFreshUser({ allowStale: true });
+    if (!user) {
       return formatError('Please activate CaptureAI with a license key');
     }
 
@@ -550,6 +685,13 @@ async function sendTextOnlyQuestion(question, apiKey) {
       promptType: PROMPT_TYPES.ASK,
       reasoningLevel: reasoningLevel
     });
+
+    // Cache usage data from response so popup can display it without a separate API call
+    if (response.usage) {
+      chrome.storage.local.set({
+        'captureai-last-usage': { data: response.usage, updatedAt: Date.now() }
+      });
+    }
 
     return response.answer || 'No response found';
 
@@ -692,6 +834,15 @@ async function displayResponse(tabId, response, promptType) {
       }
       resolve();
     });
+  });
+
+  // Send directly to popup (eliminates content script relay round-trip)
+  chrome.runtime.sendMessage({
+    action: 'updateResponse',
+    message: response,
+    isError: response.startsWith('Error:')
+  }).catch(() => {
+    // Popup may not be open - ignore
   });
 }
 

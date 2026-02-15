@@ -8,26 +8,18 @@
  * - Window focus/blur events
  * - Page lifecycle events
  * - Extension activity
+ *
+ * Injection is controlled by background.js via chrome.scripting.registerContentScripts.
+ * This script is only registered when Privacy Guard is enabled (Pro tier + toggle on),
+ * so no runtime settings check is needed here.
  */
 
 (function() {
   'use strict';
 
-  // ============================================================================
-  // SECTION -1: PRIVACY GUARD CONDITIONAL CHECK
-  // ============================================================================
-
-  /**
-   * Check if Privacy Guard is enabled via settings
-   * settings-checker.js runs first and sets this flag based on chrome.storage
-   * If flag is not set (shouldn't happen), default to enabled (secure-by-default)
-   */
-  const privacyGuardEnabled = window.__CAPTUREAI_PRIVACY_GUARD_ENABLED__ !== false;
-
-  if (!privacyGuardEnabled) {
-    // Privacy Guard disabled in settings - exit without applying protections
-    return;
-  }
+  // Guard against double-injection (e.g. fallback path via handleEnablePrivacyGuard)
+  if (window.__CAPTUREAI_PRIVACY_GUARD_ACTIVE__) return;
+  window.__CAPTUREAI_PRIVACY_GUARD_ACTIVE__ = true;
 
   // ============================================================================
   // SECTION 0: PRESERVE ORIGINAL CONSOLE
@@ -35,16 +27,32 @@
 
   /**
    * Store reference to original console.log before page scripts can override it
-   * Some pages override console methods to detect extensions
+   * Some pages override console methods to detect extensions or make them unavailable
    */
-  const originalConsoleLog = console.log.bind(console);
-  const originalConsoleWarn = console.warn.bind(console);
-  const originalConsoleError = console.error.bind(console);
+  let originalConsoleLog = null;
+  let originalConsoleWarn = null;
+  let originalConsoleError = null;
+
+  try {
+    if (console && console.log && typeof console.log === 'function') {
+      originalConsoleLog = console.log.bind(console);
+    }
+    if (console && console.warn && typeof console.warn === 'function') {
+      originalConsoleWarn = console.warn.bind(console);
+    }
+    if (console && console.error && typeof console.error === 'function') {
+      originalConsoleError = console.error.bind(console);
+    }
+  } catch (e) {
+    // Console might be inaccessible, proceed without it
+  }
 
   // Create a safe logging function that can't be overridden
   const safeLog = function(...args) {
     try {
-      originalConsoleLog(...args);
+      if (originalConsoleLog) {
+        originalConsoleLog(...args);
+      }
     } catch (e) {
       // Silently fail if console is completely broken
     }

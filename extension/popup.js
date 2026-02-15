@@ -114,12 +114,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Load and display custom keybinds
       await updateKeybindsDisplay();
 
-      // Check if activated (has valid license key)
-      const isActivated = await AuthService.isActivated();
+      // Quick check: is there a license key at all? (fast storage read, no network)
+      const licenseKey = await AuthService.getLicenseKey();
+      if (!licenseKey) {
+        showLicenseKeyInput();
+        return;
+      }
 
-      if (isActivated) {
-        await showMainControls();
+      // Try to get user from cache for instant UI render
+      const { user, fromCache, needsRefresh } = await AuthService.getCachedOrFreshUser();
+
+      if (user) {
+        // Show UI immediately with cached (or fresh) data
+        await showMainControlsWithUser(user);
+
+        // If cache is stale, refresh in background and update UI if data changed
+        if (fromCache && needsRefresh) {
+          AuthService.refreshUserCache().then(freshUser => {
+            if (freshUser && (freshUser.email !== user.email || freshUser.tier !== user.tier)) {
+              showMainControlsWithUser(freshUser);
+            }
+          }).catch(() => {
+            // Silent failure - we already showed cached data
+          });
+        }
       } else {
+        // No cache and API call failed - show activation screen
         showLicenseKeyInput();
       }
     } catch (error) {
@@ -265,18 +285,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Show main controls (activated state)
+   * Show main controls (activated state) - fetches fresh user from API
+   * Used by handleActivate() after fresh license validation
    */
   async function showMainControls() {
     try {
-      // Get user info
       const user = await AuthService.getCurrentUser();
+      await showMainControlsWithUser(user);
+    } catch (error) {
+      console.error('Error loading user info:', error);
+      showResponseMessage('Error loading user info', 'error');
+      showLicenseKeyInput();
+    }
+  }
+
+  /**
+   * Show main controls with a pre-fetched user object (no API call)
+   * @param {Object} user - User object with email and tier
+   */
+  async function showMainControlsWithUser(user) {
+    try {
       currentState.user = user;
 
       // Update UI
       elements.licenseKeySection.classList.add('hidden');
       elements.mainControls.classList.remove('hidden');
-      elements.responseSection.classList.remove('hidden'); // Show response section when activated
+      elements.responseSection.classList.remove('hidden');
 
       // Clear any previous error messages
       clearResponseMessage();
@@ -298,16 +332,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.settingsBtn.classList.add('settings-hidden');
       } else {
         elements.upgradeBtn.classList.add('hidden');
-        // Purple gradient for Pro tier
         elements.userTier.classList.add('tier-pro');
         elements.userTier.classList.remove('tier-free');
         elements.settingsBtn.classList.remove('settings-hidden');
       }
 
-      // Load and display usage stats (only for free tier)
+      // Load usage stats (only for free tier)
+      // Always fetched fresh (not cached) but loaded async so buttons appear immediately
       if (user.tier === 'free') {
-        await updateUsageStats();
         elements.usageSection.classList.remove('hidden');
+        updateUsageStats(); // No await - load asynchronously
       } else {
         elements.usageSection.classList.add('hidden');
       }
@@ -336,7 +370,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function updateUsageStats() {
     try {
-      const usage = await AuthService.getUsage();
+      // Try cached usage from last AI response first (avoids separate API call)
+      let usage = null;
+      const cached = await chrome.storage.local.get('captureai-last-usage');
+      const cachedUsage = cached['captureai-last-usage'];
+
+      if (cachedUsage && cachedUsage.data && cachedUsage.updatedAt) {
+        const age = Date.now() - cachedUsage.updatedAt;
+        if (age < 2 * 60 * 1000) { // Fresh if < 2 minutes old
+          const d = cachedUsage.data;
+          // Build usage object matching getUsage() format from cached AI response data
+          if (d.limitType === 'per_day') {
+            const used = d.usedToday || 0;
+            const limit = d.dailyLimit || 0;
+            usage = {
+              limitType: 'per_day',
+              today: {
+                used,
+                limit,
+                percentage: limit > 0 ? Math.round((used / limit) * 100) : 0
+              }
+            };
+          }
+        }
+      }
+
+      // Fall back to API call if no recent cached data
+      if (!usage) {
+        usage = await AuthService.getUsage();
+      }
 
       // Build DOM elements instead of innerHTML to prevent XSS from API data
       elements.usageContent.textContent = '';
@@ -345,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Free tier - show daily stats
         const used = parseInt(usage.today.used, 10) || 0;
         const limit = parseInt(usage.today.limit, 10) || 0;
-        const remaining = parseInt(usage.today.remaining, 10) || 0;
+        const remaining = Math.max(0, limit - used);
         const percentage = Math.min(100, Math.max(0, parseFloat(usage.today.percentage) || 0));
 
         const statsDiv = document.createElement('div');

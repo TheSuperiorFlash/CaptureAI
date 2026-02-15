@@ -53,7 +53,7 @@ export class AIHandler {
         60000,
         this.env
       );
-      if (ipRateLimit) {
+      if (ipRateLimit && ipRateLimit.error) {
         return jsonResponse(ipRateLimit, 429);
       }
 
@@ -146,7 +146,6 @@ export class AIHandler {
         answer,
         usage: {
           tokensUsed: aiResponse.usage?.total_tokens || 0,
-          remainingToday: usageCheck.limitType === 'per_day' ? usageCheck.limit - usageCheck.used - 1 : null,
           dailyLimit: usageCheck.limitType === 'per_day' ? usageCheck.limit : null,
           usedToday: usageCheck.limitType === 'per_day' ? usageCheck.used + 1 : null,
           limitType: usageCheck.limitType
@@ -228,7 +227,6 @@ export class AIHandler {
           today: {
             used,
             limit: dailyLimit,
-            remaining: Math.max(0, dailyLimit - used),
             percentage: Math.round((used / dailyLimit) * 100)
           },
           tier: user.tier,
@@ -448,47 +446,25 @@ export class AIHandler {
       const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '60');
 
       // Use Durable Object rate limiter to prevent race conditions
-      const rateLimitError = await checkRateLimit(
+      const rateLimitResult = await checkRateLimit(
         `user:${userId}`,
         rateLimit,
         60000, // 1 minute window
         this.env
       );
 
-      if (rateLimitError) {
-        // Rate limit exceeded - get approximate usage from database for display
-        const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
-        const result = await this.db
-          .prepare(`
-            SELECT COUNT(*) as count
-            FROM usage_records
-            WHERE user_id = ? AND created_at > ?
-          `)
-          .bind(userId, oneMinuteAgo)
-          .first();
-
-        const usedInLastMinute = result?.count || rateLimit;
-
+      if (rateLimitResult && rateLimitResult.error) {
+        // Rate limit exceeded - use count from Durable Object (no DB query needed)
         return {
           allowed: false,
-          used: usedInLastMinute,
+          used: rateLimit,
           limit: rateLimit,
           limitType: 'per_minute'
         };
       }
 
-      // Allowed - get current usage from database for display purposes
-      const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
-      const result = await this.db
-        .prepare(`
-          SELECT COUNT(*) as count
-          FROM usage_records
-          WHERE user_id = ? AND created_at > ?
-        `)
-        .bind(userId, oneMinuteAgo)
-        .first();
-
-      const usedInLastMinute = result?.count || 0;
+      // Allowed - use count from Durable Object instead of redundant DB query
+      const usedInLastMinute = rateLimitResult?.count || 0;
 
       return {
         allowed: true,

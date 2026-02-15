@@ -271,23 +271,8 @@ export const Messaging = {
           }
         }
 
-        // Notify popup if available - don't fail on popup errors
-        try {
-          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-            chrome.runtime.sendMessage({
-              action: 'updateResponse',
-              message: request.response,
-              isError: request.response.startsWith('Error:')
-            }, () => {
-              // Ignore response or errors - popup might not be open
-              if (chrome.runtime.lastError) {
-                // Silent handling of popup communication errors
-              }
-            });
-          }
-        } catch (_error) {
-          // Extension context might be invalidated, continue processing
-        }
+        // Popup update is now sent directly by background.js displayResponse()
+        // No need to relay through the content script
 
         sendResponse({ success: true });
       } catch (error) {
