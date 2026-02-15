@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { SITE_URL } from '@/lib/constants'
 
 const inter = Inter({
     subsets: ['latin'],
@@ -11,7 +12,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://captureai.dev'),
+    metadataBase: new URL(SITE_URL),
     title: {
         default: 'CaptureAI - AI-Powered Screenshot Answers for Students',
         template: '%s | CaptureAI',
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: 'website',
         locale: 'en_US',
-        url: 'https://captureai.dev',
+        url: SITE_URL,
         siteName: 'CaptureAI',
         title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
         description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',

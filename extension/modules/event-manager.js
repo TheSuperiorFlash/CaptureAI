@@ -183,8 +183,11 @@ export const EventManager = {
       // Filter: only handle rejections from our extension
       const reason = event.reason;
       const stack = reason?.stack || '';
-      if (stack.includes('chrome-extension://')) {
-        this.handleError(reason, 'Unhandled Promise');
+      if (stack.includes('chrome-extension://') || !stack) {
+        this.handleError(
+          reason instanceof Error ? reason : new Error(String(reason)),
+          'Unhandled Promise'
+        );
       }
     });
   }

@@ -358,16 +358,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   /**
    * Update usage statistics display
    */
-  /**
-   * Sanitize a value for safe insertion into the DOM (prevent XSS)
-   */
-  function sanitize(value) {
-    const str = String(value);
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
   async function updateUsageStats() {
     try {
       // Try cached usage from last AI response first (avoids separate API call)
@@ -788,26 +778,32 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Render domain list
    */
   function renderDomainList() {
+    elements.domainList.textContent = '';
+
     if (settings.domainBlacklist.length === 0) {
-      elements.domainList.innerHTML = '<div class="domain-list-empty">No domains in blacklist</div>';
+      const empty = document.createElement('div');
+      empty.className = 'domain-list-empty';
+      empty.textContent = 'No domains in blacklist';
+      elements.domainList.appendChild(empty);
       return;
     }
 
-    elements.domainList.innerHTML = settings.domainBlacklist
-      .map(domain => `
-        <div class="domain-item">
-          <span class="domain-name">${domain}</span>
-          <button class="remove-domain-btn" data-domain="${domain}">×</button>
-        </div>
-      `)
-      .join('');
+    settings.domainBlacklist.forEach(domain => {
+      const item = document.createElement('div');
+      item.className = 'domain-item';
 
-    // Add remove event listeners
-    elements.domainList.querySelectorAll('.remove-domain-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const domain = e.target.getAttribute('data-domain');
-        removeDomain(domain);
-      });
+      const name = document.createElement('span');
+      name.className = 'domain-name';
+      name.textContent = domain;
+
+      const btn = document.createElement('button');
+      btn.className = 'remove-domain-btn';
+      btn.textContent = '\u00d7';
+      btn.addEventListener('click', () => removeDomain(domain));
+
+      item.appendChild(name);
+      item.appendChild(btn);
+      elements.domainList.appendChild(item);
     });
   }
 
@@ -938,6 +934,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await new Promise(resolve => setTimeout(resolve, 200));
           }
         }
+        throw new Error('Content script failed to respond after injection');
       } catch (_injectionError) {
         throw new Error('Could not load content script');
       }

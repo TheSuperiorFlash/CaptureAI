@@ -17,9 +17,10 @@
 (function() {
   'use strict';
 
-  // Guard against double-injection (e.g. fallback path via handleEnablePrivacyGuard)
-  if (window.__CAPTUREAI_PRIVACY_GUARD_ACTIVE__) return;
-  window.__CAPTUREAI_PRIVACY_GUARD_ACTIVE__ = true;
+  // Guard against double-injection using a non-writable Symbol (prevents page script tampering)
+  const guardKey = Symbol.for('__captureai_privacy_guard__');
+  if (window[guardKey]) return;
+  Object.defineProperty(window, guardKey, { value: true, writable: false, configurable: false });
 
   // ============================================================================
   // SECTION 0: PRESERVE ORIGINAL CONSOLE
@@ -403,7 +404,7 @@
       'user-select', '-webkit-user-select', '-moz-user-select', '-ms-user-select'
     ]);
     const originalGetPropertyValueDesc = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'getPropertyValue');
-    const originalGetPropertyValue = originalGetPropertyValueDesc.value;
+    const originalGetPropertyValue = originalGetPropertyValueDesc?.value ?? CSSStyleDeclaration.prototype.getPropertyValue;
 
     CSSStyleDeclaration.prototype.getPropertyValue = function(property) {
       if (userSelectProps.has(property)) {

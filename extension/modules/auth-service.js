@@ -496,10 +496,13 @@ const AuthService = {
 
     const data = await response.json();
 
-    // Automatically activate the key
-    await this.validateKey(data.licenseKey);
+    // Automatically activate the key if returned (may be emailed instead)
+    if (data.licenseKey) {
+      await this.validateKey(data.licenseKey);
+      return data.licenseKey;
+    }
 
-    return data.licenseKey;
+    return null; // Key was sent via email
   }
 };
 

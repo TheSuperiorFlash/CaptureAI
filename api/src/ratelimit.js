@@ -36,7 +36,7 @@ async function checkRateLimitDO(identifier, limit, windowMs, env) {
       };
     }
 
-    return { allowed: true, count: result.count || 0 };
+    return { allowed: true, count: result.count ?? 0 };
   } catch (error) {
     console.error('Rate limit check error:', error);
     // Fail open - allow request if rate limiter is unavailable

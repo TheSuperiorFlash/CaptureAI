@@ -46,6 +46,7 @@ content.js.backup
 ### Temporary Files ###
 *.tmp
 *.temp
+*.stackdump
 
 ### Build Output ###
 dist/

@@ -336,11 +336,10 @@ export const AutoSolve = {
 
           activeElement.focus();
           // Use native setter to trigger React/Vue/Angular change detection
-          const nativeSetter = Object.getOwnPropertyDescriptor(
-            HTMLInputElement.prototype, 'value'
-          )?.set || Object.getOwnPropertyDescriptor(
-            HTMLTextAreaElement.prototype, 'value'
-          )?.set;
+          const proto = activeElement.tagName === 'TEXTAREA'
+            ? HTMLTextAreaElement.prototype
+            : HTMLInputElement.prototype;
+          const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
           if (nativeSetter) {
             nativeSetter.call(activeElement, (activeElement.value || '') + key);
           } else {

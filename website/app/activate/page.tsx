@@ -141,11 +141,14 @@ export default function ActivatePage() {
         if (data.url) {
             // Validate redirect URL points to a trusted domain (Stripe checkout)
             const url = new URL(data.url as string)
+            if (url.protocol !== 'https:') {
+                throw new Error('Unexpected checkout URL protocol')
+            }
             const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com']
             if (!trustedHosts.includes(url.hostname)) {
                 throw new Error('Unexpected checkout URL')
             }
-            window.location.href = data.url as string
+            window.location.href = url.href
         } else {
             throw new Error('No checkout URL received')
         }

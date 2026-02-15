@@ -135,10 +135,10 @@ export class SubscriptionHandler {
       console.error('Webhook error:', error);
       // Return 200 for business logic errors to prevent Stripe retries
       // Only signature verification failures should return 400
-      if (error.message?.includes('Signature verification') || error.message?.includes('signature')) {
+      if (error.isSignatureError) {
         return jsonResponse({ error: 'Webhook verification failed' }, 400);
       }
-      return jsonResponse({ error: error.message, received: true }, 200);
+      return jsonResponse({ error: 'Internal server error', received: true }, 200);
     }
   }
 
@@ -234,7 +234,6 @@ export class SubscriptionHandler {
 
     } catch (error) {
       console.error('Checkout completion error:', error);
-      throw error;
     }
   }
 
@@ -253,7 +252,6 @@ export class SubscriptionHandler {
       }
     } catch (error) {
       console.error('Payment succeeded handler error:', error);
-      throw error;
     }
   }
 
@@ -272,7 +270,6 @@ export class SubscriptionHandler {
       }
     } catch (error) {
       console.error('Payment failed handler error:', error);
-      throw error;
     }
   }
 
@@ -289,7 +286,6 @@ export class SubscriptionHandler {
         .run();
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
-      throw error;
     }
   }
 
@@ -302,12 +298,14 @@ export class SubscriptionHandler {
       const status = subscription.status;
 
       // Map Stripe subscription statuses to tier/status
-      // active, trialing = pro (user has access)
-      // past_due = pro (grace period, still has access)
+      // active, trialing = pro (user has access), subscription_status = 'active'
+      // past_due = pro (grace period, still has access), subscription_status = 'past_due'
       // unpaid, canceled, incomplete_expired, paused = free (no access)
-      const activeStatuses = ['active', 'trialing', 'past_due'];
-      const newTier = activeStatuses.includes(status) ? 'pro' : 'free';
-      const subscriptionStatus = activeStatuses.includes(status) ? 'active' : 'inactive';
+      const accessStatuses = ['active', 'trialing', 'past_due'];
+      const newTier = accessStatuses.includes(status) ? 'pro' : 'free';
+      const subscriptionStatus = status === 'past_due' ? 'past_due'
+        : accessStatuses.includes(status) ? 'active'
+        : 'inactive';
 
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_subscription_id = ?')
@@ -315,7 +313,6 @@ export class SubscriptionHandler {
         .run();
     } catch (error) {
       console.error('Subscription update handler error:', error);
-      throw error;
     }
   }
 
@@ -401,7 +398,7 @@ export class SubscriptionHandler {
 
       // Validate sessionId format to prevent SSRF/path traversal
       // Stripe checkout session IDs match pattern: cs_test_... or cs_live_...
-      if (!/^cs_(test|live)_[a-zA-Z0-9]+$/.test(sessionId)) {
+      if (!/^cs_(test|live)_[a-zA-Z0-9_]+$/.test(sessionId)) {
         return jsonResponse({ error: 'Invalid session ID format' }, 400);
       }
 
@@ -551,7 +548,9 @@ export class SubscriptionHandler {
           currentTime
         });
       }
-      throw new Error('Webhook timestamp too old (max 2 minutes)');
+      const err = new Error('Webhook timestamp too old (max 2 minutes)');
+      err.isSignatureError = true;
+      throw err;
     }
 
     // Reject future timestamps (clock skew tolerance: 30 seconds)
@@ -563,7 +562,9 @@ export class SubscriptionHandler {
           currentTime
         });
       }
-      throw new Error('Webhook timestamp is in the future');
+      const err = new Error('Webhook timestamp is in the future');
+      err.isSignatureError = true;
+      throw err;
     }
 
     // Construct signed payload
@@ -594,7 +595,9 @@ export class SubscriptionHandler {
       if (this.logger) {
         this.logger.security('Webhook signature verification failed');
       }
-      throw new Error('Signature verification failed');
+      const err = new Error('Signature verification failed');
+      err.isSignatureError = true;
+      throw err;
     }
 
     const event = JSON.parse(payload);
