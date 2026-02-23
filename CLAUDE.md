@@ -23,7 +23,7 @@ npm run lint:fix            # ESLint auto-fix
 # Backend (Cloudflare Workers)
 cd api && npm run dev       # Local dev server on http://localhost:8787
 cd api && npm run deploy    # Deploy to production
-wrangler tail               # Monitor logs
+cd api && npm run tail      # Monitor logs
 
 # Backend database
 cd api && npm run db:init     # Initialize D1 database
