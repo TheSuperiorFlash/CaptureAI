@@ -151,7 +151,7 @@ Stripe webhooks verified with HMAC SHA256 + timestamp validation (2-min window) 
 - Read files before editing
 - Use `textContent` for user content (never `innerHTML` with untrusted data)
 - Use `STORAGE_KEYS` constants (never hardcode storage keys)
-- Access state via `window.CaptureAI.STATE`
+- Access state via `window.CaptureAI.STATE` and config via `window.CaptureAI.CONFIG` (never access directly)
 - Use parameterized queries in backend (never string concatenation)
 - Validate all input (email, license keys, request bodies)
 - Verify webhook signatures
