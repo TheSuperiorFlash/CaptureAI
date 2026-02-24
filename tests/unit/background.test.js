@@ -16,7 +16,7 @@ const {
   getStoredApiKey,
   OPENAI_CONFIG,
   PROMPT_TYPES
-} = require('../../background.js');
+} = require('../../extension/background.js');
 
 describe('background.js', () => {
   beforeEach(() => {
