@@ -77,7 +77,7 @@ describe('background.js', () => {
       expect(config.USE_LEGACY_PARAMS).toBe(false);
     });
 
-    test('missing level (undefined) defaults to medium (level 1)', async () => {
+    test('missing level (undefined) defaults to level 1 (low reasoning effort)', async () => {
       storageMock.local.get.mockImplementation((keys, callback) => {
         if (callback) {
           callback({}); // no key present
@@ -92,7 +92,7 @@ describe('background.js', () => {
       expect(config.REASONING_EFFORT).toBe('low');
     });
 
-    test('invalid level (e.g. 99) falls back to medium (level 1)', async () => {
+    test('invalid level (e.g. 99) falls back to level 1 (low reasoning effort)', async () => {
       storageMock.local.get.mockImplementation((keys, callback) => {
         if (callback) {
           callback({ 'captureai-reasoning-level': 99 });
@@ -123,7 +123,7 @@ describe('background.js', () => {
       expect(config.MAX_TOKENS).toEqual(OPENAI_CONFIG.MAX_TOKENS);
     });
 
-    test('falls back to medium config when storage throws', async () => {
+    test('falls back to level 1 config (low reasoning effort) when storage throws', async () => {
       storageMock.local.get.mockImplementation((keys, callback) => {
         if (callback) {
           throw new Error('Storage unavailable');
@@ -133,7 +133,7 @@ describe('background.js', () => {
 
       const config = await getAIConfig();
 
-      // Should return the medium fallback without throwing
+      // Should return the level 1 fallback (low reasoning effort) without throwing
       expect(config.MODEL).toBe('gpt-5-nano');
       expect(config.REASONING_EFFORT).toBe('low');
       expect(config.USE_LEGACY_PARAMS).toBe(false);
