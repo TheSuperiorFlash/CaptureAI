@@ -39,14 +39,17 @@ module.exports = {
   ],
 
   // Coverage thresholds
-  // Note: Global thresholds are low because UI modules (ui-core, ui-components,
-  // capture-system) need browser DOM and are tested via E2E/Playwright.
+  // Current baseline: ~40% stmts/branches/lines, ~48% functions (Feb 2026).
+  // popup.js (0%), ui-core.js (0%), ui-components.js (0%), and content.js (0%)
+  // are DOM-heavy files excluded from unit tests; they pull the global average down.
+  // Target: raise to 60%+ once Priority 2 DOM tests (ui-core, ui-components, popup)
+  // are completed (see testing-plan.md).
   coverageThreshold: {
     global: {
-      statements: 30,
-      branches: 30,
-      functions: 40,
-      lines: 30
+      statements: 40,
+      branches: 40,
+      functions: 47,
+      lines: 40
     }
   },
 
