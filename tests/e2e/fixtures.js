@@ -17,7 +17,7 @@ const test = base.extend({
   // Override context to use persistent context with extension
   context: async ({ /* unused fixtures */ }, use) => { // eslint-disable-line no-empty-pattern
     const context = await chromium.launchPersistentContext('', {
-      headless: false,
+      headless: process.env.PWHEADED !== '1',
       args: [
         `--disable-extensions-except=${EXTENSION_PATH}`,
         `--load-extension=${EXTENSION_PATH}`,
