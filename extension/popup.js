@@ -84,16 +84,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
   elements.addDomainBtn.addEventListener('click', addDomain);
-  elements.domainInput.addEventListener('keypress', (e) => {
+  elements.domainInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       addDomain();
     }
   });
   elements.ocrToggle.addEventListener('click', toggleOCR);
 
   // Add Enter key support for license key input
-  elements.licenseKeyInput.addEventListener('keypress', (e) => {
+  elements.licenseKeyInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleActivate();
     }
   });
@@ -218,9 +220,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Handle deactivation (clear license key)
    */
   async function handleDeactivate() {
-    const confirm = window.confirm('Are you sure you want to deactivate? You will need to enter your license key again.');
+    const confirmed = window.confirm('Are you sure you want to deactivate? You will need to enter your license key again.');
 
-    if (!confirm) {
+    if (!confirmed) {
       return;
     }
 
