@@ -114,8 +114,13 @@ class OCRService {
       const confidenceThreshold = options.confidenceThreshold || 40;
       const startTime = performance.now();
 
+      // Apply preprocessing if requested
+      const sourceImage = options.preprocessImage
+        ? await this.preprocessImage(imageDataUrl)
+        : imageDataUrl;
+
       // Perform OCR
-      const result = await this.worker.recognize(imageDataUrl);
+      const result = await this.worker.recognize(sourceImage);
 
       const endTime = performance.now();
       const duration = Math.round(endTime - startTime);
@@ -202,41 +207,66 @@ class OCRService {
      * @returns {Promise<string>} - Preprocessed image data URL
      */
   async preprocessImage(imageDataUrl) {
+    // Max dimension to guard against extremely large images causing memory errors
+    const MAX_DIMENSION = 4000;
+
     return new Promise((resolve, reject) => {
       try {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          try {
+            // Guard against extremely large images
+            if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+              reject(new Error('Image dimensions too large for preprocessing'));
+              return;
+            }
 
-          canvas.width = img.width;
-          canvas.height = img.height;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-          // Draw original image
-          ctx.drawImage(img, 0, 0);
+            if (!ctx) {
+              reject(new Error('Failed to get 2D canvas context for preprocessing'));
+              return;
+            }
 
-          // Get image data
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imageData.data;
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-          // Apply grayscale and contrast enhancement
-          for (let i = 0; i < data.length; i += 4) {
-            // Convert to grayscale
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            // Draw original image
+            ctx.drawImage(img, 0, 0);
 
-            // Enhance contrast (simple thresholding)
-            const enhanced = avg > 128 ? 255 : 0;
+            let imageData;
+            try {
+              // getImageData can throw on tainted (cross-origin) canvases
+              imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            } catch (securityError) {
+              reject(new Error(`Cannot read image pixel data: ${securityError.message}`));
+              return;
+            }
 
-            data[i] = enhanced;     // R
-            data[i + 1] = enhanced; // G
-            data[i + 2] = enhanced; // B
+            const data = imageData.data;
+
+            // Apply grayscale and contrast enhancement
+            for (let i = 0; i < data.length; i += 4) {
+              // Convert to grayscale
+              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+
+              // Enhance contrast (simple thresholding)
+              const enhanced = avg > 128 ? 255 : 0;
+
+              data[i] = enhanced;     // R
+              data[i + 1] = enhanced; // G
+              data[i + 2] = enhanced; // B
+            }
+
+            // Put processed image back
+            ctx.putImageData(imageData, 0, 0);
+
+            // Return processed image as data URL
+            resolve(canvas.toDataURL('image/png'));
+          } catch (error) {
+            reject(error);
           }
-
-          // Put processed image back
-          ctx.putImageData(imageData, 0, 0);
-
-          // Return processed image as data URL
-          resolve(canvas.toDataURL('image/png'));
         };
         img.onerror = () => reject(new Error('Failed to load image for preprocessing'));
         img.src = imageDataUrl;

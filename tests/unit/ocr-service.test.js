@@ -297,6 +297,56 @@ describe('OCRService', () => {
       await freshService.extractText(mockImageData);
       expect(global.Tesseract.createWorker).toHaveBeenCalled();
     });
+
+    test('should use preprocessed image when options.preprocessImage is true', async () => {
+      const preprocessedUrl = 'data:image/png;base64,preprocessed';
+      jest.spyOn(OCRService, 'preprocessImage').mockResolvedValueOnce(preprocessedUrl);
+
+      mockWorker.recognize.mockResolvedValueOnce({
+        data: { text: 'Preprocessed text', confidence: 90, words: [], lines: [] }
+      });
+
+      await OCRService.extractText(mockImageData, { preprocessImage: true });
+
+      expect(OCRService.preprocessImage).toHaveBeenCalledWith(mockImageData);
+      expect(mockWorker.recognize).toHaveBeenCalledWith(preprocessedUrl);
+    });
+
+    test('should not preprocess image when options.preprocessImage is false', async () => {
+      jest.spyOn(OCRService, 'preprocessImage');
+
+      mockWorker.recognize.mockResolvedValueOnce({
+        data: { text: 'Text', confidence: 90, words: [], lines: [] }
+      });
+
+      await OCRService.extractText(mockImageData, { preprocessImage: false });
+
+      expect(OCRService.preprocessImage).not.toHaveBeenCalled();
+      expect(mockWorker.recognize).toHaveBeenCalledWith(mockImageData);
+    });
+
+    test('should not preprocess image by default (no option specified)', async () => {
+      jest.spyOn(OCRService, 'preprocessImage');
+
+      mockWorker.recognize.mockResolvedValueOnce({
+        data: { text: 'Text', confidence: 90, words: [], lines: [] }
+      });
+
+      await OCRService.extractText(mockImageData);
+
+      expect(OCRService.preprocessImage).not.toHaveBeenCalled();
+    });
+
+    test('should fall back gracefully when preprocessImage rejects', async () => {
+      jest.spyOn(OCRService, 'preprocessImage').mockRejectedValueOnce(
+        new Error('Image dimensions too large for preprocessing')
+      );
+
+      const result = await OCRService.extractText(mockImageData, { preprocessImage: true });
+
+      expect(result.shouldFallbackToImage).toBe(true);
+      expect(result.error).toContain('Image dimensions too large');
+    });
   });
 
   describe('terminate', () => {
@@ -369,6 +419,151 @@ describe('OCRService', () => {
       expect(OCRService.isValidOCRResult({
         confidence: 90
       })).toBe(false);
+    });
+  });
+
+  describe('preprocessImage', () => {
+    let mockCanvas;
+    let mockCtx;
+    let mockImg;
+
+    beforeEach(() => {
+      mockCtx = {
+        drawImage: jest.fn(),
+        getImageData: jest.fn().mockReturnValue({
+          data: new Uint8ClampedArray(4 * 4 * 4) // 4x4 image, 4 RGBA channels per pixel
+        }),
+        putImageData: jest.fn()
+      };
+
+      mockCanvas = {
+        getContext: jest.fn().mockReturnValue(mockCtx),
+        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,processed'),
+        width: 0,
+        height: 0
+      };
+
+      mockImg = {
+        onload: null,
+        onerror: null,
+        src: null,
+        width: 4,
+        height: 4
+      };
+
+      global.document = {
+        createElement: jest.fn((tag) => {
+          if (tag === 'canvas') return mockCanvas;
+          if (tag === 'img') return mockImg;
+          return {};
+        })
+      };
+
+      global.Image = jest.fn().mockImplementation(() => {
+        const img = {
+          onload: null,
+          onerror: null,
+          width: 4,
+          height: 4,
+          get src() { return this._src; },
+          set src(value) {
+            this._src = value;
+            if (this.onload) this.onload();
+          }
+        };
+        return img;
+      });
+    });
+
+    afterEach(() => {
+      delete global.Image;
+      delete global.document;
+    });
+
+    test('should reject when canvas context is unavailable', async () => {
+      mockCanvas.getContext.mockReturnValueOnce(null);
+
+      global.Image = jest.fn().mockImplementation(() => {
+        return {
+          onload: null,
+          onerror: null,
+          width: 4,
+          height: 4,
+          get src() { return this._src; },
+          set src(value) {
+            this._src = value;
+            if (this.onload) this.onload();
+          }
+        };
+      });
+
+      await expect(OCRService.preprocessImage('data:image/png;base64,test'))
+        .rejects.toThrow('Failed to get 2D canvas context');
+    });
+
+    test('should reject when image exceeds size limit', async () => {
+      global.Image = jest.fn().mockImplementation(() => {
+        return {
+          onload: null,
+          onerror: null,
+          width: 5000,
+          height: 5000,
+          get src() { return this._src; },
+          set src(value) {
+            this._src = value;
+            if (this.onload) this.onload();
+          }
+        };
+      });
+
+      await expect(OCRService.preprocessImage('data:image/png;base64,test'))
+        .rejects.toThrow('Image dimensions too large for preprocessing');
+    });
+
+    test('should reject when getImageData throws (tainted canvas)', async () => {
+      mockCtx.getImageData.mockImplementationOnce(() => {
+        throw new Error('The canvas has been tainted by cross-origin data');
+      });
+
+      global.Image = jest.fn().mockImplementation(() => {
+        return {
+          onload: null,
+          onerror: null,
+          width: 4,
+          height: 4,
+          get src() { return this._src; },
+          set src(value) {
+            this._src = value;
+            if (this.onload) this.onload();
+          }
+        };
+      });
+
+      await expect(OCRService.preprocessImage('data:image/png;base64,test'))
+        .rejects.toThrow('Cannot read image pixel data');
+    });
+
+    test('should reject when image fails to load', async () => {
+      global.Image = jest.fn().mockImplementation(() => {
+        return {
+          onload: null,
+          onerror: null,
+          get src() { return this._src; },
+          set src(value) {
+            this._src = value;
+            if (this.onerror) this.onerror();
+          }
+        };
+      });
+
+      await expect(OCRService.preprocessImage('data:image/png;base64,invalid'))
+        .rejects.toThrow('Failed to load image for preprocessing');
+    });
+
+    test('should resolve with processed data URL on success', async () => {
+      const result = await OCRService.preprocessImage('data:image/png;base64,test');
+      expect(result).toBe('data:image/png;base64,processed');
+      expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
     });
   });
 });
