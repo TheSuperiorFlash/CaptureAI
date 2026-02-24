@@ -7,6 +7,7 @@
  * @jest-environment jsdom
  */
 
+/* global HTMLElement */
 import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { UIStealthyResult } from '../../modules/ui-stealthy-result.js';
 
