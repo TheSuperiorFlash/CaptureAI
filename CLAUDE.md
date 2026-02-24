@@ -8,7 +8,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js
 
-**Tiers:** Free (10 req/day) | Pro ($9.99/mo, 60 req/min unlimited)
+**Tiers:** Free (10 req/day) | Pro ($9.99/mo, 20 req/min unlimited)
 
 ## Commands
 
@@ -129,7 +129,7 @@ Capture → Tesseract.js extracts text → if confidence >60%, send text only (9
 - `Ctrl+Shift+E`: Toggle panel
 
 ### Backend Rate Limiting
-Uses Cloudflare Durable Objects (`RateLimiterDO`) for distributed rate limiting. Free: 10/day, Pro: 60/min.
+Uses Cloudflare Durable Objects (`RateLimiterDO`) for distributed rate limiting. Free: 10/day, Pro: 20/min.
 
 ### Webhook Security
 Stripe webhooks verified with HMAC SHA256 + timestamp validation (2-min window) + event deduplication via `webhook_events` table + constant-time comparison.
