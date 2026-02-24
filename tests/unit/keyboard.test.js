@@ -1,379 +1,239 @@
 /**
- * Unit Tests for Keyboard Module
- *
- * Tests keyboard event handling, command routing, and shortcut logic
+ * @jest-environment jsdom
  */
 
-const { describe, test, expect, beforeEach } = require('@jest/globals');
+/**
+ * Unit Tests for Keyboard Module
+ *
+ * Tests the actual Keyboard module from extension/modules/keyboard.js
+ * including init, cleanup, handleKeyDown, handleCommand, handleEscapeKey
+ */
+
+import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { Keyboard } from '../../modules/keyboard.js';
 
 describe('Keyboard Module', () => {
-  describe('Event Listener Management', () => {
-    test('should bind keydown event listener on init', () => {
-      const eventListeners = [];
-      const mockDocument = {
-        addEventListener: (event, handler) => {
-          eventListeners.push({ event, handler });
-        }
-      };
+  let mockState;
+  let mockDomCache;
 
-      function init(doc) {
-        const handler = () => {};
-        doc.addEventListener('keydown', handler);
-        return handler;
+  beforeEach(() => {
+    mockState = {
+      isProcessing: false,
+      isPanelVisible: false,
+      isAutoSolveMode: false,
+      isShowingAnswer: false,
+      isAskMode: false,
+      answerFadeoutTimer: null
+    };
+
+    mockDomCache = {
+      panel: {
+        style: { display: 'none' }
       }
+    };
 
-      const handler = init(mockDocument);
+    window.CaptureAI = {
+      STATE: mockState,
+      DOM_CACHE: mockDomCache,
+      CONFIG: { RESULT_ID: 'captureai-result', PANEL_ID: 'captureai-panel' },
+      STORAGE_KEYS: { ASK_MODE: 'captureai-ask-mode' },
+      CaptureSystem: {
+        startCapture: jest.fn(),
+        quickCapture: jest.fn(),
+        cancelSelection: jest.fn()
+      },
+      UICore: {
+        togglePanelVisibility: jest.fn(),
+        switchMode: jest.fn()
+      },
+      AutoSolve: {
+        toggleAutoSolveMode: jest.fn()
+      },
+      UIStealthyResult: {
+        hide: jest.fn()
+      },
+      StorageUtils: {
+        setValue: jest.fn()
+      }
+    };
 
-      expect(eventListeners).toHaveLength(1);
-      expect(eventListeners[0].event).toBe('keydown');
-      expect(eventListeners[0].handler).toBe(handler);
+    // Clean up any previous bindings
+    Keyboard.boundHandleKeyDown = null;
+  });
+
+  afterEach(() => {
+    Keyboard.cleanup();
+  });
+
+  describe('init and cleanup', () => {
+    test('should bind keydown event listener on init', () => {
+      const spy = jest.spyOn(document, 'addEventListener');
+      Keyboard.init();
+
+      expect(spy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(Keyboard.boundHandleKeyDown).not.toBeNull();
+      spy.mockRestore();
     });
 
     test('should remove keydown event listener on cleanup', () => {
-      const eventListeners = [];
-      const mockDocument = {
-        addEventListener: (event, handler) => {
-          eventListeners.push({ event, handler });
-        },
-        removeEventListener: (event, handler) => {
-          const index = eventListeners.findIndex(
-            (l) => l.event === event && l.handler === handler
-          );
-          if (index > -1) {
-            eventListeners.splice(index, 1);
-          }
-        }
-      };
+      Keyboard.init();
+      const removeSpy = jest.spyOn(document, 'removeEventListener');
 
-      function init(doc) {
-        const handler = () => {};
-        doc.addEventListener('keydown', handler);
-        return handler;
-      }
+      Keyboard.cleanup();
 
-      function cleanup(doc, handler) {
-        doc.removeEventListener('keydown', handler);
-      }
+      expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(Keyboard.boundHandleKeyDown).toBeNull();
+      removeSpy.mockRestore();
+    });
 
-      const handler = init(mockDocument);
-      expect(eventListeners).toHaveLength(1);
-
-      cleanup(mockDocument, handler);
-      expect(eventListeners).toHaveLength(0);
+    test('should not throw on cleanup without init', () => {
+      expect(() => Keyboard.cleanup()).not.toThrow();
     });
   });
 
-  describe('Escape Key Handling', () => {
-    test('should detect Escape key press', () => {
-      const event = { key: 'Escape' };
-
-      const isEscape = event.key === 'Escape';
-
-      expect(isEscape).toBe(true);
+  describe('handleKeyDown', () => {
+    test('should call handleEscapeKey on Escape', () => {
+      const spy = jest.spyOn(Keyboard, 'handleEscapeKey');
+      Keyboard.handleKeyDown({ key: 'Escape' });
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
     });
 
-    test('should not detect other keys as Escape', () => {
-      const events = [
-        { key: 'Enter' },
-        { key: 'Space' },
-        { key: 'a' },
-        { key: 'Esc' }
-      ];
-
-      events.forEach((event) => {
-        const isEscape = event.key === 'Escape';
-        expect(isEscape).toBe(false);
-      });
-    });
-
-    test('should handle Escape key case-sensitively', () => {
-      const events = [
-        { key: 'Escape' },
-        { key: 'escape' },
-        { key: 'ESCAPE' }
-      ];
-
-      expect(events[0].key === 'Escape').toBe(true);
-      expect(events[1].key === 'Escape').toBe(false);
-      expect(events[2].key === 'Escape').toBe(false);
+    test('should not call handleEscapeKey for other keys', () => {
+      const spy = jest.spyOn(Keyboard, 'handleEscapeKey');
+      Keyboard.handleKeyDown({ key: 'Enter' });
+      Keyboard.handleKeyDown({ key: 'a' });
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
     });
   });
 
-  describe('Command Routing', () => {
-    test('should route capture_shortcut command', () => {
-      const commands = {
-        capture_shortcut: 'startCapture',
-        quick_capture_shortcut: 'quickCapture',
-        toggle_ui_shortcut: 'togglePanelVisibility'
-      };
-
-      const command = 'capture_shortcut';
-
-      expect(commands[command]).toBe('startCapture');
+  describe('handleCommand', () => {
+    test('should call startCapture for capture_shortcut when not processing', () => {
+      Keyboard.handleCommand('capture_shortcut');
+      expect(window.CaptureAI.CaptureSystem.startCapture).toHaveBeenCalled();
     });
 
-    test('should route quick_capture_shortcut command', () => {
-      const commands = {
-        capture_shortcut: 'startCapture',
-        quick_capture_shortcut: 'quickCapture',
-        toggle_ui_shortcut: 'togglePanelVisibility'
-      };
-
-      const command = 'quick_capture_shortcut';
-
-      expect(commands[command]).toBe('quickCapture');
+    test('should not call startCapture when processing', () => {
+      mockState.isProcessing = true;
+      Keyboard.handleCommand('capture_shortcut');
+      expect(window.CaptureAI.CaptureSystem.startCapture).not.toHaveBeenCalled();
     });
 
-    test('should route toggle_ui_shortcut command', () => {
-      const commands = {
-        capture_shortcut: 'startCapture',
-        quick_capture_shortcut: 'quickCapture',
-        toggle_ui_shortcut: 'togglePanelVisibility'
-      };
-
-      const command = 'toggle_ui_shortcut';
-
-      expect(commands[command]).toBe('togglePanelVisibility');
+    test('should call quickCapture for quick_capture_shortcut', () => {
+      Keyboard.handleCommand('quick_capture_shortcut');
+      expect(window.CaptureAI.CaptureSystem.quickCapture).toHaveBeenCalled();
     });
 
-    test('should handle unknown command', () => {
-      const commands = {
-        capture_shortcut: 'startCapture',
-        quick_capture_shortcut: 'quickCapture',
-        toggle_ui_shortcut: 'togglePanelVisibility'
-      };
-
-      const command = 'unknown_command';
-
-      expect(commands[command]).toBeUndefined();
-    });
-  });
-
-  describe('State Validation', () => {
-    test('should check if capture is in progress', () => {
-      const state = {
-        isProcessing: false
-      };
-
-      const canCapture = !state.isProcessing;
-
-      expect(canCapture).toBe(true);
+    test('should call togglePanelVisibility for toggle_ui_shortcut', () => {
+      Keyboard.handleCommand('toggle_ui_shortcut');
+      expect(window.CaptureAI.UICore.togglePanelVisibility).toHaveBeenCalled();
     });
 
-    test('should prevent capture when processing', () => {
-      const state = {
-        isProcessing: true
-      };
-
-      const canCapture = !state.isProcessing;
-
-      expect(canCapture).toBe(false);
+    test('should do nothing for unknown commands', () => {
+      Keyboard.handleCommand('unknown_command');
+      expect(window.CaptureAI.CaptureSystem.startCapture).not.toHaveBeenCalled();
+      expect(window.CaptureAI.CaptureSystem.quickCapture).not.toHaveBeenCalled();
+      expect(window.CaptureAI.UICore.togglePanelVisibility).not.toHaveBeenCalled();
     });
 
-    test('should check auto-solve mode state', () => {
-      const state = {
-        isAutoSolveMode: true
-      };
+    test('should do nothing when window.CaptureAI is undefined', () => {
+      window.CaptureAI = undefined;
+      expect(() => Keyboard.handleCommand('capture_shortcut')).not.toThrow();
+    });
 
-      expect(state.isAutoSolveMode).toBe(true);
+    test('should do nothing when STATE is undefined', () => {
+      window.CaptureAI = { STATE: undefined };
+      expect(() => Keyboard.handleCommand('capture_shortcut')).not.toThrow();
+    });
+
+    test('should handle missing CaptureSystem gracefully', () => {
+      window.CaptureAI.CaptureSystem = undefined;
+      expect(() => Keyboard.handleCommand('capture_shortcut')).not.toThrow();
+    });
+
+    test('should handle missing UICore gracefully', () => {
+      window.CaptureAI.UICore = undefined;
+      expect(() => Keyboard.handleCommand('toggle_ui_shortcut')).not.toThrow();
     });
   });
 
-  describe('Keyboard Event Properties', () => {
-    test('should detect modifier keys', () => {
-      const event = {
-        key: 'x',
-        ctrlKey: true,
-        shiftKey: true,
-        altKey: false,
-        metaKey: false
-      };
+  describe('handleEscapeKey', () => {
+    test('should cancel selection if overlay exists', () => {
+      const overlay = document.createElement('div');
+      overlay.id = 'captureai-overlay';
+      document.body.appendChild(overlay);
 
-      expect(event.ctrlKey).toBe(true);
-      expect(event.shiftKey).toBe(true);
-      expect(event.altKey).toBe(false);
+      Keyboard.handleEscapeKey();
+
+      expect(window.CaptureAI.CaptureSystem.cancelSelection).toHaveBeenCalled();
+      overlay.remove();
     });
 
-    test('should detect key combinations', () => {
-      const isCtrlShiftX = (e) => {
-        return e.ctrlKey && e.shiftKey && !e.altKey &&
-          !e.metaKey && e.key.toLowerCase() === 'x';
-      };
-
-      const validEvent = {
-        key: 'x',
-        ctrlKey: true,
-        shiftKey: true,
-        altKey: false,
-        metaKey: false
-      };
-
-      const invalidEvent = {
-        key: 'x',
-        ctrlKey: true,
-        shiftKey: false,
-        altKey: false,
-        metaKey: false
-      };
-
-      expect(isCtrlShiftX(validEvent)).toBe(true);
-      expect(isCtrlShiftX(invalidEvent)).toBe(false);
-    });
-  });
-
-  describe('Escape Key Actions', () => {
-    test('should disable auto-solve mode on Escape', () => {
-      const state = {
-        isAutoSolveMode: true
-      };
-
-      function handleEscape(state) {
-        if (state.isAutoSolveMode) {
-          state.isAutoSolveMode = false;
-        }
-      }
-
-      handleEscape(state);
-
-      expect(state.isAutoSolveMode).toBe(false);
+    test('should clear processing state', () => {
+      mockState.isProcessing = true;
+      Keyboard.handleEscapeKey();
+      expect(mockState.isProcessing).toBe(false);
     });
 
-    test('should cancel capture on Escape', () => {
-      const state = {
-        isCapturing: true
-      };
-
-      function handleEscape(state) {
-        if (state.isCapturing) {
-          state.isCapturing = false;
-        }
-      }
-
-      handleEscape(state);
-
-      expect(state.isCapturing).toBe(false);
+    test('should disable auto-solve first (stage 1)', () => {
+      mockState.isAutoSolveMode = true;
+      Keyboard.handleEscapeKey();
+      expect(window.CaptureAI.AutoSolve.toggleAutoSolveMode).toHaveBeenCalledWith(false);
     });
 
-    test('should hide UI panel on Escape', () => {
-      const ui = {
-        isPanelVisible: true
-      };
+    test('should not hide panel when disabling auto-solve', () => {
+      mockState.isAutoSolveMode = true;
+      mockState.isPanelVisible = true;
+      mockDomCache.panel.style.display = 'block';
 
-      function handleEscape(ui) {
-        if (ui.isPanelVisible) {
-          ui.isPanelVisible = false;
-        }
-      }
+      Keyboard.handleEscapeKey();
 
-      handleEscape(ui);
+      // Panel should stay visible (stage 1 only disables auto-solve)
+      expect(mockDomCache.panel.style.display).toBe('block');
+    });
 
-      expect(ui.isPanelVisible).toBe(false);
+    test('should hide panel when auto-solve already disabled (stage 2)', () => {
+      mockState.isAutoSolveMode = false;
+      mockState.isPanelVisible = true;
+
+      Keyboard.handleEscapeKey();
+
+      expect(mockDomCache.panel.style.display).toBe('none');
+      expect(mockState.isPanelVisible).toBe(false);
+    });
+
+    test('should clear fadeout timer when showing answer', () => {
+      mockState.isShowingAnswer = true;
+      mockState.answerFadeoutTimer = 999;
+
+      Keyboard.handleEscapeKey();
+
+      expect(mockState.answerFadeoutTimer).toBeNull();
+    });
+
+    test('should exit ask mode if active', () => {
+      mockState.isAskMode = true;
+
+      Keyboard.handleEscapeKey();
+
+      expect(mockState.isAskMode).toBe(false);
+      expect(window.CaptureAI.StorageUtils.setValue).toHaveBeenCalledWith(
+        'captureai-ask-mode',
+        false
+      );
+      expect(window.CaptureAI.UICore.switchMode).toHaveBeenCalledWith(false);
     });
   });
 
-  describe('Command Validation', () => {
-    test('should validate command exists', () => {
-      const validCommands = [
-        'capture_shortcut',
-        'quick_capture_shortcut',
-        'toggle_ui_shortcut'
-      ];
+  describe('getShortcutsHelp', () => {
+    test('should return help text with all shortcuts', () => {
+      const help = Keyboard.getShortcutsHelp();
 
-      const command = 'capture_shortcut';
-
-      const isValid = validCommands.includes(command);
-
-      expect(isValid).toBe(true);
-    });
-
-    test('should reject invalid commands', () => {
-      const validCommands = [
-        'capture_shortcut',
-        'quick_capture_shortcut',
-        'toggle_ui_shortcut'
-      ];
-
-      const command = 'invalid_command';
-
-      const isValid = validCommands.includes(command);
-
-      expect(isValid).toBe(false);
-    });
-  });
-
-  describe('Event Propagation', () => {
-    test('should not propagate handled events', () => {
-      const event = {
-        key: 'Escape',
-        stopPropagation: jest.fn(),
-        preventDefault: jest.fn()
-      };
-
-      function handleKeyDown(e) {
-        if (e.key === 'Escape') {
-          e.stopPropagation();
-          e.preventDefault();
-          return true;
-        }
-        return false;
-      }
-
-      const handled = handleKeyDown(event);
-
-      expect(handled).toBe(true);
-      expect(event.stopPropagation).toHaveBeenCalled();
-      expect(event.preventDefault).toHaveBeenCalled();
-    });
-
-    test('should allow unhandled events to propagate', () => {
-      const event = {
-        key: 'a',
-        stopPropagation: jest.fn(),
-        preventDefault: jest.fn()
-      };
-
-      function handleKeyDown(e) {
-        if (e.key === 'Escape') {
-          e.stopPropagation();
-          e.preventDefault();
-          return true;
-        }
-        return false;
-      }
-
-      const handled = handleKeyDown(event);
-
-      expect(handled).toBe(false);
-      expect(event.stopPropagation).not.toHaveBeenCalled();
-      expect(event.preventDefault).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Binding Context', () => {
-    test('should preserve this context with bind', () => {
-      const keyboard = {
-        name: 'keyboard',
-        handleKeyDown() {
-          return this.name;
-        }
-      };
-
-      const boundHandler = keyboard.handleKeyDown.bind(keyboard);
-
-      expect(boundHandler()).toBe('keyboard');
-    });
-
-    test('should lose this context without bind', () => {
-      const keyboard = {
-        name: 'keyboard',
-        handleKeyDown() {
-          return this?.name;
-        }
-      };
-
-      const unboundHandler = keyboard.handleKeyDown;
-
-      expect(unboundHandler()).toBeUndefined();
+      expect(help).toContain('Ctrl+Shift+X');
+      expect(help).toContain('Ctrl+Shift+F');
+      expect(help).toContain('Ctrl+Shift+E');
+      expect(help).toContain('Escape');
     });
   });
 });

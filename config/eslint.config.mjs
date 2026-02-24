@@ -5,14 +5,22 @@ export default [
   js.configs.recommended,
   {
     files: ['**/*.js'],
-    ignores: ['tests/**', 'config/**'],
+    ignores: ['tests/**', 'config/**', 'api/**'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
         ...globals.browser,
         ...globals.webextensions,
-        chrome: 'readonly'
+        chrome: 'readonly',
+        // Globals loaded via importScripts in background.js / popup.js
+        importScripts: 'readonly',
+        AuthService: 'readonly',
+        Migration: 'readonly',
+        // Loaded via script tag in extension
+        Tesseract: 'readonly',
+        // CJS compatibility (typeof module !== 'undefined' checks)
+        module: 'readonly'
       }
     },
     rules: {
@@ -74,8 +82,74 @@ export default [
     }
   },
   {
+    // Backend - Cloudflare Workers source files
+    files: ['api/src/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.serviceworker
+      }
+    },
+    rules: {
+      // Code Quality
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+      'no-console': 'off',
+      'prefer-const': 'warn',
+      'no-var': 'error',
+
+      // Style
+      'indent': ['error', 2, { SwitchCase: 1 }],
+      'quotes': ['error', 'single', { avoidEscape: true }],
+      'semi': ['error', 'always'],
+      'max-len': ['warn', {
+        code: 100,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true
+      }],
+      'max-lines': ['warn', {
+        max: 500,
+        skipBlankLines: true,
+        skipComments: true
+      }],
+      'max-lines-per-function': ['warn', {
+        max: 50,
+        skipBlankLines: true,
+        skipComments: true
+      }],
+
+      // Best Practices
+      'eqeqeq': ['error', 'always'],
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs'],
+      'comma-dangle': ['error', 'never'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+      'space-before-function-paren': ['error', {
+        anonymous: 'never',
+        named: 'never',
+        asyncArrow: 'always'
+      }],
+      'keyword-spacing': ['error', { before: true, after: true }],
+      'space-infix-ops': 'error',
+      'comma-spacing': ['error', { before: false, after: true }],
+      'no-trailing-spaces': 'error',
+      'eol-last': ['error', 'always'],
+      'no-undef': 'error'
+    }
+  },
+  {
     // Config files - JS (CommonJS)
-    files: ['config/**/*.js'],
+    files: ['config/**/*.js', 'babel.config.js', 'api/babel.config.js', 'api/jest.config.js', 'playwright.config.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -102,17 +176,19 @@ export default [
     }
   },
   {
-    // Test files
-    files: ['tests/**/*.js'],
+    // Test files (extension + backend)
+    files: ['tests/**/*.js', 'api/tests/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: {
         ...globals.node,
         ...globals.jest,
         chrome: 'readonly',
         window: 'writable',
-        global: 'writable'
+        global: 'writable',
+        document: 'writable',
+        Document: 'readonly'
       }
     },
     rules: {
@@ -128,7 +204,10 @@ export default [
     ignores: [
       'node_modules/**',
       'dist/**',
-      '*.min.js'
+      '*.min.js',
+      'api/.wrangler/**',
+      'website/**',
+      'extension/libs/**'
     ]
   }
 ];

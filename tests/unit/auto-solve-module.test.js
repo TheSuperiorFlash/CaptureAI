@@ -420,6 +420,82 @@ describe('AutoSolve Module', () => {
     });
   });
 
+  describe('getAutoSolveCaptureArea - edge cases', () => {
+    test('should handle zero coordinates with startX format', async () => {
+      const storedArea = {
+        startX: 0,
+        startY: 0,
+        width: 100,
+        height: 50
+      };
+      mockWindow.CaptureAI.StorageUtils.getValue.mockResolvedValue(storedArea);
+
+      const result = await AutoSolve.getAutoSolveCaptureArea();
+
+      // left is undefined → falsy, falls through to startX=0
+      // 0 !== undefined, so validation passes
+      expect(result).toEqual({
+        startX: 0,
+        startY: 0,
+        width: 100,
+        height: 50
+      });
+    });
+
+    test('should return null when width is missing', async () => {
+      const storedArea = { startX: 10, startY: 20, height: 50 };
+      mockWindow.CaptureAI.StorageUtils.getValue.mockResolvedValue(storedArea);
+
+      const result = await AutoSolve.getAutoSolveCaptureArea();
+      expect(result).toBeNull();
+    });
+
+    test('should return null when height is missing', async () => {
+      const storedArea = { startX: 10, startY: 20, width: 100 };
+      mockWindow.CaptureAI.StorageUtils.getValue.mockResolvedValue(storedArea);
+
+      const result = await AutoSolve.getAutoSolveCaptureArea();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Answer Extraction - last match behavior', () => {
+    test('should use last digit match from response', () => {
+      const response = 'Question 1 is about option 3';
+      const matches = response.trim().toLowerCase().match(/[1-4]/g);
+      expect(matches[matches.length - 1]).toBe('3');
+    });
+
+    test('should return null for responses with no digits 1-4', () => {
+      const response = 'Error code 500 from server 9';
+      const matches = response.trim().toLowerCase().match(/[1-4]/g);
+      expect(matches).toBeNull();
+    });
+  });
+
+  describe('handleAutoSolveResponse - additional edge cases', () => {
+    test('should handle response with no digit matches as valid', async () => {
+      mockWindow.CaptureAI.STATE.isAutoSolveMode = true;
+      mockWindow.CaptureAI.STATE.invalidQuestionCount = 0;
+      AutoSolve.lastAutoSolveResponse = null;
+
+      await AutoSolve.handleAutoSolveResponse('Select the blue option');
+
+      // No [1-4] match but not an invalid pattern, counter stays 0
+      expect(mockWindow.CaptureAI.STATE.invalidQuestionCount).toBe(0);
+    });
+
+    test('should handle "error:" prefix case-insensitively', async () => {
+      mockWindow.CaptureAI.STATE.isAutoSolveMode = true;
+      mockWindow.CaptureAI.STATE.invalidQuestionCount = 0;
+      AutoSolve.lastAutoSolveResponse = null;
+
+      await AutoSolve.handleAutoSolveResponse('Error: Rate limit exceeded');
+
+      expect(mockWindow.CaptureAI.STATE.invalidQuestionCount).toBe(1);
+    });
+  });
+
   describe('Integration Tests', () => {
     test('should handle complete auto-solve cycle', async () => {
       mockWindow.CaptureAI.STATE.isAutoSolveMode = true;

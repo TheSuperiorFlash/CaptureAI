@@ -115,7 +115,7 @@ export class AIHandler {
 
       // Determine input method (OCR, image, or text-only)
       const inputMethod = hasOcrText && !hasImageData ? 'ocr' :
-                          hasImageData ? 'image' : 'text';
+        hasImageData ? 'image' : 'text';
 
       // Map reasoning level to human-readable format
       const reasoningLevelMap = {
@@ -694,46 +694,46 @@ export class AIHandler {
     }
 
     const payload = {
-        model: config.model,
-        messages
+      model: config.model,
+      messages
     };
 
     // Use different token parameter based on model
     const maxTokens = promptType === 'ask' ? 4000 : 2500;
 
     if (config.useLegacyTokenParam) {
-        // gpt-4.1-mini uses max_tokens
-        payload.max_tokens = maxTokens;
+      // gpt-4.1-mini uses max_tokens
+      payload.max_tokens = maxTokens;
     } else {
-        // gpt-5-nano uses max_completion_tokens
-        payload.max_completion_tokens = maxTokens;
+      // gpt-5-nano uses max_completion_tokens
+      payload.max_completion_tokens = maxTokens;
     }
 
     // Add reasoning_effort only for gpt-5-nano models (level 1 and 2)
     if (config.reasoningEffort) {
-        payload.reasoning_effort = config.reasoningEffort;
+      payload.reasoning_effort = config.reasoningEffort;
     }
 
     return payload;
-}
+  }
 
   /**
    * Send request to Cloudflare AI Gateway
    */
   async sendToGateway(payload, userId) {
-      const headers = {
-          'Content-Type': 'application/json',
-          'cf-aig-metadata-user': userId
-      };
+    const headers = {
+      'Content-Type': 'application/json',
+      'cf-aig-metadata-user': userId
+    };
 
-      // Add gateway token if using authenticated AI Gateway
-      if (this.env.CLOUDFLARE_GATEWAY_TOKEN) {
-          headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
-      }
+    // Add gateway token if using authenticated AI Gateway
+    if (this.env.CLOUDFLARE_GATEWAY_TOKEN) {
+      headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
+    }
 
-      const response = await fetchWithTimeout(this.apiUrl, {
-          method: 'POST',
-          headers,
+    const response = await fetchWithTimeout(this.apiUrl, {
+      method: 'POST',
+      headers,
       body: JSON.stringify(payload)
     }, 30000); // 30 second timeout for AI requests
 

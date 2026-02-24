@@ -192,7 +192,9 @@ async function activatePrivacyGuard() {
       }
     }
   } catch (error) {
-    if (DEBUG) console.error('Privacy Guard activation error:', error);
+    if (DEBUG) {
+      console.error('Privacy Guard activation error:', error);
+    }
   }
 }
 
@@ -234,7 +236,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
 if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
   chrome.commands.onCommand.addListener((command) => {
     // Get current active tab and send command to content script
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'keyboardCommand',
@@ -298,7 +300,9 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onStartup) {
  */
 if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local') return;
+    if (areaName !== 'local') {
+      return;
+    }
     if (changes['captureai-settings'] || changes['captureai-user-tier']) {
       activatePrivacyGuard();
     }
@@ -314,7 +318,9 @@ if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
       try {
         await AuthService.refreshUserCache();
       } catch (error) {
-        if (DEBUG) console.error('Scheduled cache refresh failed:', error);
+        if (DEBUG) {
+          console.error('Scheduled cache refresh failed:', error);
+        }
       }
     }
   });
@@ -468,11 +474,11 @@ async function handleAskQuestion(request, sender, sendResponse) {
     // Send to backend (with or without image and OCR data)
     const aiResponse = imageData
       ? await sendToOpenAI({
-          question,
-          imageData,
-          ocrText: ocrData?.text,
-          ocrConfidence: ocrData?.confidence
-        }, null, PROMPT_TYPES.ASK)
+        question,
+        imageData,
+        ocrText: ocrData?.text,
+        ocrConfidence: ocrData?.confidence
+      }, null, PROMPT_TYPES.ASK)
       : await sendTextOnlyQuestion(question, null);
 
     await displayResponse(sender.tab.id, aiResponse);
@@ -626,7 +632,7 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     if (data.ocrText && data.ocrText.trim().length > 0) {
       requestPayload.ocrText = data.ocrText;
     }
-    if (data.ocrConfidence != null) {
+    if (data.ocrConfidence !== null && data.ocrConfidence !== undefined) {
       requestPayload.ocrConfidence = data.ocrConfidence;
     }
 

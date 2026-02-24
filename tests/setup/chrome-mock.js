@@ -48,6 +48,7 @@ const runtimeMock = {
     if (callback) {
       callback({ success: true });
     }
+    return Promise.resolve({ success: true });
   }),
   onMessage: {
     addListener: jest.fn(),
@@ -77,7 +78,45 @@ const scriptingMock = {
     if (callback) {
       callback([{ result: true }]);
     }
+    return Promise.resolve([{ result: true }]);
   })
+};
+
+// Context Menus API mock
+const contextMenusMock = {
+  create: jest.fn(),
+  update: jest.fn(),
+  remove: jest.fn(),
+  removeAll: jest.fn(),
+  onClicked: {
+    addListener: jest.fn(),
+    removeListener: jest.fn()
+  }
+};
+
+// Alarms API mock
+const alarmsMock = {
+  create: jest.fn(),
+  clear: jest.fn(),
+  clearAll: jest.fn(),
+  get: jest.fn(),
+  getAll: jest.fn(),
+  onAlarm: {
+    addListener: jest.fn(),
+    removeListener: jest.fn()
+  }
+};
+
+// Action API mock (Manifest V3)
+const actionMock = {
+  setIcon: jest.fn(),
+  setBadgeText: jest.fn(),
+  setBadgeBackgroundColor: jest.fn(),
+  setTitle: jest.fn(),
+  onClicked: {
+    addListener: jest.fn(),
+    removeListener: jest.fn()
+  }
 };
 
 // Complete Chrome API mock
@@ -85,7 +124,10 @@ const chromeMock = {
   storage: storageMock,
   runtime: runtimeMock,
   tabs: tabsMock,
-  scripting: scriptingMock
+  scripting: scriptingMock,
+  contextMenus: contextMenusMock,
+  alarms: alarmsMock,
+  action: actionMock
 };
 
 /**
@@ -127,5 +169,8 @@ export {
   storageMock,
   runtimeMock,
   tabsMock,
-  scriptingMock
+  scriptingMock,
+  contextMenusMock,
+  alarmsMock,
+  actionMock
 };

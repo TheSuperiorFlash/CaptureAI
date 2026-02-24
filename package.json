@@ -20,13 +20,17 @@
     "test": "jest --config config/jest.config.js",
     "test:watch": "jest --config config/jest.config.js --watch",
     "test:coverage": "jest --config config/jest.config.js --coverage",
-    "test:verbose": "jest --config config/jest.config.js --verbose"
+    "test:verbose": "jest --config config/jest.config.js --verbose",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:all": "npm test && cd api && npx jest && cd .. && npx playwright test"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@eslint/js": "^9.39.2",
     "@jest/globals": "^30.2.0",
+    "@playwright/test": "^1.58.2",
     "@types/chrome": "^0.1.32",
     "babel-jest": "^30.2.0",
     "eslint": "^9.39.2",

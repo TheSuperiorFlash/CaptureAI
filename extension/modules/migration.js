@@ -82,7 +82,7 @@ const Migration = {
    */
   async clearMigrationNotice() {
     await chrome.storage.local.remove('captureai-migration-notice');
-  },
+  }
 
 };
 

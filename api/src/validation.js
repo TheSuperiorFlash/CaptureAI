@@ -47,7 +47,9 @@ export async function validateRequestBody(request, maxSize = MAX_BODY_SIZE) {
       throw new ValidationError('Invalid JSON format');
     }
   } catch (error) {
-    if (error instanceof ValidationError) throw error;
+    if (error instanceof ValidationError) {
+      throw error;
+    }
     throw new ValidationError('Failed to parse request body');
   }
 }
@@ -77,7 +79,7 @@ export function validateEmail(email, required = true) {
   }
 
   // Format validation (RFC 5322 simplified pattern)
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
   if (!emailRegex.test(email)) {
     throw new ValidationError('Invalid email format', 'email');
@@ -340,7 +342,9 @@ export function validateReasoningLevel(level) {
  * Sanitize string to prevent XSS and injection attacks
  */
 export function sanitizeString(str) {
-  if (typeof str !== 'string') return str;
+  if (typeof str !== 'string') {
+    return str;
+  }
 
   // Remove null bytes
   str = str.replace(/\0/g, '');
@@ -355,7 +359,9 @@ export function sanitizeString(str) {
  * Validate and sanitize all fields in an object
  */
 export function sanitizeObject(obj) {
-  if (typeof obj !== 'object' || obj === null) return obj;
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
 
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {

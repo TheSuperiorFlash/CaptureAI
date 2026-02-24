@@ -83,7 +83,9 @@ export class Logger {
    * Debug log
    */
   debug(message, data = {}) {
-    if (!this.shouldLog(LogLevel.DEBUG)) return;
+    if (!this.shouldLog(LogLevel.DEBUG)) {
+      return;
+    }
     this.output(this.formatLog(LogLevel.DEBUG, message, data));
   }
 
@@ -91,7 +93,9 @@ export class Logger {
    * Info log
    */
   info(message, data = {}) {
-    if (!this.shouldLog(LogLevel.INFO)) return;
+    if (!this.shouldLog(LogLevel.INFO)) {
+      return;
+    }
     this.output(this.formatLog(LogLevel.INFO, message, data));
   }
 
@@ -99,7 +103,9 @@ export class Logger {
    * Warning log
    */
   warn(message, data = {}) {
-    if (!this.shouldLog(LogLevel.WARN)) return;
+    if (!this.shouldLog(LogLevel.WARN)) {
+      return;
+    }
     this.output(this.formatLog(LogLevel.WARN, message, data));
   }
 

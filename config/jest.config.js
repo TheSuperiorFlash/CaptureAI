@@ -11,31 +11,42 @@ module.exports = {
   // Use Node environment for testing
   testEnvironment: 'node',
 
-  // Test file patterns
+  // Test file patterns - exclude api/ and e2e/ (separate configs)
   testMatch: [
     '**/tests/**/*.test.js',
     '**/__tests__/**/*.test.js'
   ],
 
-  // Coverage collection
+  // Map module imports to their actual locations under extension/
+  moduleNameMapper: {
+    '^(\\.\\.[\\\\/]){2}modules[\\\\/](.*)$': '<rootDir>/extension/modules/$2',
+    '^(\\.\\.[\\\\/]){2}background\\.js$': '<rootDir>/extension/background.js',
+    '^(\\.\\.[\\\\/]){2}popup\\.js$': '<rootDir>/extension/popup.js',
+    '^(\\.\\.[\\\\/]){2}content\\.js$': '<rootDir>/extension/content.js',
+    '^(\\.\\.[\\\\/]){2}inject\\.js$': '<rootDir>/extension/inject.js'
+  },
+
+  // Coverage collection from extension source files
   collectCoverageFrom: [
-    'background.js',
-    'modules/**/*.js',
-    'popup.js',
+    'extension/background.js',
+    'extension/modules/**/*.js',
+    'extension/popup.js',
+    'extension/content.js',
+    'extension/inject.js',
     '!**/node_modules/**',
     '!**/tests/**',
     '!**/__tests__/**'
   ],
 
   // Coverage thresholds
-  // Note: Currently set to 0% as tests use function copies for unit testing
-  // TODO: Refactor to import actual functions and increase thresholds to 70%
+  // Note: Global thresholds are low because UI modules (ui-core, ui-components,
+  // capture-system) need browser DOM and are tested via E2E/Playwright.
   coverageThreshold: {
     global: {
-      statements: 0,
-      branches: 0,
-      functions: 0,
-      lines: 0
+      statements: 30,
+      branches: 30,
+      functions: 40,
+      lines: 30
     }
   },
 
@@ -72,6 +83,8 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    '/coverage/'
+    '/coverage/',
+    '/api/',
+    '/e2e/'
   ]
 };

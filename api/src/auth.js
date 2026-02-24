@@ -27,7 +27,9 @@ export class AuthHandler {
 
     let key = '';
     for (let i = 0; i < segments; i++) {
-      if (i > 0) key += '-';
+      if (i > 0) {
+        key += '-';
+      }
       for (let j = 0; j < segmentLength; j++) {
         // Use cryptographically secure random number generation
         const randomValues = crypto.getRandomValues(new Uint8Array(1));
@@ -67,7 +69,9 @@ export class AuthHandler {
         .first();
 
       if (!user) {
-        if (this.logger) logAuth(this.logger, false, null);
+        if (this.logger) {
+          logAuth(this.logger, false, null);
+        }
         return jsonResponse({ error: 'Invalid license key' }, 401);
       }
 
@@ -77,7 +81,9 @@ export class AuthHandler {
         .bind(user.id)
         .run();
 
-      if (this.logger) logAuth(this.logger, true, user.id);
+      if (this.logger) {
+        logAuth(this.logger, true, user.id);
+      }
 
       return jsonResponse({
         message: 'License key validated successfully',
@@ -91,9 +97,13 @@ export class AuthHandler {
       });
 
     } catch (error) {
-      if (this.logger) this.logger.error('License validation error', error);
+      if (this.logger) {
+        this.logger.error('License validation error', error);
+      }
       if (error instanceof ValidationError) {
-        if (this.logger) logValidationError(this.logger, error.field, error);
+        if (this.logger) {
+          logValidationError(this.logger, error.field, error);
+        }
         return jsonResponse({ error: error.message, field: error.field }, 400);
       }
       return jsonResponse({ error: 'Validation failed' }, 500);
@@ -255,7 +265,9 @@ export class AuthHandler {
           .bind(licenseKey)
           .first();
 
-        if (!existing) break;
+        if (!existing) {
+          break;
+        }
         attempts++;
       }
 
@@ -270,7 +282,9 @@ export class AuthHandler {
         .bind(userId, licenseKey, normalizedEmail, 'free', 'inactive')
         .run();
 
-      if (this.logger) logLicenseCreation(this.logger, userId, normalizedEmail, 'free');
+      if (this.logger) {
+        logLicenseCreation(this.logger, userId, normalizedEmail, 'free');
+      }
 
       // If email service configured, send the key
       let emailSent = false;
@@ -299,9 +313,13 @@ export class AuthHandler {
       }, 201);
 
     } catch (error) {
-      if (this.logger) this.logger.error('Create free key error', error);
+      if (this.logger) {
+        this.logger.error('Create free key error', error);
+      }
       if (error instanceof ValidationError) {
-        if (this.logger) logValidationError(this.logger, error.field, error);
+        if (this.logger) {
+          logValidationError(this.logger, error.field, error);
+        }
         return jsonResponse({ error: error.message, field: error.field }, 400);
       }
       return jsonResponse({ error: 'Failed to create license key' }, 500);
@@ -807,7 +825,7 @@ https://captureai.dev`;
           html: htmlContent,
           text: textContent,
           headers: {
-            'X-Entity-Ref-ID': crypto.randomUUID(),
+            'X-Entity-Ref-ID': crypto.randomUUID()
           },
           tags: [
             {
