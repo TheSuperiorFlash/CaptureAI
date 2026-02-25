@@ -160,12 +160,39 @@ function clearRuntimeError() {
   runtimeMock.lastError = null;
 }
 
+/**
+ * Create a consistent chrome.storage.local.get mock implementation
+ * that handles both callback and Promise APIs correctly.
+ *
+ * Reduces duplication in tests that need to return specific storage data,
+ * and ensures both API paths (callback and Promise) always behave the same.
+ *
+ * @param {Object} data - Key/value pairs to return from storage
+ * @returns {Function} Mock implementation suitable for mockImplementation/mockImplementationOnce
+ *
+ * @example
+ * storageMock.local.get.mockImplementation(makeStorageGetMock({
+ *   'captureai-user-tier': 'pro',
+ *   'captureai-reasoning-level': 1
+ * }));
+ */
+function makeStorageGetMock(data) {
+  return (keys, callback) => {
+    if (callback) {
+      callback(data);
+      return undefined;
+    }
+    return Promise.resolve(data);
+  };
+}
+
 export {
   chromeMock,
   setupChromeMock,
   resetChromeMocks,
   setRuntimeError,
   clearRuntimeError,
+  makeStorageGetMock,
   storageMock,
   runtimeMock,
   tabsMock,

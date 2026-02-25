@@ -5,7 +5,7 @@
  * and error handling for the CaptureAI license key system
  */
 
-import { describe, test, expect, beforeEach } from '@jest/globals';
+import { describe, test, expect, beforeEach, jest } from '@jest/globals';
 import { resetChromeMocks, storageMock } from '../setup/chrome-mock.js';
 
 let AuthService;
