@@ -85,15 +85,19 @@ export function handleCORS(request, env) {
     // No wildcard github.io matching - only exact origins above
   }
 
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': allowedOrigin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400',
-      'Access-Control-Allow-Credentials': 'true'
-    }
-  });
+  const headers = {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  };
+
+  // Only allow credentials for explicitly allowed origins
+  if (allowedOrigin !== 'null') {
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  }
+
+  return new Response(null, { headers });
 }
 
 /**

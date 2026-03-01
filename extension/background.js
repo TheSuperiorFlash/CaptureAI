@@ -229,6 +229,12 @@ if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
   chrome.commands.onCommand.addListener((command) => {
     // Get current active tab and send command to content script
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        if (DEBUG) {
+          console.error('tabs.query error:', chrome.runtime.lastError.message);
+        }
+        return;
+      }
       if (tabs[0]?.id) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'keyboardCommand',

@@ -23,7 +23,7 @@
     "test:verbose": "jest --config config/jest.config.js --verbose",
     "test:e2e": "npx playwright test",
     "test:e2e:headed": "npx playwright test --headed",
-    "test:all": "npm test && cd api && npx jest && cd .. && npx playwright test"
+    "test:all": "npm test && npm --prefix api test && npx playwright test"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",

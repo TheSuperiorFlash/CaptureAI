@@ -8,7 +8,6 @@ class OCRService {
     this.worker = null;
     this.isInitialized = false;
     this.initializationPromise = null;
-    this.Tesseract = null;
   }
 
   /**
@@ -111,7 +110,7 @@ class OCRService {
         await this.initialize();
       }
 
-      const confidenceThreshold = options.confidenceThreshold || 40;
+      const confidenceThreshold = options.confidenceThreshold || 60;
       const startTime = performance.now();
 
       // Apply preprocessing if requested
@@ -196,7 +195,7 @@ class OCRService {
     const hasText = ocrResult.text.trim().length > 0;
 
     // Check confidence threshold (matches default in extractText)
-    const hasConfidence = ocrResult.confidence >= 40;
+    const hasConfidence = ocrResult.confidence >= 60;
 
     return hasText && hasConfidence;
   }

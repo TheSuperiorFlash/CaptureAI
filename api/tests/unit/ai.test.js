@@ -71,7 +71,7 @@ function createMockEnv(overrides = {}) {
     CLOUDFLARE_ACCOUNT_ID: 'test-account-id',
     CLOUDFLARE_GATEWAY_NAME: 'test-gateway',
     FREE_TIER_DAILY_LIMIT: '10',
-    PRO_TIER_RATE_LIMIT_PER_MINUTE: '60',
+    PRO_TIER_RATE_LIMIT_PER_MINUTE: '20',
     RATE_LIMITER: {
       idFromName: jest.fn().mockReturnValue('mock-id'),
       get: jest.fn().mockReturnValue({
@@ -326,7 +326,7 @@ describe('AIHandler', () => {
 
       expect(result.allowed).toBe(true);
       expect(result.limitType).toBe('per_minute');
-      expect(result.limit).toBe(60);
+      expect(result.limit).toBe(20);
     });
 
     test('should block pro tier when rate limited', async () => {
@@ -736,8 +736,8 @@ describe('AIHandler', () => {
         usageCheck: {
           allowed: false,
           limitType: 'per_minute',
-          limit: 60,
-          used: 60
+          limit: 20,
+          used: 20
         }
       });
 

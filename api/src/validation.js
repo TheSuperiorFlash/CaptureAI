@@ -58,16 +58,16 @@ export async function validateRequestBody(request, maxSize = MAX_BODY_SIZE) {
  * Validate email format (RFC 5322 simplified)
  */
 export function validateEmail(email, required = true) {
+  // Type check before any string operations
+  if (email !== null && email !== undefined && typeof email !== 'string') {
+    throw new ValidationError('Email must be a string', 'email');
+  }
+
   if (!email || email.trim() === '') {
     if (required) {
       throw new ValidationError('Email is required', 'email');
     }
     return null;
-  }
-
-  // Type check
-  if (typeof email !== 'string') {
-    throw new ValidationError('Email must be a string', 'email');
   }
 
   // Trim whitespace
@@ -121,16 +121,16 @@ export function validateEmail(email, required = true) {
  * Validate license key format
  */
 export function validateLicenseKey(licenseKey, required = true) {
+  // Type check before any string operations
+  if (licenseKey !== null && licenseKey !== undefined && typeof licenseKey !== 'string') {
+    throw new ValidationError('License key must be a string', 'licenseKey');
+  }
+
   if (!licenseKey || licenseKey.trim() === '') {
     if (required) {
       throw new ValidationError('License key is required', 'licenseKey');
     }
     return null;
-  }
-
-  // Type check
-  if (typeof licenseKey !== 'string') {
-    throw new ValidationError('License key must be a string', 'licenseKey');
   }
 
   // Normalize (remove spaces, uppercase)
@@ -361,6 +361,17 @@ export function sanitizeString(str) {
 export function sanitizeObject(obj) {
   if (typeof obj !== 'object' || obj === null) {
     return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => {
+      if (typeof item === 'string') {
+        return sanitizeString(item);
+      } else if (typeof item === 'object' && item !== null) {
+        return sanitizeObject(item);
+      }
+      return item;
+    });
   }
 
   const sanitized = {};

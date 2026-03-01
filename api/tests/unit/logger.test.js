@@ -469,13 +469,14 @@ describe('Specialized Loggers', () => {
 
   describe('logLicenseCreation', () => {
     test('should log license creation as audit', () => {
-      logLicenseCreation(logger, 'user-1', 'test@example.com', 'free');
+      logLicenseCreation(logger, 'user-1', 'free');
       const parsed = JSON.parse(console.log.mock.calls[0][0]);
       expect(parsed.level).toBe('AUDIT');
       expect(parsed.message).toBe('license_created');
       expect(parsed.userId).toBe('user-1');
       expect(parsed.tier).toBe('free');
       expect(parsed.action).toBe('create_license');
+      expect(parsed.email).toBeUndefined();
     });
   });
 

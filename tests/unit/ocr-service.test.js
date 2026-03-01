@@ -219,11 +219,11 @@ describe('OCRService', () => {
         }
       });
 
-      // Default threshold is 40, so 50 should pass
+      // Default threshold is 60, so 50 should fall back
       const result = await OCRService.extractText(mockImageData);
-      expect(result.shouldFallbackToImage).toBe(false);
+      expect(result.shouldFallbackToImage).toBe(true);
 
-      // Custom threshold of 60, so 50 should fail
+      // Explicit threshold of 40, so 50 should pass
       mockWorker.recognize.mockResolvedValueOnce({
         data: {
           text: 'Some text',
@@ -232,8 +232,8 @@ describe('OCRService', () => {
           lines: []
         }
       });
-      const result2 = await OCRService.extractText(mockImageData, { confidenceThreshold: 60 });
-      expect(result2.shouldFallbackToImage).toBe(true);
+      const result2 = await OCRService.extractText(mockImageData, { confidenceThreshold: 40 });
+      expect(result2.shouldFallbackToImage).toBe(false);
     });
 
     test('should clean extracted text', async () => {
@@ -408,10 +408,10 @@ describe('OCRService', () => {
       })).toBe(false);
     });
 
-    test('should return true for confidence at threshold (40)', () => {
+    test('should return true for confidence at threshold (60)', () => {
       expect(OCRService.isValidOCRResult({
         text: 'Some text',
-        confidence: 40
+        confidence: 60
       })).toBe(true);
     });
 

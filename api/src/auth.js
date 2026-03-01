@@ -283,7 +283,7 @@ export class AuthHandler {
         .run();
 
       if (this.logger) {
-        logLicenseCreation(this.logger, userId, normalizedEmail, 'free');
+        logLicenseCreation(this.logger, userId, 'free');
       }
 
       // If email service configured, send the key
@@ -636,7 +636,7 @@ https://captureai.dev`;
     } catch (error) {
       console.error('Email sending error:', error);
       if (this.logger) {
-        this.logger.error('Email sending failed', error, { email, tier });
+        this.logger.error('Email sending failed', error, { tier });
       }
       return false; // Email failed
     }
@@ -809,7 +809,7 @@ https://captureai.dev`;
    * @returns {boolean} - True if email sent successfully, false otherwise
    */
   async sendEmailViaResend(email, subject, htmlContent, textContent, tier = 'free') {
-    console.log('Attempting to send email via Resend to:', email);
+    console.log('Attempting to send email via Resend');
 
     try {
       const response = await fetchWithTimeout('https://api.resend.com/emails', {
@@ -850,7 +850,7 @@ https://captureai.dev`;
       const result = await response.json();
       console.log('Email sent successfully! Resend response:', result);
       if (this.logger) {
-        this.logger.info('Email sent successfully', { provider: 'resend', to: email, id: result.id });
+        this.logger.info('Email sent successfully', { provider: 'resend', id: result.id });
       }
       return true;
 

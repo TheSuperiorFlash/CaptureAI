@@ -960,7 +960,7 @@ describe('sanitizeObject', () => {
     expect(result.name).toBe('test');
     expect(result.count).toBe(5);
     expect(result.active).toBe(false);
-    // Arrays are objects, so they get recursively sanitized
+    expect(result.tags).toEqual(['a', 'b']);
     expect(result.nested).toEqual({ key: 'val' });
   });
 });

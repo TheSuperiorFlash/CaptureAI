@@ -201,10 +201,9 @@ export function logAuth(logger, success, userId = null, method = 'license_key') 
 /**
  * Log license key creation
  */
-export function logLicenseCreation(logger, userId, email, tier) {
+export function logLicenseCreation(logger, userId, tier) {
   logger.audit('license_created', {
     userId,
-    email,
     tier,
     action: 'create_license'
   });

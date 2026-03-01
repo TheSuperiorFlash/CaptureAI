@@ -767,7 +767,6 @@ describe('AuthHandler', () => {
       expect(logLicenseCreation).toHaveBeenCalledWith(
         logger,
         'test-uuid-1234',
-        'new@example.com',
         'free'
       );
     });
@@ -1239,7 +1238,6 @@ describe('AuthHandler', () => {
         'Email sent successfully',
         expect.objectContaining({
           provider: 'resend',
-          to: 'user@test.com',
           id: 'resend-email-id-99'
         })
       );
