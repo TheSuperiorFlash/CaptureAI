@@ -9,7 +9,10 @@
     <div class="header">
         <div class="header-left">
             <img src="icons/icon128.png" alt="CaptureAI" class="header-logo">
-            <span class="header-title">CaptureAI</span>
+            <div class="header-title-section">
+                <span class="header-title">CaptureAI</span>
+                <span class="header-subtitle hidden" id="activation-subtitle">Activation Required</span>
+            </div>
         </div>
         <div class="header-right">
             <button id="header-ui-toggle" class="header-ui-toggle">Show UI</button>
@@ -39,13 +42,7 @@
         <!-- License Key Section -->
         <div id="license-key-section" class="section hidden">
             <div class="activation-header">
-                <h3>Activate CaptureAI</h3>
-                <p>
-                    Get your free key at
-                    <a href="https://captureai.dev/activate" target="_blank" class="activation-link">
-                        activate page
-                    </a>
-                </p>
+                <p>Paste your license key or obtain one at <a href="https://captureai.dev/activate" target="_blank" class="activation-link">captureai.dev</a></p>
             </div>
 
             <div class="input-group">
@@ -71,7 +68,7 @@
         </div>
 
         <!-- Help Section -->
-        <div id="help-section" class="help-section">
+        <div id="help-section" class="help-section hidden">
             <div class="help-toggle" id="help-toggle">
                 <span>Help</span>
                 <span class="help-arrow" id="help-arrow">▶</span>
@@ -83,21 +80,6 @@
                 <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
                 <div class="help-category">Stealth Mode</div>
                 <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
-
-                <!-- User Info (moved from main-controls) -->
-                <div class="help-item user-info-container">
-                    <div id="user-info" class="user-info">
-                        <div class="user-info-header">
-                            <div class="user-info-label">Logged in as:</div>
-                            <button id="logout-btn">Logout</button>
-                        </div>
-                        <div id="user-email"></div>
-                        <div class="user-info-footer">
-                            <div id="user-tier"></div>
-                            <button id="upgrade-btn" class="hidden">Upgrade to Pro</button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Settings Button -->
                 <div class="help-item settings-button-container">
@@ -115,6 +97,20 @@
                     <img src="icons/back-arrow.png" alt="Back" class="back-arrow-icon">
                 </button>
                 <h2>Settings</h2>
+            </div>
+
+            <div class="settings-section">
+                <div id="user-info" class="user-info">
+                    <div class="user-info-header">
+                        <div class="user-info-label">Logged in as:</div>
+                        <button id="logout-btn">Logout</button>
+                    </div>
+                    <div id="user-email"></div>
+                    <div class="user-info-footer">
+                        <div id="user-tier"></div>
+                        <button id="upgrade-btn" class="hidden">Upgrade to Pro</button>
+                    </div>
+                </div>
             </div>
 
             <div class="settings-section">
@@ -146,36 +142,40 @@
                 </div>
             </div>
 
+            <!-- Advanced Settings Section -->
             <div class="settings-section">
-                <div id="reasoning-level-item" class="settings-card">
-                    <div class="reasoning-level-title">Reasoning Level</div>
-                    <div class="reasoning-level-description">
-                        Control how deeply the AI analyzes questions. Higher levels provide better answers but increase response time
-                    </div>
-                    <div class="reasoning-toggle-container reasoning-toggle-wrapper">
-                        <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1">
-                        <div class="reasoning-toggle-track" id="settings-reasoning-toggle-track">
-                            <div class="reasoning-toggle-progress" id="settings-reasoning-toggle-progress"></div>
-                            <div class="reasoning-toggle-slider" id="settings-reasoning-toggle-slider"></div>
-                            <span class="reasoning-label reasoning-label-low">Low</span>
-                            <span class="reasoning-label reasoning-label-medium">Medium</span>
-                            <span class="reasoning-label reasoning-label-high">High</span>
-                        </div>
-                    </div>
+                <div class="advanced-toggle" id="advanced-toggle">
+                    <span>Advanced</span>
+                    <span class="advanced-arrow" id="advanced-arrow">▶</span>
                 </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-card">
-                    <div class="settings-item-header">
-                        <div>
-                            <div class="settings-item-title">Disable OCR Extraction</div>
-                            <div class="settings-item-description">
-                                Send image data instead of extracting text (not recommended)
+                <div class="advanced-content" id="advanced-content">
+                    <div id="reasoning-level-item" class="settings-card">
+                        <div class="reasoning-level-title">Reasoning Level</div>
+                        <div class="reasoning-level-description">
+                            Control how deeply the AI analyzes questions. Higher levels provide better answers but increase response time
+                        </div>
+                        <div class="reasoning-toggle-container reasoning-toggle-wrapper">
+                            <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1">
+                            <div class="reasoning-toggle-track" id="settings-reasoning-toggle-track">
+                                <div class="reasoning-toggle-progress" id="settings-reasoning-toggle-progress"></div>
+                                <div class="reasoning-toggle-slider" id="settings-reasoning-toggle-slider"></div>
+                                <span class="reasoning-label reasoning-label-low">Low</span>
+                                <span class="reasoning-label reasoning-label-medium">Medium</span>
+                                <span class="reasoning-label reasoning-label-high">High</span>
                             </div>
                         </div>
-                        <div class="toggle-switch" id="ocr-toggle">
-                            <div class="toggle-slider"></div>
+                    </div>
+                    <div id="ocr-item" class="settings-card">
+                        <div class="settings-item-header">
+                            <div>
+                                <div class="settings-item-title">Disable OCR Extraction</div>
+                                <div class="settings-item-description">
+                                    Send image data instead of extracting text (not recommended)
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="ocr-toggle">
+                                <div class="toggle-slider"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -183,7 +183,7 @@
         </div>
     </div>
 
-    <script src="modules/auth-service.js"></script>
+<script src="modules/auth-service.js"></script>
     <script src="modules/migration.js"></script>
     <script src="popup.js"></script>
 </body>

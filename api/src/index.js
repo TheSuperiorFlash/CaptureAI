@@ -65,8 +65,8 @@ export default {
     try {
       logger.info('Request received');
 
-      // Create router instance
-      const router = new Router(env, logger);
+      // Create router instance (pass ctx for waitUntil support)
+      const router = new Router(env, logger, ctx);
 
       // Route the request
       const response = await router.route(request);
@@ -150,8 +150,7 @@ function addSecurityHeaders(response) {
 function getCORSHeaders(request, env) {
   // List of allowed origins - must be exact matches for security
   const allowedOrigins = [
-    'https://captureai.dev',
-    'https://thesuperiorflash.github.io'
+    'https://captureai.dev'
   ];
 
   // Development/testing origins (only if in dev mode)

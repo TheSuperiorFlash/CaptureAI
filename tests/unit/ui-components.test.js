@@ -90,13 +90,14 @@ describe('UIComponents', () => {
       const mockFn = jest.fn();
       window.CaptureAI.UICore = { handleAskQuestion: mockFn };
 
-      UIComponents.handleAskQuestion('my question', 'data:image/png;base64,img', null);
+      const images = [{ imageData: 'data:image/png;base64,img', ocrData: null }];
+      UIComponents.handleAskQuestion('my question', images);
 
-      expect(mockFn).toHaveBeenCalledWith('my question', 'data:image/png;base64,img', null);
+      expect(mockFn).toHaveBeenCalledWith('my question', images);
     });
 
     test('does not throw when UICore.handleAskQuestion is absent', () => {
-      expect(() => UIComponents.handleAskQuestion('q', null, null)).not.toThrow();
+      expect(() => UIComponents.handleAskQuestion('q', [])).not.toThrow();
     });
   });
 

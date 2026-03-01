@@ -188,8 +188,7 @@ export class SubscriptionHandler {
             SET tier = ?,
                 subscription_status = ?,
                 stripe_customer_id = ?,
-                stripe_subscription_id = ?,
-                updated_at = datetime('now')
+                stripe_subscription_id = ?
             WHERE id = ?
           `)
           .bind('pro', 'active', customerId, subscriptionId, user.id)
@@ -658,10 +657,13 @@ export class SubscriptionHandler {
    */
   async markWebhookProcessed(eventId, timestamp) {
     try {
-      await this.db
-        .prepare('INSERT INTO webhook_events (event_id, processed_at, webhook_timestamp) VALUES (?, datetime(\'now\'), ?)')
-        .bind(eventId, timestamp)
-        .run();
+      await this.db.batch([
+        this.db
+          .prepare('INSERT INTO webhook_events (event_id, processed_at, webhook_timestamp) VALUES (?, datetime(\'now\'), ?)')
+          .bind(eventId, timestamp),
+        this.db
+          .prepare("DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours')")
+      ]);
     } catch (error) {
       if (this.logger) {
         this.logger.error('Failed to mark webhook as processed', error, { eventId });

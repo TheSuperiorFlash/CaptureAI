@@ -262,50 +262,19 @@ export const UIComponents = {
             overflow-y: hidden;
         `;
 
-    // Create image preview
-    this.imagePreview = document.createElement('div');
-    this.imagePreview.style.cssText = `
+    // Create image preview container for multiple images
+    this.imagePreviewContainer = document.createElement('div');
+    this.imagePreviewContainer.style.cssText = `
             display: none;
             position: absolute;
             top: 8px;
             left: 8px;
-            width: 80px;
-            height: 80px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid ${theme.border};
-            background-color: ${theme.toggleBg};
             z-index: 10;
+            gap: 6px;
         `;
-
-    const previewImage = document.createElement('img');
-    previewImage.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-
-    const removeButton = document.createElement('div');
-    removeButton.style.cssText = `
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 18px;
-            height: 18px;
-            border-radius: 46%;
-            background-color: ${theme.primaryBg};
-            color: ${theme.primaryText};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: bold;
-            line-height: 1;
-        `;
-    removeButton.textContent = '✕';
-
-    this.imagePreview.appendChild(previewImage);
-    this.imagePreview.appendChild(removeButton);
 
     textInputWrapper.appendChild(this.askTextInput);
-    textInputWrapper.appendChild(this.imagePreview);
+    textInputWrapper.appendChild(this.imagePreviewContainer);
 
     // Create button row
     const buttonRow = document.createElement('div');
@@ -372,7 +341,7 @@ export const UIComponents = {
     this.askModeContainer.appendChild(textInputWrapper);
     this.askModeContainer.appendChild(buttonRow);
 
-    this.attachedImageData = null;
+    this.attachedImages = [];
   },
 
   setupAskModeEventHandlers() {
@@ -382,27 +351,14 @@ export const UIComponents = {
 
     // Auto-resize functionality
     this.askTextInput.addEventListener('input', () => {
-      this.askTextInput.style.height = '60px';
-      const scrollHeight = this.askTextInput.scrollHeight;
-      const maxHeight = 150;
-      const minHeight = 60;
-
-      if (scrollHeight > minHeight) {
-        this.askTextInput.style.height = Math.min(scrollHeight, maxHeight) + 'px';
-      }
-
-      if (scrollHeight > maxHeight) {
-        this.askTextInput.style.overflowY = 'auto';
-      } else {
-        this.askTextInput.style.overflowY = 'hidden';
-      }
+      this.resizeTextarea();
     });
 
     // Keyboard shortcuts
     this.askTextInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        if (this.askTextInput.value.trim()) {
+        if (this.askTextInput.value.trim() || this.attachedImages.length > 0) {
           this.handleAskModeQuestion();
         }
       }
@@ -410,7 +366,7 @@ export const UIComponents = {
 
     // Ask button click
     this.askButton.addEventListener('click', () => {
-      if (this.askTextInput.value.trim()) {
+      if (this.askTextInput.value.trim() || this.attachedImages.length > 0) {
         this.handleAskModeQuestion();
       }
     });
@@ -420,13 +376,14 @@ export const UIComponents = {
       this.startImageCapture();
     });
 
-    // Remove image button
-    const removeButton = this.imagePreview?.querySelector('div');
-    if (removeButton) {
-      removeButton.addEventListener('click', () => {
-        this.removeAttachedImage();
-      });
-    }
+  },
+
+  resizeTextarea() {
+    if (!this.askTextInput) return;
+    this.askTextInput.style.height = '60px';
+    const scrollHeight = this.askTextInput.scrollHeight;
+    this.askTextInput.style.height = Math.min(Math.max(scrollHeight, 60), 150) + 'px';
+    this.askTextInput.style.overflowY = scrollHeight > 150 ? 'auto' : 'hidden';
   },
 
   handleAskModeQuestion() {
@@ -435,7 +392,7 @@ export const UIComponents = {
     // Show "Processing..." message
     this.showMessage('Processing...', false);
 
-    this.handleAskQuestion(question, this.attachedImageData, this.attachedOCRData);
+    this.handleAskQuestion(question, this.attachedImages);
     this.clearAskInput();
   },
 
@@ -465,19 +422,10 @@ export const UIComponents = {
   },
 
   setAttachedImage(imageData, ocrData = null) {
-    this.attachedImageData = imageData;
-    this.attachedOCRData = ocrData;
-    const previewImage = this.imagePreview.querySelector('img');
-    if (previewImage) {
-      previewImage.src = imageData;
-    }
-    this.imagePreview.style.display = 'block';
-    this.askTextInput.style.paddingTop = '88px';
-    this.attachImageButton.style.backgroundColor = 'rgba(40, 40, 40, 0.45)';
-    const attachIcon = this.attachImageButton.querySelector('img');
-    if (attachIcon && window.CaptureAI?.ICONS?.ATTACHED) {
-      attachIcon.src = window.CaptureAI.ICONS.ATTACHED;
-    }
+    if (this.attachedImages.length >= 3) return;
+
+    this.attachedImages.push({ imageData, ocrData });
+    this.renderImagePreviews();
 
     // Clear the "Capturing..." message now that image is attached
     if (window.CaptureAI.UICore?.clearMessage) {
@@ -485,19 +433,108 @@ export const UIComponents = {
     }
   },
 
-  removeAttachedImage() {
-    this.attachedImageData = null;
-    this.attachedOCRData = null;
-    this.imagePreview.style.display = 'none';
-    this.askTextInput.style.paddingTop = '10px';
-    const theme = this.getTheme();
-    this.attachImageButton.style.backgroundColor = theme.toggleInactiveBg;
-    const attachIcon = this.attachImageButton.querySelector('img');
-    if (attachIcon && window.CaptureAI?.ICONS?.ATTACH) {
-      attachIcon.src = window.CaptureAI.ICONS.ATTACH;
+  removeAttachedImage(index) {
+    if (index !== undefined) {
+      this.attachedImages.splice(index, 1);
+    } else {
+      this.attachedImages = [];
+    }
+    this.renderImagePreviews();
+  },
+
+  renderImagePreviews() {
+    if (!this.imagePreviewContainer) return;
+
+    // Clear existing previews safely
+    while (this.imagePreviewContainer.firstChild) {
+      this.imagePreviewContainer.removeChild(this.imagePreviewContainer.firstChild);
+    }
+
+    if (this.attachedImages.length === 0) {
+      this.imagePreviewContainer.style.display = 'none';
+      this.askTextInput.style.paddingTop = '10px';
+      this.resizeTextarea();
+      const theme = this.getTheme();
+      this.attachImageButton.style.backgroundColor = theme.toggleInactiveBg;
+      this.attachImageButton.style.display = 'flex';
+      const attachIcon = this.attachImageButton.querySelector('img');
+      if (attachIcon && window.CaptureAI?.ICONS?.ATTACH) {
+        attachIcon.src = window.CaptureAI.ICONS.ATTACH;
+      }
+      return;
+    }
+
+    // Show container and adjust textarea padding
+    this.imagePreviewContainer.style.display = 'flex';
+    this.askTextInput.style.paddingTop = '80px';
+    this.resizeTextarea();
+
+    // Render each image preview slot
+    for (let i = 0; i < this.attachedImages.length; i++) {
+      const slot = this.createImagePreviewSlot(this.attachedImages[i], i);
+      this.imagePreviewContainer.appendChild(slot);
+    }
+
+    // Hide attach button when at max (3 images)
+    if (this.attachedImages.length >= 3) {
+      this.attachImageButton.style.display = 'none';
+    } else {
+      this.attachImageButton.style.display = 'flex';
+      this.attachImageButton.style.backgroundColor = 'rgba(40, 40, 40, 0.45)';
+      const attachIcon = this.attachImageButton.querySelector('img');
+      if (attachIcon && window.CaptureAI?.ICONS?.ATTACHED) {
+        attachIcon.src = window.CaptureAI.ICONS.ATTACHED;
+      }
     }
   },
 
+  createImagePreviewSlot(imageEntry, index) {
+    const theme = this.getTheme();
+
+    const slot = document.createElement('div');
+    slot.style.cssText = `
+            position: relative;
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid ${theme.border};
+            background-color: ${theme.toggleBg};
+            flex-shrink: 0;
+        `;
+
+    const img = document.createElement('img');
+    img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+    img.src = imageEntry.imageData;
+
+    const removeBtn = document.createElement('div');
+    removeBtn.style.cssText = `
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: ${theme.primaryBg};
+            color: ${theme.primaryText};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 1;
+        `;
+    removeBtn.textContent = '\u2715';
+    removeBtn.addEventListener('click', () => {
+      this.removeAttachedImage(index);
+    });
+
+    slot.appendChild(img);
+    slot.appendChild(removeBtn);
+
+    return slot;
+  },
 
   showMessage(message, isError = false) {
     if (window.CaptureAI.UICore?.showMessage) {
@@ -505,9 +542,9 @@ export const UIComponents = {
     }
   },
 
-  handleAskQuestion(question, imageData = null, ocrData = null) {
+  handleAskQuestion(question, attachedImages = []) {
     if (window.CaptureAI.UICore?.handleAskQuestion) {
-      window.CaptureAI.UICore.handleAskQuestion(question, imageData, ocrData);
+      window.CaptureAI.UICore.handleAskQuestion(question, attachedImages);
     }
   },
 

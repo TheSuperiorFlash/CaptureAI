@@ -213,7 +213,7 @@ const AuthService = {
    * @param {number} params.reasoningLevel - Reasoning level (0, 1, 2)
    * @returns {Promise<Object>} { answer, usage, cached, responseTime }
    */
-  async sendAIRequest({ question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel }) {
+  async sendAIRequest({ question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel, images }) {
     const backendUrl = await this.getBackendUrl();
     const licenseKey = await this.getLicenseKey();
 
@@ -235,7 +235,8 @@ const AuthService = {
           ocrText,
           ocrConfidence,
           promptType,
-          reasoningLevel
+          reasoningLevel,
+          images
         })
       }, 60000);
 

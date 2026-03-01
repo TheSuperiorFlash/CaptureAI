@@ -21,7 +21,12 @@
       "Bash(wrangler tail:*)",
       "Bash(wrangler secret list:*)",
       "Bash(git reset:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(git -C /c/Users/SuperiorFlash/CaptureAI status --short)",
+      "Bash(git -C /c/Users/SuperiorFlash/CaptureAI branch:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

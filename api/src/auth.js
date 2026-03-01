@@ -75,12 +75,6 @@ export class AuthHandler {
         return jsonResponse({ error: 'Invalid license key' }, 401);
       }
 
-      // Update last validated timestamp
-      await this.db
-        .prepare('UPDATE users SET last_validated_at = datetime(\'now\') WHERE id = ?')
-        .bind(user.id)
-        .run();
-
       if (this.logger) {
         logAuth(this.logger, true, user.id);
       }

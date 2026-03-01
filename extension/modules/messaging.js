@@ -206,7 +206,11 @@ export const Messaging = {
       height: request.height
     };
 
-    window.CaptureAI.ImageProcessing.captureAndProcess(request.imageUri, coordinates)
+    const options = {
+      enableOCR: request.enableOCR !== undefined ? request.enableOCR : true
+    };
+
+    window.CaptureAI.ImageProcessing.captureAndProcess(request.imageUri, coordinates, options)
       .then(result => {
         sendResponse(result);
       })

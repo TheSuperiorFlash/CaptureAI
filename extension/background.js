@@ -388,8 +388,14 @@ async function handleCaptureArea(request, sender, sendResponse) {
     // Capture screenshot of visible tab
     const imageUri = await captureScreenshot();
 
+    // Read OCR setting from storage
+    const settingsResult = await chrome.storage.local.get('captureai-settings');
+    const settings = settingsResult['captureai-settings'] || {};
+    // Skip OCR for ask-mode captures — the image is sent directly, not via text extraction
+    const enableOCR = !request.isForAskMode && !settings.ocr?.disabled;
+
     // Process image (crop and compress)
-    const processedData = await processImage(imageUri, request, sender);
+    const processedData = await processImage(imageUri, request, sender, { enableOCR });
 
     // Check for image processing errors
     if (processedData?.hasError) {
@@ -460,24 +466,40 @@ async function handleCaptureArea(request, sender, sendResponse) {
  */
 async function handleAskQuestion(request, sender, sendResponse) {
   try {
-    const { question, imageData, ocrData } = request;
+    const { question, imageData, ocrData, images } = request;
 
-    // Validate question
-    if (!question?.trim()) {
+    // Require a question unless images are attached
+    const hasImages = (images && images.length > 0) || imageData;
+    if (!question?.trim() && !hasImages) {
       await displayResponse(sender.tab.id, formatError(ERROR_MESSAGES.NO_QUESTION));
       sendResponse({ success: false, error: ERROR_MESSAGES.NO_QUESTION });
       return;
     }
 
-    // Send to backend (with or without image and OCR data)
-    const aiResponse = imageData
-      ? await sendToOpenAI({
+    let aiResponse;
+
+    if (images && images.length > 0) {
+      // Multi-image ask mode
+      aiResponse = await sendToOpenAI({
+        question,
+        images: images.map(img => ({
+          imageData: img.imageData,
+          ocrText: img.ocrData?.text || null,
+          ocrConfidence: img.ocrData?.confidence || null
+        }))
+      }, null, PROMPT_TYPES.ASK);
+    } else if (imageData) {
+      // Single image (backward compat)
+      aiResponse = await sendToOpenAI({
         question,
         imageData,
         ocrText: ocrData?.text,
         ocrConfidence: ocrData?.confidence
-      }, null, PROMPT_TYPES.ASK)
-      : await sendTextOnlyQuestion(question, null);
+      }, null, PROMPT_TYPES.ASK);
+    } else {
+      // Text-only
+      aiResponse = await sendTextOnlyQuestion(question, null);
+    }
 
     await displayResponse(sender.tab.id, aiResponse);
     sendResponse({ success: true });
@@ -633,6 +655,9 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     if (data.ocrConfidence !== null && data.ocrConfidence !== undefined) {
       requestPayload.ocrConfidence = data.ocrConfidence;
     }
+    if (data.images && data.images.length > 0) {
+      requestPayload.images = data.images;
+    }
 
     // Send request to backend
     const response = await AuthService.sendAIRequest(requestPayload);
@@ -735,7 +760,7 @@ async function captureScreenshot() {
  * @returns {Promise<Object>} Processed image data with compressedImageData
  * @throws {Error} If image processing fails
  */
-async function processImage(imageUri, request, sender) {
+async function processImage(imageUri, request, sender, options = {}) {
   return new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(sender.tab.id, {
       action: 'processCapturedImage',
@@ -743,7 +768,8 @@ async function processImage(imageUri, request, sender) {
       startX: request.coordinates.startX,
       startY: request.coordinates.startY,
       width: request.coordinates.width,
-      height: request.coordinates.height
+      height: request.coordinates.height,
+      enableOCR: options.enableOCR !== undefined ? options.enableOCR : true
     }, (response) => {
       chrome.runtime.lastError
         ? reject(new Error('Error processing image: ' + chrome.runtime.lastError.message))

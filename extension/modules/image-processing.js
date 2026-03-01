@@ -192,17 +192,25 @@ export const ImageProcessing = {
    * @returns {Promise<Object>} OCR result data
    */
   async performOCR(imageDataUrl) {
+    const isDebug = window.CaptureAI?.CONFIG?.DEBUG;
     try {
-      console.log('Starting OCR extraction...');
+      if (isDebug) {
+        console.log('Starting OCR extraction...');
+      }
+      const hostname = window.location?.hostname || '';
       const ocrResult = await OCRService.extractText(imageDataUrl, {
-        confidenceThreshold: 60 // Require 60% confidence to use OCR
+        confidenceThreshold: 60, // Require 60% confidence to use OCR
+        preprocessImage: true,
+        hostname: hostname
       });
 
-      console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
-      if (ocrResult.shouldFallbackToImage) {
-        console.log('OCR quality insufficient - will use image data instead');
-      } else if (ocrResult.text.length > 0) {
-        console.log('OCR Full Text:', ocrResult.text);
+      if (isDebug) {
+        console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
+        if (ocrResult.shouldFallbackToImage) {
+          console.log('OCR quality insufficient - will use image data instead');
+        } else if (ocrResult.text.length > 0) {
+          console.log('OCR Full Text:', ocrResult.text);
+        }
       }
 
       return {

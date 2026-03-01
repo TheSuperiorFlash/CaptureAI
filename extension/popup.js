@@ -42,7 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsReasoningToggleTrack: document.getElementById('settings-reasoning-toggle-track'),
     settingsReasoningToggleSlider: document.getElementById('settings-reasoning-toggle-slider'),
     settingsReasoningToggleProgress: document.getElementById('settings-reasoning-toggle-progress'),
-    ocrToggle: document.getElementById('ocr-toggle')
+    ocrToggle: document.getElementById('ocr-toggle'),
+    advancedToggle: document.getElementById('advanced-toggle'),
+    advancedContent: document.getElementById('advanced-content'),
+    advancedArrow: document.getElementById('advanced-arrow')
   };
 
   // State variables
@@ -91,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   elements.ocrToggle.addEventListener('click', toggleOCR);
+  elements.advancedToggle.addEventListener('click', toggleAdvanced);
 
   // Add Enter key support for license key input
   elements.licenseKeyInput.addEventListener('keydown', (e) => {
@@ -188,35 +192,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   /**
-   * Handle buy pro click - prompt for email
-   */
-  async function handleBuyPro() {
-    const email = prompt('Enter your email to receive your Pro license key:');
-
-    if (!email) {
-      return;
-    }
-
-    // Validate email
-    if (!email.includes('@')) {
-      showResponseMessage('Please enter a valid email address', 'error');
-      return;
-    }
-
-    try {
-      const checkout = await AuthService.createCheckoutSession(email);
-
-      // Open Stripe checkout in new tab
-      chrome.tabs.create({ url: checkout.url });
-
-      showResponseMessage('Check your email for your license key after payment!', 'success');
-    } catch (error) {
-      console.error('Checkout error:', error);
-      showResponseMessage(error.message || 'Failed to start checkout', 'error');
-    }
-  }
-
-  /**
    * Handle deactivation (clear license key)
    */
   async function handleDeactivate() {
@@ -245,17 +220,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function handleUpgrade() {
     if (!currentState.user || !currentState.user.email) {
-      const email = prompt('Enter your email to upgrade:');
-      if (!email) {
-        return;
-      }
-
-      if (!email.includes('@')) {
-        showResponseMessage('Please enter a valid email address', 'error');
-        return;
-      }
-
-      return handleBuyProWithEmail(email);
+      // No email on file — send them to the website to upgrade
+      chrome.tabs.create({ url: 'https://captureai.dev/activate' });
+      return;
     }
 
     return handleBuyProWithEmail(currentState.user.email);
@@ -289,6 +256,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.licenseKeySection.classList.remove('hidden');
     elements.mainControls.classList.add('hidden');
     elements.responseSection.classList.add('hidden'); // Hide response section when not activated
+    document.getElementById('help-section').classList.add('hidden'); // Hide help section when not activated
+    document.getElementById('activation-subtitle').classList.remove('hidden'); // Show activation subtitle
 
     // Clear input
     elements.licenseKeyInput.value = '';
@@ -323,6 +292,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.licenseKeySection.classList.add('hidden');
       elements.mainControls.classList.remove('hidden');
       elements.responseSection.classList.remove('hidden');
+      document.getElementById('help-section').classList.remove('hidden'); // Show help section when activated
+      document.getElementById('activation-subtitle').classList.add('hidden'); // Hide activation subtitle
 
       // Clear any previous error messages
       clearResponseMessage();
@@ -632,6 +603,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (_error) {
       showResponseMessage('Page not ready - please refresh and try again', 'error');
+    }
+  }
+
+  /**
+   * Toggle advanced settings section visibility
+   */
+  function toggleAdvanced() {
+    const isExpanded = elements.advancedContent.classList.contains('expanded');
+    if (isExpanded) {
+      elements.advancedContent.classList.remove('expanded');
+      elements.advancedArrow.classList.remove('expanded');
+    } else {
+      elements.advancedContent.classList.add('expanded');
+      elements.advancedArrow.classList.add('expanded');
     }
   }
 
