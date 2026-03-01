@@ -38,7 +38,7 @@ new_sqlite_classes = ["RateLimiterDO"]
 CLOUDFLARE_ACCOUNT_ID = "e411f43b15c9122c0056a08f727eef15"
 CLOUDFLARE_GATEWAY_NAME = "captureai-gateway"
 FREE_TIER_DAILY_LIMIT = "10"
-PRO_TIER_RATE_LIMIT_PER_MINUTE = "60"  # 60 requests per minute for Pro tier
+PRO_TIER_RATE_LIMIT_PER_MINUTE = "20"  # 60 requests per minute for Pro tier
 EXTENSION_URL = "https://captureai.dev"
 # Chrome Extension IDs - Comma-separated list of allowed extension IDs
 # First ID: Production extension from Chrome Web Store

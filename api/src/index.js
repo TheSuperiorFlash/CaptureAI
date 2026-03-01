@@ -151,7 +151,7 @@ function getCORSHeaders(request, env) {
   // List of allowed origins - must be exact matches for security
   const allowedOrigins = [
     'https://captureai.dev',
-    'https://thesuperiorflash.github.io',
+    'https://thesuperiorflash.github.io'
   ];
 
   // Development/testing origins (only if in dev mode)
@@ -169,9 +169,8 @@ function getCORSHeaders(request, env) {
     // Exact match for standard origins
     if (allowedOrigins.includes(origin)) {
       allowedOrigin = origin;
-    }
-    // Chrome extension support - only allow specific extension IDs
-    else if (origin.startsWith('chrome-extension://')) {
+    } else if (origin.startsWith('chrome-extension://')) {
+      // Chrome extension support - only allow specific extension IDs
       const extensionIds = env?.CHROME_EXTENSION_IDS;
       if (extensionIds) {
         const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
@@ -192,6 +191,6 @@ function getCORSHeaders(request, env) {
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
-    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Credentials': 'true'
   };
 }

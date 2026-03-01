@@ -5,8 +5,8 @@
  * Note: This is different from storage.test.js which tests background.js storage functions
  */
 
-import { describe, test, expect, beforeEach } from '@jest/globals';
-import { resetChromeMocks, storageMock } from '../setup/chrome-mock.js';
+import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
+import { resetChromeMocks, storageMock, setRuntimeError, clearRuntimeError } from '../setup/chrome-mock.js';
 import {
   setValue,
   getValue,
@@ -457,6 +457,70 @@ describe('Storage Module Wrapper Functions', () => {
       expect(storageMock.local.get).toHaveBeenCalled();
       expect(storageMock.local.remove).toHaveBeenCalled();
       expect(storageMock.local.clear).toHaveBeenCalled();
+    });
+  });
+
+  describe('Error Handling', () => {
+    beforeEach(() => {
+      clearRuntimeError();
+    });
+
+    afterEach(() => {
+      clearRuntimeError();
+    });
+
+    test('setValue should reject when chrome.runtime.lastError is set', async () => {
+      storageMock.local.set.mockImplementationOnce((items, callback) => {
+        setRuntimeError('QuotaExceededError');
+        callback();
+      });
+
+      await expect(setValue('key', 'value')).rejects.toThrow('QuotaExceededError');
+    });
+
+    test('getValue should reject when chrome.runtime.lastError is set', async () => {
+      storageMock.local.get.mockImplementationOnce((keys, callback) => {
+        setRuntimeError('StorageError');
+        callback({});
+      });
+
+      await expect(getValue('key')).rejects.toThrow('StorageError');
+    });
+
+    test('getValues should reject when chrome.runtime.lastError is set', async () => {
+      storageMock.local.get.mockImplementationOnce((keys, callback) => {
+        setRuntimeError('StorageError');
+        callback({});
+      });
+
+      await expect(getValues(['key1', 'key2'])).rejects.toThrow('StorageError');
+    });
+
+    test('removeValue should reject when chrome.runtime.lastError is set', async () => {
+      storageMock.local.remove.mockImplementationOnce((key, callback) => {
+        setRuntimeError('RemoveError');
+        callback();
+      });
+
+      await expect(removeValue('key')).rejects.toThrow('RemoveError');
+    });
+
+    test('clear should reject when chrome.runtime.lastError is set', async () => {
+      storageMock.local.clear.mockImplementationOnce((callback) => {
+        setRuntimeError('ClearError');
+        callback();
+      });
+
+      await expect(clear()).rejects.toThrow('ClearError');
+    });
+
+    test('getValue should resolve with default value when key is missing (no error)', async () => {
+      storageMock.local.get.mockImplementationOnce((keys, callback) => {
+        callback({});
+      });
+
+      const result = await getValue('missingKey', 'fallback');
+      expect(result).toBe('fallback');
     });
   });
 

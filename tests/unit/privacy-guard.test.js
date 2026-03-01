@@ -1,372 +1,329 @@
 /**
- * Unit Tests for Privacy Guard Module
- *
- * Tests privacy protection state management and API checking
+ * @jest-environment jsdom
  */
 
-const { describe, test, expect, beforeEach } = require('@jest/globals');
+/**
+ * Unit Tests for Privacy Guard Module
+ *
+ * Tests the actual PrivacyGuard module from extension/modules/privacy-guard.js
+ * including checkProtection, isActive, disable, checkProAccess, checkSettings
+ */
 
-// Test the privacy guard logic (extracted from modules/privacy-guard.js)
-describe('Privacy Guard', () => {
-  describe('State Management', () => {
-    test('should initialize with disabled state', () => {
-      const privacyGuard = {
-        enabled: false,
-        injected: false
-      };
+import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { PrivacyGuard } from '../../modules/privacy-guard.js';
 
-      expect(privacyGuard.enabled).toBe(false);
-      expect(privacyGuard.injected).toBe(false);
+describe('Privacy Guard Module', () => {
+  beforeEach(() => {
+    // Reset PrivacyGuard state
+    PrivacyGuard.enabled = false;
+    PrivacyGuard.injected = false;
+
+    // Set up window.CaptureAI
+    window.CaptureAI = {
+      CONFIG: { DEBUG: false }
+    };
+
+    // Reset chrome mocks
+    chrome.storage.local.get.mockReset();
+    chrome.runtime.sendMessage.mockReset();
+  });
+
+  describe('isActive', () => {
+    test('should return false when disabled', () => {
+      expect(PrivacyGuard.isActive()).toBe(false);
     });
 
-    test('should track enabled state', () => {
-      const privacyGuard = {
-        enabled: false,
-        injected: false,
-
-        enable() {
-          this.enabled = true;
-          this.injected = true;
-        },
-
-        isActive() {
-          return this.enabled;
-        }
-      };
-
-      expect(privacyGuard.isActive()).toBe(false);
-
-      privacyGuard.enable();
-
-      expect(privacyGuard.isActive()).toBe(true);
-      expect(privacyGuard.injected).toBe(true);
-    });
-
-    test('should handle disable request', () => {
-      const privacyGuard = {
-        enabled: true,
-        injected: true,
-
-        disable() {
-          this.enabled = false;
-        }
-      };
-
-      expect(privacyGuard.enabled).toBe(true);
-
-      privacyGuard.disable();
-
-      expect(privacyGuard.enabled).toBe(false);
-      expect(privacyGuard.injected).toBe(true); // Injection persists
+    test('should return true when enabled', () => {
+      PrivacyGuard.enabled = true;
+      expect(PrivacyGuard.isActive()).toBe(true);
     });
   });
 
-  describe('Protection Detection', () => {
-    test('should detect protection when document APIs are overridden', () => {
-      // Simulate overridden APIs
-      const mockDocument = {
-        visibilityState: 'visible',
-        hidden: false,
-        addEventListener: jest.fn()
+  describe('checkProtection', () => {
+    let origGetOwnPD;
+
+    beforeEach(() => {
+      origGetOwnPD = Object.getOwnPropertyDescriptor;
+    });
+
+    afterEach(() => {
+      Object.getOwnPropertyDescriptor = origGetOwnPD;
+    });
+
+    test('should return false when descriptors are configurable', () => {
+      Object.getOwnPropertyDescriptor = (obj, prop) => {
+        if (obj === Document.prototype && (prop === 'visibilityState' || prop === 'hidden')) {
+          return { get: () => 'visible', configurable: true };
+        }
+        return origGetOwnPD(obj, prop);
       };
 
-      function checkProtection(doc) {
-        try {
-          const visibilityOverridden = doc.visibilityState === 'visible';
-          const hiddenOverridden = doc.hidden === false;
-          return visibilityOverridden && hiddenOverridden;
-        } catch (error) {
-          return false;
+      const result = PrivacyGuard.checkProtection();
+      expect(result).toBe(false);
+    });
+
+    test('should return true when visibilityState descriptor is non-configurable', () => {
+      Object.getOwnPropertyDescriptor = (obj, prop) => {
+        if (obj === Document.prototype && prop === 'visibilityState') {
+          return { get: () => 'visible', configurable: false };
         }
-      }
+        return origGetOwnPD(obj, prop);
+      };
 
-      const result = checkProtection(mockDocument);
-
+      const result = PrivacyGuard.checkProtection();
       expect(result).toBe(true);
     });
 
-    test('should not detect protection when APIs are normal', () => {
-      const mockDocument = {
-        visibilityState: 'hidden',
-        hidden: true,
-        addEventListener: jest.fn()
+    test('should return true when hidden descriptor is non-configurable', () => {
+      Object.getOwnPropertyDescriptor = (obj, prop) => {
+        if (obj === Document.prototype && prop === 'visibilityState') {
+          return { get: () => 'visible', configurable: true };
+        }
+        if (obj === Document.prototype && prop === 'hidden') {
+          return { get: () => false, configurable: false };
+        }
+        return origGetOwnPD(obj, prop);
       };
 
-      function checkProtection(doc) {
-        try {
-          const visibilityOverridden = doc.visibilityState === 'visible';
-          const hiddenOverridden = doc.hidden === false;
-          return visibilityOverridden && hiddenOverridden;
-        } catch (error) {
-          return false;
+      const result = PrivacyGuard.checkProtection();
+      expect(result).toBe(true);
+    });
+
+    test('should return false when no descriptor exists', () => {
+      Object.getOwnPropertyDescriptor = (obj, prop) => {
+        if (obj === Document.prototype && (prop === 'visibilityState' || prop === 'hidden')) {
+          return undefined;
         }
-      }
+        return origGetOwnPD(obj, prop);
+      };
 
-      const result = checkProtection(mockDocument);
-
+      const result = PrivacyGuard.checkProtection();
       expect(result).toBe(false);
     });
 
-    test('should handle errors in protection check', () => {
-      const mockDocument = {
-        get visibilityState() {
-          throw new Error('API error');
-        }
-      };
+    test('should return false when error is thrown', () => {
+      Object.getOwnPropertyDescriptor = () => { throw new Error('Test error'); };
 
-      function checkProtection(doc) {
-        try {
-          const visibilityOverridden = doc.visibilityState === 'visible';
-          const hiddenOverridden = doc.hidden === false;
-          return visibilityOverridden && hiddenOverridden;
-        } catch (error) {
-          return false;
-        }
-      }
-
-      const result = checkProtection(mockDocument);
-
+      const result = PrivacyGuard.checkProtection();
       expect(result).toBe(false);
     });
   });
 
-  describe('Message Communication', () => {
-    test('should send enable message to background', () => {
-      const messages = [];
+  describe('checkProAccess', () => {
+    test('should return true when tier is pro', async () => {
+      chrome.storage.local.get.mockResolvedValue({ 'captureai-user-tier': 'pro' });
 
-      const mockChrome = {
-        runtime: {
-          sendMessage: jest.fn((message) => {
-            messages.push(message);
-            return Promise.resolve({ success: true });
-          })
-        }
-      };
-
-      async function enablePrivacyGuard(chrome) {
-        const result = await chrome.runtime.sendMessage({
-          action: 'enablePrivacyGuard'
-        });
-        return result;
-      }
-
-      enablePrivacyGuard(mockChrome);
-
-      expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
-        action: 'enablePrivacyGuard'
-      });
+      const result = await PrivacyGuard.checkProAccess();
+      expect(result).toBe(true);
     });
 
-    test('should send disable message to background', () => {
-      const mockChrome = {
-        runtime: {
-          sendMessage: jest.fn(() => Promise.resolve({ success: true }))
-        }
-      };
+    test('should return false when tier is free', async () => {
+      chrome.storage.local.get.mockResolvedValue({ 'captureai-user-tier': 'free' });
 
-      async function disablePrivacyGuard(chrome) {
-        await chrome.runtime.sendMessage({
-          action: 'disablePrivacyGuard'
-        });
-      }
+      const result = await PrivacyGuard.checkProAccess();
+      expect(result).toBe(false);
+    });
 
-      disablePrivacyGuard(mockChrome);
+    test('should return false when tier is not set', async () => {
+      chrome.storage.local.get.mockResolvedValue({});
 
-      expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
+      const result = await PrivacyGuard.checkProAccess();
+      expect(result).toBe(false);
+    });
+
+    test('should return false on storage error', async () => {
+      chrome.storage.local.get.mockRejectedValue(new Error('Storage error'));
+
+      const result = await PrivacyGuard.checkProAccess();
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('checkSettings', () => {
+    test('should return true when privacy guard enabled in settings', async () => {
+      chrome.storage.local.get.mockResolvedValue({
+        'captureai-settings': { privacyGuard: { enabled: true } }
+      });
+
+      const result = await PrivacyGuard.checkSettings();
+      expect(result).toBe(true);
+    });
+
+    test('should return false when privacy guard disabled in settings', async () => {
+      chrome.storage.local.get.mockResolvedValue({
+        'captureai-settings': { privacyGuard: { enabled: false } }
+      });
+
+      const result = await PrivacyGuard.checkSettings();
+      expect(result).toBe(false);
+    });
+
+    test('should return false when settings are empty', async () => {
+      chrome.storage.local.get.mockResolvedValue({});
+
+      const result = await PrivacyGuard.checkSettings();
+      expect(result).toBe(false);
+    });
+
+    test('should return false when privacyGuard key missing', async () => {
+      chrome.storage.local.get.mockResolvedValue({
+        'captureai-settings': {}
+      });
+
+      const result = await PrivacyGuard.checkSettings();
+      expect(result).toBe(false);
+    });
+
+    test('should return false on storage error', async () => {
+      chrome.storage.local.get.mockRejectedValue(new Error('Storage error'));
+
+      const result = await PrivacyGuard.checkSettings();
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('disable', () => {
+    test('should do nothing when already disabled', async () => {
+      PrivacyGuard.enabled = false;
+
+      await PrivacyGuard.disable();
+
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+    });
+
+    test('should send disable message when enabled', async () => {
+      PrivacyGuard.enabled = true;
+      chrome.runtime.sendMessage.mockResolvedValue({ success: true });
+
+      await PrivacyGuard.disable();
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
         action: 'disablePrivacyGuard'
       });
+      expect(PrivacyGuard.enabled).toBe(false);
     });
 
-    test('should send status request to background', () => {
-      const mockChrome = {
-        runtime: {
-          sendMessage: jest.fn(() => Promise.resolve({ enabled: true, available: true }))
-        }
-      };
+    test('should handle send message error gracefully', async () => {
+      PrivacyGuard.enabled = true;
+      chrome.runtime.sendMessage.mockRejectedValue(new Error('Send error'));
 
-      async function getStatus(chrome) {
-        const result = await chrome.runtime.sendMessage({
-          action: 'getPrivacyGuardStatus'
-        });
-        return result;
-      }
+      await PrivacyGuard.disable();
 
-      getStatus(mockChrome);
+      // Should not throw, enabled state may remain true due to error
+      expect(PrivacyGuard.enabled).toBe(true);
+    });
+  });
 
-      expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
+  describe('getStatus', () => {
+    test('should return status from background', async () => {
+      chrome.runtime.sendMessage.mockResolvedValue({ enabled: true, injected: true });
+
+      const status = await PrivacyGuard.getStatus();
+
+      expect(status).toEqual({ enabled: true, injected: true });
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
         action: 'getPrivacyGuardStatus'
       });
     });
 
-    test('should handle communication errors', async () => {
-      const mockChrome = {
-        runtime: {
-          sendMessage: jest.fn(() => Promise.reject(new Error('Communication error')))
-        }
-      };
+    test('should return disabled status on error', async () => {
+      chrome.runtime.sendMessage.mockRejectedValue(new Error('Error'));
 
-      async function getStatus(chrome) {
-        try {
-          const result = await chrome.runtime.sendMessage({
-            action: 'getPrivacyGuardStatus'
-          });
-          return result;
-        } catch (error) {
-          return { enabled: false, error: error.message };
-        }
-      }
+      const status = await PrivacyGuard.getStatus();
 
-      const result = await getStatus(mockChrome);
-
-      expect(result.enabled).toBe(false);
-      expect(result.error).toBe('Communication error');
+      expect(status).toEqual({ enabled: false });
     });
   });
 
-  describe('Initialization Flow', () => {
-    test('should not reinitialize if already enabled', async () => {
-      const privacyGuard = {
-        enabled: true,
-        initCount: 0,
+  describe('init', () => {
+    test('should skip if already enabled', async () => {
+      PrivacyGuard.enabled = true;
 
-        async init() {
-          if (this.enabled) {
-            return;
-          }
-          this.initCount++;
-        }
-      };
+      await PrivacyGuard.init();
 
-      await privacyGuard.init();
-      await privacyGuard.init();
-
-      expect(privacyGuard.initCount).toBe(0);
+      expect(chrome.storage.local.get).not.toHaveBeenCalled();
     });
 
-    test('should initialize when not enabled', async () => {
-      const privacyGuard = {
-        enabled: false,
-        initCount: 0,
+    test('should not enable when not pro tier', async () => {
+      chrome.storage.local.get.mockResolvedValue({});
 
-        async init() {
-          if (this.enabled) {
-            return;
-          }
-          this.initCount++;
-          this.enabled = true;
-        }
-      };
+      await PrivacyGuard.init();
 
-      await privacyGuard.init();
-
-      expect(privacyGuard.initCount).toBe(1);
-      expect(privacyGuard.enabled).toBe(true);
+      expect(PrivacyGuard.enabled).toBe(false);
     });
 
-    test('should handle initialization errors', async () => {
-      const privacyGuard = {
-        enabled: false,
-        error: null,
+    test('should not enable when settings disabled', async () => {
+      chrome.storage.local.get
+        .mockResolvedValueOnce({ 'captureai-user-tier': 'pro' })
+        .mockResolvedValueOnce({ 'captureai-settings': { privacyGuard: { enabled: false } } });
 
-        async init() {
-          try {
-            throw new Error('Init failed');
-          } catch (error) {
-            this.error = error.message;
-          }
-        }
-      };
+      await PrivacyGuard.init();
 
-      await privacyGuard.init();
-
-      expect(privacyGuard.error).toBe('Init failed');
-      expect(privacyGuard.enabled).toBe(false);
-    });
-  });
-
-  describe('API Override Detection', () => {
-    test('should detect document.hidden override', () => {
-      const overriddenDoc = { hidden: false };
-      const normalDoc = { hidden: true };
-
-      expect(overriddenDoc.hidden).toBe(false);
-      expect(normalDoc.hidden).toBe(true);
+      expect(PrivacyGuard.enabled).toBe(false);
     });
 
-    test('should detect document.visibilityState override', () => {
-      const overriddenDoc = { visibilityState: 'visible' };
-      const normalDoc = { visibilityState: 'hidden' };
+    test('should try to inject when pro and settings enabled but not protected', async () => {
+      jest.spyOn(PrivacyGuard, 'checkProtection').mockReturnValue(false);
+      chrome.storage.local.get
+        .mockResolvedValueOnce({ 'captureai-user-tier': 'pro' })
+        .mockResolvedValueOnce({ 'captureai-settings': { privacyGuard: { enabled: true } } });
+      chrome.runtime.sendMessage.mockResolvedValue({ success: true });
 
-      expect(overriddenDoc.visibilityState).toBe('visible');
-      expect(normalDoc.visibilityState).toBe('hidden');
+      await PrivacyGuard.init();
+
+      expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
+        action: 'enablePrivacyGuard'
+      });
+      expect(PrivacyGuard.enabled).toBe(true);
+      expect(PrivacyGuard.injected).toBe(true);
     });
 
-    test('should detect addEventListener blocking', () => {
-      const blockedEvents = [];
-      const normalDoc = {
-        addEventListener: (event, listener) => {
-          // Normal behavior
-        }
-      };
+    test('should enable directly when protection already active', async () => {
+      jest.spyOn(PrivacyGuard, 'checkProtection').mockReturnValue(true);
+      chrome.storage.local.get
+        .mockResolvedValueOnce({ 'captureai-user-tier': 'pro' })
+        .mockResolvedValueOnce({ 'captureai-settings': { privacyGuard: { enabled: true } } });
 
-      const overriddenDoc = {
-        addEventListener: (event, listener) => {
-          if (event === 'visibilitychange') {
-            blockedEvents.push(event);
-            return; // Block the listener
-          }
-        }
-      };
+      await PrivacyGuard.init();
 
-      overriddenDoc.addEventListener('visibilitychange', () => {});
-      normalDoc.addEventListener('visibilitychange', () => {});
+      expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+      expect(PrivacyGuard.enabled).toBe(true);
+      expect(PrivacyGuard.injected).toBe(true);
+    });
 
-      expect(blockedEvents).toContain('visibilitychange');
+    test('should handle injection failure', async () => {
+      jest.spyOn(PrivacyGuard, 'checkProtection').mockReturnValue(false);
+      chrome.storage.local.get
+        .mockResolvedValueOnce({ 'captureai-user-tier': 'pro' })
+        .mockResolvedValueOnce({ 'captureai-settings': { privacyGuard: { enabled: true } } });
+      chrome.runtime.sendMessage.mockRejectedValue(new Error('Injection failed'));
+
+      await PrivacyGuard.init();
+
+      expect(PrivacyGuard.enabled).toBe(false);
+    });
+
+    test('should handle injection returning unsuccessful', async () => {
+      jest.spyOn(PrivacyGuard, 'checkProtection').mockReturnValue(false);
+      chrome.storage.local.get
+        .mockResolvedValueOnce({ 'captureai-user-tier': 'pro' })
+        .mockResolvedValueOnce({ 'captureai-settings': { privacyGuard: { enabled: true } } });
+      chrome.runtime.sendMessage.mockResolvedValue({ success: false });
+
+      await PrivacyGuard.init();
+
+      expect(PrivacyGuard.enabled).toBe(false);
     });
   });
 
-  describe('Status Reporting', () => {
-    test('should report enabled status', () => {
-      const privacyGuard = {
-        enabled: true,
-
-        isActive() {
-          return this.enabled;
-        }
-      };
-
-      expect(privacyGuard.isActive()).toBe(true);
-    });
-
-    test('should report disabled status', () => {
-      const privacyGuard = {
-        enabled: false,
-
-        isActive() {
-          return this.enabled;
-        }
-      };
-
-      expect(privacyGuard.isActive()).toBe(false);
-    });
-
-    test('should include injection status', () => {
-      const privacyGuard = {
-        enabled: true,
-        injected: true,
-
-        getStatus() {
-          return {
-            enabled: this.enabled,
-            injected: this.injected
-          };
-        }
-      };
-
-      const status = privacyGuard.getStatus();
-
-      expect(status.enabled).toBe(true);
-      expect(status.injected).toBe(true);
+  describe('module exports', () => {
+    test('should export PrivacyGuard object', () => {
+      expect(PrivacyGuard).toBeDefined();
+      expect(typeof PrivacyGuard.init).toBe('function');
+      expect(typeof PrivacyGuard.checkProtection).toBe('function');
+      expect(typeof PrivacyGuard.isActive).toBe('function');
+      expect(typeof PrivacyGuard.disable).toBe('function');
+      expect(typeof PrivacyGuard.getStatus).toBe('function');
     });
   });
 });

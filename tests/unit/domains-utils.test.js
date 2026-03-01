@@ -62,11 +62,10 @@ describe('DomainUtils', () => {
       expect(DomainUtils.isOnQuizlet()).toBe(false);
     });
 
-    test('should match domains containing quizlet', () => {
-      // Note: Uses .includes() so will match partial strings
+    test('should not match domains merely containing quizlet', () => {
       global.window.location.hostname = 'notquizlet.com';
 
-      expect(DomainUtils.isOnQuizlet()).toBe(true);
+      expect(DomainUtils.isOnQuizlet()).toBe(false);
     });
   });
 
@@ -101,19 +100,18 @@ describe('DomainUtils', () => {
       expect(DomainUtils.isOnVocabulary()).toBe(false);
     });
 
-    test('should match domains containing vocabulary', () => {
-      // Note: Uses .includes() so will match partial strings
+    test('should not match domains merely containing vocabulary', () => {
       global.window.location.hostname = 'notvocabulary.com';
 
-      expect(DomainUtils.isOnVocabulary()).toBe(true);
+      expect(DomainUtils.isOnVocabulary()).toBe(false);
     });
   });
 
   describe('isOnSupportedSite', () => {
-    test('should return true for quizlet.com', () => {
+    test('should return false for quizlet.com (only vocabulary supported)', () => {
       global.window.location.hostname = 'quizlet.com';
 
-      expect(DomainUtils.isOnSupportedSite()).toBe(true);
+      expect(DomainUtils.isOnSupportedSite()).toBe(false);
     });
 
     test('should return true for vocabulary.com', () => {
@@ -135,9 +133,6 @@ describe('DomainUtils', () => {
     });
 
     test('should work with subdomains', () => {
-      global.window.location.hostname = 'www.quizlet.com';
-      expect(DomainUtils.isOnSupportedSite()).toBe(true);
-
       global.window.location.hostname = 'app.vocabulary.com';
       expect(DomainUtils.isOnSupportedSite()).toBe(true);
     });
@@ -278,11 +273,10 @@ describe('DomainUtils', () => {
       expect(DomainUtils.isOnStrictCSPSite()).toBe(false);
     });
 
-    test('should match partial domain names due to includes()', () => {
-      // Note: Uses .includes() so will match partial strings
+    test('should not match domains merely containing a CSP domain', () => {
       global.window.location.hostname = 'notgithub.com';
 
-      expect(DomainUtils.isOnStrictCSPSite()).toBe(true);
+      expect(DomainUtils.isOnStrictCSPSite()).toBe(false);
     });
 
     test('should match domains that include the CSP domain', () => {
@@ -419,8 +413,8 @@ describe('DomainUtils', () => {
   });
 
   describe('Integration Tests', () => {
-    test('should correctly identify supported sites without CSP', () => {
-      global.window.location.hostname = 'quizlet.com';
+    test('should correctly identify vocabulary as supported without CSP', () => {
+      global.window.location.hostname = 'vocabulary.com';
 
       expect(DomainUtils.isOnSupportedSite()).toBe(true);
       expect(DomainUtils.isOnStrictCSPSite()).toBe(false);
@@ -445,7 +439,7 @@ describe('DomainUtils', () => {
 
       expect(DomainUtils.isOnQuizlet()).toBe(true);
       expect(DomainUtils.isOnVocabulary()).toBe(false);
-      expect(DomainUtils.isOnSupportedSite()).toBe(true);
+      expect(DomainUtils.isOnSupportedSite()).toBe(false);
     });
   });
 });

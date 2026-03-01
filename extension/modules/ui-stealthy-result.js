@@ -88,7 +88,9 @@ export const UIStealthyResult = {
     // Auto-hide after delay
     this.fadeoutTimer = setTimeout(() => {
       // Only fade if no newer show() call has occurred
-      if (this._showCounter !== showId) return;
+      if (this._showCounter !== showId) {
+        return;
+      }
       this.element.style.opacity = '0';
       setTimeout(() => {
         if (this.element && this._showCounter === showId) {

@@ -19,7 +19,9 @@
 
   // Guard against double-injection using a non-writable Symbol (prevents page script tampering)
   const guardKey = Symbol.for('__captureai_privacy_guard__');
-  if (window[guardKey]) return;
+  if (window[guardKey]) {
+    return;
+  }
   Object.defineProperty(window, guardKey, { value: true, writable: false, configurable: false });
 
   // ============================================================================

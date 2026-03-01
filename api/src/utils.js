@@ -50,7 +50,7 @@ export function handleCORS(request, env) {
   // Kept in sync with getCORSHeaders() in index.js
   const allowedOrigins = [
     'https://captureai.dev',
-    'https://thesuperiorflash.github.io',
+    'https://thesuperiorflash.github.io'
   ];
 
   // Development/testing origins (only if in dev mode)
@@ -68,9 +68,8 @@ export function handleCORS(request, env) {
     // Exact match for standard origins
     if (allowedOrigins.includes(origin)) {
       allowedOrigin = origin;
-    }
-    // Chrome extension support - only allow specific extension IDs
-    else if (origin.startsWith('chrome-extension://')) {
+    } else if (origin.startsWith('chrome-extension://')) {
+      // Chrome extension support - only allow specific extension IDs
       const extensionIds = env?.CHROME_EXTENSION_IDS;
       if (extensionIds) {
         const allowedExtensionIds = extensionIds.split(',').map(id => id.trim());
@@ -86,15 +85,19 @@ export function handleCORS(request, env) {
     // No wildcard github.io matching - only exact origins above
   }
 
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': allowedOrigin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400',
-      'Access-Control-Allow-Credentials': 'true',
-    }
-  });
+  const headers = {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  };
+
+  // Only allow credentials for explicitly allowed origins
+  if (allowedOrigin !== 'null') {
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  }
+
+  return new Response(null, { headers });
 }
 
 /**
@@ -187,7 +190,9 @@ export async function verifyPassword(password, hash) {
     const newHash = new Uint8Array(hashBuffer);
 
     // Constant-time comparison to prevent timing attacks
-    if (originalHash.length !== newHash.length) return false;
+    if (originalHash.length !== newHash.length) {
+      return false;
+    }
 
     let result = 0;
     for (let i = 0; i < originalHash.length; i++) {
@@ -225,7 +230,9 @@ export async function createJWT(payload, secret) {
 export async function verifyJWT(token, secret) {
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) throw new Error('Invalid token format');
+    if (parts.length !== 3) {
+      throw new Error('Invalid token format');
+    }
 
     const [encodedHeader, encodedPayload, signature] = parts;
     const message = `${encodedHeader}.${encodedPayload}`;

@@ -149,7 +149,9 @@ export async function checkRateLimit(identifier, limit, windowMs, env = null) {
 export function getClientIdentifier(request) {
   // Try CF-Connecting-IP (Cloudflare's real IP header)
   const cfIp = request.headers.get('CF-Connecting-IP');
-  if (cfIp) return cfIp;
+  if (cfIp) {
+    return cfIp;
+  }
 
   // Try X-Forwarded-For
   const xForwardedFor = request.headers.get('X-Forwarded-For');
@@ -160,7 +162,9 @@ export function getClientIdentifier(request) {
 
   // Try X-Real-IP
   const xRealIp = request.headers.get('X-Real-IP');
-  if (xRealIp) return xRealIp;
+  if (xRealIp) {
+    return xRealIp;
+  }
 
   // Fallback to 'unknown' (not ideal but prevents crashes)
   return 'unknown';
@@ -173,21 +177,21 @@ export const RateLimitPresets = {
   // Authentication endpoints - 5 requests per minute per IP
   AUTH: {
     limit: 5,
-    windowMs: 60000, // 1 minute
+    windowMs: 60000 // 1 minute
   },
   // Free key creation - 3 requests per hour per IP
   FREE_KEY_CREATION: {
     limit: 3,
-    windowMs: 3600000, // 1 hour
+    windowMs: 3600000 // 1 hour
   },
   // License validation - 10 requests per minute per IP
   LICENSE_VALIDATION: {
     limit: 10,
-    windowMs: 60000, // 1 minute
+    windowMs: 60000 // 1 minute
   },
   // Checkout creation - 5 requests per hour per IP
   CHECKOUT: {
     limit: 5,
-    windowMs: 3600000, // 1 hour
-  },
+    windowMs: 3600000 // 1 hour
+  }
 };

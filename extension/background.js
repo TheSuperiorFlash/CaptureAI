@@ -99,14 +99,6 @@ async function getAIConfig() {
   }
 }
 
-/**
- * AI prompt templates
- */
-const PROMPTS = {
-  AUTO_SOLVE: 'Answer with only the number (1, 2, 3, or 4) of the correct choice. Answer choices will go left to right, then top to bottom. If there are not exactly 4 choices or if it says Spell the word, respond with "Invalid question". Avoid choices that are red.',
-  ANSWER: 'Reply with answer only, avoid choices that are red.',
-  ASK_SYSTEM: 'You are a helpful assistant that provides clear, accurate, and concise answers.'
-};
 
 /**
  * Error message templates
@@ -192,7 +184,9 @@ async function activatePrivacyGuard() {
       }
     }
   } catch (error) {
-    if (DEBUG) console.error('Privacy Guard activation error:', error);
+    if (DEBUG) {
+      console.error('Privacy Guard activation error:', error);
+    }
   }
 }
 
@@ -234,7 +228,13 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
 if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
   chrome.commands.onCommand.addListener((command) => {
     // Get current active tab and send command to content script
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        if (DEBUG) {
+          console.error('tabs.query error:', chrome.runtime.lastError.message);
+        }
+        return;
+      }
       if (tabs[0]?.id) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'keyboardCommand',
@@ -298,7 +298,9 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onStartup) {
  */
 if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local') return;
+    if (areaName !== 'local') {
+      return;
+    }
     if (changes['captureai-settings'] || changes['captureai-user-tier']) {
       activatePrivacyGuard();
     }
@@ -314,7 +316,9 @@ if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
       try {
         await AuthService.refreshUserCache();
       } catch (error) {
-        if (DEBUG) console.error('Scheduled cache refresh failed:', error);
+        if (DEBUG) {
+          console.error('Scheduled cache refresh failed:', error);
+        }
       }
     }
   });
@@ -468,11 +472,11 @@ async function handleAskQuestion(request, sender, sendResponse) {
     // Send to backend (with or without image and OCR data)
     const aiResponse = imageData
       ? await sendToOpenAI({
-          question,
-          imageData,
-          ocrText: ocrData?.text,
-          ocrConfidence: ocrData?.confidence
-        }, null, PROMPT_TYPES.ASK)
+        question,
+        imageData,
+        ocrText: ocrData?.text,
+        ocrConfidence: ocrData?.confidence
+      }, null, PROMPT_TYPES.ASK)
       : await sendTextOnlyQuestion(question, null);
 
     await displayResponse(sender.tab.id, aiResponse);
@@ -626,7 +630,7 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
     if (data.ocrText && data.ocrText.trim().length > 0) {
       requestPayload.ocrText = data.ocrText;
     }
-    if (data.ocrConfidence != null) {
+    if (data.ocrConfidence !== null && data.ocrConfidence !== undefined) {
       requestPayload.ocrConfidence = data.ocrConfidence;
     }
 
@@ -699,48 +703,6 @@ async function sendTextOnlyQuestion(question, apiKey) {
     console.error('Backend API error:', error);
     return formatError(error.message || 'Failed to get AI response');
   }
-}
-
-/**
- * Build OpenAI API message payload based on prompt type
- *
- * @param {Object} data - Data to include in message
- * @param {string} data.imageData - Base64-encoded image data URI
- * @param {string} [data.question] - User question (for ASK prompt type)
- * @param {string} promptType - Type of prompt (ANSWER, AUTO_SOLVE, ASK)
- * @returns {Array<Object>} Array of message objects for OpenAI API
- * @throws {Error} If no image data is provided
- */
-function buildMessages(data, promptType) {
-  if (!data?.imageData) {
-    throw new Error(`${ERROR_MESSAGES.NO_IMAGE_DATA} for ${promptType}`);
-  }
-
-  const prompts = {
-    [PROMPT_TYPES.AUTO_SOLVE]: PROMPTS.AUTO_SOLVE,
-    [PROMPT_TYPES.ANSWER]: PROMPTS.ANSWER
-  };
-
-  // ASK mode with custom question
-  if (promptType === PROMPT_TYPES.ASK && data.question) {
-    return [{
-      role: 'user',
-      content: [
-        { type: 'text', text: data.question },
-        { type: 'image_url', image_url: { url: data.imageData } }
-      ]
-    }];
-  }
-
-  // Standard prompts (ANSWER or AUTO_SOLVE)
-  const prompt = prompts[promptType] || PROMPTS.ANSWER;
-  return [{
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: data.imageData } }
-    ]
-  }];
 }
 
 
@@ -913,14 +875,12 @@ if (typeof module !== 'undefined' && module.exports) {
     // Constants
     PROMPT_TYPES,
     OPENAI_CONFIG,
-    PROMPTS,
     ERROR_MESSAGES,
     STORAGE_KEY_API_KEY,
 
     // Functions
     getAIConfig,
     formatError,
-    buildMessages,
     sendToOpenAI,
     sendTextOnlyQuestion,
     getStoredApiKey,

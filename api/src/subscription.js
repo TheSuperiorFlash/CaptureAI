@@ -75,9 +75,13 @@ export class SubscriptionHandler {
       });
 
     } catch (error) {
-      if (this.logger) this.logger.error('Checkout creation error', error);
+      if (this.logger) {
+        this.logger.error('Checkout creation error', error);
+      }
       if (error instanceof ValidationError) {
-        if (this.logger) logValidationError(this.logger, error.field, error);
+        if (this.logger) {
+          logValidationError(this.logger, error.field, error);
+        }
         return jsonResponse({ error: error.message, field: error.field }, 400);
       }
       return jsonResponse({ error: 'Failed to create checkout' }, 500);
@@ -171,7 +175,7 @@ export class SubscriptionHandler {
       }
 
       // Check if user already exists (by email OR stripe_customer_id)
-      let user = await this.db
+      const user = await this.db
         .prepare('SELECT * FROM users WHERE email = ? OR stripe_customer_id = ?')
         .bind(customerEmail, customerId)
         .first();
@@ -211,7 +215,9 @@ export class SubscriptionHandler {
             .bind(licenseKey)
             .first();
 
-          if (!existing) break;
+          if (!existing) {
+            break;
+          }
           attempts++;
         }
 
@@ -305,7 +311,7 @@ export class SubscriptionHandler {
       const newTier = accessStatuses.includes(status) ? 'pro' : 'free';
       const subscriptionStatus = status === 'past_due' ? 'past_due'
         : accessStatuses.includes(status) ? 'active'
-        : 'inactive';
+          : 'inactive';
 
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_subscription_id = ?')
@@ -387,7 +393,9 @@ export class SubscriptionHandler {
         RateLimitPresets.AUTH.windowMs,
         this.env
       );
-      if (rateLimitError && rateLimitError.error) return jsonResponse(rateLimitError, 429);
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
 
       const body = await validateRequestBody(request);
       const sessionId = body.sessionId;
@@ -431,7 +439,9 @@ export class SubscriptionHandler {
       }
 
     } catch (error) {
-      if (this.logger) this.logger.error('Payment verification error', error);
+      if (this.logger) {
+        this.logger.error('Payment verification error', error);
+      }
       if (error instanceof ValidationError) {
         return jsonResponse({ error: error.message, field: error.field }, 400);
       }

@@ -84,14 +84,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
   elements.addDomainBtn.addEventListener('click', addDomain);
-  elements.domainInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addDomain();
+  elements.domainInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addDomain();
+    }
   });
   elements.ocrToggle.addEventListener('click', toggleOCR);
 
   // Add Enter key support for license key input
-  elements.licenseKeyInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleActivate();
+  elements.licenseKeyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleActivate();
+    }
   });
 
   /**
@@ -187,7 +193,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function handleBuyPro() {
     const email = prompt('Enter your email to receive your Pro license key:');
 
-    if (!email) return;
+    if (!email) {
+      return;
+    }
 
     // Validate email
     if (!email.includes('@')) {
@@ -212,9 +220,11 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Handle deactivation (clear license key)
    */
   async function handleDeactivate() {
-    const confirm = window.confirm('Are you sure you want to deactivate? You will need to enter your license key again.');
+    const confirmed = window.confirm('Are you sure you want to deactivate? You will need to enter your license key again.');
 
-    if (!confirm) return;
+    if (!confirmed) {
+      return;
+    }
 
     try {
       await AuthService.clearKey();
@@ -236,7 +246,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function handleUpgrade() {
     if (!currentState.user || !currentState.user.email) {
       const email = prompt('Enter your email to upgrade:');
-      if (!email) return;
+      if (!email) {
+        return;
+      }
 
       if (!email.includes('@')) {
         showResponseMessage('Please enter a valid email address', 'error');
@@ -832,7 +844,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const slider = elements.settingsReasoningToggleSlider;
     const progress = elements.settingsReasoningToggleProgress;
 
-    if (!track || !slider || !progress) return;
+    if (!track || !slider || !progress) {
+      return;
+    }
 
     track.addEventListener('click', async (e) => {
       const rect = track.getBoundingClientRect();
@@ -869,7 +883,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const slider = elements.settingsReasoningToggleSlider;
     const progress = elements.settingsReasoningToggleProgress;
 
-    if (!track || !slider || !progress) return;
+    if (!track || !slider || !progress) {
+      return;
+    }
 
     const trackWidth = track.offsetWidth;
     const sliderWidth = 40;

@@ -1,7 +1,8 @@
 /**
- * Unit Tests for OpenAI API Functions
+ * Unit Tests for OpenAI API Functions (Backend Auth System)
  *
  * Tests sendToOpenAI and sendTextOnlyQuestion functions
+ * These now use AuthService.sendAIRequest() instead of direct fetch calls
  */
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
@@ -9,25 +10,19 @@ const { resetChromeMocks, storageMock } = require('../setup/chrome-mock');
 const {
   PROMPT_TYPES,
   OPENAI_CONFIG,
-  PROMPTS,
   ERROR_MESSAGES,
   formatError,
-  buildMessages,
   sendToOpenAI,
   sendTextOnlyQuestion
 } = require('../../background.js');
 
-// Tests
 describe('sendToOpenAI', () => {
   const mockImageData = 'data:image/png;base64,iVBORw0KGgo';
-  const mockApiKey = 'sk-test123456789';
 
   beforeEach(() => {
-    fetch.resetMocks();
     resetChromeMocks();
 
-    // Mock storage to return default reasoning level (medium)
-    // Support both callback and Promise APIs
+    // Mock storage to return default reasoning level
     storageMock.local.get.mockImplementation((keys, callback) => {
       const result = { 'captureai-reasoning-level': 1 };
       if (callback) {
@@ -36,50 +31,46 @@ describe('sendToOpenAI', () => {
       }
       return Promise.resolve(result);
     });
+
+    // Ensure AuthService global is properly set up
+    global.AuthService = {
+      getLicenseKey: jest.fn().mockResolvedValue('TEST-KEY1-KEY2-KEY3-KEY4'),
+      getCachedOrFreshUser: jest.fn().mockResolvedValue({
+        user: { tier: 'free', subscription_status: 'inactive' }
+      }),
+      sendAIRequest: jest.fn().mockResolvedValue({
+        answer: 'The answer is 42',
+        usage: { total_tokens: 100 }
+      })
+    };
   });
 
   describe('successful API calls', () => {
     test('should return AI response for ANSWER prompt', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: 'The answer is 42' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
-
       const result = await sendToOpenAI(
         { imageData: mockImageData },
-        mockApiKey,
+        null,
         PROMPT_TYPES.ANSWER
       );
 
       expect(result).toBe('The answer is 42');
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(
-        OPENAI_CONFIG.API_URL,
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            'Authorization': `Bearer ${mockApiKey}`,
-            'Content-Type': 'application/json'
-          })
+          promptType: PROMPT_TYPES.ANSWER,
+          imageData: mockImageData
         })
       );
     });
 
     test('should return AI response for AUTO_SOLVE prompt', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: '2' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
+      global.AuthService.sendAIRequest.mockResolvedValueOnce({
+        answer: '2',
+        usage: { total_tokens: 50 }
+      });
 
       const result = await sendToOpenAI(
         { imageData: mockImageData },
-        mockApiKey,
+        null,
         PROMPT_TYPES.AUTO_SOLVE
       );
 
@@ -87,199 +78,181 @@ describe('sendToOpenAI', () => {
     });
 
     test('should return AI response for ASK prompt with question', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: 'This is a diagram of a circle' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
+      global.AuthService.sendAIRequest.mockResolvedValueOnce({
+        answer: 'This is a diagram of a circle',
+        usage: { total_tokens: 80 }
+      });
 
       const result = await sendToOpenAI(
         { imageData: mockImageData, question: 'What is this?' },
-        mockApiKey,
+        null,
         PROMPT_TYPES.ASK
       );
 
       expect(result).toBe('This is a diagram of a circle');
-    });
-
-    test('should trim whitespace from response', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: '  Answer with spaces  \n' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
-
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        mockApiKey
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          question: 'What is this?'
+        })
       );
-
-      expect(result).toBe('Answer with spaces');
     });
 
-    test('should handle empty content with fallback message', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: '' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
+    test('should handle empty answer with fallback message', async () => {
+      global.AuthService.sendAIRequest.mockResolvedValueOnce({
+        answer: '',
+        usage: { total_tokens: 10 }
+      });
 
       const result = await sendToOpenAI(
         { imageData: mockImageData },
-        mockApiKey
+        null
       );
 
       expect(result).toBe('No response found');
     });
 
-    test('should use correct max tokens for AUTO_SOLVE', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: '1' } }]
-      }));
+    test('should handle null answer with fallback message', async () => {
+      global.AuthService.sendAIRequest.mockResolvedValueOnce({
+        usage: { total_tokens: 10 }
+      });
 
-      await sendToOpenAI(
+      const result = await sendToOpenAI(
         { imageData: mockImageData },
-        mockApiKey,
-        PROMPT_TYPES.AUTO_SOLVE
+        null
       );
 
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.max_completion_tokens).toBe(OPENAI_CONFIG.MAX_TOKENS.AUTO_SOLVE);
+      expect(result).toBe('No response found');
     });
 
-    test('should use correct max tokens for ASK', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: 'answer' } }]
-      }));
-
+    test('should include OCR text in request payload', async () => {
       await sendToOpenAI(
-        { imageData: mockImageData, question: 'test?' },
-        mockApiKey,
-        PROMPT_TYPES.ASK
+        {
+          imageData: mockImageData,
+          ocrText: 'Extracted text from image',
+          ocrConfidence: 85
+        },
+        null
       );
 
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.max_completion_tokens).toBe(OPENAI_CONFIG.MAX_TOKENS.ASK);
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ocrText: 'Extracted text from image',
+          ocrConfidence: 85
+        })
+      );
+    });
+
+    test('should not include empty question in payload', async () => {
+      await sendToOpenAI(
+        { imageData: mockImageData, question: '   ' },
+        null
+      );
+
+      const payload = global.AuthService.sendAIRequest.mock.calls[0][0];
+      expect(payload.question).toBeUndefined();
+    });
+
+    test('should cache usage data in storage', async () => {
+      await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
+
+      expect(storageMock.local.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          'captureai-last-usage': expect.objectContaining({
+            data: { total_tokens: 100 }
+          })
+        })
+      );
+    });
+
+    test('should include reasoning level in payload', async () => {
+      await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
+
+      const payload = global.AuthService.sendAIRequest.mock.calls[0][0];
+      expect(payload.reasoningLevel).toBeDefined();
     });
   });
 
   describe('error handling', () => {
-    test('should return error for missing API key', async () => {
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        '',
-        PROMPT_TYPES.ANSWER
-      );
-
-      expect(result).toBe('Error: API key is not set');
-      expect(fetch).not.toHaveBeenCalled();
-    });
-
-    test('should return error for whitespace-only API key', async () => {
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        '   ',
-        PROMPT_TYPES.ANSWER
-      );
-
-      expect(result).toBe('Error: API key is not set');
-    });
-
-    test('should return error for null API key', async () => {
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        null,
-        PROMPT_TYPES.ANSWER
-      );
-
-      expect(result).toBe('Error: API key is not set');
-    });
-
-    test('should handle HTTP error responses', async () => {
-      fetch.mockResponseOnce('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+    test('should return error when AuthService is undefined', async () => {
+      const savedAuthService = global.AuthService;
+      delete global.AuthService;
 
       const result = await sendToOpenAI(
         { imageData: mockImageData },
-        mockApiKey
+        null
       );
-
-      expect(result).toContain('Error: OpenAI API error (401)');
-    });
-
-    test('should handle rate limit errors', async () => {
-      fetch.mockResponseOnce('Rate limit exceeded', { status: 429, statusText: 'Too Many Requests' });
-
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        mockApiKey
-      );
-
-      expect(result).toContain('Error: OpenAI API error (429)');
-    });
-
-    test('should handle network errors', async () => {
-      fetch.mockReject(new Error('Network failure'));
-
-      const result = await sendToOpenAI(
-        { imageData: mockImageData },
-        mockApiKey
-      );
-
-      expect(result).toContain('Error: Network error or API unavailable');
-      expect(result).toContain('Network failure');
-    });
-
-    test('should return error for missing image data', async () => {
-      // Note: The function catches the error and returns an error string
-      // rather than throwing
-      const result = await sendToOpenAI({}, mockApiKey);
 
       expect(result).toContain('Error:');
-      expect(result).toContain('No image data provided');
-    });
-  });
+      expect(result).toContain('Authentication service not available');
 
-  describe('API request payload', () => {
-    test('should include correct model in request', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: 'test' } }]
-      }));
-
-      await sendToOpenAI({ imageData: mockImageData }, mockApiKey);
-
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.model).toBe('gpt-5-nano');
+      global.AuthService = savedAuthService;
     });
 
-    test('should include reasoning effort and verbosity', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: 'test' } }]
-      }));
+    test('should return error when no license key', async () => {
+      global.AuthService.getLicenseKey.mockResolvedValueOnce(null);
 
-      await sendToOpenAI({ imageData: mockImageData }, mockApiKey);
+      const result = await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
 
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.reasoning_effort).toBe('low');
-      expect(requestBody.verbosity).toBe('low');
+      expect(result).toContain('Error:');
+      expect(result).toContain('activate CaptureAI');
+    });
+
+    test('should return error when no cached user', async () => {
+      global.AuthService.getCachedOrFreshUser.mockResolvedValueOnce({
+        user: null
+      });
+
+      const result = await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
+
+      expect(result).toContain('Error:');
+      expect(result).toContain('activate CaptureAI');
+    });
+
+    test('should handle API request errors', async () => {
+      global.AuthService.sendAIRequest.mockRejectedValueOnce(
+        new Error('Network failure')
+      );
+
+      const result = await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
+
+      expect(result).toContain('Error:');
+    });
+
+    test('should handle rate limit errors from backend', async () => {
+      global.AuthService.sendAIRequest.mockRejectedValueOnce(
+        new Error('Rate limit exceeded')
+      );
+
+      const result = await sendToOpenAI(
+        { imageData: mockImageData },
+        null
+      );
+
+      expect(result).toContain('Error:');
+      expect(result).toContain('Rate limit exceeded');
     });
   });
 });
 
 describe('sendTextOnlyQuestion', () => {
-  const mockApiKey = 'sk-test123456789';
-
   beforeEach(() => {
-    fetch.resetMocks();
     resetChromeMocks();
 
-    // Mock storage to return default reasoning level (medium)
-    // Support both callback and Promise APIs
     storageMock.local.get.mockImplementation((keys, callback) => {
       const result = { 'captureai-reasoning-level': 1 };
       if (callback) {
@@ -288,103 +261,81 @@ describe('sendTextOnlyQuestion', () => {
       }
       return Promise.resolve(result);
     });
+
+    global.AuthService = {
+      getLicenseKey: jest.fn().mockResolvedValue('TEST-KEY1-KEY2-KEY3-KEY4'),
+      getCachedOrFreshUser: jest.fn().mockResolvedValue({
+        user: { tier: 'free', subscription_status: 'inactive' }
+      }),
+      sendAIRequest: jest.fn().mockResolvedValue({
+        answer: 'Paris is the capital of France',
+        usage: { total_tokens: 50 }
+      })
+    };
   });
 
   describe('successful API calls', () => {
     test('should return AI response for text question', async () => {
-      const mockResponse = {
-        choices: [
-          { message: { content: 'Paris is the capital of France' } }
-        ]
-      };
-
-      fetch.mockResponseOnce(JSON.stringify(mockResponse));
-
-      const result = await sendTextOnlyQuestion(
-        'What is the capital of France?',
-        mockApiKey
-      );
+      const result = await sendTextOnlyQuestion('What is the capital of France?');
 
       expect(result).toBe('Paris is the capital of France');
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          question: 'What is the capital of France?',
+          promptType: PROMPT_TYPES.ASK
+        })
+      );
     });
 
-    test('should include system message in request', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: 'answer' } }]
-      }));
+    test('should not include image data in text-only request', async () => {
+      await sendTextOnlyQuestion('test question');
 
-      await sendTextOnlyQuestion('test question', mockApiKey);
-
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.messages).toHaveLength(2);
-      expect(requestBody.messages[0].role).toBe('system');
-      expect(requestBody.messages[0].content).toBe(PROMPTS.ASK_SYSTEM);
-      expect(requestBody.messages[1].role).toBe('user');
-      expect(requestBody.messages[1].content).toBe('test question');
+      const payload = global.AuthService.sendAIRequest.mock.calls[0][0];
+      expect(payload.imageData).toBeUndefined();
     });
 
-    test('should use TEXT_ONLY max tokens', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: 'answer' } }]
-      }));
+    test('should handle empty response content', async () => {
+      global.AuthService.sendAIRequest.mockResolvedValueOnce({
+        answer: '',
+        usage: {}
+      });
 
-      await sendTextOnlyQuestion('test', mockApiKey);
+      const result = await sendTextOnlyQuestion('test');
 
-      const requestBody = JSON.parse(fetch.mock.calls[0][1].body);
-      expect(requestBody.max_completion_tokens).toBe(OPENAI_CONFIG.MAX_TOKENS.TEXT_ONLY);
-    });
-
-    test('should trim whitespace from response', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: '  trimmed response  \n' } }]
-      }));
-
-      const result = await sendTextOnlyQuestion('test', mockApiKey);
-
-      expect(result).toBe('trimmed response');
+      expect(result).toBe('No response found');
     });
   });
 
   describe('error handling', () => {
-    test('should handle HTTP error responses', async () => {
-      fetch.mockResponseOnce(
-        JSON.stringify({ error: { message: 'Invalid API key' } }),
-        { status: 401 }
-      );
+    test('should return error when AuthService unavailable', async () => {
+      const savedAuthService = global.AuthService;
+      delete global.AuthService;
 
-      const result = await sendTextOnlyQuestion('test', mockApiKey);
-
-      expect(result).toContain('Error: Invalid API key');
-    });
-
-    test('should handle malformed error JSON', async () => {
-      fetch.mockResponseOnce(
-        'Not JSON',
-        { status: 500, statusText: 'Internal Server Error' }
-      );
-
-      const result = await sendTextOnlyQuestion('test', mockApiKey);
+      const result = await sendTextOnlyQuestion('test');
 
       expect(result).toContain('Error:');
+      expect(result).toContain('Authentication service not available');
+
+      global.AuthService = savedAuthService;
     });
 
-    test('should handle network errors', async () => {
-      fetch.mockReject(new Error('Connection timeout'));
+    test('should return error when no license key', async () => {
+      global.AuthService.getLicenseKey.mockResolvedValueOnce(null);
 
-      const result = await sendTextOnlyQuestion('test', mockApiKey);
+      const result = await sendTextOnlyQuestion('test');
 
-      expect(result).toContain('Error: Network error or API unavailable');
-      expect(result).toContain('Connection timeout');
+      expect(result).toContain('Error:');
+      expect(result).toContain('activate CaptureAI');
     });
 
-    test('should handle empty response content', async () => {
-      fetch.mockResponseOnce(JSON.stringify({
-        choices: [{ message: { content: '' } }]
-      }));
+    test('should handle API errors', async () => {
+      global.AuthService.sendAIRequest.mockRejectedValueOnce(
+        new Error('Connection timeout')
+      );
 
-      const result = await sendTextOnlyQuestion('test', mockApiKey);
+      const result = await sendTextOnlyQuestion('test');
 
-      expect(result).toBe('No response found');
+      expect(result).toContain('Error:');
     });
   });
 });

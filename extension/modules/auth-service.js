@@ -407,7 +407,9 @@ const AuthService = {
 
     this._refreshInFlight = this.getCurrentUser()
       .catch(() => null)
-      .finally(() => { this._refreshInFlight = null; });
+      .finally(() => {
+        this._refreshInFlight = null;
+      });
 
     return this._refreshInFlight;
   },
@@ -455,7 +457,9 @@ const AuthService = {
    */
   async isActivated() {
     const licenseKey = await this.getLicenseKey();
-    if (!licenseKey) return false;
+    if (!licenseKey) {
+      return false;
+    }
 
     // Try cache first to avoid blocking API call
     const cached = await this.getCachedUser();

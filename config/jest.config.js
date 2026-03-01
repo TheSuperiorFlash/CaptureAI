@@ -11,31 +11,45 @@ module.exports = {
   // Use Node environment for testing
   testEnvironment: 'node',
 
-  // Test file patterns
+  // Test file patterns - exclude api/ and e2e/ (separate configs)
   testMatch: [
     '**/tests/**/*.test.js',
     '**/__tests__/**/*.test.js'
   ],
 
-  // Coverage collection
+  // Map module imports to their actual locations under extension/
+  moduleNameMapper: {
+    '^(\\.\\.[\\\\/]){2}modules[\\\\/](.*)$': '<rootDir>/extension/modules/$2',
+    '^(\\.\\.[\\\\/]){2}background\\.js$': '<rootDir>/extension/background.js',
+    '^(\\.\\.[\\\\/]){2}popup\\.js$': '<rootDir>/extension/popup.js',
+    '^(\\.\\.[\\\\/]){2}content\\.js$': '<rootDir>/extension/content.js',
+    '^(\\.\\.[\\\\/]){2}inject\\.js$': '<rootDir>/extension/inject.js'
+  },
+
+  // Coverage collection from extension source files
   collectCoverageFrom: [
-    'background.js',
-    'modules/**/*.js',
-    'popup.js',
+    'extension/background.js',
+    'extension/modules/**/*.js',
+    'extension/popup.js',
+    'extension/content.js',
+    'extension/inject.js',
     '!**/node_modules/**',
     '!**/tests/**',
     '!**/__tests__/**'
   ],
 
   // Coverage thresholds
-  // Note: Currently set to 0% as tests use function copies for unit testing
-  // TODO: Refactor to import actual functions and increase thresholds to 70%
+  // Current baseline: ~40% stmts/branches/lines, ~48% functions (Feb 2026).
+  // popup.js (0%), ui-core.js (0%), ui-components.js (0%), and content.js (0%)
+  // are DOM-heavy files excluded from unit tests; they pull the global average down.
+  // Target: raise to 60%+ once Priority 2 DOM tests (ui-core, ui-components, popup)
+  // are completed (see testing-plan.md).
   coverageThreshold: {
     global: {
-      statements: 0,
-      branches: 0,
-      functions: 0,
-      lines: 0
+      statements: 40,
+      branches: 40,
+      functions: 47,
+      lines: 40
     }
   },
 
@@ -72,6 +86,8 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    '/coverage/'
+    '/coverage/',
+    '/api/',
+    '/e2e/'
   ]
 };

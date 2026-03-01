@@ -8,6 +8,15 @@ import { AuthHandler } from './auth';
 import { validateRequestBody } from './validation';
 import { checkRateLimit, getClientIdentifier } from './ratelimit';
 
+const PROMPTS = {
+  SYSTEM:       'You are a helpful assistant.',
+  SYSTEM_IMAGE: 'You are a helpful assistant. Do not select choices highlighted in red.',
+  AUTO_SOLVE:       'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. If there are not exactly 4 choices, respond with exactly: Invalid question.',
+  AUTO_SOLVE_IMAGE: 'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. Do not select choices highlighted in red. If there are not exactly 4 choices, respond with exactly: Invalid question.',
+  ANSWER:       'Reply with the answer only.',
+  ASK:          'You are a helpful assistant. Provide an accurate and clear answer.'
+};
+
 export class AIHandler {
   constructor(env, logger = null) {
     this.env = env;
@@ -115,7 +124,7 @@ export class AIHandler {
 
       // Determine input method (OCR, image, or text-only)
       const inputMethod = hasOcrText && !hasImageData ? 'ocr' :
-                          hasImageData ? 'image' : 'text';
+        hasImageData ? 'image' : 'text';
 
       // Map reasoning level to human-readable format
       const reasoningLevelMap = {
@@ -628,112 +637,113 @@ export class AIHandler {
     };
 
     if (promptType === 'ask' && question && imageData) {
-      // Ask mode with image - include OCR text if available
-      const enhancedQuestion = buildPromptWithOCR(question);
-      messages = [{
-        role: 'user',
-        content: [
-          { type: 'text', text: enhancedQuestion },
-          { type: 'image_url', image_url: { url: imageData } }
-        ]
-      }];
+      // Ask mode with image
+      messages = [
+        { role: 'system', content: PROMPTS.ASK },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: question },
+            { type: 'image_url', image_url: { url: imageData } }
+          ]
+        }
+      ];
     } else if (promptType === 'ask' && question && ocrText && !imageData) {
       // Ask mode with OCR text only (no image)
       messages = [
-        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'system', content: PROMPTS.ASK },
         { role: 'user', content: buildPromptWithOCR(question) }
       ];
     } else if (promptType === 'ask' && question) {
       // Ask mode text-only
       messages = [
-        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'system', content: PROMPTS.ASK },
         { role: 'user', content: question }
       ];
     } else if (promptType === 'auto_solve') {
       // Auto-solve mode
-      const basePrompt = 'Answer with only the number (1, 2, 3, or 4) of the correct choice.';
-      const enhancedPrompt = buildPromptWithOCR(basePrompt);
-
       if (imageData) {
         // Auto-solve with image
-        messages = [{
-          role: 'user',
-          content: [
-            { type: 'text', text: enhancedPrompt },
-            { type: 'image_url', image_url: { url: imageData } }
-          ]
-        }];
+        messages = [
+          { role: 'system', content: PROMPTS.AUTO_SOLVE_IMAGE },
+          {
+            role: 'user',
+            content: [{ type: 'image_url', image_url: { url: imageData } }]
+          }
+        ];
       } else {
         // Auto-solve with OCR only
         messages = [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: enhancedPrompt }
+          { role: 'system', content: PROMPTS.AUTO_SOLVE },
+          { role: 'user', content: ocrText }
         ];
       }
     } else if (ocrText && !imageData) {
       // OCR text only, no image (normal answer mode)
-      const basePrompt = 'Reply with answer only.';
       messages = [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: buildPromptWithOCR(basePrompt) }
+        { role: 'system', content: PROMPTS.SYSTEM },
+        { role: 'user', content: `${PROMPTS.ANSWER}\n\n${ocrText}` }
       ];
     } else if (imageData) {
       // Image-based answer (fallback)
-      const basePrompt = 'Reply with answer only.';
-      const enhancedPrompt = buildPromptWithOCR(basePrompt);
-      messages = [{
-        role: 'user',
-        content: [
-          { type: 'text', text: enhancedPrompt },
-          { type: 'image_url', image_url: { url: imageData } }
-        ]
-      }];
+      messages = [
+        { role: 'system', content: PROMPTS.SYSTEM_IMAGE },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: PROMPTS.ANSWER },
+            { type: 'image_url', image_url: { url: imageData } }
+          ]
+        }
+      ];
     } else {
       // No image, no OCR - error case
       throw new Error('No image data or OCR text provided');
     }
 
     const payload = {
-        model: config.model,
-        messages
+      model: config.model,
+      messages
     };
 
     // Use different token parameter based on model
-    const maxTokens = promptType === 'ask' ? 4000 : 2500;
+    const maxTokens =
+      promptType === 'ask'        ? 4000 :
+      promptType === 'auto_solve' ? 1500 : 2000;
 
     if (config.useLegacyTokenParam) {
-        // gpt-4.1-mini uses max_tokens
-        payload.max_tokens = maxTokens;
+      // gpt-4.1-mini uses max_tokens
+      payload.max_tokens = maxTokens;
     } else {
-        // gpt-5-nano uses max_completion_tokens
-        payload.max_completion_tokens = maxTokens;
+      // gpt-5-nano uses max_completion_tokens
+      payload.max_completion_tokens = maxTokens;
     }
 
     // Add reasoning_effort only for gpt-5-nano models (level 1 and 2)
     if (config.reasoningEffort) {
-        payload.reasoning_effort = config.reasoningEffort;
+      payload.reasoning_effort = config.reasoningEffort;
     }
 
     return payload;
-}
+  }
 
   /**
    * Send request to Cloudflare AI Gateway
    */
   async sendToGateway(payload, userId) {
-      const headers = {
-          'Content-Type': 'application/json',
-          'cf-aig-metadata-user': userId
-      };
+    const headers = {
+      'Content-Type': 'application/json',
+      'cf-aig-metadata-user': userId
+    };
 
-      // Add gateway token if using authenticated AI Gateway
-      if (this.env.CLOUDFLARE_GATEWAY_TOKEN) {
-          headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
-      }
+    // Add gateway token if using authenticated AI Gateway
+    if (this.env.CLOUDFLARE_GATEWAY_TOKEN) {
+      headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
+    }
 
-      const response = await fetchWithTimeout(this.apiUrl, {
-          method: 'POST',
-          headers,
+    const response = await fetchWithTimeout(this.apiUrl, {
+      method: 'POST',
+      headers,
       body: JSON.stringify(payload)
     }, 30000); // 30 second timeout for AI requests
 

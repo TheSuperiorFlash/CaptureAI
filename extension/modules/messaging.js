@@ -253,7 +253,9 @@ export const Messaging = {
          * @returns {boolean}
          */
   handleDisplayResponse(request, sendResponse) {
-    if (!window.CaptureAI) return false;
+    if (!window.CaptureAI) {
+      return false;
+    }
     const { STATE } = window.CaptureAI;
 
     // Handle async operation with proper error handling

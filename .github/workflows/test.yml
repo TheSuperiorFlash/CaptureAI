@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  extension-tests:
+    name: Extension Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Run linter (extension + backend)
+        run: npm run lint
+
+      - name: Run extension tests with coverage
+        run: npm test -- --coverage
+
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'api/package-lock.json'
+
+      - name: Install backend dependencies
+        run: cd api && npm ci
+
+      - name: Run backend tests with coverage
+        run: cd api && npx jest --coverage
