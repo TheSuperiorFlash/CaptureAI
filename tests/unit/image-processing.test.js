@@ -9,7 +9,7 @@
  * focusing on calculateOptimalSize (pure math, no DOM needed)
  */
 
-import { describe, test, expect, jest } from '@jest/globals';
+import { describe, test, expect, beforeEach, jest } from '@jest/globals';
 
 // Mock OCR service dependency (image-processing.js imports it statically)
 jest.mock('../../modules/ocr-service.js', () => ({
@@ -20,6 +20,7 @@ jest.mock('../../modules/ocr-service.js', () => ({
 }));
 
 import { ImageProcessing } from '../../modules/image-processing.js';
+import { OCRService } from '../../modules/ocr-service.js';
 
 describe('Image Processing Module', () => {
   describe('calculateOptimalSize', () => {
@@ -97,6 +98,152 @@ describe('Image Processing Module', () => {
       const originalRatio = 1920 / 1080;
       const resultRatio = result.width / result.height;
       expect(resultRatio).toBeCloseTo(originalRatio, 1);
+    });
+  });
+
+  describe('tryCompression', () => {
+    test('returns the compressed data URL from canvas.toDataURL', async () => {
+      const canvasMock = {
+        toDataURL: jest.fn().mockReturnValue('data:image/webp;base64,abc123')
+      };
+
+      const result = await ImageProcessing.tryCompression(canvasMock, 'image/webp', 0.8);
+
+      expect(result).toBe('data:image/webp;base64,abc123');
+      expect(canvasMock.toDataURL).toHaveBeenCalledWith('image/webp', 0.8);
+    });
+
+    test('returns null when toDataURL throws', async () => {
+      const canvasMock = {
+        toDataURL: jest.fn().mockImplementation(() => {
+          throw new Error('Format not supported');
+        })
+      };
+
+      const result = await ImageProcessing.tryCompression(canvasMock, 'image/webp', 0.8);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('performOCR', () => {
+    beforeEach(() => {
+      OCRService.extractText.mockReset();
+      OCRService.isValidOCRResult.mockReset();
+    });
+
+    test('returns valid OCR result when text has sufficient confidence', async () => {
+      OCRService.extractText.mockResolvedValue({
+        text: 'Hello World',
+        confidence: 85,
+        duration: 100,
+        shouldFallbackToImage: false
+      });
+      OCRService.isValidOCRResult.mockReturnValue(true);
+
+      const result = await ImageProcessing.performOCR('data:image/png;base64,test');
+
+      expect(result.text).toBe('Hello World');
+      expect(result.confidence).toBe(85);
+      expect(result.hasValidText).toBe(true);
+      expect(result.shouldFallbackToImage).toBe(false);
+      expect(result.duration).toBe(100);
+    });
+
+    test('marks hasValidText false when shouldFallbackToImage is true', async () => {
+      OCRService.extractText.mockResolvedValue({
+        text: 'blurry low-confidence text',
+        confidence: 25,
+        duration: 50,
+        shouldFallbackToImage: true
+      });
+      OCRService.isValidOCRResult.mockReturnValue(false);
+
+      const result = await ImageProcessing.performOCR('data:image/png;base64,test');
+
+      expect(result.hasValidText).toBe(false);
+      expect(result.shouldFallbackToImage).toBe(true);
+    });
+
+    test('returns error-shaped object when extractText throws', async () => {
+      OCRService.extractText.mockRejectedValue(new Error('OCR engine crashed'));
+
+      const result = await ImageProcessing.performOCR('data:image/png;base64,test');
+
+      expect(result.text).toBe('');
+      expect(result.confidence).toBe(0);
+      expect(result.hasValidText).toBe(false);
+      expect(result.shouldFallbackToImage).toBe(true);
+      expect(result.error).toBe('OCR engine crashed');
+    });
+  });
+
+  describe('captureAndProcess', () => {
+    let cropSpy;
+    let compressSpy;
+    let ocrSpy;
+
+    beforeEach(() => {
+      cropSpy = jest.spyOn(ImageProcessing, 'cropImage')
+        .mockResolvedValue('data:image/png;base64,cropped');
+      compressSpy = jest.spyOn(ImageProcessing, 'compressImage')
+        .mockResolvedValue('data:image/jpeg;base64,compressed');
+      ocrSpy = jest.spyOn(ImageProcessing, 'performOCR')
+        .mockResolvedValue({
+          text: 'test question',
+          confidence: 80,
+          hasValidText: true,
+          shouldFallbackToImage: false,
+          duration: 100
+        });
+    });
+
+    test('returns compressed image and OCR data by default (enableOCR: true)', async () => {
+      const result = await ImageProcessing.captureAndProcess(
+        'data:image/png;base64,screenshot',
+        { startX: 10, startY: 20, width: 100, height: 50 }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.compressedImageData).toBe('data:image/jpeg;base64,compressed');
+      expect(result.ocrData).toBeDefined();
+      expect(result.ocrData.text).toBe('test question');
+    });
+
+    test('maps coordinates correctly to cropImage {x, y, width, height}', async () => {
+      await ImageProcessing.captureAndProcess(
+        'data:image/png;base64,screenshot',
+        { startX: 50, startY: 100, width: 200, height: 150 }
+      );
+
+      expect(cropSpy).toHaveBeenCalledWith(
+        'data:image/png;base64,screenshot',
+        { x: 50, y: 100, width: 200, height: 150 }
+      );
+    });
+
+    test('skips OCR and returns no ocrData when enableOCR is false', async () => {
+      const result = await ImageProcessing.captureAndProcess(
+        'data:image/png;base64,screenshot',
+        { startX: 0, startY: 0, width: 100, height: 100 },
+        { enableOCR: false }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.ocrData).toBeUndefined();
+      expect(ocrSpy).not.toHaveBeenCalled();
+    });
+
+    test('returns hasError object when cropImage rejects', async () => {
+      cropSpy.mockRejectedValue(new Error('Canvas tainted by cross-origin data'));
+
+      const result = await ImageProcessing.captureAndProcess(
+        'data:image/png;base64,screenshot',
+        { startX: 0, startY: 0, width: 100, height: 100 }
+      );
+
+      expect(result.hasError).toBe(true);
+      expect(result.error).toContain('Canvas tainted');
     });
   });
 

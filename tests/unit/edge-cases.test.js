@@ -7,8 +7,6 @@
 const { describe, test, expect, beforeEach } = require('@jest/globals');
 const { resetChromeMocks, storageMock, tabsMock, setRuntimeError } = require('../setup/chrome-mock');
 const {
-  PROMPT_TYPES,
-  buildMessages,
   isValidUrl,
   captureScreenshot,
   getStoredApiKey
@@ -17,66 +15,6 @@ const {
 describe('Edge Cases', () => {
   beforeEach(() => {
     resetChromeMocks();
-  });
-
-  describe('buildMessages - extreme inputs', () => {
-    test('should handle extremely long image data URLs', () => {
-      const longImageData = 'data:image/png;base64,' + 'A'.repeat(100000);
-      const result = buildMessages({ imageData: longImageData }, PROMPT_TYPES.ANSWER);
-
-      expect(result[0].content[1].image_url.url).toBe(longImageData);
-      expect(result[0].content[1].image_url.url.length).toBeGreaterThan(100000);
-    });
-
-    test('should handle very long questions', () => {
-      const longQuestion = 'What is ' + 'this '.repeat(1000) + '?';
-      const result = buildMessages(
-        { imageData: 'data:image/png;base64,abc', question: longQuestion },
-        PROMPT_TYPES.ASK
-      );
-
-      expect(result[0].content[0].text).toBe(longQuestion);
-    });
-
-    test('should handle questions with special regex characters', () => {
-      const question = 'What does [a-z]+ (\\d{3}) mean?';
-      const result = buildMessages(
-        { imageData: 'data:image/png;base64,abc', question: question },
-        PROMPT_TYPES.ASK
-      );
-
-      expect(result[0].content[0].text).toBe(question);
-    });
-
-    test('should handle questions with HTML entities', () => {
-      const question = 'What is &lt;div&gt; &amp; &quot;test&quot;?';
-      const result = buildMessages(
-        { imageData: 'data:image/png;base64,abc', question: question },
-        PROMPT_TYPES.ASK
-      );
-
-      expect(result[0].content[0].text).toBe(question);
-    });
-
-    test('should handle image data with special base64 characters', () => {
-      const imageData = 'data:image/png;base64,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==';
-      const result = buildMessages({ imageData }, PROMPT_TYPES.ANSWER);
-
-      expect(result[0].content[1].image_url.url).toBe(imageData);
-    });
-
-    test('should handle data object with extra properties', () => {
-      const data = {
-        imageData: 'data:image/png;base64,abc',
-        question: 'test',
-        extraProp1: 'ignored',
-        extraProp2: 123
-      };
-      const result = buildMessages(data, PROMPT_TYPES.ASK);
-
-      expect(result[0].content).toHaveLength(2);
-      expect(result[0].content[0].text).toBe('test');
-    });
   });
 
   describe('isValidUrl - complex URLs', () => {
@@ -227,21 +165,6 @@ describe('Edge Cases', () => {
   });
 
   describe('Type coercion and boundary values', () => {
-    test('buildMessages should throw on null data', () => {
-      expect(() => buildMessages(null, PROMPT_TYPES.ANSWER))
-        .toThrow('No image data provided');
-    });
-
-    test('buildMessages should throw on undefined data', () => {
-      expect(() => buildMessages(undefined, PROMPT_TYPES.ANSWER))
-        .toThrow('No image data provided');
-    });
-
-    test('buildMessages should throw on data without imageData', () => {
-      expect(() => buildMessages({ question: 'test' }, PROMPT_TYPES.ANSWER))
-        .toThrow('No image data provided');
-    });
-
     test('isValidUrl should handle URL with only protocol', () => {
       // Note: .startsWith() will return true for these
       expect(isValidUrl('http://')).toBe(true);

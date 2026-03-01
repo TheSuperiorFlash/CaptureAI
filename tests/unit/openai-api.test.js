@@ -10,10 +10,8 @@ const { resetChromeMocks, storageMock } = require('../setup/chrome-mock');
 const {
   PROMPT_TYPES,
   OPENAI_CONFIG,
-  PROMPTS,
   ERROR_MESSAGES,
   formatError,
-  buildMessages,
   sendToOpenAI,
   sendTextOnlyQuestion
 } = require('../../background.js');

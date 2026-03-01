@@ -9,11 +9,13 @@
  */
 
 const { describe, test, expect, beforeEach } = require('@jest/globals');
-const { resetChromeMocks, storageMock, clearRuntimeError } = require('../setup/chrome-mock');
+const { resetChromeMocks, storageMock, tabsMock, setRuntimeError, clearRuntimeError } = require('../setup/chrome-mock');
 const {
   getAIConfig,
   formatError,
   getStoredApiKey,
+  isValidUrl,
+  processImage,
   OPENAI_CONFIG,
   PROMPT_TYPES
 } = require('../../extension/background.js');
@@ -204,6 +206,76 @@ describe('background.js', () => {
         ['captureai-api-key'],
         expect.any(Function)
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // isValidUrl
+  // ---------------------------------------------------------------------------
+
+  describe('isValidUrl()', () => {
+    test('accepts http:// URLs', () => {
+      expect(isValidUrl('http://example.com/page')).toBe(true);
+    });
+
+    test('accepts https:// URLs', () => {
+      expect(isValidUrl('https://example.com/page?q=1')).toBe(true);
+    });
+
+    test('rejects chrome:// URLs', () => {
+      expect(isValidUrl('chrome://extensions')).toBe(false);
+    });
+
+    test('rejects chrome-extension:// URLs', () => {
+      expect(isValidUrl('chrome-extension://abcdefgh/popup.html')).toBe(false);
+    });
+
+    test('rejects Chrome Web Store URLs', () => {
+      expect(isValidUrl('https://chrome.google.com/webstore/detail/ext/id')).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // processImage
+  // ---------------------------------------------------------------------------
+
+  describe('processImage()', () => {
+    const mockSender = { tab: { id: 42 } };
+    const mockRequest = {
+      coordinates: { startX: 10, startY: 20, width: 300, height: 200 }
+    };
+
+    test('resolves with the content script response', async () => {
+      tabsMock.sendMessage.mockImplementationOnce((tabId, message, callback) => {
+        callback({ success: true, compressedImageData: 'data:image/jpeg;base64,out' });
+      });
+
+      const result = await processImage('data:image/png;base64,uri', mockRequest, mockSender);
+
+      expect(result).toEqual({ success: true, compressedImageData: 'data:image/jpeg;base64,out' });
+      expect(tabsMock.sendMessage).toHaveBeenCalledWith(
+        42,
+        expect.objectContaining({
+          action: 'processCapturedImage',
+          startX: 10,
+          startY: 20,
+          width: 300,
+          height: 200
+        }),
+        expect.any(Function)
+      );
+    });
+
+    test('rejects when chrome.runtime.lastError is set', async () => {
+      tabsMock.sendMessage.mockImplementationOnce((tabId, message, callback) => {
+        setRuntimeError('Tab was discarded');
+        callback(null);
+      });
+
+      await expect(processImage('data:image/png;base64,uri', mockRequest, mockSender))
+        .rejects.toThrow('Error processing image');
+
+      clearRuntimeError();
     });
   });
 

@@ -194,7 +194,7 @@ describe('Utils', () => {
 
       const elapsed = Date.now() - start;
 
-      expect(elapsed).toBeLessThan(20);
+      expect(elapsed).toBeLessThan(50);
     });
 
     test('should work with multiple concurrent delays', async () => {

@@ -310,6 +310,108 @@ describe('Message Handlers', () => {
     });
   });
 
+  describe('handleCaptureArea', () => {
+    const mockCaptureRequest = {
+      coordinates: { startX: 0, startY: 0, width: 100, height: 100 },
+      promptType: PROMPT_TYPES.ANSWER,
+      isForAskMode: false
+    };
+
+    beforeEach(() => {
+      // Override sendMessage so 'processCapturedImage' returns proper image data.
+      tabsMock.sendMessage.mockImplementation((tabId, message, callback) => {
+        if (message.action === 'processCapturedImage') {
+          if (callback) {
+            callback({
+              success: true,
+              compressedImageData: 'data:image/jpeg;base64,compressed',
+              ocrData: { text: 'test question', confidence: 85, hasValidText: true, shouldFallbackToImage: false }
+            });
+          }
+          return Promise.resolve({ success: true });
+        }
+        if (callback) callback({ success: true });
+        return Promise.resolve({ success: true });
+      });
+    });
+
+    test('captures screenshot, processes image, and sends to AI', async () => {
+      await handleCaptureArea(mockCaptureRequest, mockSender, sendResponseMock);
+
+      expect(tabsMock.captureVisibleTab).toHaveBeenCalled();
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalled();
+      expect(sendResponseMock).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('returns image to content script when isForAskMode is true', async () => {
+      const askModeRequest = { ...mockCaptureRequest, isForAskMode: true };
+
+      await handleCaptureArea(askModeRequest, mockSender, sendResponseMock);
+
+      // setAskModeImage is sent via Promise API (no callback argument)
+      expect(tabsMock.sendMessage).toHaveBeenCalledWith(
+        123,
+        expect.objectContaining({ action: 'setAskModeImage' })
+      );
+      expect(global.AuthService.sendAIRequest).not.toHaveBeenCalled();
+      expect(sendResponseMock).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('displays error and skips AI when processImage returns hasError', async () => {
+      tabsMock.sendMessage.mockImplementation((tabId, message, callback) => {
+        if (message.action === 'processCapturedImage') {
+          if (callback) callback({ hasError: true, error: 'Processing failed: canvas error' });
+          return Promise.resolve({ hasError: true });
+        }
+        if (callback) callback({ success: true });
+        return Promise.resolve({ success: true });
+      });
+
+      await handleCaptureArea(mockCaptureRequest, mockSender, sendResponseMock);
+
+      expect(global.AuthService.sendAIRequest).not.toHaveBeenCalled();
+      expect(tabsMock.sendMessage).toHaveBeenCalledWith(
+        123,
+        expect.objectContaining({ action: 'displayResponse' }),
+        expect.any(Function)
+      );
+      expect(sendResponseMock).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('defaults to ANSWER prompt type when promptType is absent', async () => {
+      const requestNoPrompt = { coordinates: { startX: 0, startY: 0, width: 100, height: 100 } };
+
+      await handleCaptureArea(requestNoPrompt, mockSender, sendResponseMock);
+
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ promptType: PROMPT_TYPES.ANSWER })
+      );
+    });
+
+    test('passes imageData to AI when OCR confidence is too low (shouldFallbackToImage)', async () => {
+      tabsMock.sendMessage.mockImplementation((tabId, message, callback) => {
+        if (message.action === 'processCapturedImage') {
+          if (callback) {
+            callback({
+              success: true,
+              compressedImageData: 'data:image/jpeg;base64,compressed',
+              ocrData: { text: '', confidence: 15, hasValidText: false, shouldFallbackToImage: true }
+            });
+          }
+          return Promise.resolve({ success: true });
+        }
+        if (callback) callback({ success: true });
+        return Promise.resolve({ success: true });
+      });
+
+      await handleCaptureArea(mockCaptureRequest, mockSender, sendResponseMock);
+
+      expect(global.AuthService.sendAIRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ imageData: 'data:image/jpeg;base64,compressed' })
+      );
+    });
+  });
+
   describe('handleTextSelection', () => {
     test('should process selected text via backend', async () => {
       const selectedText = 'Selected text to analyze';

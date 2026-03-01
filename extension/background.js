@@ -99,14 +99,6 @@ async function getAIConfig() {
   }
 }
 
-/**
- * AI prompt templates
- */
-const PROMPTS = {
-  AUTO_SOLVE: 'Answer with only the number (1, 2, 3, or 4) of the correct choice. Answer choices will go left to right, then top to bottom. If there are not exactly 4 choices or if it says Spell the word, respond with "Invalid question". Avoid choices that are red.',
-  ANSWER: 'Reply with answer only, avoid choices that are red.',
-  ASK_SYSTEM: 'You are a helpful assistant that provides clear, accurate, and concise answers.'
-};
 
 /**
  * Error message templates
@@ -707,48 +699,6 @@ async function sendTextOnlyQuestion(question, apiKey) {
   }
 }
 
-/**
- * Build OpenAI API message payload based on prompt type
- *
- * @param {Object} data - Data to include in message
- * @param {string} data.imageData - Base64-encoded image data URI
- * @param {string} [data.question] - User question (for ASK prompt type)
- * @param {string} promptType - Type of prompt (ANSWER, AUTO_SOLVE, ASK)
- * @returns {Array<Object>} Array of message objects for OpenAI API
- * @throws {Error} If no image data is provided
- */
-function buildMessages(data, promptType) {
-  if (!data?.imageData) {
-    throw new Error(`${ERROR_MESSAGES.NO_IMAGE_DATA} for ${promptType}`);
-  }
-
-  const prompts = {
-    [PROMPT_TYPES.AUTO_SOLVE]: PROMPTS.AUTO_SOLVE,
-    [PROMPT_TYPES.ANSWER]: PROMPTS.ANSWER
-  };
-
-  // ASK mode with custom question
-  if (promptType === PROMPT_TYPES.ASK && data.question) {
-    return [{
-      role: 'user',
-      content: [
-        { type: 'text', text: data.question },
-        { type: 'image_url', image_url: { url: data.imageData } }
-      ]
-    }];
-  }
-
-  // Standard prompts (ANSWER or AUTO_SOLVE)
-  const prompt = prompts[promptType] || PROMPTS.ANSWER;
-  return [{
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: data.imageData } }
-    ]
-  }];
-}
-
 
 // ============================================================================
 // SECTION 5: CHROME APIS - SCREENSHOT
@@ -919,14 +869,12 @@ if (typeof module !== 'undefined' && module.exports) {
     // Constants
     PROMPT_TYPES,
     OPENAI_CONFIG,
-    PROMPTS,
     ERROR_MESSAGES,
     STORAGE_KEY_API_KEY,
 
     // Functions
     getAIConfig,
     formatError,
-    buildMessages,
     sendToOpenAI,
     sendTextOnlyQuestion,
     getStoredApiKey,
