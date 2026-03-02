@@ -24,7 +24,7 @@ export default function ContactPage() {
                         <span className="text-[--color-text]">Contact </span>
                         <span className="text-gradient-static">us</span>
                     </h1>
-                    <p className="text-[--color-text-secondary]">
+                    <p className="mt-1 text-[--color-text-secondary]">
                         Questions, bugs, or feature ideas — we read everything.
                     </p>
                 </div>
@@ -36,7 +36,7 @@ export default function ContactPage() {
                         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
                             <Mail className="h-6 w-6 text-blue-400" />
                         </div>
-                        <h2 className="mb-1.5 text-lg font-semibold text-[--color-text]">Support</h2>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Support</h2>
                         <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Bug reports, account issues, or general questions. We respond within 24 hours.
                         </p>
@@ -54,7 +54,7 @@ export default function ContactPage() {
                         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
                             <MessageCircle className="h-6 w-6 text-violet-400" />
                         </div>
-                        <h2 className="mb-1.5 text-lg font-semibold text-[--color-text]">Feedback</h2>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Feedback</h2>
                         <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Feature requests, suggestions, or ideas for improvement.
                         </p>
@@ -74,7 +74,7 @@ export default function ContactPage() {
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
                             <BookOpen className="h-6 w-6 text-emerald-400" />
                         </div>
-                        <h3 className="mb-2 text-[--color-text]">Looking for answers first?</h3>
+                        <h3 className="mb-3 text-[--color-text]">Looking for answers first?</h3>
                         <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Check the help center for guides and frequently asked questions.
                         </p>
