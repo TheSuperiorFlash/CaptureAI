@@ -309,29 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.userEmail.textContent = 'License activated';
       }
 
-      elements.userTier.textContent = user.tier.toUpperCase();
-
-      // Show upgrade button for free tier
-      if (user.tier === 'free') {
-        elements.upgradeBtn.classList.remove('hidden');
-        elements.userTier.classList.add('tier-free');
-        elements.userTier.classList.remove('tier-pro');
-        elements.settingsView.classList.add('free-tier-view');
-      } else {
-        elements.upgradeBtn.classList.add('hidden');
-        elements.userTier.classList.add('tier-pro');
-        elements.userTier.classList.remove('tier-free');
-        elements.settingsView.classList.remove('free-tier-view');
-      }
-
-      // Load usage stats (only for free tier)
-      // Always fetched fresh (not cached) but loaded async so buttons appear immediately
-      if (user.tier === 'free') {
-        elements.usageSection.classList.remove('hidden');
-        updateUsageStats(); // No await - load asynchronously
-      } else {
-        elements.usageSection.classList.add('hidden');
-      }
+      applyTierUI(user.tier);
 
       // Get current state from content script
       await updateStateFromContentScript();
@@ -339,6 +317,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error loading user info:', error);
       showResponseMessage('Error loading user info', 'error');
       showLicenseKeyInput();
+    }
+  }
+
+  /**
+   * Apply tier-specific UI updates: badge, upgrade button, and usage stats
+   * @param {string} tier - 'free' or 'pro'
+   */
+  function applyTierUI(tier) {
+    elements.userTier.textContent = tier.toUpperCase();
+
+    if (tier === 'free') {
+      elements.upgradeBtn.classList.remove('hidden');
+      elements.userTier.classList.add('tier-free');
+      elements.userTier.classList.remove('tier-pro');
+      elements.settingsView.classList.add('free-tier-view');
+      elements.usageSection.classList.remove('hidden');
+      updateUsageStats(); // No await - load asynchronously
+    } else {
+      elements.upgradeBtn.classList.add('hidden');
+      elements.userTier.classList.add('tier-pro');
+      elements.userTier.classList.remove('tier-free');
+      elements.settingsView.classList.remove('free-tier-view');
+      elements.usageSection.classList.add('hidden');
     }
   }
 
@@ -981,6 +982,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       elements.responseContent.textContent = request.message;
       elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+    }
+  });
+
+  /**
+   * Listen for storage changes to update tier UI in real time
+   * when the user upgrades from free to pro or vice versa
+   */
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes['captureai-user-tier']) {
+      return;
+    }
+    const newTier = changes['captureai-user-tier'].newValue;
+    if (newTier && currentState.user && !elements.mainControls.classList.contains('hidden')) {
+      currentState.user = { ...currentState.user, tier: newTier };
+      applyTierUI(newTier);
     }
   });
 
