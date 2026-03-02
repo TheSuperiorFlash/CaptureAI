@@ -17,7 +17,8 @@ const {
   isValidUrl,
   processImage,
   OPENAI_CONFIG,
-  PROMPT_TYPES
+  PROMPT_TYPES,
+  applyPrivacyGuardDefault
 } = require('../../extension/background.js');
 
 describe('background.js', () => {
@@ -294,6 +295,60 @@ describe('background.js', () => {
       const values = Object.values(PROMPT_TYPES);
       const unique = new Set(values);
       expect(unique.size).toBe(values.length);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // applyPrivacyGuardDefault
+  // ---------------------------------------------------------------------------
+
+  describe('applyPrivacyGuardDefault()', () => {
+    test('enables PrivacyGuard and sets flag when not yet applied', async () => {
+      storageMock.local.get.mockResolvedValue({});
+      storageMock.local.set.mockResolvedValue(undefined);
+
+      await applyPrivacyGuardDefault();
+
+      expect(storageMock.local.set).toHaveBeenCalledWith({
+        'captureai-settings': { privacyGuard: { enabled: true } },
+        'captureai-privacy-guard-defaulted': true
+      });
+    });
+
+    test('preserves existing settings when enabling PrivacyGuard', async () => {
+      storageMock.local.get.mockResolvedValue({
+        'captureai-settings': { domainBlacklist: ['example.com'], ocr: { disabled: true } }
+      });
+      storageMock.local.set.mockResolvedValue(undefined);
+
+      await applyPrivacyGuardDefault();
+
+      expect(storageMock.local.set).toHaveBeenCalledWith({
+        'captureai-settings': {
+          domainBlacklist: ['example.com'],
+          ocr: { disabled: true },
+          privacyGuard: { enabled: true }
+        },
+        'captureai-privacy-guard-defaulted': true
+      });
+    });
+
+    test('does not modify storage when flag is already set', async () => {
+      storageMock.local.get.mockResolvedValue({
+        'captureai-privacy-guard-defaulted': true,
+        'captureai-settings': { privacyGuard: { enabled: false } }
+      });
+
+      await applyPrivacyGuardDefault();
+
+      expect(storageMock.local.set).not.toHaveBeenCalled();
+    });
+
+    test('handles storage read error gracefully', async () => {
+      storageMock.local.get.mockRejectedValue(new Error('Storage error'));
+
+      await expect(applyPrivacyGuardDefault()).resolves.toBeUndefined();
+      expect(storageMock.local.set).not.toHaveBeenCalled();
     });
   });
 });

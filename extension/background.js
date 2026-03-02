@@ -190,6 +190,38 @@ async function activatePrivacyGuard() {
   }
 }
 
+/**
+ * Auto-enable PrivacyGuard the first time a user upgrades to Pro.
+ * Runs at most once per installation — guarded by the
+ * 'captureai-privacy-guard-defaulted' flag in storage.
+ */
+async function applyPrivacyGuardDefault() {
+  try {
+    const result = await chrome.storage.local.get([
+      'captureai-privacy-guard-defaulted',
+      'captureai-settings'
+    ]);
+
+    // Only apply once
+    if (result['captureai-privacy-guard-defaulted']) {
+      return;
+    }
+
+    // Enable privacy guard in settings
+    const settings = result['captureai-settings'] || {};
+    settings.privacyGuard = { ...settings.privacyGuard, enabled: true };
+
+    await chrome.storage.local.set({
+      'captureai-settings': settings,
+      'captureai-privacy-guard-defaulted': true
+    });
+  } catch (error) {
+    if (DEBUG) {
+      console.error('Privacy Guard default application error:', error);
+    }
+  }
+}
+
 
 // ============================================================================
 // SECTION 2: MESSAGE ROUTING
@@ -294,7 +326,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onStartup) {
 }
 
 /**
- * Re-evaluate Privacy Guard registration when settings or tier change
+ * Re-evaluate Privacy Guard registration when settings or tier change.
+ * Also auto-enables PrivacyGuard the first time the user upgrades to Pro.
  */
 if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -303,6 +336,9 @@ if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
     }
     if (changes['captureai-settings'] || changes['captureai-user-tier']) {
       activatePrivacyGuard();
+    }
+    if (changes['captureai-user-tier']?.newValue === 'pro') {
+      applyPrivacyGuardDefault();
     }
   });
 }
@@ -920,6 +956,7 @@ if (typeof module !== 'undefined' && module.exports) {
     handleEnablePrivacyGuard,
     handleDisablePrivacyGuard,
     handleGetPrivacyGuardStatus,
-    handleTextSelection
+    handleTextSelection,
+    applyPrivacyGuardDefault
   };
 }
