@@ -132,14 +132,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Try to get user from cache for instant UI render
-      const { user, fromCache, needsRefresh } = await AuthService.getCachedOrFreshUser();
+      const { user, fromCache } = await AuthService.getCachedOrFreshUser();
 
       if (user) {
         // Show UI immediately with cached (or fresh) data
         await showMainControlsWithUser(user);
 
-        // If cache is stale, refresh in background and update UI if data changed
-        if (fromCache && needsRefresh) {
+        // Always refresh in background when showing cached data so the plan
+        // badge stays accurate after a Stripe upgrade. The chrome.storage.onChanged
+        // listener will update the UI automatically if the tier changed.
+        if (fromCache) {
           AuthService.refreshUserCache().then(freshUser => {
             if (freshUser && (freshUser.email !== user.email || freshUser.tier !== user.tier)) {
               showMainControlsWithUser(freshUser);
@@ -309,29 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.userEmail.textContent = 'License activated';
       }
 
-      elements.userTier.textContent = user.tier.toUpperCase();
-
-      // Show upgrade button for free tier
-      if (user.tier === 'free') {
-        elements.upgradeBtn.classList.remove('hidden');
-        elements.userTier.classList.add('tier-free');
-        elements.userTier.classList.remove('tier-pro');
-        elements.settingsView.classList.add('free-tier-view');
-      } else {
-        elements.upgradeBtn.classList.add('hidden');
-        elements.userTier.classList.add('tier-pro');
-        elements.userTier.classList.remove('tier-free');
-        elements.settingsView.classList.remove('free-tier-view');
-      }
-
-      // Load usage stats (only for free tier)
-      // Always fetched fresh (not cached) but loaded async so buttons appear immediately
-      if (user.tier === 'free') {
-        elements.usageSection.classList.remove('hidden');
-        updateUsageStats(); // No await - load asynchronously
-      } else {
-        elements.usageSection.classList.add('hidden');
-      }
+      applyTierUI(user.tier);
 
       // Get current state from content script
       await updateStateFromContentScript();
@@ -339,6 +319,48 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error loading user info:', error);
       showResponseMessage('Error loading user info', 'error');
       showLicenseKeyInput();
+    }
+  }
+
+  /**
+   * Normalize tier to a safe, known value.
+   * Falls back to 'free' if the provided value is invalid.
+   *
+   * @param {*} tier - Raw tier value from storage or API.
+   * @returns {'free'|'pro'} Normalized tier string.
+   */
+  function normalizeTier(tier) {
+    if (typeof tier === 'string') {
+      const normalized = tier.trim().toLowerCase();
+      if (normalized === 'free' || normalized === 'pro') {
+        return normalized;
+      }
+    }
+    console.error('Invalid tier value, defaulting to free:', tier);
+    return 'free';
+  }
+
+  /**
+   * Apply tier-specific UI updates: badge, upgrade button, and usage stats
+   * @param {string} tier - 'free' or 'pro'
+   */
+  function applyTierUI(tier) {
+    const normalizedTier = normalizeTier(tier);
+    elements.userTier.textContent = normalizedTier.toUpperCase();
+
+    if (normalizedTier === 'free') {
+      elements.upgradeBtn.classList.remove('hidden');
+      elements.userTier.classList.add('tier-free');
+      elements.userTier.classList.remove('tier-pro');
+      elements.settingsView.classList.add('free-tier-view');
+      elements.usageSection.classList.remove('hidden');
+      updateUsageStats(); // No await - load asynchronously
+    } else {
+      elements.upgradeBtn.classList.add('hidden');
+      elements.userTier.classList.add('tier-pro');
+      elements.userTier.classList.remove('tier-free');
+      elements.settingsView.classList.remove('free-tier-view');
+      elements.usageSection.classList.add('hidden');
     }
   }
 
@@ -981,6 +1003,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       elements.responseContent.textContent = request.message;
       elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+    }
+  });
+
+  /**
+   * Listen for storage changes to update tier UI in real time
+   * when the user upgrades from free to pro or vice versa
+   */
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes['captureai-user-tier']) {
+      return;
+    }
+    const newTier = changes['captureai-user-tier'].newValue;
+    if (newTier && currentState.user && !elements.mainControls.classList.contains('hidden')) {
+      currentState.user = { ...currentState.user, tier: newTier };
+      applyTierUI(newTier);
     }
   });
 
