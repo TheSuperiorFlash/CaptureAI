@@ -6,7 +6,7 @@
 import { jsonResponse, fetchWithTimeout } from './utils';
 import { AuthHandler } from './auth';
 import { validateRequestBody } from './validation';
-import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
+import { checkRateLimit, RateLimitPresets } from './ratelimit';
 
 const PROMPTS = {
   SYSTEM:       'You are a helpful assistant.',
@@ -72,22 +72,6 @@ export class AIHandler {
    */
   async complete(request) {
     try {
-      // IP-based rate limit before authentication to prevent abuse.
-      // Uses a separate key ('ai:IP') from the router's global check ('IP') so the
-      // two limits are tracked independently. The per-user tier limits (10/day free,
-      // 20/min pro) enforce tighter per-user controls after authentication.
-      const clientId = getClientIdentifier(request);
-      const ipRateLimit = await checkRateLimit(
-        `ai:${clientId}`,
-        RateLimitPresets.GLOBAL.limit,
-        RateLimitPresets.GLOBAL.windowMs,
-        this.env,
-        RateLimitPresets.GLOBAL.bindingName
-      );
-      if (ipRateLimit && ipRateLimit.error) {
-        return jsonResponse(ipRateLimit, 429);
-      }
-
       // Authenticate and check usage limit in a single query (optimization)
       const { user, usageCheck } = await this.authenticateAndCheckUsage(request);
       if (!user) {
@@ -530,7 +514,8 @@ export class AIHandler {
         `user:${email}`,
         rateLimit,
         60000, // 1 minute window
-        this.env
+        this.env,
+        RateLimitPresets.PRO_AI.bindingName
       );
 
       if (rateLimitResult && rateLimitResult.error) {

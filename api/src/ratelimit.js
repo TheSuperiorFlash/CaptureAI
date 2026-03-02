@@ -55,22 +55,66 @@ function getInMemoryLimiter() {
  * @param {number} limit - Max requests (used for in-memory fallback and retryAfter)
  * @param {number} windowMs - Time window in milliseconds (used for in-memory fallback)
  * @param {object} env - Environment object (optional, required for native rate limiting)
- * @param {string} bindingName - Name of the rate limiting binding in env (default: 'RATE_LIMITER')
+ * @param {string} bindingName - Name of the rate limiting binding in env (required when using native rate limiting; no default to prevent silent in-memory fallback)
  * @returns {Promise<object>} - Error response if rate limited, success object if allowed
  */
-export async function checkRateLimit(identifier, limit, windowMs, env = null, bindingName = 'RATE_LIMITER') {
+export async function checkRateLimit(identifier, limit, windowMs, env = null, bindingName = null) {
   // Use named native Cloudflare Rate Limiting binding if available
-  if (env && env[bindingName]) {
+  // NOTE: In native mode, limit/windowMs are not used for enforcement.
+  // They may still be passed by callers (e.g. for in-memory fallback),
+  // but the binding's own [[ratelimits]] configuration is authoritative.
+  if (env && bindingName && env[bindingName]) {
     try {
-      const { success } = await env[bindingName].limit({ key: identifier });
+      const limitResult = await env[bindingName].limit({ key: identifier });
+      const { success } = limitResult || {};
       if (!success) {
+        let retryAfter = null;
+
+        if (limitResult && limitResult.reset) {
+          let resetTime = null;
+
+          if (limitResult.reset instanceof Date) {
+            resetTime = limitResult.reset.getTime();
+          } else if (typeof limitResult.reset === 'number') {
+            resetTime = limitResult.reset;
+          }
+
+          if (resetTime != null) {
+            retryAfter = Math.max(
+              0,
+              Math.ceil((resetTime - Date.now()) / 1000)
+            );
+          }
+        }
+
         return {
           error: 'Rate limit exceeded',
           message: 'Too many requests. Please slow down.',
-          retryAfter: Math.ceil(windowMs / 1000)
+          retryAfter
         };
       }
-      return { allowed: true, count: null };
+
+      const response = { allowed: true, count: null };
+
+      if (
+        limitResult &&
+        typeof limitResult.limit === 'number' &&
+        typeof limitResult.remaining === 'number'
+      ) {
+        response.count = limitResult.limit - limitResult.remaining;
+        response.limit = limitResult.limit;
+        response.remaining = limitResult.remaining;
+      }
+
+      if (limitResult && limitResult.reset) {
+        if (limitResult.reset instanceof Date) {
+          response.resetAt = limitResult.reset.toISOString();
+        } else {
+          response.resetAt = limitResult.reset;
+        }
+      }
+
+      return response;
     } catch (error) {
       console.error('Rate limit check error:', error);
       // Fail open - allow request if rate limiter is unavailable
@@ -159,5 +203,11 @@ export const RateLimitPresets = {
     limit: 60,
     windowMs: 60000,
     bindingName: 'RATE_LIMITER_GLOBAL'
+  },
+  // Pro-tier per-user AI rate limit — 20 req/min per user
+  PRO_AI: {
+    limit: 20,
+    windowMs: 60000,
+    bindingName: 'RATE_LIMITER_AI_PRO'
   }
 };
