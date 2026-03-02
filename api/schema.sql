@@ -49,4 +49,49 @@ CREATE INDEX IF NOT EXISTS idx_users_stripe_subscription ON users(stripe_subscri
 -- Composite index covers all usage queries (by email, by date, by email+date)
 CREATE INDEX IF NOT EXISTS idx_usage_records_email_date ON usage_records(email, created_at);
 
+-- Total usage view: aggregates token/cost data across all users at 4 levels
+--   sort_order 1: Grand total  (all prompt_types, all models)
+--   sort_order 2: Per prompt_type (all models combined)
+--   sort_order 3: Per model       (all prompt_types combined)
+--   sort_order 4: Per model + prompt_type combination
+CREATE VIEW IF NOT EXISTS total_usage AS
+SELECT
+  1 AS sort_order,
+  'ALL' AS prompt_type,
+  'ALL' AS model,
+  COALESCE(SUM(input_tokens), 0) AS input_tokens,
+  COALESCE(SUM(output_tokens), 0) AS output_tokens,
+  COALESCE(SUM(total_cost), 0.0) AS total_cost
+FROM usage_records
+UNION ALL
+SELECT
+  2 AS sort_order,
+  prompt_type,
+  'ALL' AS model,
+  COALESCE(SUM(input_tokens), 0) AS input_tokens,
+  COALESCE(SUM(output_tokens), 0) AS output_tokens,
+  COALESCE(SUM(total_cost), 0.0) AS total_cost
+FROM usage_records
+GROUP BY prompt_type
+UNION ALL
+SELECT
+  3 AS sort_order,
+  'ALL' AS prompt_type,
+  model,
+  COALESCE(SUM(input_tokens), 0) AS input_tokens,
+  COALESCE(SUM(output_tokens), 0) AS output_tokens,
+  COALESCE(SUM(total_cost), 0.0) AS total_cost
+FROM usage_records
+GROUP BY model
+UNION ALL
+SELECT
+  4 AS sort_order,
+  prompt_type,
+  model,
+  COALESCE(SUM(input_tokens), 0) AS input_tokens,
+  COALESCE(SUM(output_tokens), 0) AS output_tokens,
+  COALESCE(SUM(total_cost), 0.0) AS total_cost
+FROM usage_records
+GROUP BY model, prompt_type;
+
 -- For test data, use: api/seed.sql
