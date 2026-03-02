@@ -313,7 +313,7 @@ export default function ActivatePage() {
                                         handleSignup()
                                     }
                                 }}
-                                placeholder="you@email.com"
+                                placeholder="your@email.com"
                                 aria-label="Email address"
                                 autoComplete="email"
                                 className="min-w-0 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
