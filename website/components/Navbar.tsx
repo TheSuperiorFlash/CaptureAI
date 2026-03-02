@@ -82,9 +82,9 @@ export default function Navbar() {
                     <div className="hidden md:block">
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                            className="glow-btn inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
-                            Get Started
+                            Start Now
                         </Link>
                     </div>
 
@@ -121,10 +121,10 @@ export default function Navbar() {
                         <div className="pt-2">
                             <Link
                                 href="/activate"
-                                className="glow-btn block rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-center text-sm font-medium text-white"
+                                className="glow-btn block rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-center text-sm font-semibold text-white"
                                 onClick={() => setIsOpen(false)}
                             >
-                                Get Started
+                                Start Now
                             </Link>
                         </div>
                     </div>
