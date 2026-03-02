@@ -69,6 +69,9 @@ export class Router {
     if (path === '/api/ai/analytics' && method === 'GET') {
       return this.ai.getAnalytics(request);
     }
+    if (path === '/api/ai/total-usage' && method === 'GET') {
+      return this.ai.getTotalUsage(request);
+    }
 
     // Subscription routes
     if (path === '/api/subscription/create-checkout' && method === 'POST') {

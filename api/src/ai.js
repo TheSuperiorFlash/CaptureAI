@@ -284,6 +284,52 @@ export class AIHandler {
   }
 
   /**
+   * Get total usage statistics across all users (admin)
+   * GET /api/ai/total-usage
+   * Requires X-Admin-Key header matching ADMIN_KEY env var
+   */
+  async getTotalUsage(request) {
+    try {
+      // Simple admin key authentication
+      const adminKey = this.env.ADMIN_KEY;
+      if (!adminKey) {
+        return jsonResponse({ error: 'Admin access not configured' }, 503);
+      }
+      const providedKey = request.headers.get('X-Admin-Key') || '';
+
+      // Constant-time comparison to prevent timing attacks
+      const enc = new TextEncoder();
+      const hmacKey = await crypto.subtle.importKey(
+        'raw', new Uint8Array(32), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+      );
+      const [sigA, sigB] = await Promise.all([
+        crypto.subtle.sign('HMAC', hmacKey, enc.encode(providedKey)),
+        crypto.subtle.sign('HMAC', hmacKey, enc.encode(adminKey))
+      ]);
+      const arrA = new Uint8Array(sigA);
+      const arrB = new Uint8Array(sigB);
+      let diff = 0;
+      for (let i = 0; i < arrA.length; i++) { diff |= arrA[i] ^ arrB[i]; }
+      if (diff !== 0) {
+        return jsonResponse({ error: 'Unauthorized' }, 401);
+      }
+
+      const rows = await this.db
+        .prepare(`
+          SELECT prompt_type, model, input_tokens, output_tokens, total_cost
+          FROM total_usage
+          ORDER BY sort_order, prompt_type, model
+        `)
+        .all();
+
+      return jsonResponse({ rows: rows.results || [] });
+    } catch (error) {
+      console.error('Total usage fetch error:', error);
+      return jsonResponse({ error: 'Failed to fetch total usage' }, 500);
+    }
+  }
+
+  /**
    * Get available models
    * GET /api/ai/models
    */
@@ -593,7 +639,7 @@ export class AIHandler {
     const inputCost = (regularInputTokens * pricing.input) / 1000000;
     const cachedCost = ((cachedTokens || 0) * pricing.cached) / 1000000;
     const outputCost = (outputTokens * pricing.output) / 1000000;
-    return inputCost + cachedCost + outputCost;
+    return parseFloat((inputCost + cachedCost + outputCost).toFixed(8));
   }
 
   /**
