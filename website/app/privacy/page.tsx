@@ -47,9 +47,10 @@ export default function PrivacyPage() {
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Usage Data</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Number of API requests made (to enforce daily limits and rate limiting by tier)</li>
-                            <li>Request timestamps (for rate limiting purposes only)</li>
-                            <li>This data is not linked to any personally identifiable information beyond your license key</li>
+                            <li>Per-request metadata is recorded for each AI query: prompt type, model used, input/output/cached token counts, estimated cost, response time, and timestamp</li>
+                            <li>This data is used for: enforcing daily request limits (Free tier), per-minute rate limiting (Pro tier), internal cost monitoring and analytics, and service improvement</li>
+                            <li>Usage records are linked to your account via your license key, which is stored together with your email address (see Data Storage section below). Usage data is therefore account-identifiable</li>
+                            <li>Cloudflare AI Gateway also retains its own request logs per its standard data retention practices — review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a></li>
                         </ul>
                     </section>
 
@@ -61,7 +62,7 @@ export default function PrivacyPage() {
                             <li>To process payments and manage your subscription through Stripe</li>
                             <li>To enforce usage limits and rate limits based on your subscription tier</li>
                             <li>To provide customer support and respond to inquiries</li>
-                            <li>To send essential service communications (e.g. billing receipts, policy updates)</li>
+                            <li>To send essential service communications (e.g. license key delivery, policy updates) — billing receipts are sent directly by Stripe</li>
                             <li>To improve the performance and reliability of the Service</li>
                         </ul>
                         <p className="mt-3">
@@ -81,7 +82,7 @@ export default function PrivacyPage() {
                             <li><strong className="text-[--color-text-secondary]">OpenAI</strong> — AI processing of extracted text via Cloudflare AI Gateway. Review <a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">OpenAI&apos;s Privacy Policy</a>.</li>
                             <li><strong className="text-[--color-text-secondary]">Cloudflare</strong> — Backend infrastructure (Workers, D1 database, AI Gateway). Review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a>.</li>
                             <li><strong className="text-[--color-text-secondary]">Stripe</strong> — Payment processing for Pro subscriptions. Review <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Stripe&apos;s Privacy Policy</a>.</li>
-                            <li><strong className="text-[--color-text-secondary]">Resend</strong> — Transactional email delivery (license keys, receipts). Review <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Resend&apos;s Privacy Policy</a>.</li>
+                            <li><strong className="text-[--color-text-secondary]">Resend</strong> — License key delivery emails. Your email address is shared with Resend solely for this purpose. Billing receipts are sent directly by Stripe, not via Resend. Review <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Resend&apos;s Privacy Policy</a>.</li>
                         </ul>
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Legal Compliance</h3>
@@ -103,7 +104,7 @@ export default function PrivacyPage() {
                         </p>
                         <p className="mb-3">
                             <span className="font-medium text-[--color-text-secondary]">Backend storage:</span>{' '}
-                            License keys, email addresses, subscription tier, and usage counts are stored on Cloudflare D1. This data is retained for as long as your account is active.
+                            Your license key and email address are stored together in Cloudflare D1, along with your subscription tier and subscription status. Per-request usage records (prompt type, model, token counts, cost, response time, timestamp) are also stored and linked to your account via this license key. This data is retained for as long as your account is active.
                         </p>
                         <p className="mb-3">
                             <span className="font-medium text-[--color-text-secondary]">Screenshot and query data:</span>{' '}
