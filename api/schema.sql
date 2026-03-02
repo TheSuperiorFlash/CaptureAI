@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS usage_records (
   input_tokens INTEGER DEFAULT 0,
   output_tokens INTEGER DEFAULT 0,
   total_cost REAL DEFAULT 0.0,
-  cached TEXT DEFAULT 'no',
+  cached TEXT DEFAULT 'no' CHECK (cached IN ('yes', 'no')),
   response_time INTEGER DEFAULT 0,
   created_at TEXT DEFAULT (datetime('now'))
 );

@@ -106,7 +106,9 @@ class OCRService {
      * @returns {string}
      */
   cleanSiteSpecificText(text, hostname) {
-    if (!text || !hostname) return text || '';
+    if (!text || !hostname) {
+      return text || '';
+    }
     if (hostname === 'vocabulary.com' || hostname.endsWith('.vocabulary.com')) {
       text = text.replace(/^(QO|Q|\(@\))[ \t]*/gm, '');
       text = text.replace(/\n{2,}/g, '\n').trim();
@@ -302,10 +304,14 @@ class OCRService {
                 let count = 0;
                 for (let dy = -1; dy <= 1; dy++) {
                   const ny = y + dy;
-                  if (ny < 0 || ny >= h) continue;
+                  if (ny < 0 || ny >= h) {
+                    continue;
+                  }
                   for (let dx = -1; dx <= 1; dx++) {
                     const nx = x + dx;
-                    if (nx < 0 || nx >= w) continue;
+                    if (nx < 0 || nx >= w) {
+                      continue;
+                    }
                     sum += gray[ny * w + nx];
                     count++;
                   }

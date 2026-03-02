@@ -208,8 +208,6 @@ export const ImageProcessing = {
         console.log(`OCR extraction completed: ${ocrResult.text.length} characters extracted (Confidence: ${ocrResult.confidence}%)`);
         if (ocrResult.shouldFallbackToImage) {
           console.log('OCR quality insufficient - will use image data instead');
-        } else if (ocrResult.text.length > 0) {
-          console.log('OCR Full Text:', ocrResult.text);
         }
       }
 

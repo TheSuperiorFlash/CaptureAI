@@ -210,16 +210,28 @@ export const Messaging = {
       enableOCR: request.enableOCR !== undefined ? request.enableOCR : true
     };
 
-    window.CaptureAI.ImageProcessing.captureAndProcess(request.imageUri, coordinates, options)
-      .then(result => {
-        sendResponse(result);
-      })
-      .catch(error => {
-        sendResponse({
-          hasError: true,
-          error: 'Failed to process captured image: ' + error.message
+    if (!window.CaptureAI?.ImageProcessing?.captureAndProcess) {
+      sendResponse({ hasError: true, error: 'ImageProcessing not ready' });
+      return true;
+    }
+
+    try {
+      window.CaptureAI.ImageProcessing.captureAndProcess(request.imageUri, coordinates, options)
+        .then(result => {
+          sendResponse(result);
+        })
+        .catch(error => {
+          sendResponse({
+            hasError: true,
+            error: 'Failed to process captured image: ' + error.message
+          });
         });
+    } catch (error) {
+      sendResponse({
+        hasError: true,
+        error: 'Failed to process captured image: ' + error.message
       });
+    }
 
     return true; // Keep message channel open for async response
   },

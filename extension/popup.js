@@ -221,7 +221,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function handleUpgrade() {
     if (!currentState.user || !currentState.user.email) {
       // No email on file — send them to the website to upgrade
-      chrome.tabs.create({ url: 'https://captureai.dev/activate' });
+      try {
+        await chrome.tabs.create({ url: 'https://captureai.dev/activate' });
+      } catch (err) {
+        console.error('Failed to open upgrade page:', err);
+      }
       return;
     }
 
@@ -614,9 +618,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isExpanded) {
       elements.advancedContent.classList.remove('expanded');
       elements.advancedArrow.classList.remove('expanded');
+      elements.advancedToggle.setAttribute('aria-expanded', 'false');
     } else {
       elements.advancedContent.classList.add('expanded');
       elements.advancedArrow.classList.add('expanded');
+      elements.advancedToggle.setAttribute('aria-expanded', 'true');
     }
   }
 

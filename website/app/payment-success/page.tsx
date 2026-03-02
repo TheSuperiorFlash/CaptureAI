@@ -63,7 +63,13 @@ function PaymentSuccessContent() {
 
                 setStatus('success')
             } catch (error) {
-                if (attempt < MAX_RETRIES && !(error instanceof Error && error.message.includes('No payment session'))) {
+                // Only retry on network/timeout errors, not on 4xx client errors
+                const isRetryable = !(error instanceof Error && (
+                    error.message.includes('No payment session') ||
+                    error.message.includes('Payment verification failed') ||
+                    error.message.includes('Invalid session')
+                ));
+                if (isRetryable && attempt < MAX_RETRIES) {
                     const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
                     await new Promise(resolve => setTimeout(resolve, delay))
                     return verifyPayment(attempt + 1)

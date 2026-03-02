@@ -370,8 +370,8 @@ export class SubscriptionHandler {
           name: 'Pro',
           price: 9.99,
           dailyLimit: null,
-          rateLimit: '60 per minute',
-          features: ['Unlimited requests', 'GPT-5 Nano', '60 requests/minute'],
+          rateLimit: '20 per minute',
+          features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute'],
           recommended: true
         }
       ]
@@ -657,16 +657,25 @@ export class SubscriptionHandler {
    */
   async markWebhookProcessed(eventId, timestamp) {
     try {
-      await this.db.batch([
-        this.db
-          .prepare('INSERT INTO webhook_events (event_id, processed_at, webhook_timestamp) VALUES (?, datetime(\'now\'), ?)')
-          .bind(eventId, timestamp),
-        this.db
-          .prepare("DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours')")
-      ]);
+      await this.db
+        .prepare('INSERT INTO webhook_events (event_id, processed_at, webhook_timestamp) VALUES (?, datetime(\'now\'), ?)')
+        .bind(eventId, timestamp)
+        .run();
     } catch (error) {
       if (this.logger) {
         this.logger.error('Failed to mark webhook as processed', error, { eventId });
+      }
+      return;
+    }
+
+    // Cleanup old events separately so failure doesn't affect the insert
+    try {
+      await this.db
+        .prepare("DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours')")
+        .run();
+    } catch (error) {
+      if (this.logger) {
+        this.logger.warn('Webhook cleanup failed', { error: error.message });
       }
     }
   }

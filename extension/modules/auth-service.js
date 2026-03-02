@@ -211,6 +211,7 @@ const AuthService = {
    * @param {number} params.ocrConfidence - OCR confidence percentage (optional)
    * @param {string} params.promptType - Prompt type (answer, auto_solve, ask)
    * @param {number} params.reasoningLevel - Reasoning level (0, 1, 2)
+   * @param {Array<{imageData: string}>} [params.images] - Array of image objects for multi-image requests
    * @returns {Promise<Object>} { answer, usage, cached, responseTime }
    */
   async sendAIRequest({ question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel, images }) {

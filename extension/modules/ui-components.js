@@ -379,7 +379,9 @@ export const UIComponents = {
   },
 
   resizeTextarea() {
-    if (!this.askTextInput) return;
+    if (!this.askTextInput) {
+      return;
+    }
     this.askTextInput.style.height = '60px';
     const scrollHeight = this.askTextInput.scrollHeight;
     this.askTextInput.style.height = Math.min(Math.max(scrollHeight, 60), 150) + 'px';
@@ -422,7 +424,9 @@ export const UIComponents = {
   },
 
   setAttachedImage(imageData, ocrData = null) {
-    if (this.attachedImages.length >= 3) return;
+    if (this.attachedImages.length >= 3) {
+      return;
+    }
 
     this.attachedImages.push({ imageData, ocrData });
     this.renderImagePreviews();
@@ -443,7 +447,9 @@ export const UIComponents = {
   },
 
   renderImagePreviews() {
-    if (!this.imagePreviewContainer) return;
+    if (!this.imagePreviewContainer) {
+      return;
+    }
 
     // Clear existing previews safely
     while (this.imagePreviewContainer.firstChild) {

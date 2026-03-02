@@ -469,7 +469,7 @@ async function handleAskQuestion(request, sender, sendResponse) {
     const { question, imageData, ocrData, images } = request;
 
     // Require a question unless images are attached
-    const hasImages = (images && images.length > 0) || imageData;
+    const hasImages = !!(Array.isArray(images) && images.length > 0) || !!imageData;
     if (!question?.trim() && !hasImages) {
       await displayResponse(sender.tab.id, formatError(ERROR_MESSAGES.NO_QUESTION));
       sendResponse({ success: false, error: ERROR_MESSAGES.NO_QUESTION });
