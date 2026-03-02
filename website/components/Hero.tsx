@@ -33,7 +33,7 @@ export default function Hero() {
                     </div>
 
                     {/* Headline */}
-                    <h1 className="mb-8">
+                    <h1 className="mb-10">
                         <span className="text-[--color-text]">Screenshot any question.</span>
                         <br />
                         <span className="text-gradient-static">Get the answer.</span>

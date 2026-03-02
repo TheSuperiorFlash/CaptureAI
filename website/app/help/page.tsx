@@ -20,7 +20,7 @@ export default function HelpPage() {
                     <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
                         Support
                     </span>
-                    <h1 className="mb-5">
+                    <h1 className="mb-6">
                         <span className="text-[--color-text]">Help </span>
                         <span className="text-gradient-static">Center</span>
                     </h1>
@@ -131,7 +131,7 @@ export default function HelpPage() {
                             },
                         ].map((item, i) => (
                             <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
-                                <h3 className="mb-4 text-sm font-medium text-[--color-text]">{item.q}</h3>
+                                <h3 className="mb-5 text-sm font-medium text-[--color-text]">{item.q}</h3>
                                 <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
                             </div>
                         ))}
@@ -144,7 +144,7 @@ export default function HelpPage() {
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
                             <MessageSquare className="h-6 w-6 text-emerald-400" />
                         </div>
-                        <h3 className="mb-4 text-[--color-text]">Still need help?</h3>
+                        <h3 className="mb-5 text-[--color-text]">Still need help?</h3>
                         <p className="mb-6 text-sm text-[--color-text-tertiary]">
                             Reach out and we&apos;ll get back to you within 24 hours.
                         </p>

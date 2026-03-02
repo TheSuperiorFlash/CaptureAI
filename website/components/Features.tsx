@@ -79,7 +79,7 @@ export default function Features() {
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 {/* Header */}
                 <div className="mx-auto mb-16 max-w-2xl text-center">
-                    <h2 className="mb-6">
+                    <h2 className="mb-8">
                         <span className="text-[--color-text]">Everything you need, </span>
                         <span className="text-gradient-static">nothing you don&apos;t</span>
                     </h2>
