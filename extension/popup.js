@@ -132,14 +132,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Try to get user from cache for instant UI render
-      const { user, fromCache, needsRefresh } = await AuthService.getCachedOrFreshUser();
+      const { user, fromCache } = await AuthService.getCachedOrFreshUser();
 
       if (user) {
         // Show UI immediately with cached (or fresh) data
         await showMainControlsWithUser(user);
 
-        // If cache is stale, refresh in background and update UI if data changed
-        if (fromCache && needsRefresh) {
+        // Always refresh in background when showing cached data so the plan
+        // badge stays accurate after a Stripe upgrade. The chrome.storage.onChanged
+        // listener will update the UI automatically if the tier changed.
+        if (fromCache) {
           AuthService.refreshUserCache().then(freshUser => {
             if (freshUser && (freshUser.email !== user.email || freshUser.tier !== user.tier)) {
               showMainControlsWithUser(freshUser);
@@ -321,13 +323,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
+   * Normalize tier to a safe, known value.
+   * Falls back to 'free' if the provided value is invalid.
+   *
+   * @param {*} tier - Raw tier value from storage or API.
+   * @returns {'free'|'pro'} Normalized tier string.
+   */
+  function normalizeTier(tier) {
+    if (typeof tier === 'string') {
+      const normalized = tier.trim().toLowerCase();
+      if (normalized === 'free' || normalized === 'pro') {
+        return normalized;
+      }
+    }
+    console.error('Invalid tier value, defaulting to free:', tier);
+    return 'free';
+  }
+
+  /**
    * Apply tier-specific UI updates: badge, upgrade button, and usage stats
    * @param {string} tier - 'free' or 'pro'
    */
   function applyTierUI(tier) {
-    elements.userTier.textContent = tier.toUpperCase();
+    const normalizedTier = normalizeTier(tier);
+    elements.userTier.textContent = normalizedTier.toUpperCase();
 
-    if (tier === 'free') {
+    if (normalizedTier === 'free') {
       elements.upgradeBtn.classList.remove('hidden');
       elements.userTier.classList.add('tier-free');
       elements.userTier.classList.remove('tier-pro');
