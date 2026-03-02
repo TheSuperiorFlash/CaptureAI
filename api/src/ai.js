@@ -593,7 +593,7 @@ export class AIHandler {
     const inputCost = (regularInputTokens * pricing.input) / 1000000;
     const cachedCost = ((cachedTokens || 0) * pricing.cached) / 1000000;
     const outputCost = (outputTokens * pricing.output) / 1000000;
-    return inputCost + cachedCost + outputCost;
+    return parseFloat((inputCost + cachedCost + outputCost).toFixed(8));
   }
 
   /**
