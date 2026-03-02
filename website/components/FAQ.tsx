@@ -40,7 +40,7 @@ export default function FAQ() {
                 <div className="grid gap-12 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">
                     {/* Left column */}
                     <div>
-                        <h2 className="mb-5">
+                        <h2 className="mb-6">
                             <span className="text-gradient-static">FAQ</span>
                         </h2>
                         <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
