@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -82,9 +82,10 @@ export default function Navbar() {
                     <div className="hidden md:block">
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                            className="glow-btn inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
                             Get Started
+                            <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                     </div>
 
@@ -121,10 +122,11 @@ export default function Navbar() {
                         <div className="pt-2">
                             <Link
                                 href="/activate"
-                                className="glow-btn block rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-center text-sm font-medium text-white"
+                                className="glow-btn flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-sm font-semibold text-white"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started
+                                <ArrowRight className="h-3.5 w-3.5" />
                             </Link>
                         </div>
                     </div>
