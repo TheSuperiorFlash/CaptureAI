@@ -31,44 +31,12 @@ function createMockNativeEnv(success, bindingName = 'RATE_LIMITER') {
 }
 
 /**
- * Create a mock env using the legacy Durable Objects approach.
- * @param {Object} response - The JSON response from stub.fetch
- * @returns {Object} Mock env with RATE_LIMITER binding
- */
-function createMockDOEnv(response) {
-  return {
-    RATE_LIMITER: {
-      idFromName: jest.fn().mockReturnValue('mock-id'),
-      get: jest.fn().mockReturnValue({
-        fetch: jest.fn().mockResolvedValue({
-          json: jest.fn().mockResolvedValue(response)
-        })
-      })
-    }
-  };
-}
-
-/**
  * Create a mock env whose native limit() rejects with an error.
  */
 function createFailingNativeEnv(error, bindingName = 'RATE_LIMITER') {
   return {
     [bindingName]: {
       limit: jest.fn().mockRejectedValue(error)
-    }
-  };
-}
-
-/**
- * Create a mock env whose Durable Objects fetch rejects with an error.
- */
-function createFailingDOEnv(error) {
-  return {
-    RATE_LIMITER: {
-      idFromName: jest.fn().mockReturnValue('mock-id'),
-      get: jest.fn().mockReturnValue({
-        fetch: jest.fn().mockRejectedValue(error)
-      })
     }
   };
 }
@@ -144,86 +112,6 @@ describe('checkRateLimit with native Cloudflare Rate Limiting API', () => {
     const result = await checkRateLimit('native-missing-binding', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
     expect(result.allowed).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// checkRateLimit - Durable Objects legacy fallback path
-// ---------------------------------------------------------------------------
-
-describe('checkRateLimit with Durable Objects legacy fallback', () => {
-  test('should return allowed when DO responds with allowed: true', async () => {
-    const env = createMockDOEnv({ allowed: true, count: 3 });
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.allowed).toBe(true);
-    expect(result.count).toBe(3);
-  });
-
-  test('should pass identifier to idFromName', async () => {
-    const env = createMockDOEnv({ allowed: true, count: 1 });
-    await checkRateLimit('test-user@example.com', 10, 60000, env);
-
-    expect(env.RATE_LIMITER.idFromName).toHaveBeenCalledWith('test-user@example.com');
-  });
-
-  test('should call stub.fetch with correct URL and body', async () => {
-    const env = createMockDOEnv({ allowed: true, count: 1 });
-    await checkRateLimit('my-identifier', 5, 30000, env);
-
-    const stub = env.RATE_LIMITER.get();
-    expect(stub.fetch).toHaveBeenCalledWith(
-      'https://rate-limiter/check',
-      expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'my-identifier', limit: 5, windowMs: 30000 })
-      })
-    );
-  });
-
-  test('should return rate limit error when DO responds with allowed: false', async () => {
-    const futureResetAt = Date.now() + 30000;
-    const env = createMockDOEnv({ allowed: false, resetAt: futureResetAt });
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.error).toBe('Rate limit exceeded');
-    expect(result.message).toMatch(/Too many requests\. Please try again in \d+ seconds\./);
-    expect(result.retryAfter).toBeGreaterThan(0);
-    expect(result.resetAt).toBe(new Date(futureResetAt).toISOString());
-  });
-
-  test('should return count as 0 when DO response has no count field', async () => {
-    const env = createMockDOEnv({ allowed: true });
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.allowed).toBe(true);
-    expect(result.count).toBe(0);
-  });
-
-  test('should fail open when DO throws an error', async () => {
-    const env = createFailingDOEnv(new Error('Durable Object unavailable'));
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.allowed).toBe(true);
-    expect(result.count).toBeNull();
-  });
-
-  test('should fail open when DO fetch returns invalid JSON', async () => {
-    const env = {
-      RATE_LIMITER: {
-        idFromName: jest.fn().mockReturnValue('mock-id'),
-        get: jest.fn().mockReturnValue({
-          fetch: jest.fn().mockResolvedValue({
-            json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token'))
-          })
-        })
-      }
-    };
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.allowed).toBe(true);
-    expect(result.count).toBeNull();
   });
 });
 
@@ -535,7 +423,7 @@ describe('RateLimitPresets', () => {
 
   test('should have CHECKOUT preset with correct values', () => {
     expect(RateLimitPresets.CHECKOUT).toMatchObject({
-      limit: 5,
+      limit: 10,
       windowMs: 60000,
       bindingName: 'RATE_LIMITER_CHECKOUT'
     });
@@ -543,7 +431,7 @@ describe('RateLimitPresets', () => {
 
   test('should have GLOBAL preset with correct values', () => {
     expect(RateLimitPresets.GLOBAL).toMatchObject({
-      limit: 100,
+      limit: 60,
       windowMs: 60000,
       bindingName: 'RATE_LIMITER_GLOBAL'
     });
@@ -575,3 +463,4 @@ describe('RateLimitPresets', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 });
+

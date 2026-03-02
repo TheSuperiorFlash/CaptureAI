@@ -1,58 +1,11 @@
 /**
  * Rate Limiting Utilities
- * Uses Cloudflare's native Rate Limiting API with Durable Objects fallback
+ * Uses Cloudflare's native Rate Limiting API
  * https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
  */
 
 /**
- * Check rate limit using a single binding (native API or Durable Object fallback)
- * @param {string} identifier - Unique identifier (IP, email, license key)
- * @param {number} limit - Max requests (used by DO fallback and for retryAfter calculation)
- * @param {number} windowMs - Time window in ms (used by DO fallback and for retryAfter calculation)
- * @param {object} binding - Rate limit binding from env
- * @returns {object} - Error response if rate limited, success response if allowed
- */
-async function checkRateLimitBinding(identifier, limit, windowMs, binding) {
-  // Native Cloudflare Rate Limiting API (binding exposes a .limit() method)
-  if (typeof binding.limit === 'function') {
-    const { success } = await binding.limit({ key: identifier });
-    if (!success) {
-      return {
-        error: 'Rate limit exceeded',
-        message: 'Too many requests. Please slow down.',
-        retryAfter: Math.ceil(windowMs / 1000)
-      };
-    }
-    return { allowed: true, count: null };
-  }
-
-  // Legacy Durable Objects fallback
-  const id = binding.idFromName(identifier);
-  const stub = binding.get(id);
-
-  const response = await stub.fetch('https://rate-limiter/check', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: identifier, limit, windowMs })
-  });
-
-  const result = await response.json();
-
-  if (!result.allowed) {
-    const resetInSeconds = Math.ceil((result.resetAt - Date.now()) / 1000);
-    return {
-      error: 'Rate limit exceeded',
-      message: `Too many requests. Please try again in ${resetInSeconds} seconds.`,
-      retryAfter: resetInSeconds,
-      resetAt: new Date(result.resetAt).toISOString()
-    };
-  }
-
-  return { allowed: true, count: result.count ?? 0 };
-}
-
-/**
- * In-memory fallback rate limiter (for backwards compatibility and testing)
+ * In-memory rate limiter for local development and testing (no binding available)
  */
 class InMemoryRateLimiter {
   constructor() {
@@ -64,43 +17,21 @@ class InMemoryRateLimiter {
     const record = this.requests.get(key);
 
     if (!record) {
-      this.requests.set(key, {
-        count: 1,
-        resetAt: now + windowMs
-      });
-      return {
-        allowed: true,
-        remaining: limit - 1,
-        resetAt: now + windowMs
-      };
+      this.requests.set(key, { count: 1, resetAt: now + windowMs });
+      return { allowed: true, remaining: limit - 1, resetAt: now + windowMs };
     }
 
     if (now > record.resetAt) {
-      this.requests.set(key, {
-        count: 1,
-        resetAt: now + windowMs
-      });
-      return {
-        allowed: true,
-        remaining: limit - 1,
-        resetAt: now + windowMs
-      };
+      this.requests.set(key, { count: 1, resetAt: now + windowMs });
+      return { allowed: true, remaining: limit - 1, resetAt: now + windowMs };
     }
 
     if (record.count < limit) {
       record.count++;
-      return {
-        allowed: true,
-        remaining: limit - record.count,
-        resetAt: record.resetAt
-      };
+      return { allowed: true, remaining: limit - record.count, resetAt: record.resetAt };
     }
 
-    return {
-      allowed: false,
-      remaining: 0,
-      resetAt: record.resetAt
-    };
+    return { allowed: false, remaining: 0, resetAt: record.resetAt };
   }
 
   reset(key) {
@@ -119,20 +50,27 @@ function getInMemoryLimiter() {
 
 /**
  * Rate limit middleware for endpoints
- * Uses Cloudflare native Rate Limiting API if binding available, falls back to
- * Durable Objects, then in-memory.
+ * Uses Cloudflare native Rate Limiting API if binding available, falls back to in-memory.
  * @param {string} identifier - Unique identifier (IP, license key, user ID)
  * @param {number} limit - Max requests (used for in-memory fallback and retryAfter)
  * @param {number} windowMs - Time window in milliseconds (used for in-memory fallback)
- * @param {object} env - Environment object (optional, required for native/DO rate limiting)
+ * @param {object} env - Environment object (optional, required for native rate limiting)
  * @param {string} bindingName - Name of the rate limiting binding in env (default: 'RATE_LIMITER')
  * @returns {Promise<object>} - Error response if rate limited, success object if allowed
  */
 export async function checkRateLimit(identifier, limit, windowMs, env = null, bindingName = 'RATE_LIMITER') {
-  // Use named binding if available (native Cloudflare API or Durable Object)
+  // Use named native Cloudflare Rate Limiting binding if available
   if (env && env[bindingName]) {
     try {
-      return await checkRateLimitBinding(identifier, limit, windowMs, env[bindingName]);
+      const { success } = await env[bindingName].limit({ key: identifier });
+      if (!success) {
+        return {
+          error: 'Rate limit exceeded',
+          message: 'Too many requests. Please slow down.',
+          retryAfter: Math.ceil(windowMs / 1000)
+        };
+      }
+      return { allowed: true, count: null };
     } catch (error) {
       console.error('Rate limit check error:', error);
       // Fail open - allow request if rate limiter is unavailable
@@ -140,7 +78,7 @@ export async function checkRateLimit(identifier, limit, windowMs, env = null, bi
     }
   }
 
-  // Fallback to in-memory rate limiting
+  // Fallback to in-memory rate limiting (local dev / testing)
   const limiter = getInMemoryLimiter();
   const result = limiter.check(identifier, limit, windowMs);
 
@@ -187,37 +125,39 @@ export function getClientIdentifier(request) {
 
 /**
  * Rate limit configuration presets
+ * Conservative limits based on endpoint sensitivity.
  * bindingName maps to a [[ratelimits]] entry in wrangler.toml
+ * (period must be 10 or 60 seconds per Cloudflare docs)
  */
 export const RateLimitPresets = {
-  // Authentication endpoints - 5 requests per minute per IP
+  // Sensitive auth endpoint — highly conservative: 5 req/min per IP
   AUTH: {
     limit: 5,
-    windowMs: 60000, // 1 minute
+    windowMs: 60000,
     bindingName: 'RATE_LIMITER_AUTH'
   },
-  // Free key creation - 3 requests per minute per IP
+  // Unauthenticated resource creation — very conservative: 3 req/min per IP
   FREE_KEY_CREATION: {
     limit: 3,
-    windowMs: 60000, // 1 minute — Cloudflare native rate limiting period must be 10 or 60 seconds
+    windowMs: 60000,
     bindingName: 'RATE_LIMITER_FREE_KEY'
   },
-  // License validation - 10 requests per minute per IP
+  // Low-traffic/sensitive endpoint — 10 req/min per IP
   LICENSE_VALIDATION: {
     limit: 10,
-    windowMs: 60000, // 1 minute
+    windowMs: 60000,
     bindingName: 'RATE_LIMITER_LICENSE'
   },
-  // Checkout creation - 5 requests per minute per IP
+  // Low-traffic/sensitive third-party integration — 10 req/min per IP
   CHECKOUT: {
-    limit: 5,
-    windowMs: 60000, // 1 minute — Cloudflare native rate limiting period must be 10 or 60 seconds
+    limit: 10,
+    windowMs: 60000,
     bindingName: 'RATE_LIMITER_CHECKOUT'
   },
-  // Global rate limit applied to every endpoint - 100 requests per minute per IP
+  // Global limit applied to every endpoint — 60 req/min per IP
   GLOBAL: {
-    limit: 100,
-    windowMs: 60000, // 1 minute
+    limit: 60,
+    windowMs: 60000,
     bindingName: 'RATE_LIMITER_GLOBAL'
   }
 };
