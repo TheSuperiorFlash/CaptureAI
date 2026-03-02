@@ -48,10 +48,10 @@ export default function Hero() {
                     <div className="flex flex-col items-center gap-4">
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-5 text-lg font-bold text-white transition-all hover:from-blue-500 hover:to-cyan-500 md:px-12 md:py-6 md:text-xl"
+                            className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 px-10 py-4 text-base font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 md:px-14 md:py-5 md:text-lg"
                         >
-                            Start Now
-                            <ArrowRight className="h-5 w-5" />
+                            Get Started
+                            <ArrowRight className="h-4 w-4" />
                         </Link>
                         <Link
                             href="/#features"
