@@ -33,14 +33,14 @@ export default function Hero() {
                     </div>
 
                     {/* Headline */}
-                    <h1 className="mb-6">
+                    <h1 className="mb-3">
                         <span className="text-[--color-text]">Screenshot any question.</span>
                         <br />
                         <span className="text-gradient-static">Get the answer.</span>
                     </h1>
 
                     {/* Subheading */}
-                    <p className="mb-10 text-lg text-[--color-text-secondary]">
+                    <p className="mb-6 text-lg text-[--color-text-secondary]">
                         CaptureAI is a Chrome extension that reads your screen, understands the question, and gives you the answer — in seconds. Works on any website.
                     </p>
 
