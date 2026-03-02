@@ -40,10 +40,6 @@ jest.mock('../../src/utils.js', () => ({
   )
 }));
 
-jest.mock('../../src/durable-objects/RateLimiter.js', () => ({
-  RateLimiterDO: class MockRateLimiterDO {}
-}));
-
 import indexModule from '../../src/index.js';
 import { handleCORS } from '../../src/utils.js';
 import { createRequestLogger } from '../../src/logger.js';

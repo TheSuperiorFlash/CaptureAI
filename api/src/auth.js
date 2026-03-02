@@ -53,7 +53,8 @@ export class AuthHandler {
         `validate:${clientId}`,
         RateLimitPresets.LICENSE_VALIDATION.limit,
         RateLimitPresets.LICENSE_VALIDATION.windowMs,
-        this.env
+        this.env,
+        RateLimitPresets.LICENSE_VALIDATION.bindingName
       );
       if (rateLimitError && rateLimitError.error) {
         return jsonResponse(rateLimitError, 429);
@@ -217,7 +218,8 @@ export class AuthHandler {
         `freekey:${clientId}`,
         RateLimitPresets.FREE_KEY_CREATION.limit,
         RateLimitPresets.FREE_KEY_CREATION.windowMs,
-        this.env
+        this.env,
+        RateLimitPresets.FREE_KEY_CREATION.bindingName
       );
       if (rateLimitError && rateLimitError.error) {
         return jsonResponse(rateLimitError, 429);

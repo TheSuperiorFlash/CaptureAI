@@ -38,7 +38,10 @@ jest.mock('../../src/validation.js', () => ({
 
 jest.mock('../../src/ratelimit.js', () => ({
   checkRateLimit: jest.fn().mockResolvedValue({ allowed: true, count: 1 }),
-  getClientIdentifier: jest.fn().mockReturnValue('127.0.0.1')
+  getClientIdentifier: jest.fn().mockReturnValue('127.0.0.1'),
+  RateLimitPresets: {
+    GLOBAL: { limit: 100, windowMs: 60000, bindingName: 'RATE_LIMITER_GLOBAL' }
+  }
 }));
 
 jest.mock('../../src/logger.js', () => ({

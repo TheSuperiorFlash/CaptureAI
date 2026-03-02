@@ -17,7 +17,21 @@ import {
 // ---------------------------------------------------------------------------
 
 /**
- * Create a mock Durable Objects env with a configurable response.
+ * Create a mock env using the native Cloudflare Rate Limiting API.
+ * The binding exposes a .limit() method that returns { success }.
+ * @param {boolean} success - Whether the rate limit check succeeds
+ * @param {string} bindingName - The binding name to create (default: 'RATE_LIMITER')
+ */
+function createMockNativeEnv(success, bindingName = 'RATE_LIMITER') {
+  return {
+    [bindingName]: {
+      limit: jest.fn().mockResolvedValue({ success })
+    }
+  };
+}
+
+/**
+ * Create a mock env using the legacy Durable Objects approach.
  * @param {Object} response - The JSON response from stub.fetch
  * @returns {Object} Mock env with RATE_LIMITER binding
  */
@@ -35,9 +49,18 @@ function createMockDOEnv(response) {
 }
 
 /**
- * Create a mock Durable Objects env whose fetch rejects with an error.
- * @param {Error} error - The error to throw
- * @returns {Object} Mock env with RATE_LIMITER binding
+ * Create a mock env whose native limit() rejects with an error.
+ */
+function createFailingNativeEnv(error, bindingName = 'RATE_LIMITER') {
+  return {
+    [bindingName]: {
+      limit: jest.fn().mockRejectedValue(error)
+    }
+  };
+}
+
+/**
+ * Create a mock env whose Durable Objects fetch rejects with an error.
  */
 function createFailingDOEnv(error) {
   return {
@@ -52,8 +75,6 @@ function createFailingDOEnv(error) {
 
 /**
  * Create a Request object with specific headers for getClientIdentifier tests.
- * @param {Object} headers - Key-value pairs for request headers
- * @returns {Request}
  */
 function mockRequestWithHeaders(headers = {}) {
   return new Request('https://api.captureai.workers.dev/', {
@@ -62,10 +83,75 @@ function mockRequestWithHeaders(headers = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// checkRateLimit - Durable Objects path
+// checkRateLimit - Native Cloudflare Rate Limiting API path
 // ---------------------------------------------------------------------------
 
-describe('checkRateLimit with Durable Objects', () => {
+describe('checkRateLimit with native Cloudflare Rate Limiting API', () => {
+  test('should return allowed when native binding succeeds', async () => {
+    const env = createMockNativeEnv(true);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+
+    expect(result.allowed).toBe(true);
+  });
+
+  test('should call binding.limit with the identifier as key', async () => {
+    const env = createMockNativeEnv(true);
+    await checkRateLimit('user-123', 10, 60000, env);
+
+    expect(env.RATE_LIMITER.limit).toHaveBeenCalledWith({ key: 'user-123' });
+  });
+
+  test('should use the specified bindingName from env', async () => {
+    const env = createMockNativeEnv(true, 'RATE_LIMITER_LICENSE');
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_LICENSE');
+
+    expect(env.RATE_LIMITER_LICENSE.limit).toHaveBeenCalledWith({ key: '192.168.1.1' });
+    expect(result.allowed).toBe(true);
+  });
+
+  test('should return rate limit error when native binding returns success: false', async () => {
+    const env = createMockNativeEnv(false);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+
+    expect(result.error).toBe('Rate limit exceeded');
+    expect(result.message).toMatch(/Too many requests/);
+    expect(result.retryAfter).toBeGreaterThan(0);
+  });
+
+  test('should set retryAfter from windowMs when rate limited', async () => {
+    const env = createMockNativeEnv(false);
+    const result = await checkRateLimit('192.168.1.1', 10, 30000, env); // 30 second window
+
+    expect(result.retryAfter).toBe(30);
+  });
+
+  test('should fail open when native binding throws an error', async () => {
+    const env = createFailingNativeEnv(new Error('Service unavailable'));
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+
+    expect(result.allowed).toBe(true);
+    expect(result.count).toBeNull();
+  });
+
+  test('should fall back to in-memory when env is null', async () => {
+    const result = await checkRateLimit('native-null-env', 10, 60000, null);
+
+    expect(result.allowed).toBe(true);
+  });
+
+  test('should fall back to in-memory when binding is not found in env', async () => {
+    const env = { OTHER_BINDING: {} };
+    const result = await checkRateLimit('native-missing-binding', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.allowed).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// checkRateLimit - Durable Objects legacy fallback path
+// ---------------------------------------------------------------------------
+
+describe('checkRateLimit with Durable Objects legacy fallback', () => {
   test('should return allowed when DO responds with allowed: true', async () => {
     const env = createMockDOEnv({ allowed: true, count: 3 });
     const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
@@ -79,13 +165,6 @@ describe('checkRateLimit with Durable Objects', () => {
     await checkRateLimit('test-user@example.com', 10, 60000, env);
 
     expect(env.RATE_LIMITER.idFromName).toHaveBeenCalledWith('test-user@example.com');
-  });
-
-  test('should call get with the id returned by idFromName', async () => {
-    const env = createMockDOEnv({ allowed: true, count: 1 });
-    await checkRateLimit('some-key', 10, 60000, env);
-
-    expect(env.RATE_LIMITER.get).toHaveBeenCalledWith('mock-id');
   });
 
   test('should call stub.fetch with correct URL and body', async () => {
@@ -114,16 +193,6 @@ describe('checkRateLimit with Durable Objects', () => {
     expect(result.resetAt).toBe(new Date(futureResetAt).toISOString());
   });
 
-  test('should calculate retryAfter in seconds from resetAt', async () => {
-    const futureResetAt = Date.now() + 45000;
-    const env = createMockDOEnv({ allowed: false, resetAt: futureResetAt });
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    // retryAfter should be approximately 45 seconds (ceiling of ms / 1000)
-    expect(result.retryAfter).toBeGreaterThanOrEqual(44);
-    expect(result.retryAfter).toBeLessThanOrEqual(46);
-  });
-
   test('should return count as 0 when DO response has no count field', async () => {
     const env = createMockDOEnv({ allowed: true });
     const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
@@ -149,21 +218,6 @@ describe('checkRateLimit with Durable Objects', () => {
             json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token'))
           })
         })
-      }
-    };
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
-
-    expect(result.allowed).toBe(true);
-    expect(result.count).toBeNull();
-  });
-
-  test('should fail open when idFromName throws', async () => {
-    const env = {
-      RATE_LIMITER: {
-        idFromName: jest.fn().mockImplementation(() => {
-          throw new Error('idFromName failed');
-        }),
-        get: jest.fn()
       }
     };
     const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
@@ -294,7 +348,7 @@ describe('checkRateLimit with in-memory fallback', () => {
     expect(result.count).toBe(1);
   });
 
-  test('should fall back to in-memory when env has no RATE_LIMITER', async () => {
+  test('should fall back to in-memory when env has no matching binding', async () => {
     const env = { OTHER_BINDING: 'something' };
     const result = await checkRateLimit('inmem-no-binding', 10, 60000, env);
 
@@ -456,59 +510,68 @@ describe('getClientIdentifier', () => {
 
 describe('RateLimitPresets', () => {
   test('should have AUTH preset with correct values', () => {
-    expect(RateLimitPresets.AUTH).toEqual({
+    expect(RateLimitPresets.AUTH).toMatchObject({
       limit: 5,
-      windowMs: 60000
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_AUTH'
     });
   });
 
   test('should have FREE_KEY_CREATION preset with correct values', () => {
-    expect(RateLimitPresets.FREE_KEY_CREATION).toEqual({
+    expect(RateLimitPresets.FREE_KEY_CREATION).toMatchObject({
       limit: 3,
-      windowMs: 3600000
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_FREE_KEY'
     });
   });
 
   test('should have LICENSE_VALIDATION preset with correct values', () => {
-    expect(RateLimitPresets.LICENSE_VALIDATION).toEqual({
+    expect(RateLimitPresets.LICENSE_VALIDATION).toMatchObject({
       limit: 10,
-      windowMs: 60000
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_LICENSE'
     });
   });
 
   test('should have CHECKOUT preset with correct values', () => {
-    expect(RateLimitPresets.CHECKOUT).toEqual({
+    expect(RateLimitPresets.CHECKOUT).toMatchObject({
       limit: 5,
-      windowMs: 3600000
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_CHECKOUT'
     });
   });
 
-  test('should have exactly 4 presets', () => {
-    expect(Object.keys(RateLimitPresets)).toHaveLength(4);
+  test('should have GLOBAL preset with correct values', () => {
+    expect(RateLimitPresets.GLOBAL).toMatchObject({
+      limit: 100,
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_GLOBAL'
+    });
   });
 
-  test('should have limit and windowMs in every preset', () => {
+  test('should have exactly 5 presets', () => {
+    expect(Object.keys(RateLimitPresets)).toHaveLength(5);
+  });
+
+  test('should have limit, windowMs, and bindingName in every preset', () => {
     for (const [name, preset] of Object.entries(RateLimitPresets)) {
       expect(typeof preset.limit).toBe('number');
       expect(typeof preset.windowMs).toBe('number');
+      expect(typeof preset.bindingName).toBe('string');
       expect(preset.limit).toBeGreaterThan(0);
       expect(preset.windowMs).toBeGreaterThan(0);
+      expect(preset.bindingName.length).toBeGreaterThan(0);
     }
   });
 
-  test('AUTH window should be 1 minute', () => {
-    expect(RateLimitPresets.AUTH.windowMs).toBe(60 * 1000);
+  test('all presets should use a 60-second window (period must be 10 or 60 per Cloudflare docs)', () => {
+    for (const [name, preset] of Object.entries(RateLimitPresets)) {
+      expect(preset.windowMs).toBe(60 * 1000);
+    }
   });
 
-  test('FREE_KEY_CREATION window should be 1 hour', () => {
-    expect(RateLimitPresets.FREE_KEY_CREATION.windowMs).toBe(60 * 60 * 1000);
-  });
-
-  test('LICENSE_VALIDATION window should be 1 minute', () => {
-    expect(RateLimitPresets.LICENSE_VALIDATION.windowMs).toBe(60 * 1000);
-  });
-
-  test('CHECKOUT window should be 1 hour', () => {
-    expect(RateLimitPresets.CHECKOUT.windowMs).toBe(60 * 60 * 1000);
+  test('each preset should have a unique bindingName', () => {
+    const names = Object.values(RateLimitPresets).map(p => p.bindingName);
+    expect(new Set(names).size).toBe(names.length);
   });
 });

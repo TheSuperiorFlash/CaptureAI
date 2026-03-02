@@ -40,6 +40,17 @@ jest.mock('../../src/subscription.js', () => ({
   SubscriptionHandler: jest.fn().mockImplementation(() => mockSubscription)
 }));
 
+// Mock ratelimit to allow by default; individual tests override as needed
+const mockCheckRateLimit = jest.fn().mockResolvedValue({ allowed: true, count: 0 });
+const mockGetClientIdentifier = jest.fn().mockReturnValue('127.0.0.1');
+jest.mock('../../src/ratelimit.js', () => ({
+  checkRateLimit: (...args) => mockCheckRateLimit(...args),
+  getClientIdentifier: (...args) => mockGetClientIdentifier(...args),
+  RateLimitPresets: {
+    GLOBAL: { limit: 100, windowMs: 60000, bindingName: 'RATE_LIMITER_GLOBAL' }
+  }
+}));
+
 import { Router } from '../../src/router.js';
 
 function createRequest(url, method = 'GET') {
@@ -69,6 +80,8 @@ describe('Router', () => {
     router.auth = mockAuth;
     router.ai = mockAI;
     router.subscription = mockSubscription;
+    // Reset rate limit mock to allow by default
+    mockCheckRateLimit.mockResolvedValue({ allowed: true, count: 0 });
   });
 
   describe('constructor', () => {
@@ -80,6 +93,47 @@ describe('Router', () => {
       const mockLogger = { info: jest.fn() };
       const r = new Router(mockEnv, mockLogger);
       expect(r.logger).toBe(mockLogger);
+    });
+  });
+
+  describe('Global rate limiting', () => {
+    test('should return 429 when global rate limit is exceeded', async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please slow down.',
+        retryAfter: 60
+      });
+
+      const request = createRequest('/health');
+      const response = await router.route(request);
+
+      expect(response.status).toBe(429);
+      const body = await getBody(response);
+      expect(body.error).toBe('Rate limit exceeded');
+    });
+
+    test('should apply global rate limit before routing', async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please slow down.',
+        retryAfter: 60
+      });
+
+      const request = createRequest('/api/auth/validate-key', 'POST');
+      const response = await router.route(request);
+
+      // Should be blocked before reaching the auth handler
+      expect(response.status).toBe(429);
+      expect(mockAuth.validateKey).not.toHaveBeenCalled();
+    });
+
+    test('should pass through when global rate limit allows request', async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({ allowed: true, count: 1 });
+
+      const request = createRequest('/health');
+      const response = await router.route(request);
+
+      expect(response.status).toBe(200);
     });
   });
 

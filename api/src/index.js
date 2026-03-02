@@ -7,9 +7,6 @@ import { Router } from './router';
 import { handleCORS } from './utils';
 import { createRequestLogger, logCorsRejection } from './logger';
 
-// Export Durable Object for rate limiting
-export { RateLimiterDO } from './durable-objects/RateLimiter.js';
-
 /**
  * Validate required environment variables at startup
  * Throws error if critical config is missing
