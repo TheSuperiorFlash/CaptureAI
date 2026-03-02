@@ -311,17 +311,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       elements.userTier.textContent = user.tier.toUpperCase();
 
-      // Show upgrade button and hide settings button for free tier
+      // Show upgrade button for free tier
       if (user.tier === 'free') {
         elements.upgradeBtn.classList.remove('hidden');
         elements.userTier.classList.add('tier-free');
         elements.userTier.classList.remove('tier-pro');
-        elements.settingsBtn.classList.add('settings-hidden');
+        elements.settingsView.classList.add('free-tier-view');
       } else {
         elements.upgradeBtn.classList.add('hidden');
         elements.userTier.classList.add('tier-pro');
         elements.userTier.classList.remove('tier-free');
-        elements.settingsBtn.classList.remove('settings-hidden');
+        elements.settingsView.classList.remove('free-tier-view');
       }
 
       // Load usage stats (only for free tier)
