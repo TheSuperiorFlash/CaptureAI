@@ -12,6 +12,7 @@ if "%1"=="tables" goto tables
 if "%1"=="schema" goto schema
 if "%1"=="costs" goto costs
 if "%1"=="export" goto export
+if "%1"=="daily" goto daily
 goto help
 
 :users
@@ -57,6 +58,11 @@ echo 💰 Cost Analysis...
 wrangler d1 execute %DB_NAME% --command "SELECT DATE(created_at) as date, COUNT(*) as requests, SUM(input_tokens) as input_tokens, SUM(output_tokens) as output_tokens, SUM(total_cost) as total_cost FROM usage_records GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 7;"
 goto end
 
+:daily
+echo 📅 Fetching daily usage aggregates...
+wrangler d1 execute %DB_NAME% --command "SELECT email, date, request_count, total_cost FROM usage_daily ORDER BY date DESC, total_cost DESC LIMIT 30;"
+goto end
+
 :export
 echo 💾 Exporting database...
 wrangler d1 export %DB_NAME% --output=./db-backup-%date:~-4,4%%date:~-10,2%%date:~-7,2%-%time:~0,2%%time:~3,2%%time:~6,2%.sql
@@ -76,6 +82,7 @@ echo   webhooks   - Show recent webhook events
 echo   tables     - List all tables and indexes
 echo   schema     - Show database schema
 echo   costs      - Show cost analysis by date
+echo   daily      - Show daily aggregated usage
 echo   export     - Export database to SQL file
 echo.
 echo Examples:

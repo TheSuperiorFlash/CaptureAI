@@ -59,6 +59,11 @@ case "$1" in
     "
     ;;
 
+  "daily")
+    echo "📅 Fetching daily usage aggregates..."
+    wrangler d1 execute $DB_NAME --command "SELECT email, date, request_count, total_cost FROM usage_daily ORDER BY date DESC, total_cost DESC LIMIT 30;"
+    ;;
+
   "export")
     echo "💾 Exporting database..."
     wrangler d1 export $DB_NAME --output=./db-backup-$(date +%Y%m%d-%H%M%S).sql
@@ -78,6 +83,7 @@ case "$1" in
     echo "  tables     - List all tables and indexes"
     echo "  schema     - Show database schema"
     echo "  costs      - Show cost analysis by date"
+  echo "  daily      - Show daily aggregated usage"
     echo "  export     - Export database to SQL file"
     echo ""
     echo "Examples:"

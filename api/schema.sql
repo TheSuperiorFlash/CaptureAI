@@ -104,4 +104,26 @@ SELECT
 FROM usage_records
 GROUP BY email;
 
+-- Daily aggregated usage per user (replaces per-request usage_records rows)
+CREATE TABLE IF NOT EXISTS usage_daily (
+  email TEXT NOT NULL,
+  date TEXT NOT NULL,                   -- 'YYYY-MM-DD'
+  request_count INTEGER DEFAULT 0,
+  input_tokens INTEGER DEFAULT 0,
+  output_tokens INTEGER DEFAULT 0,
+  total_cost REAL DEFAULT 0.0,
+  PRIMARY KEY (email, date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_daily_email_date ON usage_daily(email, date);
+
+-- Total usage view from daily aggregates (for admin cost overview)
+CREATE VIEW IF NOT EXISTS total_usage_daily AS
+SELECT
+  SUM(request_count) AS requests,
+  SUM(input_tokens)  AS input_tokens,
+  SUM(output_tokens) AS output_tokens,
+  ROUND(SUM(total_cost), 8) AS total_cost
+FROM usage_daily;
+
 -- For test data, use: api/seed.sql
