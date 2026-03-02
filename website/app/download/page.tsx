@@ -49,7 +49,7 @@ export default function DownloadPage() {
                         <span className="text-[--color-text]">Get </span>
                         <span className="text-gradient-static">CaptureAI</span>
                     </h1>
-                    <p className="text-[--color-text-secondary]">
+                    <p className="mt-1 text-[--color-text-secondary]">
                         Install the Chrome extension and start getting answers in under a minute.
                     </p>
                 </div>
@@ -107,7 +107,7 @@ export default function DownloadPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="mb-1 text-sm font-medium text-[--color-text]">{step.title}</h4>
+                                    <h4 className="mb-2 text-sm font-medium text-[--color-text]">{step.title}</h4>
                                     <p className="text-sm text-[--color-text-tertiary]">
                                         {step.link ? (
                                             <>

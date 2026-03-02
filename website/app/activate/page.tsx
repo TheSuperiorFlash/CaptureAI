@@ -171,7 +171,7 @@ export default function ActivatePage() {
                         <span className="text-[--color-text]">Choose your </span>
                         <span className="text-gradient-static">plan</span>
                     </h1>
-                    <p className="text-[--color-text-secondary]">
+                    <p className="mt-1 text-[--color-text-secondary]">
                         Start free with 10 requests per day, or unlock everything with Pro.
                     </p>
                 </div>
@@ -293,7 +293,7 @@ export default function ActivatePage() {
                 {/* Email + CTA section */}
                 <div className="mx-auto mt-12 max-w-md">
                     <div className="glass-card rounded-2xl p-7">
-                        <h3 className="mb-1 text-center text-lg font-semibold text-[--color-text]">
+                        <h3 className="mb-3 text-center text-lg font-semibold text-[--color-text]">
                             {selectedTier === 'free' ? 'Get your free license key' : 'Start your Pro subscription'}
                         </h3>
                         <p className="mb-6 text-center text-sm text-[--color-text-tertiary]">
