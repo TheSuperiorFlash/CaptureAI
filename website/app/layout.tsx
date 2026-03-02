@@ -23,7 +23,11 @@ export const metadata: Metadata = {
     },
     keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant',
     icons: {
-        icon: '/logo.svg',
+        icon: [
+            { url: '/logo.svg', type: 'image/svg+xml' },
+            { url: '/logo.png', type: 'image/png' },
+        ],
+        apple: '/logo.png',
     },
     openGraph: {
         type: 'website',
