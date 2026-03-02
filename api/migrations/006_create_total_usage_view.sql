@@ -13,9 +13,10 @@ SELECT
   1 AS sort_order,
   'ALL' AS prompt_type,
   'ALL' AS model,
+  COUNT(*) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
-  COALESCE(SUM(total_cost), 0.0) AS total_cost
+  ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
 FROM usage_records
 
 UNION ALL
@@ -25,9 +26,10 @@ SELECT
   2 AS sort_order,
   prompt_type,
   'ALL' AS model,
+  COUNT(*) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
-  COALESCE(SUM(total_cost), 0.0) AS total_cost
+  ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
 FROM usage_records
 GROUP BY prompt_type
 
@@ -38,21 +40,22 @@ SELECT
   3 AS sort_order,
   'ALL' AS prompt_type,
   model,
+  COUNT(*) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
-  COALESCE(SUM(total_cost), 0.0) AS total_cost
+  ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
 FROM usage_records
-GROUP BY model
+GROUP BY model;
 
-UNION ALL
+-- Per-user usage statistics
+DROP VIEW IF EXISTS user_usage;
 
--- Rows: Each model + each prompt_type combination
+CREATE VIEW user_usage AS
 SELECT
-  4 AS sort_order,
-  prompt_type,
-  model,
+  email,
+  COUNT(*) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
-  COALESCE(SUM(total_cost), 0.0) AS total_cost
+  ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
 FROM usage_records
-GROUP BY model, prompt_type;
+GROUP BY email;
