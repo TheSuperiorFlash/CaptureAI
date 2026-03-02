@@ -322,9 +322,14 @@ export class AuthHandler {
 
   /**
    * Send license key via email using Resend
+   * @param {string} email
+   * @param {string} licenseKey
+   * @param {string} tier
+   * @param {Date|null} nextBillingDate - Actual next billing date from Stripe (Pro only)
+   * @param {boolean} isNewUser - Whether this is a new user (shows install instructions)
    * @returns {boolean} - True if email sent successfully, false otherwise
    */
-  async sendLicenseKeyEmail(email, licenseKey, tier) {
+  async sendLicenseKeyEmail(email, licenseKey, tier, nextBillingDate = null, isNewUser = false) {
     try {
       // Check if Resend is configured
       if (!this.env.RESEND_API_KEY) {
@@ -338,10 +343,12 @@ export class AuthHandler {
 
       // Use separate function for Pro tier email
       if (tier === 'pro') {
-        const htmlContent = this.generateProEmailHTML(licenseKey);
-        const nextChargeDate = new Date();
-        nextChargeDate.setMonth(nextChargeDate.getMonth() + 1);
-        const formattedDate = nextChargeDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const billingDate = nextBillingDate instanceof Date
+          ? nextBillingDate
+          : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+        const formattedDate = billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const htmlContent = this.generateProEmailHTML(licenseKey, billingDate, isNewUser);
 
         const textContent = `Thanks for starting your Pro subscription.
 
@@ -349,37 +356,29 @@ Your payment method has been charged. The next charge will be on ${formattedDate
 
 You can modify your payment method or cancel your subscription anytime by visiting your account page at https://captureai.dev/activate
 
-YOUR LICENSE KEY:
+Your License Key
 ${licenseKey}
-
-For any further questions, visit our website: https://captureai.dev`;
+${isNewUser ? '\nInstall and activate the extension at https://captureai.dev/activate\n' : ''}
+Need help? Visit our help page: https://captureai.dev/help`;
 
         return await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
       }
 
       // Plain text version for free tier (prevents spam filtering)
-      const textContent = `Welcome to CaptureAI!
+      const textContent = `Welcome to CaptureAI
 
-Thank you for trying CaptureAI!
+CaptureAI is your AI-powered screenshot assistant, ready to analyze images, extract text, and answer questions you capture instantly.
 
-YOUR LICENSE KEY:
+Your License Key
 ${licenseKey}
 
-How to activate:
-1. Open the CaptureAI extension
-2. Click "Enter License Key"
-3. Copy and paste your license key above
-4. Start using CaptureAI!
+Install and activate the extension at https://captureai.dev/activate
 
-You're currently using the free tier. Upgrade to Pro for unlimited access!
+You're currently using the free tier. Upgrade to Pro for unlimited access and advanced features.
 
-Keep this email safe - you'll need your license key to use CaptureAI.
+Need help? Visit our help page: https://captureai.dev/help`;
 
----
-CaptureAI - AI-Powered Screenshot Analysis
-https://captureai.dev`;
-
-      // HTML version - Anthropic-style email template for free tier
+      // HTML version - free tier email
       const htmlContent = `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 <head>
@@ -397,7 +396,7 @@ https://captureai.dev`;
     <tbody>
       <tr>
         <td>
-          <!-- Logo and CaptureAI text header -->
+          <!-- CaptureAI Logo Header (outside card) -->
           <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
             <tbody>
               <tr>
@@ -405,15 +404,20 @@ https://captureai.dev`;
                   <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #fafaf8; border-radius: 0; color: #000; width: 600px; margin: 0 auto;" width="600">
                     <tbody>
                       <tr>
-                        <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: left; padding-bottom: 10px; padding-top: 10px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
-                          <table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                        <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: center; padding-bottom: 10px; padding-top: 30px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
+                          <table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; margin-bottom: 12px;">
                             <tr>
-                              <td class="pad" style="padding-bottom: 30px; padding-left: 25px; padding-top: 30px; width: 100%; padding-right: 0;" width="100%">
-                                <div class="alignment" align="left" style="line-height: 10px;">
-                                  <div class="alignment" align="left" style="line-height: 10px;">
-                                    <img src="https://captureai.dev/logo-email.png" style="display: block; height: auto; border: 0; width: 180px;" width="180" alt="CaptureAI logo" title="CaptureAI logo" height="auto">
-                                  </div>
+                              <td class="pad" style="width: 100%; text-align: center;" width="100%">
+                                <div class="alignment" align="center" style="line-height: 10px;">
+                                  <img src="https://captureai.dev/logo.svg" style="display: inline-block; height: auto; border: 0; width: 60px;" width="60" alt="CaptureAI" title="CaptureAI" height="auto">
                                 </div>
+                              </td>
+                            </tr>
+                          </table>
+                          <table class="heading_block block-1b" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                            <tr>
+                              <td class="pad" style="width: 100%; padding: 0 0 30px 0;">
+                                <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: 'Helvetica Now', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 600; letter-spacing: normal; line-height: 120%; text-align: center;">CaptureAI</h2>
                               </td>
                             </tr>
                           </table>
@@ -426,7 +430,7 @@ https://captureai.dev`;
             </tbody>
           </table>
 
-          <!-- First white box: Welcome and License Key -->
+          <!-- Main content box -->
           <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
             <tbody>
               <tr>
@@ -443,9 +447,7 @@ https://captureai.dev`;
                           <table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
                             <tr>
                               <td class="pad" style="width: 100%; padding: 0;">
-                                <h1 style="margin: 0 0 8px 0; color: #29261b; direction: ltr; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 600; letter-spacing: normal; line-height: 120%; text-align: left;">
-                                  ${tier === 'pro' ? 'Welcome to CaptureAI Pro' : 'Welcome to CaptureAI'}
-                                </h1>
+                                <h1 style="margin: 0 0 8px 0; color: #29261b; direction: ltr; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 600; letter-spacing: normal; line-height: 120%; text-align: left;">Welcome to CaptureAI</h1>
                               </td>
                             </tr>
                           </table>
@@ -453,132 +455,67 @@ https://captureai.dev`;
                           <!-- Description text -->
                           <table class="text_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                             <tr>
-                              <td class="pad" style="padding: 0 0 32px 0;">
+                              <td class="pad" style="padding: 0 0 24px 0;">
                                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                  <div style="font-size: 16px; color: #666666; line-height: 1.2;">
-                                    <p style="margin: 0;">
-                                      CaptureAI is your AI-powered screenshot assistant, ready to analyze images, extract text, and answer questions you capture instantly.
-                                    </p>
+                                  <div style="font-size: 16px; color: #666666; line-height: 1.5;">
+                                    <p style="margin: 0;">CaptureAI is your AI-powered screenshot assistant, ready to analyze images, extract text, and answer questions you capture instantly.</p>
                                   </div>
                                 </div>
                               </td>
                             </tr>
                           </table>
 
-                          <!-- License Key -->
-                          <table class="text_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
-                            <tr>
-                              <td class="pad" style="padding: 0;">
-                                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                  <div style="font-size: 14px; color: #666666; line-height: 1.2; margin-bottom: 8px;">
-                                    <p style="margin: 0;">Your License Key</p>
-                                  </div>
-                                  <div style="font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #218aff; line-height: 1.2; font-weight: 600;">
-                                    <p style="margin: 0;">${licenseKey}</p>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Spacer between boxes -->
-          <table class="row" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
-            <tbody>
-              <tr>
-                <td height="20" style="font-size: 1px; line-height: 1px; mso-line-height-rule: exactly;">&nbsp;</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Second white box: Activation Instructions and Features -->
-          <table class="row row-3" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
-            <tbody>
-              <tr>
-                <td style="padding: 0 30px;">
-                  <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; border-radius: 8px; box-shadow: 0 2px 5px 0 rgb(50 50 93 / 10%), 0 1px 1px 0 rgb(0 0 0 / 7%); width: 540px; margin: 0 auto;" width="540">
-                    <tbody>
-                      <tr>
-                        <td style="border-radius: 8px; background-color: #e3e8ee; padding: 1px;">
-                          <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #ffffff; border-radius: 8px; color: #000; width: 100%;" width="100%">
-                    <tbody>
-                      <tr>
-                        <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: left; padding: 40px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
-                          <!-- Activation heading -->
-                          <table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
-                            <tr>
-                              <td class="pad" style="width: 100%; padding: 0 0 16px 0;">
-                                <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: normal; line-height: 120%; text-align: left;">How to use</h2>
-                              </td>
-                            </tr>
-                          </table>
-
-                          <!-- Activation steps -->
-                          <table class="text_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
-                            <tr>
-                              <td class="pad" style="padding: 0 0 32px 0;">
-                                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                  <div style="font-size: 16px; color: #666666; line-height: 1.7;">
-                                    <div style="margin-bottom: 8px;">1. Install the CaptureAI extension</div>
-                                    <div style="margin-bottom: 8px;">2. Paste your license key from above</div>
-                                    <div style="margin-bottom: 8px;">3. Click "Activate"</div>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-
-                          ${tier === 'pro' ? `
-                          <!-- Pro Features Gradient Box -->
+                          <!-- Install link (after description) -->
                           <table class="text_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                             <tr>
                               <td class="pad" style="padding: 0 0 32px 0;">
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 24px;">
-                                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                    <div style="font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 16px;">Your Pro Features</div>
-                                    <div style="font-size: 15px; color: #ffffff; line-height: 1.8; opacity: 0.95;">
-                                      <div>• Unlimited requests (20 per minute)</div>
-                                      <div>• Access to GPT-5 Nano AI model</div>
-                                      <div>• Priority support</div>
-                                    </div>
+                                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                  <div style="font-size: 16px; color: #666666; line-height: 1.5;">
+                                    <p style="margin: 0;">Install and activate the extension at <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: none;">captureai.dev/activate</a>.</p>
                                   </div>
                                 </div>
                               </td>
                             </tr>
                           </table>
-                          ` : `
-                          <!-- Upgrade Prompt Gradient Box -->
-                          <table class="text_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
-                            <tr>
-                              <td class="pad" style="padding: 0 0 32px 0;">
-                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 24px; text-align: center;">
-                                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
-                                    <div style="font-size: 15px; color: #ffffff; line-height: 1.6;">
-                                      <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">You're currently using the free tier</div>
-                                      <div style="opacity: 0.95;">Upgrade to Pro for unlimited access and advanced features</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                          `}
 
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                                  <!-- License Key -->
+                                  <table class="text_block block-4" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 0 0 32px 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 14px; color: #666666; line-height: 1.2; margin-bottom: 8px;">
+                                            <p style="margin: 0;">Your License Key</p>
+                                          </div>
+                                          <div style="font-size: 16px; color: #218aff; line-height: 1.2; font-weight: 600;">
+                                            <p style="margin: 0;">${licenseKey}</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+
+                                  <!-- Upgrade Benefits -->
+                                  <table class="text_block block-5" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 16px; color: #666666; line-height: 1.6;">
+                                            <p style="margin: 0 0 12px 0;"><strong>Ready to upgrade?</strong> Pro gets you:</p>
+                                            <p style="margin: 0 0 8px 0;">• Unlimited requests (20 per minute)</p>
+                                            <p style="margin: 0 0 8px 0;">• Privacy Guard to hide extension activity</p>
+                                            <p style="margin: 0 0 8px 0;">• Auto-Solve mode for instant answers</p>
+                                            <p style="margin: 0 0 8px 0;">• Ask Mode for follow-up questions</p>
+                                            <p style="margin: 0;">Plus priority support</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </td>
                       </tr>
                     </tbody>
@@ -589,7 +526,7 @@ https://captureai.dev`;
           </table>
 
           <!-- Footer -->
-          <table class="row row-4" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+          <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
             <tbody>
               <tr>
                 <td>
@@ -602,7 +539,7 @@ https://captureai.dev`;
                               <td class="pad" style="padding: 0 30px;">
                                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                   <div style="font-size: 13px; color: #a3a299; line-height: 1.6;">
-                                    <p style="margin: 0; text-align: center;">Questions? <a href="https://captureai.dev" style="color: #218aff; text-decoration: none;">Visit our website</a></p>
+                                    <p style="margin: 0; text-align: center;">Need help? Visit our <a href="https://captureai.dev/help" style="color: #218aff; text-decoration: none;">help page</a>.</p>
                                   </div>
                                 </div>
                               </td>
@@ -638,12 +575,12 @@ https://captureai.dev`;
 
   /**
    * Generate Pro tier email HTML
+   * @param {string} licenseKey
+   * @param {Date} nextBillingDate - Actual next billing date from Stripe
+   * @param {boolean} isNewUser - Whether to include install instructions
    */
-  generateProEmailHTML(licenseKey) {
-    // Calculate next charge date (1 month from now)
-    const nextChargeDate = new Date();
-    nextChargeDate.setMonth(nextChargeDate.getMonth() + 1);
-    const formattedDate = nextChargeDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  generateProEmailHTML(licenseKey, nextBillingDate, isNewUser = false) {
+    const formattedDate = nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     return `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
@@ -689,7 +626,7 @@ https://captureai.dev`;
                                   <!-- Thank you message -->
                                   <table class="text_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                                     <tr>
-                                      <td class="pad" style="padding: 0 0 16px 0;">
+                                      <td class="pad" style="padding: 0 0 8px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 16px; color: #29261b; line-height: 1.5;">
                                             <p style="margin: 0;">Thanks for starting your Pro subscription.</p>
@@ -698,6 +635,21 @@ https://captureai.dev`;
                                       </td>
                                     </tr>
                                   </table>
+
+                                  ${isNewUser ? `
+                                  <!-- Install link (new users only) -->
+                                  <table class="text_block block-2b" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 0 0 16px 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 16px; color: #666666; line-height: 1.5;">
+                                            <p style="margin: 0;">Install and activate the extension at <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: none;">captureai.dev/activate</a>.</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                  ` : ''}
 
                                   <!-- Charge information -->
                                   <table class="text_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
@@ -741,13 +693,6 @@ https://captureai.dev`;
                                     </tr>
                                   </table>
 
-                                  <!-- Pro Features Gradient Box with Grid -->
-                                  <table class="text_block block-6" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
-                                    <tr>
-                                      <td class="pad" style="padding: 0;">
-                                      </td>
-                                    </tr>
-                                  </table>
                                 </td>
                               </tr>
                             </tbody>
@@ -775,7 +720,7 @@ https://captureai.dev`;
                               <td class="pad" style="padding: 0 30px;">
                                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                   <div style="font-size: 13px; color: #a3a299; line-height: 1.6;">
-                                    <p style="margin: 0; text-align: center;">For any further questions, visit our <a href="https://captureai.dev" style="color: #218aff; text-decoration: none;">website</a>.</p>
+                                    <p style="margin: 0; text-align: center;">Need help? Visit our <a href="https://captureai.dev/help" style="color: #218aff; text-decoration: none;">help page</a>.</p>
                                   </div>
                                 </div>
                               </td>
