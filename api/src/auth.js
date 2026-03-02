@@ -400,30 +400,16 @@ Need help? Visit our help page: https://captureai.dev/help`;
           <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
             <tbody>
               <tr>
-                <td>
-                  <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #fafaf8; border-radius: 0; color: #000; width: 600px; margin: 0 auto;" width="600">
-                    <tbody>
-                      <tr>
-                        <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: center; padding-bottom: 10px; padding-top: 30px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
-                          <table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; margin-bottom: 12px;">
-                            <tr>
-                              <td class="pad" style="width: 100%; text-align: center;" width="100%">
-                                <div class="alignment" align="center" style="line-height: 10px;">
-                                  <img src="https://captureai.dev/logo.svg" style="display: inline-block; height: auto; border: 0; width: 60px;" width="60" alt="CaptureAI" title="CaptureAI" height="auto">
-                                </div>
-                              </td>
-                            </tr>
-                          </table>
-                          <table class="heading_block block-1b" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
-                            <tr>
-                              <td class="pad" style="width: 100%; padding: 0 0 30px 0;">
-                                <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: 'Helvetica Now', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 600; letter-spacing: normal; line-height: 120%; text-align: center;">CaptureAI</h2>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </tbody>
+                <td style="padding: 30px 30px 0 30px;">
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                    <tr>
+                      <td style="padding-right: 6px; vertical-align: middle;">
+                        <img src="https://captureai.dev/logo.png" style="display: block; height: auto; border: 0; width: 32px; height: 32px;" width="32" height="32" alt="CaptureAI" title="CaptureAI">
+                      </td>
+                      <td style="vertical-align: middle;">
+                        <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: 'Helvetica Now', Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 400; letter-spacing: normal; line-height: 120%;">CaptureAI</h2>
+                      </td>
+                    </tr>
                   </table>
                 </td>
               </tr>
@@ -434,7 +420,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
           <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
             <tbody>
               <tr>
-                <td style="padding: 0 30px 0 30px;">
+                <td style="padding: 20px 30px 0 30px;">
                   <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; border-radius: 8px; box-shadow: 0 2px 5px 0 rgb(50 50 93 / 10%), 0 1px 1px 0 rgb(0 0 0 / 7%); width: 540px; margin: 0 auto;" width="540">
                     <tbody>
                       <tr>
@@ -612,13 +598,20 @@ Need help? Visit our help page: https://captureai.dev/help`;
                             <tbody>
                               <tr>
                                 <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: left; padding: 40px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
-                                  <!-- CaptureAI Logo -->
-                                  <table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                                  <!-- Logo and text on same line -->
+                                  <table class="logo_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
                                     <tr>
                                       <td class="pad" style="width: 100%; padding: 0 0 12px 0;">
-                                        <div class="alignment" align="left" style="line-height: 10px;">
-                                          <img src="https://captureai.dev/logo-email.png" style="display: block; height: auto; border: 0; width: 220px;" width="220" alt="CaptureAI" title="CaptureAI" height="auto">
-                                        </div>
+                                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                                          <tr>
+                                            <td style="padding-right: 6px; vertical-align: middle;">
+                                              <img src="https://captureai.dev/logo.png" style="display: block; height: auto; border: 0; width: 32px; height: 32px;" width="32" height="32" alt="CaptureAI" title="CaptureAI">
+                                            </td>
+                                            <td style="vertical-align: middle;">
+                                              <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: 'Helvetica Now', Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 400; letter-spacing: normal; line-height: 120%;">CaptureAI</h2>
+                                            </td>
+                                          </tr>
+                                        </table>
                                       </td>
                                     </tr>
                                   </table>
@@ -667,7 +660,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
                                   <!-- Billing settings link -->
                                   <table class="text_block block-4" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
                                     <tr>
-                                      <td class="pad" style="padding: 0 0 32px 0;">
+                                      <td class="pad" style="padding: 0 0 ${isNewUser ? '16' : '32'}px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 15px; color: #666666; line-height: 1.5;">
                                             <p style="margin: 0;">You can modify your payment method or cancel your subscription anytime by visiting your <a href="https://captureai.dev/activate" style="color: #218aff; text-decoration: underline;">account page</a>.</p>
