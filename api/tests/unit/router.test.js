@@ -110,6 +110,41 @@ describe('Router', () => {
       expect(response.status).toBe(429);
       const body = await getBody(response);
       expect(body.error).toBe('Rate limit exceeded');
+      expect(response.headers.get('Retry-After')).toBe('60');
+    });
+
+    test('should include X-RateLimit-* headers when metadata is present', async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please slow down.',
+        retryAfter: 30,
+        limit: 60,
+        remaining: 0,
+        reset: 1700000030
+      });
+
+      const request = createRequest('/health');
+      const response = await router.route(request);
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBe('30');
+      expect(response.headers.get('X-RateLimit-Limit')).toBe('60');
+      expect(response.headers.get('X-RateLimit-Remaining')).toBe('0');
+      expect(response.headers.get('X-RateLimit-Reset')).toBe('1700000030');
+    });
+
+    test('should omit Retry-After header when retryAfter is null', async () => {
+      mockCheckRateLimit.mockResolvedValueOnce({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests. Please slow down.',
+        retryAfter: null
+      });
+
+      const request = createRequest('/health');
+      const response = await router.route(request);
+
+      expect(response.status).toBe(429);
+      expect(response.headers.get('Retry-After')).toBeNull();
     });
 
     test('should apply global rate limit before routing', async () => {

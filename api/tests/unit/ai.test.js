@@ -40,7 +40,8 @@ jest.mock('../../src/ratelimit.js', () => ({
   checkRateLimit: jest.fn().mockResolvedValue({ allowed: true, count: 1 }),
   getClientIdentifier: jest.fn().mockReturnValue('127.0.0.1'),
   RateLimitPresets: {
-    GLOBAL: { limit: 100, windowMs: 60000, bindingName: 'RATE_LIMITER_GLOBAL' }
+    GLOBAL: { limit: 100, windowMs: 60000, bindingName: 'RATE_LIMITER_GLOBAL' },
+    PRO_AI: { limit: 20, windowMs: 60000, bindingName: 'RATE_LIMITER_AI_PRO' }
   }
 }));
 
@@ -330,6 +331,14 @@ describe('AIHandler', () => {
       expect(result.allowed).toBe(true);
       expect(result.limitType).toBe('per_minute');
       expect(result.limit).toBe(20);
+      // Verify it uses the dedicated PRO_AI binding name
+      expect(checkRateLimit).toHaveBeenCalledWith(
+        'user:user-1',
+        20,
+        60000,
+        env,
+        'RATE_LIMITER_AI_PRO'
+      );
     });
 
     test('should block pro tier when rate limited', async () => {
@@ -493,7 +502,14 @@ describe('AIHandler', () => {
       expect(response.status).toBe(401);
     });
 
-    test('should return 429 when IP rate limited', async () => {
+    test('should return 429 when pro-tier rate limited', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        email: 'test@example.com',
+        tier: 'pro',
+        licenseKey: 'ABCD-EFGH-IJKL-MNOP-QRST',
+        subscriptionStatus: 'active'
+      });
       checkRateLimit.mockResolvedValueOnce({
         error: 'Rate limit exceeded',
         message: 'Too many requests'

@@ -63,6 +63,14 @@ namespace_id = "1005"
   limit = 60
   period = 60
 
+[[ratelimits]]
+name = "RATE_LIMITER_AI_PRO"
+namespace_id = "1006"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
 # Environment Variables (Secrets)
 # Set these with: wrangler secret put SECRET_NAME
 [vars]

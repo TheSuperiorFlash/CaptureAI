@@ -35,7 +35,36 @@ export class Router {
       RateLimitPresets.GLOBAL.bindingName
     );
     if (globalLimit && globalLimit.error) {
-      return jsonResponse(globalLimit, 429);
+      // Standards-compliant 429 response with Retry-After and X-RateLimit-* headers
+      const headers = new Headers();
+      headers.set('Content-Type', 'application/json');
+
+      if (globalLimit.retryAfter !== undefined && globalLimit.retryAfter !== null) {
+        let retryAfterValue = globalLimit.retryAfter;
+
+        if (typeof retryAfterValue === 'number' && Number.isFinite(retryAfterValue)) {
+          retryAfterValue = String(Math.ceil(retryAfterValue));
+        } else {
+          retryAfterValue = String(retryAfterValue);
+        }
+
+        headers.set('Retry-After', retryAfterValue);
+      }
+
+      if (typeof globalLimit.limit === 'number') {
+        headers.set('X-RateLimit-Limit', String(globalLimit.limit));
+      }
+      if (typeof globalLimit.remaining === 'number') {
+        headers.set('X-RateLimit-Remaining', String(globalLimit.remaining));
+      }
+      if (globalLimit.reset !== undefined && globalLimit.reset !== null) {
+        headers.set('X-RateLimit-Reset', String(globalLimit.reset));
+      }
+
+      return new Response(JSON.stringify(globalLimit), {
+        status: 429,
+        headers
+      });
     }
 
     // Root / Health check

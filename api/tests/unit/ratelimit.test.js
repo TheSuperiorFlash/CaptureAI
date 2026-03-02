@@ -20,12 +20,13 @@ import {
  * Create a mock env using the native Cloudflare Rate Limiting API.
  * The binding exposes a .limit() method that returns { success }.
  * @param {boolean} success - Whether the rate limit check succeeds
- * @param {string} bindingName - The binding name to create (default: 'RATE_LIMITER')
+ * @param {string} bindingName - The binding name to create (default: 'RATE_LIMITER_GLOBAL')
+ * @param {object} extra - Extra fields to include in the limit() response (e.g. reset, limit, remaining)
  */
-function createMockNativeEnv(success, bindingName = 'RATE_LIMITER') {
+function createMockNativeEnv(success, bindingName = 'RATE_LIMITER_GLOBAL', extra = {}) {
   return {
     [bindingName]: {
-      limit: jest.fn().mockResolvedValue({ success })
+      limit: jest.fn().mockResolvedValue({ success, ...extra })
     }
   };
 }
@@ -33,7 +34,7 @@ function createMockNativeEnv(success, bindingName = 'RATE_LIMITER') {
 /**
  * Create a mock env whose native limit() rejects with an error.
  */
-function createFailingNativeEnv(error, bindingName = 'RATE_LIMITER') {
+function createFailingNativeEnv(error, bindingName = 'RATE_LIMITER_GLOBAL') {
   return {
     [bindingName]: {
       limit: jest.fn().mockRejectedValue(error)
@@ -57,16 +58,16 @@ function mockRequestWithHeaders(headers = {}) {
 describe('checkRateLimit with native Cloudflare Rate Limiting API', () => {
   test('should return allowed when native binding succeeds', async () => {
     const env = createMockNativeEnv(true);
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
     expect(result.allowed).toBe(true);
   });
 
   test('should call binding.limit with the identifier as key', async () => {
     const env = createMockNativeEnv(true);
-    await checkRateLimit('user-123', 10, 60000, env);
+    await checkRateLimit('user-123', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
-    expect(env.RATE_LIMITER.limit).toHaveBeenCalledWith({ key: 'user-123' });
+    expect(env.RATE_LIMITER_GLOBAL.limit).toHaveBeenCalledWith({ key: 'user-123' });
   });
 
   test('should use the specified bindingName from env', async () => {
@@ -79,23 +80,75 @@ describe('checkRateLimit with native Cloudflare Rate Limiting API', () => {
 
   test('should return rate limit error when native binding returns success: false', async () => {
     const env = createMockNativeEnv(false);
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
     expect(result.error).toBe('Rate limit exceeded');
     expect(result.message).toMatch(/Too many requests/);
-    expect(result.retryAfter).toBeGreaterThan(0);
   });
 
-  test('should set retryAfter from windowMs when rate limited', async () => {
+  test('should return retryAfter null when native binding does not provide reset', async () => {
     const env = createMockNativeEnv(false);
-    const result = await checkRateLimit('192.168.1.1', 10, 30000, env); // 30 second window
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
-    expect(result.retryAfter).toBe(30);
+    // Native binding returned no reset field, so retryAfter should be null
+    expect(result.retryAfter).toBeNull();
+  });
+
+  test('should calculate retryAfter from reset timestamp when provided', async () => {
+    const resetTs = Date.now() + 30000; // 30 seconds from now
+    const env = createMockNativeEnv(false, 'RATE_LIMITER_GLOBAL', { reset: resetTs });
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.retryAfter).toBeGreaterThan(0);
+    expect(result.retryAfter).toBeLessThanOrEqual(30);
+  });
+
+  test('should calculate retryAfter from reset Date object when provided', async () => {
+    const resetDate = new Date(Date.now() + 30000);
+    const env = createMockNativeEnv(false, 'RATE_LIMITER_GLOBAL', { reset: resetDate });
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.retryAfter).toBeGreaterThan(0);
+    expect(result.retryAfter).toBeLessThanOrEqual(30);
+  });
+
+  test('should extract count, limit, remaining from native response when available', async () => {
+    const env = createMockNativeEnv(true, 'RATE_LIMITER_GLOBAL', { limit: 60, remaining: 55 });
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.allowed).toBe(true);
+    expect(result.count).toBe(5); // limit - remaining
+    expect(result.limit).toBe(60);
+    expect(result.remaining).toBe(55);
+  });
+
+  test('should return count: null when native response has no limit/remaining', async () => {
+    const env = createMockNativeEnv(true);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.allowed).toBe(true);
+    expect(result.count).toBeNull();
+  });
+
+  test('should include resetAt as ISO string when reset is a Date object', async () => {
+    const resetDate = new Date(Date.now() + 60000);
+    const env = createMockNativeEnv(true, 'RATE_LIMITER_GLOBAL', { reset: resetDate });
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.resetAt).toBe(resetDate.toISOString());
+  });
+
+  test('should include resetAt as-is when reset is a number', async () => {
+    const resetTs = Date.now() + 60000;
+    const env = createMockNativeEnv(true, 'RATE_LIMITER_GLOBAL', { reset: resetTs });
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
+
+    expect(result.resetAt).toBe(resetTs);
   });
 
   test('should fail open when native binding throws an error', async () => {
     const env = createFailingNativeEnv(new Error('Service unavailable'));
-    const result = await checkRateLimit('192.168.1.1', 10, 60000, env);
+    const result = await checkRateLimit('192.168.1.1', 10, 60000, env, 'RATE_LIMITER_GLOBAL');
 
     expect(result.allowed).toBe(true);
     expect(result.count).toBeNull();
@@ -103,6 +156,13 @@ describe('checkRateLimit with native Cloudflare Rate Limiting API', () => {
 
   test('should fall back to in-memory when env is null', async () => {
     const result = await checkRateLimit('native-null-env', 10, 60000, null);
+
+    expect(result.allowed).toBe(true);
+  });
+
+  test('should fall back to in-memory when bindingName is null', async () => {
+    const env = { RATE_LIMITER_GLOBAL: { limit: jest.fn() } };
+    const result = await checkRateLimit('native-null-binding', 10, 60000, env, null);
 
     expect(result.allowed).toBe(true);
   });
@@ -437,8 +497,16 @@ describe('RateLimitPresets', () => {
     });
   });
 
-  test('should have exactly 5 presets', () => {
-    expect(Object.keys(RateLimitPresets)).toHaveLength(5);
+  test('should have PRO_AI preset with correct values', () => {
+    expect(RateLimitPresets.PRO_AI).toMatchObject({
+      limit: 20,
+      windowMs: 60000,
+      bindingName: 'RATE_LIMITER_AI_PRO'
+    });
+  });
+
+  test('should have exactly 6 presets', () => {
+    expect(Object.keys(RateLimitPresets)).toHaveLength(6);
   });
 
   test('should have limit, windowMs, and bindingName in every preset', () => {
