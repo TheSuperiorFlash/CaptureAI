@@ -217,23 +217,19 @@ export class AIHandler {
       }
 
       // Get today's usage
-      const col = await this.getUserCol();
       const today = new Date().toISOString().split('T')[0];
       const usageToday = await this.db
-        .prepare(`
-          SELECT COUNT(*) as count
-          FROM usage_records
-          WHERE ${col} = ? AND DATE(created_at) = ?
-        `)
+        .prepare(`SELECT request_count FROM usage_daily WHERE email = ? AND date = ?`)
         .bind(user.email, today)
         .first();
 
-      const used = usageToday?.count || 0;
+      const used = usageToday?.request_count || 0;
 
       // Free tier: 10/day, Pro tier: unlimited daily (rate limited per minute)
       if (user.tier === 'pro') {
         // For Pro users, show per-minute usage
         const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+        const col = await this.getUserCol();
         const usageLastMinute = await this.db
           .prepare(`
             SELECT COUNT(*) as count
@@ -322,7 +318,11 @@ export class AIHandler {
         `)
         .all();
 
-      return jsonResponse({ rows: rows.results || [] });
+      const dailySummary = await this.db
+        .prepare(`SELECT requests, input_tokens, output_tokens, total_cost FROM total_usage_daily`)
+        .first();
+
+      return jsonResponse({ rows: rows.results || [], dailySummary: dailySummary || null });
     } catch (error) {
       console.error('Total usage fetch error:', error);
       return jsonResponse({ error: 'Failed to fetch total usage' }, 500);
@@ -407,14 +407,13 @@ export class AIHandler {
           ),
           daily_breakdown AS (
             SELECT
-              DATE(created_at) as date,
-              COUNT(*) as requests,
-              SUM(input_tokens) as input_tokens,
-              SUM(output_tokens) as output_tokens,
-              SUM(total_cost) as cost
-            FROM usage_records
-            WHERE ${col} = ? AND created_at >= datetime('now', '-7 days')
-            GROUP BY DATE(created_at)
+              date,
+              request_count AS requests,
+              input_tokens,
+              output_tokens,
+              total_cost AS cost
+            FROM usage_daily
+            WHERE email = ? AND date >= DATE('now', '-7 days')
             ORDER BY date DESC
           )
           SELECT
@@ -558,19 +557,14 @@ export class AIHandler {
     // Free tier has daily limit
     const limit = parseInt(this.env.FREE_TIER_DAILY_LIMIT || '10');
 
-    // Get today's usage
-    const col = await this.getUserCol();
+    // Point-lookup by primary key (email, date) — O(1) instead of COUNT(*) scan
     const today = new Date().toISOString().split('T')[0];
     const result = await this.db
-      .prepare(`
-        SELECT COUNT(*) as count
-        FROM usage_records
-        WHERE ${col} = ? AND DATE(created_at) = ?
-      `)
+      .prepare(`SELECT request_count FROM usage_daily WHERE email = ? AND date = ?`)
       .bind(email, today)
       .first();
 
-    const used = result?.count || 0;
+    const used = result?.request_count || 0;
 
     return {
       allowed: used < limit,
@@ -658,12 +652,41 @@ export class AIHandler {
   }
 
   /**
+   * Upsert daily aggregated usage into usage_daily table.
+   * Uses SQLite INSERT ... ON CONFLICT DO UPDATE for atomic increment.
+   */
+  async upsertUsageDaily({ email, inputTokens, outputTokens, totalCost }) {
+    const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    await this.db
+      .prepare(`
+        INSERT INTO usage_daily (email, date, request_count, input_tokens, output_tokens, total_cost)
+        VALUES (?, ?, 1, ?, ?, ?)
+        ON CONFLICT(email, date) DO UPDATE SET
+          request_count = request_count + 1,
+          input_tokens  = input_tokens  + excluded.input_tokens,
+          output_tokens = output_tokens + excluded.output_tokens,
+          total_cost    = total_cost    + excluded.total_cost
+      `)
+      .bind(email, today, inputTokens, outputTokens, totalCost)
+      .run();
+  }
+
+  /**
    * Record usage in database with detailed token breakdown and cost calculation
    */
   async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
     const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
     const col = await this.getUserCol();
-    await this.insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
+
+    // Write to usage_records (kept for per-request analytics: prompt_type, model breakdowns)
+    // TODO: remove once usage_records is fully retired
+    await this.insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime })
+      .catch(err => {
+        console.error('usage_records insert failed (best-effort):', err);
+      });
+
+    // Upsert daily aggregate — primary write for rate-limit checks and daily stats
+    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost });
   }
 
   /**
