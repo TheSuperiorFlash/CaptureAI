@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
     title: 'Privacy Policy',
-    description: 'Privacy Policy for the CaptureAI Chrome extension. Learn how we handle your data.',
+    description: 'Privacy Policy for the CaptureAI Chrome extension. Learn how we collect, use, and protect your data.',
 }
 
 export default function PrivacyPage() {
@@ -11,145 +12,181 @@ export default function PrivacyPage() {
             <div className="mx-auto max-w-2xl px-6">
                 <div className="mb-12">
                     <h1 className="mb-2 text-[--color-text]">Privacy Policy</h1>
-                    <p className="text-sm text-[--color-text-tertiary]">Last updated: December 22, 2024</p>
+                    <p className="text-sm text-[--color-text-tertiary]">Last updated: March 1, 2026</p>
                 </div>
 
                 <div className="space-y-10 text-sm leading-relaxed text-[--color-text-tertiary]">
+
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Overview</h2>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">1. Introduction</h2>
                         <p>
                             CaptureAI (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy.
-                            This Privacy Policy explains how we handle your information when you use the CaptureAI Chrome extension
-                            and associated website.
+                            This Privacy Policy explains how we collect, use, store, and protect your information when you use the CaptureAI
+                            Chrome extension and associated website (collectively, the &quot;Service&quot;). By using the Service, you agree
+                            to the collection and use of information in accordance with this policy.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Information We Collect</h2>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">2. Information We Collect</h2>
 
-                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">License Key Information</h3>
+                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Account Information</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Email address (for license key delivery and account management)</li>
-                            <li>License key and tier (Free or Pro)</li>
-                            <li>Payment information (processed securely through Stripe, we do not store credit card details)</li>
-                        </ul>
-
-                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Usage Data</h3>
-                        <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Number of API requests (to enforce tier limits)</li>
-                            <li>Request timestamps (for rate limiting)</li>
+                            <li>Email address — used for license key delivery and account management</li>
+                            <li>License key and subscription tier (Free or Pro)</li>
+                            <li>Payment information — processed securely by Stripe; we never store credit card details</li>
                         </ul>
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Screenshots and Queries</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Screenshots are processed locally in your browser to extract text</li>
-                            <li>Extracted text is sent to OpenAI&apos;s API for processing</li>
-                            <li>We do NOT store your screenshots or queries on our servers</li>
-                            <li>OpenAI processes data according to their own privacy policy</li>
+                            <li>Screenshots are processed <strong className="text-[--color-text-secondary]">locally in your browser</strong> using on-device OCR (Tesseract.js) to extract text</li>
+                            <li>When OCR confidence is sufficient, only the extracted text (not the image) is sent to our backend for AI processing — this saves significant data and improves privacy</li>
+                            <li>If OCR confidence is low, the image may be sent for more accurate processing</li>
+                            <li>We do <strong className="text-[--color-text-secondary]">not</strong> store your screenshots or queries on our servers beyond the duration of the request</li>
                         </ul>
-                    </section>
 
-                    <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">How We Use Your Information</h2>
+                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Usage Data</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>To provide and maintain the CaptureAI service</li>
-                            <li>To deliver your license key via email</li>
-                            <li>To process payments through Stripe</li>
-                            <li>To enforce usage limits based on your tier</li>
-                            <li>To provide customer support</li>
-                            <li>To send important service updates</li>
+                            <li>Per-request metadata is recorded for each AI query: prompt type, model used, input/output/cached token counts, estimated cost, response time, and timestamp</li>
+                            <li>This data is used for: enforcing daily request limits (Free tier), per-minute rate limiting (Pro tier), internal cost monitoring and analytics, and service improvement</li>
+                            <li>Usage records are linked to your account via your license key, which is stored together with your email address (see Data Storage section below). Usage data is therefore account-identifiable</li>
+                            <li>Cloudflare AI Gateway also retains its own request logs per its standard data retention practices — review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a></li>
                         </ul>
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Data Storage</h2>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">3. How We Use Your Information</h2>
+                        <ul className="ml-4 list-inside list-disc space-y-1.5">
+                            <li>To provide and operate the CaptureAI Service</li>
+                            <li>To deliver your license key via email upon activation</li>
+                            <li>To process payments and manage your subscription through Stripe</li>
+                            <li>To enforce usage limits and rate limits based on your subscription tier</li>
+                            <li>To provide customer support and respond to inquiries</li>
+                            <li>To send essential service communications (e.g. license key delivery, policy updates) — billing receipts are sent directly by Stripe</li>
+                            <li>To improve the performance and reliability of the Service</li>
+                        </ul>
+                        <p className="mt-3">
+                            We do not use your data for advertising, behavioral profiling, or sell it to any third party.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">4. Data Sharing and Disclosure</h2>
                         <p className="mb-3">
-                            <span className="font-medium text-[--color-text-secondary]">Extension Storage:</span> Your license key and settings are stored locally in Chrome&apos;s secure storage API. This data remains on your device.
+                            We do not sell or trade your personally identifiable information. We may share your information only in the following circumstances:
+                        </p>
+
+                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Service Providers</h3>
+                        <p className="mb-3">We work with the following third-party providers to deliver the Service:</p>
+                        <ul className="ml-4 list-inside list-disc space-y-1.5">
+                            <li><strong className="text-[--color-text-secondary]">OpenAI</strong> — AI processing of extracted text via Cloudflare AI Gateway. Review <a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">OpenAI&apos;s Privacy Policy</a>.</li>
+                            <li><strong className="text-[--color-text-secondary]">Cloudflare</strong> — Backend infrastructure (Workers, D1 database, AI Gateway). Review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a>.</li>
+                            <li><strong className="text-[--color-text-secondary]">Stripe</strong> — Payment processing for Pro subscriptions. Review <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Stripe&apos;s Privacy Policy</a>.</li>
+                            <li><strong className="text-[--color-text-secondary]">Resend</strong> — License key delivery emails. Your email address is shared with Resend solely for this purpose. Billing receipts are sent directly by Stripe, not via Resend. Review <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Resend&apos;s Privacy Policy</a>.</li>
+                        </ul>
+
+                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Legal Compliance</h3>
+                        <p>
+                            We may disclose your information if required by law, legal process, or to protect our rights and the safety of our users.
+                        </p>
+
+                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Business Transfers</h3>
+                        <p>
+                            If CaptureAI or its assets are acquired or merged, user data may be transferred as part of that transaction. You will be notified of any such change.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">5. Data Storage and Retention</h2>
+                        <p className="mb-3">
+                            <span className="font-medium text-[--color-text-secondary]">Extension storage:</span>{' '}
+                            Your license key and settings are stored locally in Chrome&apos;s secure <code className="rounded bg-white/[0.05] px-1 font-mono">chrome.storage</code> API on your device only.
                         </p>
                         <p className="mb-3">
-                            <span className="font-medium text-[--color-text-secondary]">Backend Storage:</span> We store license keys, email addresses, tier information, and usage counts on our Cloudflare Workers backend with Cloudflare D1 database.
+                            <span className="font-medium text-[--color-text-secondary]">Backend storage:</span>{' '}
+                            Your license key and email address are stored together in Cloudflare D1, along with your subscription tier and subscription status. Per-request usage records (prompt type, model, token counts, cost, response time, timestamp) are also stored and linked to your account via this license key. This data is retained for as long as your account is active.
+                        </p>
+                        <p className="mb-3">
+                            <span className="font-medium text-[--color-text-secondary]">Screenshot and query data:</span>{' '}
+                            Not stored. Text extracted from your screenshots is processed transiently and discarded immediately after the AI response is returned.
                         </p>
                         <p>
-                            <span className="font-medium text-[--color-text-secondary]">No Screenshot Storage:</span> We do NOT store your screenshots or the questions you ask. Text extraction is performed locally in your browser.
+                            You may request full deletion of your account and associated data at any time by contacting us.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Third-Party Services</h2>
-
-                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">OpenAI</h3>
-                        <p>
-                            We send extracted text from your screenshots to OpenAI&apos;s API for AI processing.
-                            Review <a href="https://openai.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">OpenAI&apos;s Privacy Policy</a>.
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">6. Security</h2>
+                        <p className="mb-3">
+                            We implement industry-standard security measures to protect your information:
                         </p>
-
-                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Stripe</h3>
-                        <p>
-                            Payment processing for Pro subscriptions is handled by Stripe. We do not store your credit card information.
-                            Review <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Stripe&apos;s Privacy Policy</a>.
-                        </p>
-
-                        <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Cloudflare</h3>
-                        <p>
-                            Our backend runs on Cloudflare Workers.
-                            Review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a>.
-                        </p>
-                    </section>
-
-                    <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Data Retention</h2>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>License keys and account information are retained as long as your account is active</li>
-                            <li>Usage data is retained for rate limiting purposes only</li>
-                            <li>You may request deletion of your data by contacting us</li>
+                            <li>All data in transit is encrypted via HTTPS/TLS</li>
+                            <li>Backend data is stored within Cloudflare&apos;s secure infrastructure</li>
+                            <li>Stripe webhook signatures are verified using HMAC SHA-256 on every incoming request</li>
+                            <li>Sensitive data such as payment details are never stored — handled entirely by Stripe</li>
+                            <li>Extension data is isolated within Chrome&apos;s secure storage API</li>
                         </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Your Rights</h2>
-                        <p className="mb-3">You have the right to:</p>
-                        <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Access your personal data</li>
-                            <li>Request correction of your data</li>
-                            <li>Request deletion of your account and data</li>
-                            <li>Unsubscribe from our emails (except essential service emails)</li>
-                            <li>Export your data</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Security</h2>
-                        <p className="mb-3">We implement appropriate security measures to protect your data:</p>
-                        <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>HTTPS encryption for all data transmission</li>
-                            <li>Secure storage in Cloudflare&apos;s infrastructure</li>
-                            <li>No storage of sensitive data like credit cards (handled by Stripe)</li>
-                            <li>Chrome&apos;s secure storage API for extension data</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Children&apos;s Privacy</h2>
-                        <p>
-                            CaptureAI is not intended for users under 13 years of age. We do not knowingly collect information from children under 13.
+                        <p className="mt-3">
+                            No online system is 100% secure. While we take reasonable precautions, we cannot guarantee absolute security.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Changes to This Policy</h2>
-                        <p>
-                            We may update this Privacy Policy from time to time. We will notify you of significant changes via email or through the extension.
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">7. Your Rights and Choices</h2>
+                        <p className="mb-3">Depending on your location, you may have the following rights regarding your personal data:</p>
+                        <ul className="ml-4 list-inside list-disc space-y-1.5">
+                            <li><span className="font-medium text-[--color-text-secondary]">Access:</span> Request a copy of the personal data we hold about you</li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Correction:</span> Request correction of inaccurate or incomplete data</li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Deletion:</span> Request deletion of your account and personal data</li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Objection:</span> Object to or restrict certain types of data processing</li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Portability:</span> Receive your data in a portable, structured format</li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Withdraw consent:</span> Opt out of non-essential communications at any time</li>
+                        </ul>
+                        <p className="mt-3">
+                            To exercise any of these rights, contact us at <a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a>.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">Contact Us</h2>
-                        <p className="mb-3">If you have any questions about this Privacy Policy:</p>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">8. International Data Transfers</h2>
+                        <p>
+                            CaptureAI&apos;s backend infrastructure runs on Cloudflare&apos;s global network. If you are located outside the United States, your data may be transferred to and processed in countries with different data protection laws. By using the Service, you consent to this transfer. We ensure that appropriate safeguards are in place through our use of reputable service providers who comply with applicable data protection regulations.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">9. Children&apos;s Privacy</h2>
+                        <p>
+                            CaptureAI is not directed at users under 13 years of age. We do not knowingly collect personal information from children under 13. If we become aware that a child under 13 has provided us with personal data, we will delete it promptly. If you believe a child has submitted data to us, contact us immediately.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">10. Third-Party Links</h2>
+                        <p>
+                            The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of those sites and encourage you to review their privacy policies before providing any personal information.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">11. Changes to This Policy</h2>
+                        <p>
+                            We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated &quot;Last updated&quot; date. We will notify you of material changes via email or through the extension. Continued use of the Service after changes constitutes acceptance of the revised policy.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="mb-3 text-lg font-semibold text-[--color-text]">12. Contact Us</h2>
+                        <p className="mb-3">
+                            If you have any questions about this Privacy Policy or wish to exercise your data rights, please contact us:
+                        </p>
                         <ul className="space-y-1.5">
-                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span> <a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a></li>
-                            <li><span className="font-medium text-[--color-text-secondary]">GitHub:</span> <a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">TheSuperiorFlash/CaptureAI</a></li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Email:</span>{' '}<a href="mailto:support@captureai.dev" className="text-[--color-accent-hover] underline underline-offset-2">support@captureai.dev</a></li>
+                            <li><span className="font-medium text-[--color-text-secondary]">Contact form:</span>{' '}<Link href="/contact" className="text-[--color-accent-hover] underline underline-offset-2">captureai.dev/contact</Link></li>
                         </ul>
                     </section>
+
                 </div>
             </div>
         </div>
