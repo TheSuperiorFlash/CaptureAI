@@ -150,8 +150,7 @@ function addSecurityHeaders(response) {
 function getCORSHeaders(request, env) {
   // List of allowed origins - must be exact matches for security
   const allowedOrigins = [
-    'https://captureai.dev',
-    'https://thesuperiorflash.github.io'
+    'https://captureai.dev'
   ];
 
   // Development/testing origins (only if in dev mode)
