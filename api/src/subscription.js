@@ -31,7 +31,8 @@ export class SubscriptionHandler {
         `checkout:${clientId}`,
         RateLimitPresets.CHECKOUT.limit,
         RateLimitPresets.CHECKOUT.windowMs,
-        this.env
+        this.env,
+        RateLimitPresets.CHECKOUT.bindingName
       );
       if (rateLimitError && rateLimitError.error) {
         return jsonResponse(rateLimitError, 429);
@@ -410,7 +411,8 @@ export class SubscriptionHandler {
         'verify:' + clientId,
         RateLimitPresets.AUTH.limit,
         RateLimitPresets.AUTH.windowMs,
-        this.env
+        this.env,
+        RateLimitPresets.AUTH.bindingName
       );
       if (rateLimitError && rateLimitError.error) {
         return jsonResponse(rateLimitError, 429);

@@ -20,16 +20,48 @@ binding = "DB"
 database_name = "captureai-db"
 database_id = "8056a7db-be99-4c64-8316-daf6c5c9b48f"  # Created when you run: wrangler d1 create captureai-db
 
-# Durable Objects binding for distributed rate limiting
-[[durable_objects.bindings]]
-name = "RATE_LIMITER"
-class_name = "RateLimiterDO"
-script_name = "api"
+# Native Rate Limiting bindings (Cloudflare Rate Limiting API)
+# https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
 
-# Durable Objects migrations
-[[migrations]]
-tag = "v1"
-new_sqlite_classes = ["RateLimiterDO"]
+[[ratelimits]]
+name = "RATE_LIMITER_AUTH"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+[[ratelimits]]
+name = "RATE_LIMITER_FREE_KEY"
+namespace_id = "1002"
+
+  [ratelimits.simple]
+  limit = 3
+  period = 60
+
+[[ratelimits]]
+name = "RATE_LIMITER_LICENSE"
+namespace_id = "1003"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60
+
+[[ratelimits]]
+name = "RATE_LIMITER_CHECKOUT"
+namespace_id = "1004"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60
+
+[[ratelimits]]
+name = "RATE_LIMITER_GLOBAL"
+namespace_id = "1005"
+
+  [ratelimits.simple]
+  limit = 60
+  period = 60
 
 # Environment Variables (Secrets)
 # Set these with: wrangler secret put SECRET_NAME

@@ -6,6 +6,7 @@ import { AuthHandler } from './auth';
 import { AIHandler } from './ai';
 import { SubscriptionHandler } from './subscription';
 import { jsonResponse } from './utils';
+import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
 export class Router {
   constructor(env, logger = null, ctx = null) {
@@ -23,6 +24,19 @@ export class Router {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+
+    // Global rate limit - applied to every endpoint before routing
+    const clientId = getClientIdentifier(request);
+    const globalLimit = await checkRateLimit(
+      clientId,
+      RateLimitPresets.GLOBAL.limit,
+      RateLimitPresets.GLOBAL.windowMs,
+      this.env,
+      RateLimitPresets.GLOBAL.bindingName
+    );
+    if (globalLimit && globalLimit.error) {
+      return jsonResponse(globalLimit, 429);
+    }
 
     // Root / Health check
     if (path === '/' && method === 'GET') {
