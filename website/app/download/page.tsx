@@ -45,7 +45,7 @@ export default function DownloadPage() {
                     <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
                         Chrome Extension
                     </span>
-                    <h1 className="mb-6">
+                    <h1 className="mb-3">
                         <span className="text-[--color-text]">Get </span>
                         <span className="text-gradient-static">CaptureAI</span>
                     </h1>
@@ -107,7 +107,7 @@ export default function DownloadPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 className="mb-4 text-sm font-medium text-[--color-text]">{step.title}</h4>
+                                    <h4 className="mb-1 text-sm font-medium text-[--color-text]">{step.title}</h4>
                                     <p className="text-sm text-[--color-text-tertiary]">
                                         {step.link ? (
                                             <>
