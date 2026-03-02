@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     },
     keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant',
     icons: {
-        icon: '/icon128.png',
+        icon: '/logo.svg',
     },
     openGraph: {
         type: 'website',

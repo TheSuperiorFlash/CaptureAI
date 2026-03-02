@@ -57,7 +57,7 @@ export default function Navbar() {
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5">
-                        <Image src="/icon128.png" alt="CaptureAI" width={28} height={28} />
+                        <Image src="/logo.svg" alt="CaptureAI" width={28} height={28} />
                         <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
                     </Link>
 

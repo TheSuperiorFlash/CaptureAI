@@ -180,6 +180,26 @@ export class SubscriptionHandler {
         .bind(customerEmail, customerId)
         .first();
 
+      // Fetch subscription from Stripe to get the real next billing date
+      let nextBillingDate = null;
+      if (subscriptionId) {
+        try {
+          const subResponse = await fetchWithTimeout(
+            `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+            { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+            5000
+          );
+          if (subResponse.ok) {
+            const sub = await subResponse.json();
+            if (sub.current_period_end) {
+              nextBillingDate = new Date(sub.current_period_end * 1000);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch subscription for billing date:', err);
+        }
+      }
+
       if (user) {
         // User exists - upgrade to pro
         await this.db
@@ -196,9 +216,9 @@ export class SubscriptionHandler {
 
         console.log(`Upgraded user ${customerEmail} to Pro tier`);
 
-        // Send upgrade email with existing license key
+        // Send upgrade email with existing license key (not a new user)
         if (this.env.RESEND_API_KEY) {
-          await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, 'pro');
+          await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, 'pro', nextBillingDate, false);
         }
 
       } else {
@@ -231,9 +251,9 @@ export class SubscriptionHandler {
 
         console.log(`Created new Pro user ${customerEmail} with license key`);
 
-        // Send welcome email with license key
+        // Send welcome email with license key (new user)
         if (this.env.RESEND_API_KEY) {
-          await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, 'pro');
+          await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, 'pro', nextBillingDate, true);
         }
       }
 

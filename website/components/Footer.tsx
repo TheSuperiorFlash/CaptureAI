@@ -15,7 +15,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="col-span-2 md:col-span-1">
                         <div className="mb-3 flex items-center gap-2.5">
-                            <Image src="/icon128.png" alt="CaptureAI" width={24} height={24} />
+                            <Image src="/logo.svg" alt="CaptureAI" width={24} height={24} />
                             <span className="text-sm font-semibold text-[--color-text]">CaptureAI</span>
                         </div>
                         <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
