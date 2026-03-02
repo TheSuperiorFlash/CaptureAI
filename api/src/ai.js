@@ -159,8 +159,8 @@ export class AIHandler {
         promptType || 'answer', imageData, ocrText, images
       );
 
-      // Check if response was cached (header detection or sub-300ms response)
-      const isCached = aiResponse.cached || responseTime < 300;
+      // Check if response was cached
+      const isCached = aiResponse.cached
 
       // Record usage with ctx.waitUntil to ensure D1 write completes
       const parsed = parseInt(reasoningLevel);
