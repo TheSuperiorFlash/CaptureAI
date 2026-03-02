@@ -75,12 +75,6 @@ export class AuthHandler {
         return jsonResponse({ error: 'Invalid license key' }, 401);
       }
 
-      // Update last validated timestamp
-      await this.db
-        .prepare('UPDATE users SET last_validated_at = datetime(\'now\') WHERE id = ?')
-        .bind(user.id)
-        .run();
-
       if (this.logger) {
         logAuth(this.logger, true, user.id);
       }
@@ -554,7 +548,7 @@ https://captureai.dev`;
                                   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                     <div style="font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 16px;">Your Pro Features</div>
                                     <div style="font-size: 15px; color: #ffffff; line-height: 1.8; opacity: 0.95;">
-                                      <div>• Unlimited requests (60 per minute)</div>
+                                      <div>• Unlimited requests (20 per minute)</div>
                                       <div>• Access to GPT-5 Nano AI model</div>
                                       <div>• Priority support</div>
                                     </div>

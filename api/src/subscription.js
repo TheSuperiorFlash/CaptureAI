@@ -188,8 +188,7 @@ export class SubscriptionHandler {
             SET tier = ?,
                 subscription_status = ?,
                 stripe_customer_id = ?,
-                stripe_subscription_id = ?,
-                updated_at = datetime('now')
+                stripe_subscription_id = ?
             WHERE id = ?
           `)
           .bind('pro', 'active', customerId, subscriptionId, user.id)
@@ -371,8 +370,8 @@ export class SubscriptionHandler {
           name: 'Pro',
           price: 9.99,
           dailyLimit: null,
-          rateLimit: '60 per minute',
-          features: ['Unlimited requests', 'GPT-5 Nano', '60 requests/minute'],
+          rateLimit: '20 per minute',
+          features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute'],
           recommended: true
         }
       ]
@@ -665,6 +664,18 @@ export class SubscriptionHandler {
     } catch (error) {
       if (this.logger) {
         this.logger.error('Failed to mark webhook as processed', error, { eventId });
+      }
+      return;
+    }
+
+    // Cleanup old events separately so failure doesn't affect the insert
+    try {
+      await this.db
+        .prepare("DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours')")
+        .run();
+    } catch (error) {
+      if (this.logger) {
+        this.logger.warn('Webhook cleanup failed', { error: error.message });
       }
     }
   }

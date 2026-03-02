@@ -568,13 +568,13 @@ export const UICore = {
     }
   },
 
-  handleAskQuestion(question, imageData = null, ocrData = null) {
+  handleAskQuestion(question, attachedImages = []) {
     const message = { action: 'askQuestion', question: question };
-    if (imageData) {
-      message.imageData = imageData;
-    }
-    if (ocrData) {
-      message.ocrData = ocrData;
+    if (attachedImages.length > 0) {
+      message.images = attachedImages.map(img => ({
+        imageData: img.imageData,
+        ocrData: img.ocrData
+      }));
     }
 
     chrome.runtime.sendMessage(message);

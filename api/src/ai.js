@@ -18,11 +18,13 @@ const PROMPTS = {
 };
 
 export class AIHandler {
-  constructor(env, logger = null) {
+  constructor(env, logger = null, ctx = null) {
     this.env = env;
     this.db = env.DB;
     this.logger = logger;
+    this.ctx = ctx;
     this.auth = new AuthHandler(env, logger);
+    this._userCol = null; // cached: 'email' or 'user_id'
     this.gatewayName = env.CLOUDFLARE_GATEWAY_NAME || 'captureai-gateway';
 
     // Get account ID from env or extract from worker URL
@@ -38,6 +40,22 @@ export class AIHandler {
     // Account ID should be set in wrangler.toml
     // This is a fallback
     return env.CLOUDFLARE_ACCOUNT_ID || 'YOUR_ACCOUNT_ID';
+  }
+
+  /**
+   * Detect whether usage_records uses 'email' or 'user_id' column.
+   * Caches result for the lifetime of this handler instance.
+   */
+  async getUserCol() {
+    if (this._userCol) {
+      return this._userCol;
+    }
+    const info = await this.db
+      .prepare("SELECT name FROM pragma_table_info('usage_records') WHERE name = 'email'")
+      .bind()
+      .first();
+    this._userCol = info ? 'email' : 'user_id';
+    return this._userCol;
   }
 
   /**
@@ -58,7 +76,7 @@ export class AIHandler {
       const clientId = getClientIdentifier(request);
       const ipRateLimit = await checkRateLimit(
         `ai:${clientId}`,
-        120, // IP-level abuse prevention (must exceed highest tier limit of 60/min)
+        120, // IP-level abuse prevention (must exceed highest tier limit of 20/min)
         60000,
         this.env
       );
@@ -86,15 +104,21 @@ export class AIHandler {
         }, 429);
       }
 
-      // Parse and validate request body with size limit (10MB for base64 images)
-      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel } = await validateRequestBody(request, 10 * 1024 * 1024);
+      // Parse and validate request body with size limit (30MB for multi-image)
+      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel, images } = await validateRequestBody(request, 30 * 1024 * 1024);
+
+      // Validate images array size
+      if (images && images.length > 3) {
+        return jsonResponse({ error: 'Maximum 3 images allowed' }, 400);
+      }
 
       // Validate - check if we have any valid input
       const hasQuestion = question && question.trim().length > 0;
       const hasImageData = imageData && imageData.length > 0;
       const hasOcrText = ocrText && ocrText.trim().length > 0;
+      const hasImages = images && images.length > 0;
 
-      if (!hasQuestion && !hasImageData && !hasOcrText) {
+      if (!hasQuestion && !hasImageData && !hasOcrText && !hasImages) {
         return jsonResponse({ error: 'Question, image data, or OCR text required' }, 400);
       }
 
@@ -104,6 +128,7 @@ export class AIHandler {
         imageData,
         ocrText,
         ocrConfidence,
+        images,
         promptType: promptType || 'answer'
       }, reasoningLevel !== undefined ? reasoningLevel : 1);
 
@@ -122,34 +147,42 @@ export class AIHandler {
       const reasoningTokens = usage.completion_tokens_details?.reasoning_tokens || 0;
       const cachedTokens = usage.prompt_tokens_details?.cached_tokens || 0;
 
-      // Determine input method (OCR, image, or text-only)
-      const inputMethod = hasOcrText && !hasImageData ? 'ocr' :
-        hasImageData ? 'image' : 'text';
-
-      // Map reasoning level to human-readable format
+      // Map reasoning level to human-readable format (matches UI slider labels)
       const reasoningLevelMap = {
-        0: 'none',      // gpt-4.1-nano (no reasoning)
-        1: 'low',       // gpt-5-nano low reasoning
-        2: 'medium'     // gpt-5-nano medium reasoning
+        0: 'low',       // gpt-4.1-nano (no reasoning)
+        1: 'medium',    // gpt-5-nano low reasoning
+        2: 'high'       // gpt-5-nano medium reasoning
       };
 
-      // Record usage with detailed token breakdown (optimization #13: non-blocking)
-      this.recordUsage({
-        userId: user.userId,
-        promptType: promptType || 'answer',
-        model: reasoningLevelMap[reasoningLevel] || 'low',
-        tokensUsed: usage.total_tokens || 0,
-        inputTokens,
-        outputTokens,
-        reasoningTokens,
-        cachedTokens,
-        inputMethod,
-        responseTime,
-        cached: aiResponse.cached || false
-      }).catch(error => {
-        // Log error but don't fail the request
-        console.error('Usage recording failed:', error);
+      // Determine actual prompt type used (including _image variants)
+      const actualPromptType = this.getActualPromptType(
+        promptType || 'answer', imageData, ocrText, images
+      );
+
+      // Check if response was cached (header detection or sub-300ms response)
+      const isCached = aiResponse.cached || responseTime < 300;
+
+      // Record usage with ctx.waitUntil to ensure D1 write completes
+      const parsed = parseInt(reasoningLevel);
+      const level = Number.isNaN(parsed) ? 1 : parsed;
+      const usagePromise = this.recordUsage({
+        email: user.email,
+        promptType: actualPromptType,
+        model: reasoningLevelMap[level] || 'medium',
+        inputTokens: isCached ? 0 : inputTokens,
+        outputTokens: isCached ? 0 : outputTokens,
+        cachedTokens: isCached ? 0 : cachedTokens,
+        totalCost: isCached ? 0 : undefined,
+        cached: isCached,
+        responseTime
+      }).catch(err => {
+        console.error('Usage recording failed:', err?.message);
       });
+      if (this.ctx) {
+        this.ctx.waitUntil(usagePromise);
+      } else {
+        await usagePromise.catch(() => {});
+      }
 
       return jsonResponse({
         answer,
@@ -159,7 +192,7 @@ export class AIHandler {
           usedToday: usageCheck.limitType === 'per_day' ? usageCheck.used + 1 : null,
           limitType: usageCheck.limitType
         },
-        cached: aiResponse.cached || false,
+        cached: isCached,
         responseTime,
         model: payload.model
       });
@@ -184,14 +217,15 @@ export class AIHandler {
       }
 
       // Get today's usage
+      const col = await this.getUserCol();
       const today = new Date().toISOString().split('T')[0];
       const usageToday = await this.db
         .prepare(`
           SELECT COUNT(*) as count
           FROM usage_records
-          WHERE user_id = ? AND DATE(created_at) = ?
+          WHERE ${col} = ? AND DATE(created_at) = ?
         `)
-        .bind(user.userId, today)
+        .bind(user.email, today)
         .first();
 
       const used = usageToday?.count || 0;
@@ -204,13 +238,13 @@ export class AIHandler {
           .prepare(`
             SELECT COUNT(*) as count
             FROM usage_records
-            WHERE user_id = ? AND created_at > ?
+            WHERE ${col} = ? AND created_at > ?
           `)
-          .bind(user.userId, oneMinuteAgo)
+          .bind(user.email, oneMinuteAgo)
           .first();
 
         const usedLastMinute = usageLastMinute?.count || 0;
-        const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '60');
+        const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '20');
 
         return jsonResponse({
           today: {
@@ -283,24 +317,22 @@ export class AIHandler {
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
       // Optimized: Single query with CTEs to get all analytics in one DB call
+      const col = await this.getUserCol();
       const analytics = await this.db
         .prepare(`
           WITH filtered_records AS (
             SELECT *
             FROM usage_records
-            WHERE user_id = ? AND created_at >= ?
+            WHERE ${col} = ? AND created_at >= ?
           ),
           overall_stats AS (
             SELECT
               COUNT(*) as total_requests,
               SUM(input_tokens) as total_input_tokens,
               SUM(output_tokens) as total_output_tokens,
-              SUM(reasoning_tokens) as total_reasoning_tokens,
-              SUM(cached_tokens) as total_cached_tokens,
               SUM(total_cost) as total_cost,
               AVG(input_tokens) as avg_input_tokens,
               AVG(output_tokens) as avg_output_tokens,
-              AVG(reasoning_tokens) as avg_reasoning_tokens,
               AVG(total_cost) as avg_cost_per_request,
               AVG(response_time) as avg_response_time
             FROM filtered_records
@@ -335,7 +367,7 @@ export class AIHandler {
               SUM(output_tokens) as output_tokens,
               SUM(total_cost) as cost
             FROM usage_records
-            WHERE user_id = ? AND created_at >= datetime('now', '-7 days')
+            WHERE ${col} = ? AND created_at >= datetime('now', '-7 days')
             GROUP BY DATE(created_at)
             ORDER BY date DESC
           )
@@ -344,12 +376,9 @@ export class AIHandler {
               'total_requests', total_requests,
               'total_input_tokens', total_input_tokens,
               'total_output_tokens', total_output_tokens,
-              'total_reasoning_tokens', total_reasoning_tokens,
-              'total_cached_tokens', total_cached_tokens,
               'total_cost', total_cost,
               'avg_input_tokens', avg_input_tokens,
               'avg_output_tokens', avg_output_tokens,
-              'avg_reasoning_tokens', avg_reasoning_tokens,
               'avg_cost_per_request', avg_cost_per_request,
               'avg_response_time', avg_response_time
             )) FROM overall_stats) as overall,
@@ -377,7 +406,7 @@ export class AIHandler {
               'cost', cost
             )) FROM daily_breakdown) as daily
         `)
-        .bind(user.userId, startDate, user.userId)
+        .bind(user.email, startDate, user.email)
         .first();
 
       // Parse JSON results
@@ -404,13 +433,6 @@ export class AIHandler {
             output: {
               total: overall.total_output_tokens || 0,
               average: Math.round(overall.avg_output_tokens || 0)
-            },
-            reasoning: {
-              total: overall.total_reasoning_tokens || 0,
-              average: Math.round(overall.avg_reasoning_tokens || 0)
-            },
-            cached: {
-              total: overall.total_cached_tokens || 0
             }
           },
           avgResponseTime: Math.round(overall.avg_response_time || 0)
@@ -449,14 +471,14 @@ export class AIHandler {
   /**
    * Check if user is within usage limits
    */
-  async checkUsageLimit(userId, tier) {
+  async checkUsageLimit(email, tier) {
     // Pro tier: Use Durable Object rate limiter for atomic check-and-increment
     if (tier === 'pro') {
-      const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '60');
+      const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '20');
 
       // Use Durable Object rate limiter to prevent race conditions
       const rateLimitResult = await checkRateLimit(
-        `user:${userId}`,
+        `user:${email}`,
         rateLimit,
         60000, // 1 minute window
         this.env
@@ -476,7 +498,7 @@ export class AIHandler {
       const usedInLastMinute = rateLimitResult?.count ?? 0;
 
       if (rateLimitResult?.count === null) {
-        console.error('Rate limiter returned null count for user:', userId, '- possible Durable Object outage');
+        console.error('Rate limiter returned null count - possible Durable Object outage');
       }
 
       return {
@@ -491,14 +513,15 @@ export class AIHandler {
     const limit = parseInt(this.env.FREE_TIER_DAILY_LIMIT || '10');
 
     // Get today's usage
+    const col = await this.getUserCol();
     const today = new Date().toISOString().split('T')[0];
     const result = await this.db
       .prepare(`
         SELECT COUNT(*) as count
         FROM usage_records
-        WHERE user_id = ? AND DATE(created_at) = ?
+        WHERE ${col} = ? AND DATE(created_at) = ?
       `)
-      .bind(userId, today)
+      .bind(email, today)
       .first();
 
     const used = result?.count || 0;
@@ -523,101 +546,90 @@ export class AIHandler {
     }
 
     // Then check usage limit
-    const usageCheck = await this.checkUsageLimit(user.userId, user.tier);
+    const usageCheck = await this.checkUsageLimit(user.email, user.tier);
 
     return { user, usageCheck };
   }
 
   /**
-   * Record usage in database with detailed token breakdown and cost calculation
+   * Determine the actual prompt type used, including _image variants.
    */
-  async recordUsage({
-    userId,
-    promptType,
-    model,
-    tokensUsed,
-    inputTokens,
-    outputTokens,
-    reasoningTokens,
-    cachedTokens,
-    inputMethod,
-    responseTime,
-    cached
-  }) {
-    // Pricing per million tokens (based on reasoning level)
-    // model field now stores: 'none' (gpt-4.1-nano), 'low' (gpt-5-nano), 'medium' (gpt-5-nano)
+  getActualPromptType(promptType, imageData, ocrText, images) {
+    const hasImage = imageData || (images && images.length > 0);
+
+    if (promptType === 'auto_solve') {
+      return hasImage ? 'auto_solve_image' : 'auto_solve';
+    }
+    if (promptType === 'ask') {
+      return hasImage ? 'ask_image' : 'ask';
+    }
+    // 'answer' mode
+    if (ocrText && !hasImage) {
+      return 'answer';
+    }
+    if (hasImage) {
+      return 'answer_image';
+    }
+    return promptType;
+  }
+
+  /**
+   * Calculate usage cost based on model pricing
+   */
+  calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost }) {
+    if (overrideCost !== undefined) {
+      return overrideCost;
+    }
+
+    // Pricing per million tokens (matches UI slider: low/medium/high)
     const PRICING = {
-      'none': {         // GPT-4.1-nano (no reasoning)
-        input: 0.10,    // $0.10 per 1M input tokens
-        output: 0.40,   // $0.40 per 1M output tokens
-        cached: 0.025   // $0.025 per 1M cached tokens (75% discount)
-      },
-      'low': {          // GPT-5-nano with low reasoning
-        input: 0.05,    // $0.05 per 1M input tokens
-        output: 0.40,   // $0.40 per 1M output tokens (reasoning tokens count as output)
-        cached: 0.005   // $0.005 per 1M cached tokens (90% discount)
-      },
-      'medium': {       // GPT-5-nano with medium reasoning
-        input: 0.05,    // $0.05 per 1M input tokens
-        output: 0.40,   // $0.40 per 1M output tokens (reasoning tokens count as output)
-        cached: 0.005   // $0.005 per 1M cached tokens (90% discount)
-      }
+      'low':    { input: 0.10, output: 0.40, cached: 0.025 },  // GPT-4.1-nano
+      'medium': { input: 0.05, output: 0.40, cached: 0.005 },  // GPT-5-nano low
+      'high':   { input: 0.05, output: 0.40, cached: 0.005 }   // GPT-5-nano medium
     };
 
-    // Get pricing for the reasoning level (default to 'low')
-    const modelPricing = PRICING[model] || PRICING['low'];
-
-    // Calculate costs (convert from per million to per token)
-    // Note: reasoning tokens are billed as output tokens
+    const pricing = PRICING[model] || PRICING['medium'];
     const regularInputTokens = inputTokens - (cachedTokens || 0);
-    const inputCost = (regularInputTokens * modelPricing.input) / 1000000;
-    const cachedCost = ((cachedTokens || 0) * modelPricing.cached) / 1000000;
-    const outputCost = (outputTokens * modelPricing.output) / 1000000;
-    const totalCost = inputCost + cachedCost + outputCost;
+    const inputCost = (regularInputTokens * pricing.input) / 1000000;
+    const cachedCost = ((cachedTokens || 0) * pricing.cached) / 1000000;
+    const outputCost = (outputTokens * pricing.output) / 1000000;
+    return inputCost + cachedCost + outputCost;
+  }
 
+  /**
+   * Insert a usage record into the database
+   */
+  async insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime }) {
     await this.db
       .prepare(`
         INSERT INTO usage_records (
-          user_id,
-          prompt_type,
-          model,
-          tokens_used,
-          input_tokens,
-          output_tokens,
-          reasoning_tokens,
-          cached_tokens,
-          total_cost,
-          response_time,
-          cached
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ${col}, prompt_type, model, input_tokens, output_tokens,
+          total_cost, cached, response_time
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `)
-      .bind(
-        userId,
-        promptType,
-        model,
-        tokensUsed,
-        inputTokens,
-        outputTokens,
-        reasoningTokens || 0,
-        cachedTokens || 0,
-        totalCost,
-        responseTime,
-        cached ? 1 : 0
-      )
+      .bind(email, promptType, model, inputTokens, outputTokens, totalCost, cached ? 'yes' : 'no', responseTime)
       .run();
+  }
+
+  /**
+   * Record usage in database with detailed token breakdown and cost calculation
+   */
+  async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
+    const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
+    const col = await this.getUserCol();
+    await this.insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
   }
 
   /**
    * Build OpenAI payload
    */
   buildPayload(requestData, reasoningLevel) {
-    const { question, imageData, ocrText, ocrConfidence, promptType } = requestData;
+    const { question, imageData, ocrText, images, promptType } = requestData;
 
-    // Reasoning level configurations
-    // 0 = Low (gpt-4.1-nano, no reasoning)
-    // 1 = Medium (gpt-5-nano, low reasoning)
-    // 2 = High (gpt-5-nano, medium reasoning)
+    // Reasoning level configurations (matches UI slider: Low / Medium / High)
+    // 0 = Low → gpt-4.1-nano, no reasoning
+    // 1 = Medium → gpt-5-nano, low reasoning effort
+    // 2 = High → gpt-5-nano, medium reasoning effort
     const configs = {
       0: { model: 'openai/gpt-4.1-nano', reasoningEffort: null, useLegacyTokenParam: true },  // Legacy model, no reasoning
       1: { model: 'openai/gpt-5-nano', reasoningEffort: 'low', useLegacyTokenParam: false },
@@ -636,17 +648,22 @@ export class AIHandler {
       return basePrompt;
     };
 
-    if (promptType === 'ask' && question && imageData) {
-      // Ask mode with image
+    if (promptType === 'ask' && (imageData || (images && images.length > 0))) {
+      // Ask mode with image(s) — question is optional
+      const contentParts = [];
+      if (question) {
+        contentParts.push({ type: 'text', text: question });
+      }
+      if (images && images.length > 0) {
+        for (const img of images) {
+          contentParts.push({ type: 'image_url', image_url: { url: img.imageData } });
+        }
+      } else if (imageData) {
+        contentParts.push({ type: 'image_url', image_url: { url: imageData } });
+      }
       messages = [
         { role: 'system', content: PROMPTS.ASK },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: question },
-            { type: 'image_url', image_url: { url: imageData } }
-          ]
-        }
+        { role: 'user', content: contentParts }
       ];
     } else if (promptType === 'ask' && question && ocrText && !imageData) {
       // Ask mode with OCR text only (no image)
@@ -662,14 +679,14 @@ export class AIHandler {
       ];
     } else if (promptType === 'auto_solve') {
       // Auto-solve mode
-      if (imageData) {
-        // Auto-solve with image
+      const hasImage = (images && images.length > 0) || imageData;
+      if (hasImage) {
+        const imageParts = images && images.length > 0
+          ? images.map(img => ({ type: 'image_url', image_url: { url: img.imageData } }))
+          : [{ type: 'image_url', image_url: { url: imageData } }];
         messages = [
           { role: 'system', content: PROMPTS.AUTO_SOLVE_IMAGE },
-          {
-            role: 'user',
-            content: [{ type: 'image_url', image_url: { url: imageData } }]
-          }
+          { role: 'user', content: imageParts }
         ];
       } else {
         // Auto-solve with OCR only
@@ -678,21 +695,24 @@ export class AIHandler {
           { role: 'user', content: ocrText }
         ];
       }
-    } else if (ocrText && !imageData) {
+    } else if (ocrText && !imageData && !(images && images.length > 0)) {
       // OCR text only, no image (normal answer mode)
       messages = [
         { role: 'system', content: PROMPTS.SYSTEM },
         { role: 'user', content: `${PROMPTS.ANSWER}\n\n${ocrText}` }
       ];
-    } else if (imageData) {
+    } else if ((images && images.length > 0) || imageData) {
       // Image-based answer (fallback)
+      const imageParts = images && images.length > 0
+        ? images.map(img => ({ type: 'image_url', image_url: { url: img.imageData } }))
+        : [{ type: 'image_url', image_url: { url: imageData } }];
       messages = [
         { role: 'system', content: PROMPTS.SYSTEM_IMAGE },
         {
           role: 'user',
           content: [
             { type: 'text', text: PROMPTS.ANSWER },
-            { type: 'image_url', image_url: { url: imageData } }
+            ...imageParts
           ]
         }
       ];
@@ -707,9 +727,12 @@ export class AIHandler {
     };
 
     // Use different token parameter based on model
-    const maxTokens =
-      promptType === 'ask'        ? 4000 :
-      promptType === 'auto_solve' ? 1500 : 2000;
+    let maxTokens = 2500;
+    if (promptType === 'ask') {
+      maxTokens = 4000;
+    } else if (promptType === 'auto_solve') {
+      maxTokens = 1500;
+    }
 
     if (config.useLegacyTokenParam) {
       // gpt-4.1-mini uses max_tokens
@@ -754,11 +777,8 @@ export class AIHandler {
 
     const data = await response.json();
 
-    // Check if cached
-    const cfCacheStatus = response.headers.get('cf-cache-status');
-    if (cfCacheStatus === 'HIT') {
-      data.cached = true;
-    }
+    // Check if cached (AI Gateway uses cf-aig-cache-status header)
+    data.cached = response.headers.get('cf-aig-cache-status') === 'HIT';
 
     return data;
   }

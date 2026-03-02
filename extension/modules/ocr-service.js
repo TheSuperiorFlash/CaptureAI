@@ -30,7 +30,9 @@ class OCRService {
           throw new Error('Tesseract.js not available. Check manifest content_scripts configuration.');
         }
 
-        console.log('Tesseract.js found, creating worker...');
+        if (typeof window !== 'undefined' && window.CaptureAI?.CONFIG?.DEBUG) {
+          console.log('Tesseract.js found, creating worker...');
+        }
 
         // Create worker with language parameter (workers come pre-loaded in newer versions)
         // Using modern API: createWorker(lang, oem, options)
@@ -44,7 +46,9 @@ class OCRService {
         });
 
         this.isInitialized = true;
-        console.log('OCR Service initialized successfully with optimized parameters');
+        if (typeof window !== 'undefined' && window.CaptureAI?.CONFIG?.DEBUG) {
+          console.log('OCR Service initialized successfully with optimized parameters');
+        }
       } catch (error) {
         console.error('Failed to initialize OCR Service:', error);
         this.isInitialized = false;
@@ -96,11 +100,29 @@ class OCRService {
   }
 
   /**
+     * Remove site-specific OCR noise
+     * @param {string} text - Cleaned OCR text
+     * @param {string} hostname - Page hostname
+     * @returns {string}
+     */
+  cleanSiteSpecificText(text, hostname) {
+    if (!text || !hostname) {
+      return text || '';
+    }
+    if (hostname === 'vocabulary.com' || hostname.endsWith('.vocabulary.com')) {
+      text = text.replace(/^(QO|Q|\(@\))[ \t]*/gm, '');
+      text = text.replace(/\n{2,}/g, '\n').trim();
+    }
+    return text;
+  }
+
+  /**
      * Extract text from an image
      * @param {string} imageDataUrl - Base64 encoded image data URL
      * @param {Object} options - OCR options
      * @param {boolean} options.preprocessImage - Whether to preprocess the image for better OCR
      * @param {number} options.confidenceThreshold - Minimum confidence to accept OCR (default: 60)
+     * @param {string} options.hostname - Page hostname for site-specific cleanup
      * @returns {Promise<{text: string, confidence: number, words: Array, shouldFallbackToImage: boolean}>}
      */
   async extractText(imageDataUrl, options = {}) {
@@ -113,10 +135,18 @@ class OCRService {
       const confidenceThreshold = options.confidenceThreshold || 60;
       const startTime = performance.now();
 
+      const isDebug = typeof window !== 'undefined' && window.CaptureAI?.CONFIG?.DEBUG;
+
       // Apply preprocessing if requested
       const sourceImage = options.preprocessImage
         ? await this.preprocessImage(imageDataUrl)
         : imageDataUrl;
+
+      // Log preprocessed image URL for visual inspection in browser
+      if (isDebug && options.preprocessImage) {
+        console.log('CaptureAI OCR - Preprocessed image (paste URL in browser to view):');
+        console.log(sourceImage);
+      }
 
       // Perform OCR
       const result = await this.worker.recognize(sourceImage);
@@ -126,17 +156,20 @@ class OCRService {
 
       // Clean the extracted text
       const rawText = result.data.text || '';
-      const cleanedText = this.cleanOCRText(rawText);
+      const hostname = options.hostname || '';
+      const cleanedText = this.cleanSiteSpecificText(this.cleanOCRText(rawText), hostname);
 
-      console.log(`OCR completed in ${duration}ms`);
-      console.log(`Confidence: ${result.data.confidence}%`);
-      console.log(`Raw text (${rawText.length} chars):`, rawText);
-      console.log(`Cleaned text (${cleanedText.length} chars):`, cleanedText);
+      if (isDebug) {
+        console.log(`OCR completed in ${duration}ms`);
+        console.log(`Confidence: ${result.data.confidence}%`);
+        console.log(`Raw text (${rawText.length} chars):`, rawText);
+        console.log(`Cleaned text (${cleanedText.length} chars):`, cleanedText);
+      }
 
       // Determine if we should fall back to image
       const shouldFallbackToImage = result.data.confidence < confidenceThreshold || cleanedText.length === 0;
 
-      if (shouldFallbackToImage) {
+      if (isDebug && shouldFallbackToImage) {
         console.log(`OCR confidence too low (${result.data.confidence}% < ${confidenceThreshold}%) or no text extracted - will use image instead`);
       }
 
@@ -174,7 +207,9 @@ class OCRService {
         this.worker = null;
         this.isInitialized = false;
         this.initializationPromise = null;
-        console.log('OCR Service terminated');
+        if (typeof window !== 'undefined' && window.CaptureAI?.CONFIG?.DEBUG) {
+          console.log('OCR Service terminated');
+        }
       }
     } catch (error) {
       console.error('Error terminating OCR Service:', error);
@@ -214,8 +249,9 @@ class OCRService {
         const img = new Image();
         img.onload = () => {
           try {
-            // Guard against extremely large images
-            if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+            // Guard against extremely large images (after 3x upscale)
+            const scale = 3;
+            if (img.width * scale > MAX_DIMENSION || img.height * scale > MAX_DIMENSION) {
               reject(new Error('Image dimensions too large for preprocessing'));
               return;
             }
@@ -228,11 +264,13 @@ class OCRService {
               return;
             }
 
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            // Draw original image
-            ctx.drawImage(img, 0, 0);
+            // 3x upscale so 1-2px thin lines (underlines) become 3-6px,
+            // thick enough for Tesseract to recognize as characters.
+            // Nearest-neighbor keeps edges sharp instead of blurring them.
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             let imageData;
             try {
@@ -244,18 +282,55 @@ class OCRService {
             }
 
             const data = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
 
-            // Apply grayscale and contrast enhancement
+            // Step 1: Convert to grayscale with contrast stretch
+            const gray = new Uint8Array(w * h);
+            const factor = 1.5;
             for (let i = 0; i < data.length; i += 4) {
-              // Convert to grayscale
               const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+              const stretched = ((avg / 255 - 0.5) * factor + 0.5) * 255;
+              gray[i >> 2] = stretched < 0 ? 0 : stretched > 255 ? 255 : Math.round(stretched);
+            }
 
-              // Enhance contrast (simple thresholding)
-              const enhanced = avg > 128 ? 255 : 0;
+            // Step 2: Local smooth grow — 3x3 box blur that spreads dark
+            // pixels into their neighbors, softly thickening thin strokes
+            // (underlines) without the harsh artifacts of min-dilation.
+            const smoothed = new Uint8Array(w * h);
+            for (let y = 0; y < h; y++) {
+              for (let x = 0; x < w; x++) {
+                let sum = 0;
+                let count = 0;
+                for (let dy = -1; dy <= 1; dy++) {
+                  const ny = y + dy;
+                  if (ny < 0 || ny >= h) {
+                    continue;
+                  }
+                  for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    if (nx < 0 || nx >= w) {
+                      continue;
+                    }
+                    sum += gray[ny * w + nx];
+                    count++;
+                  }
+                }
+                const avg = sum / count;
+                // Bias toward darker value: blend 60% smoothed + 40% min
+                // so thin dark lines grow outward while text stays readable
+                const orig = gray[y * w + x];
+                const dark = orig < avg ? orig : avg;
+                smoothed[y * w + x] = Math.round(avg * 0.6 + dark * 0.4);
+              }
+            }
 
-              data[i] = enhanced;     // R
-              data[i + 1] = enhanced; // G
-              data[i + 2] = enhanced; // B
+            // Write smoothed grayscale back to RGBA
+            for (let i = 0; i < smoothed.length; i++) {
+              const idx = i << 2;
+              data[idx] = smoothed[i];
+              data[idx + 1] = smoothed[i];
+              data[idx + 2] = smoothed[i];
             }
 
             // Put processed image back

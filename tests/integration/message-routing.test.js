@@ -148,7 +148,8 @@ describe('Message Routing Integration', () => {
 
       expect(window.CaptureAI.ImageProcessing.captureAndProcess).toHaveBeenCalledWith(
         'data:image/png;base64,test',
-        { startX: 0, startY: 0, width: 100, height: 100 }
+        { startX: 0, startY: 0, width: 100, height: 100 },
+        { enableOCR: true }
       );
 
       expect(sendResponse).toHaveBeenCalledWith(

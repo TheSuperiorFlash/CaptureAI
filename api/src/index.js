@@ -65,8 +65,8 @@ export default {
     try {
       logger.info('Request received');
 
-      // Create router instance
-      const router = new Router(env, logger);
+      // Create router instance (pass ctx for waitUntil support)
+      const router = new Router(env, logger, ctx);
 
       // Route the request
       const response = await router.route(request);

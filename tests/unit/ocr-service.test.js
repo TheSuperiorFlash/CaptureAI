@@ -153,6 +153,42 @@ describe('OCRService', () => {
     });
   });
 
+  describe('cleanSiteSpecificText', () => {
+    test('should return text unchanged for non-vocabulary.com hostname', () => {
+      const text = 'Q some content\n(@) another line';
+      expect(OCRService.cleanSiteSpecificText(text, 'example.com')).toBe(text);
+    });
+
+    test('should return text unchanged for empty hostname', () => {
+      const text = 'Q some content\n(@) another line';
+      expect(OCRService.cleanSiteSpecificText(text, '')).toBe(text);
+    });
+
+    test('should strip Q, QO, (@) prefixes from line starts on vocabulary.com', () => {
+      const input = 'volition means:\n(@) a wave motion\nQ the act of making a choice\n(@) rushing about hastily\nQO the act of ordaining';
+      const result = OCRService.cleanSiteSpecificText(input, 'vocabulary.com');
+      expect(result).toBe('volition means:\na wave motion\nthe act of making a choice\nrushing about hastily\nthe act of ordaining');
+    });
+
+    test('should handle subdomain (www.vocabulary.com)', () => {
+      const text = 'Q the act of making a choice';
+      const result = OCRService.cleanSiteSpecificText(text, 'www.vocabulary.com');
+      expect(result).toBe('the act of making a choice');
+    });
+
+    test('should not alter lines without a noise prefix', () => {
+      const text = 'volition means:\na wave motion';
+      const result = OCRService.cleanSiteSpecificText(text, 'vocabulary.com');
+      expect(result).toBe(text);
+    });
+
+    test('should not strip Q or QO mid-line', () => {
+      const text = 'The word QO appears inside this sentence';
+      const result = OCRService.cleanSiteSpecificText(text, 'vocabulary.com');
+      expect(result).toBe(text);
+    });
+  });
+
   describe('extractText', () => {
     const mockImageData = 'data:image/png;base64,testdata';
 

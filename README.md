@@ -47,7 +47,7 @@ CaptureAI is a Chrome extension that lets you capture questions from any webpage
 
 **Free Tier (10 requests/day):**
 1. Click the CaptureAI extension icon
-2. Visit the [activation page](https://thesuperiorflash.github.io/CaptureAI/activate.html)
+2. Visit the [activation page](https://captureai.dev/activate)
 3. Enter your email to receive a free license key
 
 **Pro Tier (Unlimited - $9.99/month):**
@@ -252,10 +252,10 @@ Adjust AI reasoning effort:
 | Daily Requests | 10 | Unlimited |
 | Screenshot Capture | ✅ | ✅ |
 | OCR Text Extraction | ✅ | ✅ |
-| Auto-Solve Mode | ✅ | ✅ |
-| Ask Mode | ✅ | ✅ |
 | Stealth Mode | ✅ | ✅ |
-| Privacy Guard | ✅ | ✅ |
+| Auto-Solve Mode | ❌ | ✅ |
+| Ask Mode | ❌ | ✅ |
+| Privacy Guard | ❌ | ✅ |
 | Reasoning Slider | ❌ | ✅ |
 | Priority Support | ❌ | ✅ |
 

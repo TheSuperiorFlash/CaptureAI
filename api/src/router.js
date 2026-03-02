@@ -8,11 +8,11 @@ import { SubscriptionHandler } from './subscription';
 import { jsonResponse } from './utils';
 
 export class Router {
-  constructor(env, logger = null) {
+  constructor(env, logger = null, ctx = null) {
     this.env = env;
     this.logger = logger;
     this.auth = new AuthHandler(env, logger);
-    this.ai = new AIHandler(env, logger);
+    this.ai = new AIHandler(env, logger, ctx);
     this.subscription = new SubscriptionHandler(env, logger);
   }
 
