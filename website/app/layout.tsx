@@ -1,15 +1,19 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import '@fontsource/outfit/400.css'
+import '@fontsource/outfit/500.css'
+import '@fontsource/outfit/600.css'
+import '@fontsource/outfit/700.css'
+import '@fontsource/outfit/800.css'
+import '@fontsource/plus-jakarta-sans/400.css'
+import '@fontsource/plus-jakarta-sans/500.css'
+import '@fontsource/plus-jakarta-sans/600.css'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/700.css'
+import '@fontsource/inter/800.css'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { SITE_URL } from '@/lib/constants'
-
-const inter = Inter({
-    subsets: ['latin'],
-    weight: ['400', '500', '600', '700', '800'],
-    display: 'swap',
-})
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
@@ -71,18 +75,17 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-        <body className={`noise ${inter.className}`}>
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
-            Skip to main content
-        </a>
-        {/* Blue glow behind translucent navbar */}
-        <div className="pointer-events-none fixed top-0 left-0 right-0 z-40 h-32 bg-[radial-gradient(ellipse_at_50%_0%,rgba(37,99,235,0.4)_0%,transparent_70%)]" />
-        <Navbar />
-        <main id="main-content" className="min-h-screen pt-16">
-            {children}
-        </main>
-        <Footer />
-        </body>
+            <body className="noise antialiased">
+                <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
+                    Skip to main content
+                </a>
+
+                <Navbar />
+                <main id="main-content" className="relative min-h-screen pt-16">
+                    {children}
+                </main>
+                <Footer />
+            </body>
         </html>
     )
 }
