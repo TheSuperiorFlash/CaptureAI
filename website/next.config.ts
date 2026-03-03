@@ -40,6 +40,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // @ts-ignore - turbopack root is valid but may not be in NextConfig types
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;
