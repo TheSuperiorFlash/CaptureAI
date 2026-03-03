@@ -274,7 +274,7 @@ export default function Home() {
                         </p>
                         <Link
                             href="/activate"
-                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all shadow-[0_0_20px_rgba(0,71,255,0.2),inset_0_0_0_1px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(0,240,255,0.3),inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
                         >
                             Get Started
                             <ArrowRight className="h-5 w-5" />
