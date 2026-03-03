@@ -65,7 +65,7 @@ export default function Navbar() {
 
     return (
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'border-b border-white/[0.04] bg-[--color-background]/80 backdrop-blur-xl' : 'bg-transparent border-transparent'}`}>
-            <div className={`absolute inset-x-0 top-0 h-40 -z-10 pointer-events-none bg-gradient-to-b from-[#001e80] via-[#001e80]/40 to-transparent transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-100'}`} />
+            <div className={`absolute inset-x-0 top-0 h-26 -z-10 pointer-events-none bg-gradient-to-b from-[#001e80] via-[#001e80]/40 to-transparent transition-opacity duration-300 ${isScrolled ? 'opacity-0' : 'opacity-100'}`} />
             <div className="mx-auto max-w-6xl px-6">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
