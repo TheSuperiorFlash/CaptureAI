@@ -1,4 +1,7 @@
+'use client'
+
 import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface Feature {
     icon: LucideIcon
@@ -78,7 +81,13 @@ export default function Features() {
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 {/* Header */}
-                <div className="mx-auto mb-16 max-w-2xl text-center reveal-up delay-100">
+                <motion.div
+                    className="mx-auto mb-16 max-w-2xl text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                >
                     <h2 className="mb-4">
                         <span className="text-[--color-text]">Everything you need, </span>
                         <span className="text-gradient">nothing you don&apos;t</span>
@@ -86,19 +95,27 @@ export default function Features() {
                     <p className="text-lg text-[--color-text-secondary]">
                         What the extension does, in plain terms.
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Grid */}
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 reveal-up delay-200">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {features.map((feature, index) => {
                         const Icon = feature.icon
-                        // Stagger the cards based on their index
-                        const staggerDelay = `delay-${((index % 4) + 1) * 100}`
 
                         return (
-                            <div
+                            <motion.div
                                 key={feature.title}
-                                className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-all duration-400 ease-out reveal-up ${staggerDelay} ${feature.glow}`}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 15,
+                                    delay: (index % 4) * 0.1
+                                }}
+                                whileHover={{ y: -5, scale: 1.02, transition: { type: "spring", stiffness: 300 } }}
+                                className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
                             >
                                 {feature.pro && (
                                     <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 border border-cyan-500/20">
@@ -114,7 +131,7 @@ export default function Features() {
                                 <p className="text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
                                     {feature.description}
                                 </p>
-                            </div>
+                            </motion.div>
                         )
                     })}
                 </div>
