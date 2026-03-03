@@ -244,7 +244,7 @@ export default function Home() {
 
                                 <Link
                                     href="/activate"
-                                    className="glow-btn block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                                    className="glow-btn block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:scale-105 hover:-translate-y-1"
                                 >
                                     Get Pro
                                 </Link>
@@ -274,7 +274,7 @@ export default function Home() {
                         </p>
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-4 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-4 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:scale-105 hover:-translate-y-1"
                         >
                             Get Started
                             <ArrowRight className="h-4 w-4" />

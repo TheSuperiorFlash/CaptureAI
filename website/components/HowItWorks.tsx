@@ -45,17 +45,17 @@ export default function HowItWorks() {
                         const staggerDelay = `delay-${((index % 3) + 2) * 100}`
 
                         return (
-                            <div key={step.number} className={`relative text-center reveal-up ${staggerDelay}`}>
+                            <div key={step.number} className={`group relative flex flex-col items-center rounded-3xl p-6 text-center transition-all duration-500 hover:bg-white/[0.02] hover:-translate-y-2 reveal-up ${staggerDelay}`}>
                                 {/* Glowing step number */}
                                 <div className="relative mx-auto mb-8 flex h-12 w-12 items-center justify-center">
-                                    <div className="absolute inset-0 rounded-full bg-[#0047ff]/30 blur-md transition-all duration-500 hover:bg-[#00f0ff]/30 hover:blur-lg" />
-                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white shadow-[0_0_25px_rgba(0,113,255,0.4)] border border-white/10">
+                                    <div className="absolute inset-0 rounded-full bg-[#0047ff]/30 blur-md transition-all duration-500 group-hover:bg-[#00f0ff]/60 group-hover:blur-xl group-hover:scale-150" />
+                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white shadow-[0_0_25px_rgba(0,113,255,0.4)] border border-white/10 transition-transform duration-500 group-hover:scale-110">
                                         {step.number}
                                     </div>
                                 </div>
 
-                                <h3 className="mb-3 text-[19px] font-semibold text-[--color-text]">{step.title}</h3>
-                                <p className="mx-auto max-w-sm text-[15px] leading-relaxed text-[--color-text-tertiary]">
+                                <h3 className="mb-3 text-[19px] font-semibold text-[--color-text] transition-colors duration-500 group-hover:text-cyan-300">{step.title}</h3>
+                                <p className="mx-auto max-w-sm text-[15px] leading-relaxed text-[--color-text-tertiary] transition-colors duration-500 group-hover:text-[--color-text-secondary]">
                                     {step.description}
                                 </p>
                             </div>
