@@ -7,6 +7,7 @@ interface ScrollRevealProps {
     children: ReactNode
     className?: string
     delay?: number
+    stagger?: number
     yOffset?: number
     margin?: string
 }
@@ -25,7 +26,7 @@ export function ScrollReveal({ children, className = "", delay = 0, yOffset = 30
     )
 }
 
-export function ScrollRevealStagger({ children, className = "", delay = 0, margin = "-50px" }: ScrollRevealProps) {
+export function ScrollRevealStagger({ children, className = "", delay = 0, stagger = 0.15, margin = "-50px" }: ScrollRevealProps) {
     return (
         <motion.div
             initial="hidden"
@@ -36,7 +37,7 @@ export function ScrollRevealStagger({ children, className = "", delay = 0, margi
                 visible: {
                     opacity: 1,
                     transition: {
-                        staggerChildren: 0.15,
+                        staggerChildren: stagger,
                         delayChildren: delay,
                     }
                 }

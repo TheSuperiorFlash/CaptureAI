@@ -101,7 +101,7 @@ export default function Home() {
                     </ScrollReveal>
 
                     {/* Before / After comparison */}
-                    <ScrollRevealStagger delay={0.2} className="grid gap-6 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="grid gap-6 md:grid-cols-2">
                         {/* Without */}
                         <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5">
                             <div className="mb-4 flex items-center gap-2.5">
@@ -167,7 +167,7 @@ export default function Home() {
                         </p>
                     </ScrollReveal>
 
-                    <ScrollRevealStagger delay={0.2} className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
                         {/* Free */}
                         <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
