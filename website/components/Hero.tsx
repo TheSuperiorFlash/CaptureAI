@@ -72,7 +72,7 @@ export default function Hero() {
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
                         </span>
-                        <span className="text-[13px] font-semibold tracking-wide text-cyan-50 uppercase">Chrome Extension</span>
+                        <span className="text-[13px] font-semibold tracking-wide text-cyan-50">Chrome Extension</span>
                         <span className="h-3 w-px bg-[--color-border]" />
                         <span className="text-[13px] font-medium text-[--color-text-tertiary]">Free to start</span>
                     </motion.div>
