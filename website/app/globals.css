@@ -8,25 +8,30 @@
    ============================================ */
 
 @theme inline {
-  --color-background: #020205; /* Deep, almost pure black */
+  --color-background: #020205;
+  /* Deep, almost pure black */
   --color-foreground: #fafafa;
-  --color-surface: #060913; /* Very dark blue-tinted surface */
-  --color-surface-raised: #0b1120; 
+  --color-surface: #060913;
+  /* Very dark blue-tinted surface */
+  --color-surface-raised: #0b1120;
   --color-surface-glass: rgba(6, 9, 19, 0.65);
   --color-border: #1a2235;
   --color-border-subtle: #0f1523;
-  --color-border-glow: rgba(0, 240, 255, 0.15); /* Electric cyan glow */
-  
+  --color-border-glow: rgba(0, 240, 255, 0.15);
+  /* Electric cyan glow */
+
   --color-text: #ffffff;
   --color-text-secondary: #a3b1c6;
   --color-text-tertiary: #67748e;
-  
-  --color-accent: #0047ff; /* Vivid pure blue */
+
+  --color-accent: #0047ff;
+  /* Vivid pure blue */
   --color-accent-hover: #1a5cff;
   --color-accent-muted: rgba(0, 71, 255, 0.1);
   --color-accent-border: rgba(0, 71, 255, 0.3);
-  
-  --color-cyan: #00f0ff; /* Electric cyan */
+
+  --color-cyan: #00f0ff;
+  /* Electric cyan */
   --color-cyan-muted: rgba(0, 240, 255, 0.1);
   --color-cyan-bright: #33f3ff;
 }
@@ -58,8 +63,13 @@ body {
 
 /* ---- Typography Scale ---- */
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Outfit, system-ui, -apple-system, sans-serif;
   color: var(--color-text);
 }
 
@@ -240,24 +250,52 @@ p {
 /* ---- Animations ---- */
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-25px) rotate(2deg); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-25px) rotate(2deg);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.3;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Entrance Animations */
 @keyframes fade-in-up {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-float-slow {
@@ -278,13 +316,28 @@ p {
   animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
 
 @media (prefers-reduced-motion: reduce) {
+
   .animate-float-slow,
   .animate-pulse-glow,
   .animate-shimmer,

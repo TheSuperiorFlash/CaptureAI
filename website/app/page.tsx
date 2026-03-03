@@ -4,6 +4,7 @@ import HowItWorks from '@/components/HowItWorks'
 import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
 import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -40,12 +41,12 @@ export default function Home() {
             <Hero />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="relative py-24 md:py-32 reveal-up">
+            <section className="relative py-24 md:py-32">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
                         {/* Image with glow frame */}
-                        <div className="relative delay-100 reveal-up">
+                        <ScrollReveal delay={0.1} className="relative">
                             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-600/30 via-transparent to-cyan-400/20 blur-md" />
                             <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-blue-900/20">
                                 <Image
@@ -58,10 +59,10 @@ export default function Home() {
                                     className="block h-auto w-full"
                                 />
                             </div>
-                        </div>
+                        </ScrollReveal>
 
                         {/* Copy */}
-                        <div className="delay-200 reveal-up">
+                        <ScrollReveal delay={0.2}>
                             <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
                                 Always accessible
                             </span>
@@ -74,18 +75,18 @@ export default function Home() {
                             <p className="text-sm leading-relaxed text-[--color-text-tertiary]">
                                 No need to open the extension popup or switch tabs. It&apos;s always one click away, on every site you visit.
                             </p>
-                        </div>
+                        </ScrollReveal>
                     </div>
                 </div>
             </section>
 
             {/* ---- Privacy Guard Showcase ---- */}
-            <section className="relative py-24 md:py-32 reveal-up">
+            <section className="relative py-24 md:py-32">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="pointer-events-none absolute inset-0 aurora-bg opacity-40" />
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
                     {/* Header */}
-                    <div className="mx-auto mb-14 max-w-2xl text-center delay-100 reveal-up">
+                    <ScrollReveal delay={0.1} className="mx-auto mb-14 max-w-2xl text-center">
                         <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
                             Pro feature
                         </span>
@@ -93,12 +94,12 @@ export default function Home() {
                         <p className="text-[--color-text-secondary]">
                             Quiz platforms can log browser extension activity. Privacy Guard intercepts those detection methods so your activity logs stay clean.
                         </p>
-                    </div>
+                    </ScrollReveal>
 
                     {/* Before / After comparison */}
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} className="grid gap-6 md:grid-cols-2">
                         {/* Without */}
-                        <div className="glass-card overflow-hidden rounded-2xl p-5">
+                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5">
                             <div className="mb-4 flex items-center gap-2.5">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/15">
                                     <XIcon className="h-3.5 w-3.5 text-red-400" />
@@ -117,10 +118,10 @@ export default function Home() {
                             <p className="mt-4 text-sm text-[--color-text-tertiary]">
                                 Extension activity visible in platform logs
                             </p>
-                        </div>
+                        </ScrollRevealItem>
 
                         {/* With */}
-                        <div className="glass-card overflow-hidden rounded-2xl p-5">
+                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5">
                             <div className="mb-4 flex items-center gap-2.5">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15">
                                     <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -139,8 +140,8 @@ export default function Home() {
                             <p className="mt-4 text-sm text-[--color-text-tertiary]">
                                 Logs show only normal browsing activity
                             </p>
-                        </div>
-                    </div>
+                        </ScrollRevealItem>
+                    </ScrollRevealStagger>
                 </div>
             </section>
 
@@ -149,10 +150,10 @@ export default function Home() {
             <HowItWorks />
 
             {/* ---- Pricing ---- */}
-            <section id="pricing" className="relative py-24 md:py-32 reveal-up">
+            <section id="pricing" className="relative py-24 md:py-32">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="mx-auto mb-16 max-w-xl text-center delay-100 reveal-up">
+                    <ScrollReveal delay={0.1} className="mx-auto mb-16 max-w-xl text-center">
                         <h2 className="mb-4">
                             <span className="text-[--color-text]">Simple </span>
                             <span className="text-gradient-static">pricing</span>
@@ -160,11 +161,11 @@ export default function Home() {
                         <p className="text-lg text-[--color-text-secondary]">
                             Start free. Upgrade when you need more.
                         </p>
-                    </div>
+                    </ScrollReveal>
 
-                    <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2 delay-200 reveal-up">
+                    <ScrollRevealStagger delay={0.2} className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
                         {/* Free */}
-                        <div className="glass-card flex flex-col self-start rounded-3xl p-8">
+                        <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold text-[--color-text]">$0</span>
@@ -205,10 +206,10 @@ export default function Home() {
                             >
                                 Get Started
                             </Link>
-                        </div>
+                        </ScrollRevealItem>
 
                         {/* Pro — premium gradient treatment */}
-                        <div className="gradient-border relative flex self-start rounded-3xl glow-blue">
+                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue">
                             <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
                                     POPULAR
@@ -244,22 +245,22 @@ export default function Home() {
                                     Get Pro
                                 </Link>
                             </div>
-                        </div>
-                    </div>
+                        </ScrollRevealItem>
+                    </ScrollRevealStagger>
                 </div>
             </section>
 
             <FAQ />
 
             {/* ---- Final CTA ---- */}
-            <section className="relative overflow-hidden py-32 md:py-48 reveal-up">
+            <section className="relative overflow-hidden py-32 md:py-48">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 {/* Background glow */}
                 <div className="absolute left-1/2 top-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
                 <div className="absolute left-[30%] top-[30%] h-[400px] w-[400px] rounded-full bg-cyan-500 gradient-blur" />
 
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
-                    <div className="mx-auto max-w-xl text-center delay-100 reveal-up">
+                    <ScrollReveal delay={0.1} className="mx-auto max-w-xl text-center">
                         <h2 className="mb-5">
                             <span className="text-[--color-text]">Ready to </span>
                             <span className="text-gradient-static">try it?</span>
@@ -274,7 +275,7 @@ export default function Home() {
                             Get Started
                             <ArrowRight className="h-4 w-4" />
                         </Link>
-                    </div>
+                    </ScrollReveal>
                 </div>
             </section>
         </>

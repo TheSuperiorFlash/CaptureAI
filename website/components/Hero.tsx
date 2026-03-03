@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { motion, Variants } from 'framer-motion'
+import { motion, Variants, useReducedMotion } from 'framer-motion'
 
 const platformLogos = [
     { src: '/platforms/canvas.png', alt: 'Canvas', heightClass: 'h-8' },
     { src: '/platforms/respondus.png', alt: 'Respondus', heightClass: 'h-7' },
+    { src: '/platforms/schoology.png', alt: 'Schoology', heightClass: 'h-8' },
     { src: '/platforms/moodle.png', alt: 'Moodle', heightClass: 'h-8' },
     { src: '/platforms/blackboard.png', alt: 'Blackboard', heightClass: 'h-5' },
-    { src: '/platforms/tophat.png', alt: 'Top Hat', heightClass: 'h-5' },
 ]
 
 const containerVariants: Variants = {
@@ -40,13 +40,15 @@ const itemVariants: Variants = {
 }
 
 export default function Hero() {
+    const shouldReduceMotion = useReducedMotion()
+
     return (
         <section className="relative overflow-hidden pb-32 pt-32 md:pb-48 md:pt-40">
             {/* Layered deeper gradient background */}
             <div className="pointer-events-none absolute inset-0 aurora-bg" />
-            <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#0047ff] gradient-blur gradient-blur-animated animate-pulse-glow" style={{ opacity: 0.15 }} />
-            <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow" style={{ opacity: 0.1 }} />
-            <div className="absolute bottom-[-100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#1a5cff] gradient-blur gradient-blur-animated animate-pulse-glow" style={{ animationDelay: '2s', opacity: 0.12 }} />
+            <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.08 }} />
+            <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.05 }} />
+            <div className="absolute bottom-[-100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.08 }} />
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 <motion.div
@@ -67,7 +69,7 @@ export default function Hero() {
                     </motion.div>
 
                     {/* Headline */}
-                    <motion.h1 variants={itemVariants} className="mb-4">
+                    <motion.h1 variants={itemVariants} className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)]">
                         <span className="text-[--color-text]">Screenshot any question.</span>
                         <br />
                         <span className="text-gradient">Get the exact answer.</span>
