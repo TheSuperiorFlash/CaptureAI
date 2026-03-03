@@ -5,6 +5,7 @@ import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
+import ScrollStory from '@/components/ScrollStory'
 import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -39,6 +40,9 @@ export default function Home() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <Hero />
+
+            {/* Apple-Style Story Sequence */}
+            <ScrollStory />
 
             {/* ---- Floating UI Showcase ---- */}
             <section className="relative py-24 md:py-32">
