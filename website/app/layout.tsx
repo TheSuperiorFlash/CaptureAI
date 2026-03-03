@@ -76,7 +76,7 @@ export default function RootLayout({
                 <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
                     Skip to main content
                 </a>
-                <div className="pointer-events-none fixed top-0 left-0 right-0 z-40 h-32 bg-[radial-gradient(ellipse_at_50%_0%,rgba(11,19,43,0.8)_0%,transparent_70%)]" />
+
                 <Navbar />
                 <main id="main-content" className="relative min-h-screen pt-16">
                     {children}

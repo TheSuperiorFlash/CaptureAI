@@ -45,11 +45,13 @@ export default function Hero() {
 
     return (
         <section className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-40">
-            {/* Layered deeper gradient background */}
-            <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] aurora-bg" />
-            <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.08 }} />
-            <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.05 }} />
-            <div className="absolute bottom-[-100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.08 }} />
+            {/* Layered deeper gradient background with smooth fade-out */}
+            <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
+                <div className="absolute inset-0 aurora-bg" />
+                <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.08 }} />
+                <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.05 }} />
+                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.08 }} />
+            </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 <motion.div
@@ -86,7 +88,7 @@ export default function Hero() {
                         <MotionLink
                             href="/activate"
                             whileTap={{ scale: 0.98 }}
-                            className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-105 hover:-translate-y-1"
+                            className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
                         >
                             Get Started Now
                             <ArrowRight className="h-5 w-5" />

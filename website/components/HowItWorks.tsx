@@ -39,7 +39,7 @@ export default function HowItWorks() {
                 {/* Steps with connecting line */}
                 <div className="relative grid gap-12 md:gap-8 md:grid-cols-3 reveal-up delay-200">
                     {/* Connecting gradient line (desktop only) */}
-                    <div className="absolute left-[16.67%] right-[16.67%] top-[24px] hidden h-px bg-gradient-to-r from-[#0047ff]/40 via-[#00f0ff]/30 to-[#0047ff]/40 md:block" />
+                    <div className="absolute left-[16.67%] right-[16.67%] top-[48px] hidden h-px bg-gradient-to-r from-[#0047ff]/40 via-[#00f0ff]/30 to-[#0047ff]/40 md:block" />
 
                     {steps.map((step, index) => {
                         const staggerDelay = `delay-${((index % 3) + 2) * 100}`
@@ -49,7 +49,7 @@ export default function HowItWorks() {
                                 {/* Glowing step number */}
                                 <div className="relative mx-auto mb-8 flex h-12 w-12 items-center justify-center">
                                     <div className="absolute inset-0 rounded-full bg-[#0047ff]/30 blur-md transition-all duration-500 group-hover:bg-[#00f0ff]/60 group-hover:blur-xl group-hover:scale-150" />
-                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white shadow-[0_0_25px_rgba(0,113,255,0.4)] border border-white/10 transition-transform duration-500 group-hover:scale-110">
+                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white border border-white/10 transition-transform duration-500 group-hover:scale-110">
                                         {step.number}
                                     </div>
                                 </div>
