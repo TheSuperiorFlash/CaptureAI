@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { motion, Variants, useReducedMotion } from 'framer-motion'
+const MotionLink = motion.create(Link)
 
 const platformLogos = [
     { src: '/platforms/canvas.png', alt: 'Canvas', heightClass: 'h-8' },
@@ -82,16 +83,15 @@ export default function Hero() {
 
                     {/* CTA */}
                     <motion.div variants={itemVariants} className="flex flex-col items-center gap-6">
-                        <Link href="/activate" passHref legacyBehavior>
-                            <motion.a
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-colors hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg"
-                            >
-                                Get Started Now
-                                <ArrowRight className="h-5 w-5" />
-                            </motion.a>
-                        </Link>
+                        <MotionLink
+                            href="/activate"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-colors hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg"
+                        >
+                            Get Started Now
+                            <ArrowRight className="h-5 w-5" />
+                        </MotionLink>
                         <Link
                             href="/#features"
                             className="inline-flex items-center gap-2 text-[15px] font-semibold text-[--color-text-secondary] transition-colors hover:text-cyan-400"
