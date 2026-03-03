@@ -13,22 +13,22 @@ export default function ScrollStory() {
     })
 
     // --- Story Sequence 1 ---
-    // Fades in from 0 -> 0.15, stays until 0.25, fades out by 0.35
-    const opacity1 = useTransform(scrollYProgress, [0, 0.15, 0.25, 0.35], [0, 1, 1, 0])
-    const y1 = useTransform(scrollYProgress, [0, 0.15, 0.25, 0.35], [40, 0, 0, -40])
-    const scale1 = useTransform(scrollYProgress, [0, 0.15, 0.25, 0.35], [0.95, 1, 1, 1.05])
+    // Fades in from 0 -> 0.1, stays until 0.25, fades out by 0.33
+    const opacity1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.33], [0, 1, 1, 0])
+    const y1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.33], [40, 0, 0, -40])
+    const scale1 = useTransform(scrollYProgress, [0, 0.1, 0.25, 0.33], [0.95, 1, 1, 1.05])
 
     // --- Story Sequence 2 ---
-    // Fades in from 0.35 -> 0.5, stays until 0.6, fades out by 0.7
-    const opacity2 = useTransform(scrollYProgress, [0.35, 0.5, 0.6, 0.7], [0, 1, 1, 0])
-    const y2 = useTransform(scrollYProgress, [0.35, 0.5, 0.6, 0.7], [40, 0, 0, -40])
-    const scale2 = useTransform(scrollYProgress, [0.35, 0.5, 0.6, 0.7], [0.95, 1, 1, 1.05])
+    // Fades in from 0.33 -> 0.43, stays until 0.58, fades out by 0.66
+    const opacity2 = useTransform(scrollYProgress, [0.33, 0.43, 0.58, 0.66], [0, 1, 1, 0])
+    const y2 = useTransform(scrollYProgress, [0.33, 0.43, 0.58, 0.66], [40, 0, 0, -40])
+    const scale2 = useTransform(scrollYProgress, [0.33, 0.43, 0.58, 0.66], [0.95, 1, 1, 1.05])
 
     // --- Story Sequence 3 ---
-    // Fades in from 0.7 -> 0.85, stays until 1.0
-    const opacity3 = useTransform(scrollYProgress, [0.7, 0.85, 0.95, 1], [0, 1, 1, 0])
-    const y3 = useTransform(scrollYProgress, [0.7, 0.85, 0.95, 1], [40, 0, 0, -20])
-    const scale3 = useTransform(scrollYProgress, [0.7, 0.85, 0.95, 1], [0.95, 1, 1, 1.02])
+    // Fades in from 0.66 -> 0.76, stays until 1.0
+    const opacity3 = useTransform(scrollYProgress, [0.66, 0.76, 0.95, 1], [0, 1, 1, 0])
+    const y3 = useTransform(scrollYProgress, [0.66, 0.76, 0.95, 1], [40, 0, 0, -20])
+    const scale3 = useTransform(scrollYProgress, [0.66, 0.76, 0.95, 1], [0.95, 1, 1, 1.02])
 
     // --- Background Glow ---
     // Transitions color and scale to provide immersive feedback

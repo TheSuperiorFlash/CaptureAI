@@ -43,7 +43,7 @@ export default function Hero() {
     const shouldReduceMotion = useReducedMotion()
 
     return (
-        <section className="relative overflow-hidden pb-32 pt-32 md:pb-48 md:pt-40">
+        <section className="relative pb-32 pt-32 md:pb-48 md:pt-40">
             {/* Layered deeper gradient background */}
             <div className="pointer-events-none absolute inset-0 aurora-bg" />
             <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.08 }} />
@@ -88,7 +88,7 @@ export default function Hero() {
                                 whileTap={{ scale: 0.98 }}
                                 className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-colors hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg"
                             >
-                                Get Started Free
+                                Get Started Now
                                 <ArrowRight className="h-5 w-5" />
                             </motion.a>
                         </Link>
