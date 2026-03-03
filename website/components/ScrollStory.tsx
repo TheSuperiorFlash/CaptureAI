@@ -53,11 +53,11 @@ export default function ScrollStory() {
                     }}
                 />
 
-                <div className="relative mx-auto max-w-5xl px-6 text-center">
+                <div className="relative mx-auto flex h-full w-full max-w-5xl items-center justify-center px-6 text-center">
 
                     {/* Sequence 1 */}
                     <motion.div
-                        className="absolute left-0 right-0 top-1/2 -translate-y-1/2"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
                         style={{ opacity: opacity1, y: y1, scale: scale1 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -71,7 +71,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 2 */}
                     <motion.div
-                        className="absolute left-0 right-0 top-1/2 -translate-y-1/2"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
                         style={{ opacity: opacity2, y: y2, scale: scale2 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -84,7 +84,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 3 */}
                     <motion.div
-                        className="absolute left-0 right-0 top-1/2 -translate-y-1/2"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
                         style={{ opacity: opacity3, y: y3, scale: scale3 }}
                     >
                         <h2 className="drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">

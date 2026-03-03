@@ -39,7 +39,6 @@
 /* ---- Base ---- */
 
 html {
-  overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -50,7 +49,6 @@ html {
 }
 
 body {
-  overflow-x: hidden;
   background-color: var(--color-background);
   color: var(--color-text);
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
