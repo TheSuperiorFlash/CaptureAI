@@ -103,7 +103,7 @@ export default function Home() {
                     {/* Before / After comparison */}
                     <ScrollRevealStagger delay={0.2} stagger={0} className="grid gap-6 md:grid-cols-2">
                         {/* Without */}
-                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5">
+                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5" transition={{ type: "spring", stiffness: 40, damping: 20 }}>
                             <div className="mb-4 flex items-center gap-2.5">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/15">
                                     <XIcon className="h-3.5 w-3.5 text-red-400" />
@@ -125,7 +125,7 @@ export default function Home() {
                         </ScrollRevealItem>
 
                         {/* With */}
-                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5">
+                        <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5" transition={{ type: "spring", stiffness: 40, damping: 20 }}>
                             <div className="mb-4 flex items-center gap-2.5">
                                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15">
                                     <Check className="h-3.5 w-3.5 text-emerald-400" />

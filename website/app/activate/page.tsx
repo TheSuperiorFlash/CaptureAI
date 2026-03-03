@@ -338,6 +338,9 @@ export default function ActivatePage() {
                         {/* Result message */}
                         {result && (
                             <div
+                                role="status"
+                                aria-live="polite"
+                                aria-atomic="true"
                                 className={`mt-5 rounded-xl border p-5 ${result.type === 'success'
                                     ? 'border-emerald-500/20 bg-emerald-500/[0.05]'
                                     : 'border-red-500/20 bg-red-500/[0.05]'

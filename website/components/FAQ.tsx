@@ -41,9 +41,9 @@ export default function FAQ() {
                     {/* Left column */}
                     <div className="reveal-up delay-100">
                         <h2 className="mb-5">
-                            <span className="text-(--color-text)">FAQ</span>
+                            <span className="text-[--color-text]">FAQ</span>
                         </h2>
-                        <p className="text-lg leading-relaxed text-(--color-text-tertiary) max-w-sm">
+                        <p className="text-lg leading-relaxed text-[--color-text-tertiary] max-w-sm">
                             Answers to common questions about CaptureAI, our pricing, and how we protect your privacy.
                         </p>
                     </div>
@@ -62,13 +62,13 @@ export default function FAQ() {
                                             aria-expanded={openIndex === index}
                                             aria-controls={panelId}
                                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                            className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-cyan) focus-visible:bg-white/[0.02]"
+                                            className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
                                         >
-                                            <span className={`text-[16px] font-medium transition-colors ${openIndex === index ? 'text-(--color-text)' : 'text-(--color-text-secondary)'}`}>
+                                            <span className={`text-[16px] font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                                 {faq.question}
                                             </span>
                                             <ChevronDown
-                                                className={`h-4 w-4 flex-shrink-0 transition-all duration-300 ease-out ${openIndex === index ? 'rotate-180 text-cyan-400' : 'text-(--color-text-tertiary)'
+                                                className={`h-4 w-4 flex-shrink-0 transition-all duration-300 ease-out ${openIndex === index ? 'rotate-180 text-cyan-400' : 'text-[--color-text-tertiary]'
                                                     }`}
                                             />
                                         </button>
@@ -80,7 +80,7 @@ export default function FAQ() {
                                                 }`}
                                         >
                                             <div className="overflow-hidden">
-                                                <p className="px-6 pb-6 pt-1 text-[15px] leading-relaxed text-(--color-text-tertiary)">
+                                                <p className="px-6 pb-6 pt-1 text-[15px] leading-relaxed text-[--color-text-tertiary]">
                                                     {faq.answer}
                                                 </p>
                                             </div>

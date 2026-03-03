@@ -124,17 +124,26 @@ export default function Hero() {
                                 key={platform.alt}
                                 className="opacity-40 grayscale hover:opacity-100 hover:grayscale-0"
                                 initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 0.4, y: [0, -4, 0] }}
-                                transition={{
-                                    opacity: { delay: 1 + (i * 0.1), duration: 0.5 },
-                                    y: {
-                                        repeat: Infinity,
-                                        duration: 4,
-                                        delay: i * 0.6,
-                                        ease: "easeInOut"
+                                animate={shouldReduceMotion
+                                    ? { opacity: 0.4 }
+                                    : { opacity: 0.4, y: [0, -4, 0] }
+                                }
+                                transition={shouldReduceMotion
+                                    ? { opacity: { delay: 1 + (i * 0.1), duration: 0.5 } }
+                                    : {
+                                        opacity: { delay: 1 + (i * 0.1), duration: 0.5 },
+                                        y: {
+                                            repeat: Infinity,
+                                            duration: 4,
+                                            delay: i * 0.6,
+                                            ease: "easeInOut"
+                                        }
                                     }
-                                }}
-                                whileHover={{ opacity: 1, filter: "grayscale(0%)", transition: { duration: 0.3 } }}
+                                }
+                                whileHover={shouldReduceMotion
+                                    ? { opacity: 1 }
+                                    : { opacity: 1, filter: "grayscale(0%)", transition: { duration: 0.3 } }
+                                }
                             >
                                 <Image
                                     src={platform.src}

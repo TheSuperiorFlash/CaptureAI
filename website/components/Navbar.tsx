@@ -16,7 +16,7 @@ export default function Navbar() {
             setIsScrolled(window.scrollY > 10)
         }
 
-        window.addEventListener('scroll', handleScroll)
+        window.addEventListener('scroll', handleScroll, { passive: true })
         handleScroll() // Check on mount
 
         return () => window.removeEventListener('scroll', handleScroll)

@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ReactNode } from 'react'
 
 interface ScrollRevealProps {
@@ -13,6 +13,8 @@ interface ScrollRevealProps {
 }
 
 export function ScrollReveal({ children, className = "", delay = 0, yOffset = 30, margin = "-50px" }: ScrollRevealProps) {
+    const reduced = useReducedMotion()
+    if (reduced) return <div className={className}>{children}</div>
     return (
         <motion.div
             initial={{ opacity: 0, y: yOffset }}
@@ -27,6 +29,8 @@ export function ScrollReveal({ children, className = "", delay = 0, yOffset = 30
 }
 
 export function ScrollRevealStagger({ children, className = "", delay = 0, stagger = 0.15, margin = "-50px" }: ScrollRevealProps) {
+    const reduced = useReducedMotion()
+    if (reduced) return <div className={className}>{children}</div>
     return (
         <motion.div
             initial="hidden"
@@ -49,7 +53,10 @@ export function ScrollRevealStagger({ children, className = "", delay = 0, stagg
     )
 }
 
-export function ScrollRevealItem({ children, className = "" }: { children: ReactNode, className?: string }) {
+export function ScrollRevealItem({ children, className = "", transition }: { children: ReactNode, className?: string, transition?: object }) {
+    const reduced = useReducedMotion()
+    if (reduced) return <div className={className}>{children}</div>
+    const defaultTransition = transition ?? { type: "spring", stiffness: 100, damping: 20 }
     return (
         <motion.div
             variants={{
@@ -57,7 +64,7 @@ export function ScrollRevealItem({ children, className = "" }: { children: React
                 visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { type: "spring", stiffness: 100, damping: 20 }
+                    transition: defaultTransition
                 }
             }}
             className={className}

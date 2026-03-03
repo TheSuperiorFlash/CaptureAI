@@ -1,12 +1,13 @@
 'use client'
 
 import { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 
 export default function ScrollStory() {
+    const reduced = useReducedMotion()
     const containerRef = useRef<HTMLDivElement>(null)
 
-    // Track scroll progress through the 300vh container
+    // Track scroll progress through the 400vh container
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start start', 'end end']
@@ -35,10 +36,44 @@ export default function ScrollStory() {
     const glowScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.5, 1])
     const glowOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 0.4, 0.4, 0])
 
+    // Reduced motion: render all three story sequences statically, no sticky scroll
+    if (reduced) {
+        return (
+            <section className="relative bg-[--color-background] py-24 space-y-24">
+                <div className="mx-auto max-w-5xl px-6 text-center">
+                    <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                        Homework shouldn&apos;t be a <br className="hidden md:block" />
+                        <span className="text-gradient">search mission.</span>
+                    </h2>
+                    <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
+                        Stop switching tabs and digging through irrelevant forum posts.
+                    </p>
+                </div>
+                <div className="mx-auto max-w-5xl px-6 text-center">
+                    <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                        Your screen is the context.
+                    </h2>
+                    <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
+                        CaptureAI reads the exact phrasing, the multiple-choice options, and the diagrams simultaneously.
+                    </p>
+                </div>
+                <div className="mx-auto max-w-5xl px-6 text-center">
+                    <h2 className="drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+                        The answer appears <br className="hidden md:block" />
+                        where you need it most.
+                    </h2>
+                    <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
+                        Instantly. Seamlessly. Without a trace.
+                    </p>
+                </div>
+            </section>
+        )
+    }
+
     return (
         <section ref={containerRef} className="relative h-[400vh] bg-[--color-background]">
-            {/* 
-              This is the sticky viewport. It stays pinned while the user scrolls 
+            {/*
+              This is the sticky viewport. It stays pinned while the user scrolls
               through the 400vh parent container.
             */}
             <div className="sticky top-0 h-screen w-full overflow-hidden">

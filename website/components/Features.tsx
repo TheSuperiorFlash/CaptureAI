@@ -1,7 +1,7 @@
 'use client'
 
 import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 
 interface Feature {
     icon: LucideIcon
@@ -76,6 +76,7 @@ const features: Feature[] = [
 ]
 
 export default function Features() {
+    const shouldReduceMotion = useReducedMotion()
     return (
         <section id="features" className="relative py-24 md:py-32 reveal-up">
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
@@ -83,10 +84,10 @@ export default function Features() {
                 {/* Header */}
                 <motion.div
                     className="mx-auto mb-16 max-w-2xl text-center"
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
                 >
                     <h2 className="mb-4">
                         <span className="text-[--color-text]">Everything you need, </span>
@@ -105,16 +106,16 @@ export default function Features() {
                         return (
                             <motion.div
                                 key={feature.title}
-                                initial={{ opacity: 0, y: 30 }}
+                                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-50px" }}
-                                transition={{
+                                transition={shouldReduceMotion ? { duration: 0 } : {
                                     type: "spring",
                                     stiffness: 100,
                                     damping: 15,
                                     delay: (index % 4) * 0.1
                                 }}
-                                whileHover={{ y: -5, scale: 1.02, transition: { type: "spring", stiffness: 300 } }}
+                                {...(!shouldReduceMotion && { whileHover: { y: -5, scale: 1.02, transition: { type: "spring", stiffness: 300 } } })}
                                 className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
                             >
                                 {feature.pro && (
