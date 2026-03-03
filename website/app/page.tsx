@@ -213,7 +213,7 @@ export default function Home() {
                         </ScrollRevealItem>
 
                         {/* Pro — premium gradient treatment */}
-                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue">
+                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:shadow-[0_0_60px_rgba(0,113,255,0.4)] z-10">
                             <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
                                     POPULAR
@@ -274,10 +274,10 @@ export default function Home() {
                         </p>
                         <Link
                             href="/activate"
-                            className="glow-btn inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-8 py-4 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:scale-105 hover:-translate-y-1"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all ring-1 ring-white/10 hover:from-[#1a5cff] hover:to-[#00f0ff] hover:ring-2 hover:ring-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
                         >
                             Get Started
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-5 w-5" />
                         </Link>
                     </ScrollReveal>
                 </div>
