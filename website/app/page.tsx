@@ -40,14 +40,14 @@ export default function Home() {
             <Hero />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="relative py-24 md:py-32">
+            <section className="relative py-24 md:py-32 reveal-up">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
                         {/* Image with glow frame */}
-                        <div className="relative">
-                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-500/20 via-transparent to-cyan-500/10 blur-sm" />
-                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+                        <div className="relative delay-100 reveal-up">
+                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-600/30 via-transparent to-cyan-400/20 blur-md" />
+                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-blue-900/20">
                                 <Image
                                     src="/floating-ui.png"
                                     alt="CaptureAI floating interface on a webpage"
@@ -61,7 +61,7 @@ export default function Home() {
                         </div>
 
                         {/* Copy */}
-                        <div>
+                        <div className="delay-200 reveal-up">
                             <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
                                 Always accessible
                             </span>
@@ -80,12 +80,12 @@ export default function Home() {
             </section>
 
             {/* ---- Privacy Guard Showcase ---- */}
-            <section className="relative py-24 md:py-32">
+            <section className="relative py-24 md:py-32 reveal-up">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
-                <div className="pointer-events-none absolute inset-0 gradient-section" />
+                <div className="pointer-events-none absolute inset-0 aurora-bg opacity-40" />
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
                     {/* Header */}
-                    <div className="mx-auto mb-14 max-w-2xl text-center">
+                    <div className="mx-auto mb-14 max-w-2xl text-center delay-100 reveal-up">
                         <span className="mb-4 inline-block rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
                             Pro feature
                         </span>
@@ -149,23 +149,23 @@ export default function Home() {
             <HowItWorks />
 
             {/* ---- Pricing ---- */}
-            <section id="pricing" className="relative py-24 md:py-32">
+            <section id="pricing" className="relative py-24 md:py-32 reveal-up">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="mx-auto mb-16 max-w-xl text-center">
+                    <div className="mx-auto mb-16 max-w-xl text-center delay-100 reveal-up">
                         <h2 className="mb-4">
                             <span className="text-[--color-text]">Simple </span>
                             <span className="text-gradient-static">pricing</span>
                         </h2>
-                        <p className="text-[--color-text-secondary]">
+                        <p className="text-lg text-[--color-text-secondary]">
                             Start free. Upgrade when you need more.
                         </p>
                     </div>
 
-                    <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
+                    <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2 delay-200 reveal-up">
                         {/* Free */}
-                        <div className="glass-card flex flex-col self-start rounded-2xl p-7">
-                            <h3 className="mb-1 text-[--color-text]">Free</h3>
+                        <div className="glass-card flex flex-col self-start rounded-3xl p-8">
+                            <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
@@ -201,19 +201,19 @@ export default function Home() {
 
                             <Link
                                 href="/activate"
-                                className="glass block rounded-xl py-3 text-center text-sm font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text]"
+                                className="glass block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text] hover:bg-white/[0.05]"
                             >
                                 Get Started
                             </Link>
                         </div>
 
-                        {/* Pro — gradient border treatment */}
-                        <div className="gradient-border relative flex self-start rounded-2xl">
-                            <div className="relative flex flex-1 flex-col rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
-                                <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
-                                    Popular
+                        {/* Pro — premium gradient treatment */}
+                        <div className="gradient-border relative flex self-start rounded-3xl glow-blue">
+                            <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
+                                <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
+                                    POPULAR
                                 </span>
-                                <h3 className="mb-1 text-[--color-text]">Pro</h3>
+                                <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
                                 <div className="mb-7">
                                     <span className="text-4xl font-bold text-gradient-static">$9.99</span>
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>
@@ -252,14 +252,14 @@ export default function Home() {
             <FAQ />
 
             {/* ---- Final CTA ---- */}
-            <section className="relative overflow-hidden py-28 md:py-36">
+            <section className="relative overflow-hidden py-32 md:py-48 reveal-up">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 {/* Background glow */}
-                <div className="absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
-                <div className="absolute left-[30%] top-[30%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
+                <div className="absolute left-1/2 top-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
+                <div className="absolute left-[30%] top-[30%] h-[400px] w-[400px] rounded-full bg-cyan-500 gradient-blur" />
 
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
-                    <div className="mx-auto max-w-lg text-center">
+                    <div className="mx-auto max-w-xl text-center delay-100 reveal-up">
                         <h2 className="mb-5">
                             <span className="text-[--color-text]">Ready to </span>
                             <span className="text-gradient-static">try it?</span>
