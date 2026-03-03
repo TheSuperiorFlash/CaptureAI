@@ -41,7 +41,7 @@ export default function ScrollStory() {
               This is the sticky viewport. It stays pinned while the user scrolls 
               through the 400vh parent container.
             */}
-            <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
+            <div className="sticky top-0 h-screen w-full overflow-hidden">
 
                 {/* Immersive background glow tracking the scroll */}
                 <motion.div
@@ -53,7 +53,7 @@ export default function ScrollStory() {
                     }}
                 />
 
-                <div className="relative mx-auto flex h-full w-full max-w-5xl items-center justify-center px-6 text-center">
+                <div className="relative mx-auto h-full w-full max-w-5xl px-6 text-center">
 
                     {/* Sequence 1 */}
                     <motion.div
