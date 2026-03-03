@@ -37,7 +37,7 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Steps with connecting line */}
-                <ol className="relative grid gap-12 md:gap-8 md:grid-cols-3">
+                <ol className="relative list-none grid gap-12 md:gap-8 md:grid-cols-3">
                     {/* Connecting gradient line (desktop only) */}
                     <div className="absolute left-[16.67%] right-[16.67%] top-[48px] hidden h-px bg-gradient-to-r from-[#0047ff]/40 via-[#00f0ff]/30 to-[#0047ff]/40 md:block" aria-hidden="true" />
 
