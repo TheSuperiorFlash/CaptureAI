@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon, Minus } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -183,11 +183,10 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'free'}
-                        className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${
-                            selectedTier === 'free'
+                        className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${selectedTier === 'free'
                                 ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 : ''
-                        }`}
+                            }`}
                         onClick={() => setSelectedTier('free')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
                     >
@@ -196,11 +195,10 @@ export default function ActivatePage() {
                                 <h2 className="text-xl font-bold text-[--color-text]">Free</h2>
                                 <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                             </div>
-                            <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
-                                selectedTier === 'free'
+                            <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'free'
                                     ? 'border-blue-500 bg-blue-500'
                                     : 'border-white/20'
-                            }`}>
+                                }`}>
                                 {selectedTier === 'free' && <Check className="h-3 w-3 text-white" />}
                             </div>
                         </div>
@@ -231,11 +229,10 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${
-                            selectedTier === 'pro'
+                        className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${selectedTier === 'pro'
                                 ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
                                 : ''
-                        }`}
+                            }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
@@ -249,11 +246,10 @@ export default function ActivatePage() {
                                         <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
                                         <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
                                     </div>
-                                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${
-                                        selectedTier === 'pro'
+                                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                             ? 'border-cyan-400 bg-cyan-400'
                                             : 'border-white/20'
-                                    }`}>
+                                        }`}>
                                         {selectedTier === 'pro' && <Check className="h-3 w-3 text-[--color-background]" />}
                                     </div>
                                 </div>
@@ -291,18 +287,18 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Email + CTA section */}
-                <div className="mx-auto mt-12 max-w-md">
-                    <div className="glass-card rounded-2xl p-7">
-                        <h3 className="mb-1 text-center text-lg font-semibold text-[--color-text]">
+                <div className="mx-auto mt-12 max-w-2xl">
+                    <div className="glass-card rounded-2xl p-8 md:p-10">
+                        <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
                             {selectedTier === 'free' ? 'Get your free license key' : 'Start your Pro subscription'}
                         </h3>
-                        <p className="mb-6 text-center text-sm text-[--color-text-tertiary]">
+                        <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
                             {selectedTier === 'free'
                                 ? 'Enter your email and we\'ll send you a key instantly.'
                                 : 'Enter your email to proceed to secure checkout via Stripe.'}
                         </p>
 
-                        <div className="mb-4 flex gap-3">
+                        <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
                             <input
                                 type="email"
                                 value={email}
@@ -316,20 +312,19 @@ export default function ActivatePage() {
                                 placeholder="your@email.com"
                                 aria-label="Email address"
                                 autoComplete="email"
-                                className="min-w-0 flex-1 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3 text-sm text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                                className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-3.5 text-base text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                             />
                             <button
                                 type="button"
                                 onClick={handleSignup}
                                 disabled={loading}
-                                className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all ${
-                                    loading
+                                className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-all ${loading
                                         ? 'cursor-not-allowed bg-blue-600/40'
-                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500'
-                                }`}
+                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
+                                    }`}
                             >
                                 {loading ? (
-                                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
+                                    <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
                                 ) : (
                                     <>
                                         {selectedTier === 'free' ? 'Get Key' : 'Continue'}
@@ -348,11 +343,10 @@ export default function ActivatePage() {
                         {/* Result message */}
                         {result && (
                             <div
-                                className={`mt-5 rounded-xl border p-5 ${
-                                    result.type === 'success'
+                                className={`mt-5 rounded-xl border p-5 ${result.type === 'success'
                                         ? 'border-emerald-500/20 bg-emerald-500/[0.05]'
                                         : 'border-red-500/20 bg-red-500/[0.05]'
-                                }`}
+                                    }`}
                             >
                                 {result.type === 'success' ? (
                                     <>
@@ -378,10 +372,13 @@ export default function ActivatePage() {
                                         </div>
                                     </>
                                 ) : (
-                                    <>
-                                        <h3 className="mb-1 text-sm font-semibold text-red-400">Error</h3>
-                                        <p className="text-sm text-[--color-text-tertiary]">{result.message}</p>
-                                    </>
+                                    <div className="flex flex-col items-center text-center">
+                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
+                                            <AlertCircle className="h-5 w-5 text-red-400" />
+                                        </div>
+                                        <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
+                                        <p className="text-sm text-red-200/70">{result.message}</p>
+                                    </div>
                                 )}
                             </div>
                         )}
