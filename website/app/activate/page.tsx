@@ -184,8 +184,8 @@ export default function ActivatePage() {
                         tabIndex={0}
                         aria-pressed={selectedTier === 'free'}
                         className={`glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${selectedTier === 'free'
-                                ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
-                                : ''
+                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
+                            : ''
                             }`}
                         onClick={() => setSelectedTier('free')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
@@ -196,15 +196,15 @@ export default function ActivatePage() {
                                 <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                             </div>
                             <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'free'
-                                    ? 'border-blue-500 bg-blue-500'
-                                    : 'border-white/20'
+                                ? 'border-blue-500 bg-blue-500'
+                                : 'border-white/20'
                                 }`}>
                                 {selectedTier === 'free' && <Check className="h-3 w-3 text-white" />}
                             </div>
                         </div>
 
                         <div className="mb-7">
-                            <span className="text-4xl font-extrabold text-[--color-text]">$0</span>
+                            <span className="text-4xl font-extrabold font-inter text-[--color-text]">$0</span>
                             <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                         </div>
 
@@ -230,14 +230,14 @@ export default function ActivatePage() {
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
                         className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${selectedTier === 'pro'
-                                ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
-                                : ''
+                            ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
+                            : ''
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
                         <div className="gradient-border rounded-2xl">
-                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-7">
+                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.12] to-cyan-500/[0.08] p-7">
                                 <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
                                     Recommended
                                 </span>
@@ -247,15 +247,15 @@ export default function ActivatePage() {
                                         <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
                                     </div>
                                     <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                            ? 'border-cyan-400 bg-cyan-400'
-                                            : 'border-white/20'
+                                        ? 'border-cyan-400 bg-cyan-400'
+                                        : 'border-white/20'
                                         }`}>
                                         {selectedTier === 'pro' && <Check className="h-3 w-3 text-[--color-background]" />}
                                     </div>
                                 </div>
 
                                 <div className="mb-7">
-                                    <span className="text-4xl font-extrabold text-gradient-static">$9.99</span>
+                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                                 </div>
 
@@ -319,8 +319,8 @@ export default function ActivatePage() {
                                 onClick={handleSignup}
                                 disabled={loading}
                                 className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-all ${loading
-                                        ? 'cursor-not-allowed bg-blue-600/40'
-                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
+                                    ? 'cursor-not-allowed bg-blue-600/40'
+                                    : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
                                     }`}
                             >
                                 {loading ? (
@@ -334,18 +334,13 @@ export default function ActivatePage() {
                             </button>
                         </div>
 
-                        {selectedTier === 'pro' && (
-                            <p className="text-center text-xs text-[--color-text-tertiary]">
-                                Cancel anytime.
-                            </p>
-                        )}
 
                         {/* Result message */}
                         {result && (
                             <div
                                 className={`mt-5 rounded-xl border p-5 ${result.type === 'success'
-                                        ? 'border-emerald-500/20 bg-emerald-500/[0.05]'
-                                        : 'border-red-500/20 bg-red-500/[0.05]'
+                                    ? 'border-emerald-500/20 bg-emerald-500/[0.05]'
+                                    : 'border-red-500/20 bg-red-500/[0.05]'
                                     }`}
                             >
                                 {result.type === 'success' ? (

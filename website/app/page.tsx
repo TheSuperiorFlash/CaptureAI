@@ -172,7 +172,7 @@ export default function Home() {
                         <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
                             <div className="mb-7">
-                                <span className="text-4xl font-bold text-[--color-text]">$0</span>
+                                <span className="text-4xl font-bold font-inter text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
 
@@ -213,14 +213,14 @@ export default function Home() {
                         </ScrollRevealItem>
 
                         {/* Pro — premium gradient treatment */}
-                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue transition-all duration-500 hover:-translate-y-1 hover:scale-[1.01] hover:shadow-[0_0_60px_rgba(0,113,255,0.4)] z-10">
+                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue z-10">
                             <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
                                     POPULAR
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
                                 <div className="mb-7">
-                                    <span className="text-4xl font-bold text-gradient-static">$9.99</span>
+                                    <span className="text-4xl font-bold font-inter text-gradient-static">$9.99</span>
                                     <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                                 </div>
 

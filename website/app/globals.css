@@ -61,6 +61,10 @@ body {
 
 /* ---- Typography Scale ---- */
 
+.font-inter {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
 h1,
 h2,
 h3,
@@ -218,16 +222,18 @@ p {
 
 .gradient-border {
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .gradient-border::before {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(0, 71, 255, 0.5), rgba(0, 240, 255, 0.2), rgba(0, 71, 255, 0.15));
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.6) 0%, rgba(0, 71, 255, 0.4) 50%, rgba(0, 240, 255, 0.2) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-image: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -235,7 +241,7 @@ p {
 }
 
 .gradient-border:hover::before {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.6), rgba(0, 71, 255, 0.3), rgba(0, 240, 255, 0.2));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(0, 240, 255, 0.7) 50%, rgba(0, 71, 255, 0.4) 100%);
 }
 
 /* ---- Gradient Divider ---- */
