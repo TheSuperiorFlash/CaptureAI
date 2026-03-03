@@ -54,9 +54,9 @@ export default function Hero() {
             {/* Layered deeper gradient background with smooth fade-out */}
             <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
                 <div className="absolute inset-0 aurora-bg" />
-                <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.08 }} />
-                <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.05 }} />
-                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.08 } : { opacity: 0.08 }} />
+                <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.65 }} />
+                <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.25 }} />
+                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.65 } : { opacity: 0.65 }} />
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
