@@ -216,7 +216,7 @@ export default function Home() {
                         {/* Pro — premium gradient treatment */}
                         <ScrollRevealItem className="relative flex self-start rounded-3xl glow-blue z-10 border border-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]">
                             <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
-                                <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
+                                <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>

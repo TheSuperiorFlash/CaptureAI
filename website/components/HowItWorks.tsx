@@ -46,7 +46,7 @@ export default function HowItWorks() {
                             <li key={step.number} className="relative flex flex-col items-center rounded-3xl p-6 text-center">
                                 {/* Glowing step number */}
                                 <div className="relative mx-auto mb-8 flex h-12 w-12 items-center justify-center">
-                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white border border-white/10">
+                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white">
                                         {step.number}
                                     </div>
                                 </div>

@@ -169,7 +169,7 @@ export default function Navbar() {
                 </div>
 
                 {/* CTA */}
-                <div className="hidden md:block relative z-10">
+                <div className="hidden md:block relative z-10 ml-2">
                     <MagneticButton magneticRange={10}>
                         <Link
                             href="/activate"
