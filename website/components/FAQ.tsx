@@ -62,7 +62,7 @@ export default function FAQ() {
                                             aria-expanded={openIndex === index}
                                             aria-controls={panelId}
                                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                            className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
+                                            className={`flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02] ${index === 0 ? 'rounded-t-2xl' : index === faqs.length - 1 ? 'rounded-b-2xl' : 'rounded-none'}`}
                                         >
                                             <span className={`text-[16px] font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                                 {faq.question}

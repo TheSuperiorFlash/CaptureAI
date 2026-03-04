@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { motion, Variants, useReducedMotion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { motion, Variants, useReducedMotion, useMotionValue, useSpring, useTransform, useAnimationFrame } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
 import MagneticButton from './MagneticButton'
 const MotionLink = motion.create(Link)
 
@@ -41,6 +41,56 @@ const itemVariants: Variants = {
             mass: 1
         }
     }
+}
+
+function PlatformMarquee({ logos }: { logos: typeof platformLogos }) {
+    const trackRef = useRef<HTMLDivElement>(null)
+    const xPos = useRef(0)
+    const x = useMotionValue(0)
+    const speed = 25 // pixels per second (matches old 30s CSS animation)
+
+    useAnimationFrame((_, delta) => {
+        if (!trackRef.current) return
+        // Measure half the track (one full set of logos)
+        const halfWidth = trackRef.current.scrollWidth / 2
+        if (halfWidth === 0) return
+
+        xPos.current -= speed * (delta / 1000)
+        // Seamless reset: once we've scrolled one full set, snap back
+        if (Math.abs(xPos.current) >= halfWidth) {
+            xPos.current += halfWidth
+        }
+        x.set(xPos.current)
+    })
+
+    return (
+        <div className="relative mx-auto flex max-w-5xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            <motion.div
+                ref={trackRef}
+                className="flex"
+                style={{ x }}
+            >
+                {[0, 1].map((setIndex) => (
+                    <div key={setIndex} className="flex flex-shrink-0 items-center gap-12 pr-12">
+                        {logos.map((platform) => (
+                            <div
+                                key={`${platform.alt}-${setIndex}`}
+                                className="flex-shrink-0 opacity-40 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+                            >
+                                <Image
+                                    src={platform.src}
+                                    alt={platform.alt}
+                                    width={120}
+                                    height={40}
+                                    className={`${platform.heightClass} w-auto`}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </motion.div>
+        </div>
+    )
 }
 
 export default function Hero() {
@@ -173,24 +223,7 @@ export default function Hero() {
                     <p className="mb-8 text-center text-[13px] font-semibold tracking-widest uppercase text-[--color-text-tertiary]">
                         Undetectable on every learning platform
                     </p>
-                    <div className="relative mx-auto flex max-w-5xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-                        <div className="flex w-[200%] animate-marquee flex-row items-center justify-around gap-12 pr-12">
-                            {[...platformLogos, ...platformLogos, ...platformLogos, ...platformLogos].map((platform, i) => (
-                                <div
-                                    key={`${platform.alt}-${i}`}
-                                    className="flex-shrink-0 opacity-40 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
-                                >
-                                    <Image
-                                        src={platform.src}
-                                        alt={platform.alt}
-                                        width={120}
-                                        height={40}
-                                        className={`${platform.heightClass} w-auto`}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <PlatformMarquee logos={platformLogos} />
                 </motion.div>
             </div>
         </section>
