@@ -168,7 +168,7 @@ export default function Home() {
                         </p>
                     </ScrollReveal>
 
-                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto flex flex-col-reverse max-w-3xl gap-8 md:grid md:grid-cols-2">
                         {/* Free */}
                         <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>

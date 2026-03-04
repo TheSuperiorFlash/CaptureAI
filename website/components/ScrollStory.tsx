@@ -102,7 +102,7 @@ export default function ScrollStory() {
 
                 {/* Immersive background glow tracking the scroll */}
                 <motion.div
-                    className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full mix-blend-screen gradient-blur pointer-events-none"
+                    className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full hidden md:block mix-blend-screen gradient-blur pointer-events-none"
                     style={{
                         scale: glowScale,
                         opacity: glowOpacity,
@@ -113,7 +113,7 @@ export default function ScrollStory() {
                 {/* Central Visual Anchor (The "Interface") */}
                 <div className="absolute inset-0 flex items-center justify-center perspective-[1200px] pointer-events-none">
                     <motion.div
-                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-[0_0_50px_rgba(0,100,255,0.15)] backdrop-blur-xl"
+                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060913]/90 md:bg-black/40 shadow-[0_0_30px_rgba(0,100,255,0.1)] md:shadow-[0_0_50px_rgba(0,100,255,0.15)] md:backdrop-blur-xl backdrop-blur-sm will-change-transform"
                         style={{
                             scale: anchorScale,
                             rotateX: anchorRotateX,

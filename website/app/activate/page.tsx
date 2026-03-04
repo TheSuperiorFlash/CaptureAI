@@ -176,7 +176,7 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Plans grid */}
-                <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+                <div className="mx-auto flex flex-col-reverse max-w-4xl gap-6 md:grid md:grid-cols-2">
                     {/* Free plan */}
                     <div
                         role="button"

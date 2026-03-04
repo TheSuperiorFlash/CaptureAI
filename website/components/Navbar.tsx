@@ -13,6 +13,7 @@ export default function Navbar() {
     const [activeHash, setActiveHash] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
     const [isLowPerformance, setIsLowPerformance] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
     const [activePillIndex, setActivePillIndex] = useState<number | null>(null)
     const [isNavHovered, setIsNavHovered] = useState(false)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
@@ -41,15 +42,22 @@ export default function Navbar() {
             setIsLowPerformance(mqlTransparency.matches || mqlMotion.matches)
         }
 
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+
         checkPerformance()
+        handleResize()
+
         mqlTransparency.addEventListener('change', checkPerformance)
         mqlMotion.addEventListener('change', checkPerformance)
-
+        window.addEventListener('resize', handleResize, { passive: true })
         window.addEventListener('scroll', handleScroll, { passive: true })
         handleScroll() // Check on mount
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
+            window.removeEventListener('resize', handleResize)
             mqlTransparency.removeEventListener('change', checkPerformance)
             mqlMotion.removeEventListener('change', checkPerformance)
         }
@@ -96,8 +104,10 @@ export default function Navbar() {
         return pathname === href
     }
 
+    const shouldUseSimpleGlass = isLowPerformance || isMobile
+
     return (
-        <nav className="fixed left-0 right-0 top-0 z-50 flex justify-center pt-5 transition-all duration-300 pointer-events-none">
+        <nav className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center pt-5 transition-all duration-300 pointer-events-none">
             {/* SVG Displacement Engine for Liquid Glass */}
             <svg style={{ display: 'none' }}>
                 <filter id="displacementFilter">
@@ -112,11 +122,11 @@ export default function Navbar() {
             <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-3xl pl-6 pr-3' : 'max-w-5xl px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
-                    className={`absolute inset-0 rounded-full pointer-events-none ${isLowPerformance
+                    className={`absolute inset-0 rounded-full pointer-events-none ${shouldUseSimpleGlass
                         ? 'border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
                         : 'border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
-                    style={!isLowPerformance ? {
+                    style={!shouldUseSimpleGlass ? {
                         backdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
                         WebkitBackdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.5), inset 0 0 3px 1px rgba(255, 255, 255, 0.4)'
@@ -142,11 +152,11 @@ export default function Navbar() {
                             {activePillIndex === index && (
                                 <motion.div
                                     layoutId="nav-hover-pill"
-                                    className={`absolute inset-0 rounded-full ${isLowPerformance
+                                    className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
                                         ? 'bg-white/[0.06] backdrop-blur-md'
                                         : 'border border-white/[0.02] bg-white/[0.02]'
                                         }`}
-                                    style={!isLowPerformance ? {
+                                    style={!shouldUseSimpleGlass ? {
                                         backdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
                                         WebkitBackdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
                                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
@@ -204,8 +214,8 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="border-t border-white/[0.04] bg-[--color-background]/95 backdrop-blur-xl md:hidden">
-                    <div className="space-y-1 px-6 py-4">
+                <div className="pointer-events-auto mt-3 w-[calc(100%-48px)] overflow-hidden rounded-2xl border border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl md:hidden">
+                    <div className="space-y-1 px-5 py-5">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
