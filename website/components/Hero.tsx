@@ -126,7 +126,7 @@ export default function Hero() {
 
     return (
         <section
-            className="relative overflow-x-clip pb-32 pt-48 md:pb-48 md:pt-56"
+            className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-48"
             onMouseMove={handleMouseMove}
         >
             {/* Layered deeper gradient background with smooth fade-out */}
