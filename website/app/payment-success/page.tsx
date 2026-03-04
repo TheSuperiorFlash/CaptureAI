@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Check, X } from 'lucide-react'
+import { Check, X, Zap } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
 const MAX_RETRIES = 5
@@ -47,7 +47,7 @@ function PaymentSuccessContent() {
 
                     // Only retry on transient errors: 429 or 5xx
                     const shouldRetry = response.status === 429 || (response.status >= 500 && response.status < 600)
-                    
+
                     if (shouldRetry && attempt < MAX_RETRIES) {
                         const delay = INITIAL_DELAY_MS * Math.pow(2, attempt)
                         await new Promise(resolve => setTimeout(resolve, delay))
@@ -84,45 +84,58 @@ function PaymentSuccessContent() {
     }, [searchParams])
 
     return (
-        <div className="flex min-h-screen items-center justify-center px-6 py-20">
-            <div className="w-full max-w-md">
-                <div className="rounded-xl border border-[--color-border] p-8 text-center">
+        <section className="relative flex min-h-screen items-center justify-center overflow-x-clip px-6 py-24 md:py-32">
+            {/* Background effects */}
+            <div className="pointer-events-none absolute inset-0 z-0">
+                <div className="absolute inset-0 aurora-bg opacity-40" />
+                <div className="absolute left-[50%] top-[50%] h-[600px] w-[600px] -translate-x-[50%] -translate-y-[50%] rounded-full bg-[#0047ff] gradient-blur opacity-20" />
+                <div className="absolute left-[50%] top-[50%] h-[400px] w-[400px] -translate-x-[50%] -translate-y-[50%] rounded-full bg-[#00f0ff] gradient-blur opacity-10" />
+            </div>
+
+            <div className="relative z-10 w-full max-w-md reveal-up">
+                <div className="glass-card rounded-3xl p-8 text-center sm:p-10">
                     {/* Loading */}
                     {status === 'loading' && (
-                        <div className="flex items-center justify-center gap-3 py-8 text-[--color-text-secondary]">
-                            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-[--color-border] border-t-[--color-accent]" />
-                            <span className="text-sm">Verifying your payment...</span>
+                        <div className="flex flex-col items-center justify-center gap-5 py-12">
+                            <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-cyan-400" />
+                            <span className="text-[15px] font-medium text-[--color-text-secondary]">Verifying your payment...</span>
                         </div>
                     )}
 
                     {/* Success */}
                     {status === 'success' && (
                         <>
-                            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
-                                <Check className="h-6 w-6 text-green-400" />
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
+                                <Check className="h-8 w-8 text-cyan-400" />
                             </div>
 
-                            <h1 className="mb-2 text-2xl font-bold text-[--color-text]">Payment successful</h1>
-                            <p className="mb-6 text-sm text-[--color-text-tertiary]">
+                            <h1 className="mb-2 text-2xl font-bold text-[--color-text] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">Payment successful</h1>
+                            <p className="mb-8 text-[15px] text-[--color-text-tertiary]">
                                 Check your email for your Pro license key.
                             </p>
 
-                            <div className="mb-6 inline-flex rounded-md bg-[--color-accent-muted] px-3 py-1 text-xs font-semibold text-[--color-accent-hover]">
-                                PRO
-                            </div>
+                            <div className="mb-8 text-left rounded-2xl bg-white/[0.02] border border-white/[0.04] p-6 relative overflow-hidden">
+                                <div className="relative z-10">
+                                    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1">
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+                                            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+                                        </span>
+                                        <span className="text-[11px] font-bold tracking-widest text-cyan-400">PRO UNLOCKED</span>
+                                    </div>
 
-                            <div className="mb-6 rounded-lg border border-[--color-border-subtle] p-5 text-left">
-                                <p className="mb-3 text-sm font-medium text-[--color-text-secondary]">Next steps:</p>
-                                <ol className="list-inside list-decimal space-y-1.5 text-sm text-[--color-text-tertiary]">
-                                    <li>Check your email for the Pro license key</li>
-                                    <li>Open the CaptureAI extension popup</li>
-                                    <li>Enter your license key to activate Pro</li>
-                                </ol>
+                                    <p className="mb-3 text-sm font-semibold text-[--color-text-secondary]">Next steps:</p>
+                                    <ol className="list-decimal pl-4 space-y-2 text-sm text-[--color-text-tertiary] marker:text-cyan-600/50">
+                                        <li>Check your email for the license key</li>
+                                        <li>Open the CaptureAI extension popup</li>
+                                        <li>Enter your key to activate Pro</li>
+                                    </ol>
+                                </div>
                             </div>
 
                             <Link
                                 href="/activate"
-                                className="block rounded-lg bg-[--color-accent] py-3 text-sm font-medium text-white transition-colors hover:bg-[--color-accent-hover]"
+                                className="glow-btn block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-[15px] font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                             >
                                 Return to Activation
                             </Link>
@@ -132,22 +145,22 @@ function PaymentSuccessContent() {
                     {/* Error */}
                     {status === 'error' && (
                         <>
-                            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10">
-                                <X className="h-6 w-6 text-red-400" />
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                                <X className="h-8 w-8 text-red-400" />
                             </div>
 
                             <h1 className="mb-2 text-2xl font-bold text-[--color-text]">Verification failed</h1>
-                            <p className="mb-6 text-sm text-[--color-text-tertiary]">
-                                We couldn&apos;t verify your payment.
+                            <p className="mb-6 text-[15px] text-[--color-text-tertiary]">
+                                We couldn't verify your payment.
                             </p>
 
-                            <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-[--color-text-tertiary]">
+                            <div className="mb-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[14px] leading-relaxed text-[--color-text-secondary]">
                                 {errorMessage}
                             </div>
 
                             <Link
                                 href="/activate"
-                                className="block rounded-lg border border-[--color-border] py-3 text-sm font-medium text-[--color-text-secondary] transition-colors hover:border-[--color-text-tertiary] hover:text-[--color-text]"
+                                className="block rounded-xl border border-white/[0.08] bg-white/[0.02] py-3.5 text-[15px] font-medium text-[--color-text-secondary] transition-all hover:bg-white/[0.05] hover:text-[--color-text] hover:border-white/[0.12]"
                             >
                                 Return to Activation
                             </Link>
@@ -155,7 +168,7 @@ function PaymentSuccessContent() {
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     )
 }
 
@@ -163,9 +176,12 @@ export default function PaymentSuccessPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex min-h-screen items-center justify-center">
-                    <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-[--color-border] border-t-[--color-accent]" />
-                </div>
+                <section className="relative flex min-h-screen items-center justify-center overflow-x-clip px-6 py-24 md:py-32">
+                    <div className="pointer-events-none absolute inset-0 z-0">
+                        <div className="absolute inset-0 aurora-bg opacity-40" />
+                    </div>
+                    <span className="relative z-10 inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-cyan-400" />
+                </section>
             }
         >
             <PaymentSuccessContent />
