@@ -95,7 +95,7 @@ export default function Pricing() {
 
                     {/* Pro — premium gradient treatment */}
                     <div
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glow-blue transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:-translate-y-1'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}

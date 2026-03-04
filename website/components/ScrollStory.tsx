@@ -130,17 +130,17 @@ export default function ScrollStory() {
                                     <div className="h-3 w-3 rounded-full bg-green-500/80" />
                                 </div>
                                 {/* Cluttered Tabs */}
-                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/10" />
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
+                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-[70px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
                                     <div className="hidden md:inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
                                 </motion.div>
                                 {/* Clean Tab */}
-                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/10" />
+                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-[70px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                 </motion.div>
                             </div>
-                            <div className="h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
+                            <div className="hidden md:block h-4 w-24 rounded bg-white/5 relative z-10" />
                         </div>
                         {/* Mock Internal Content */}
                         <div className="relative flex h-full w-full flex-col p-6 overflow-hidden">
@@ -168,7 +168,7 @@ export default function ScrollStory() {
                             {/* Clean State (Mock Quiz UI + Capture) */}
                             <motion.div style={{ opacity: cleanOpacity }} className="absolute inset-0 pointer-events-none">
                                 {/* Top-Left Quiz Area */}
-                                <div className="absolute top-8 left-8 md:top-12 md:left-12 w-full max-w-[320px] md:max-w-[420px] flex flex-col gap-8">
+                                <div className="absolute top-6 left-5 right-5 md:right-auto md:top-12 md:left-12 md:w-full md:max-w-[420px] flex flex-col gap-6 md:gap-8">
                                     {/* Mock Question Area 1 (Captured) */}
                                     <div className="relative">
                                         <div className="w-full space-y-4">
@@ -244,38 +244,6 @@ export default function ScrollStory() {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Styled Popup Skeleton */}
-                                <motion.div style={{ opacity: cleanOpacity }} className="absolute top-6 right-6 w-[200px] rounded-2xl bg-[#0f1115] shadow-[0_12px_48px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 font-sans hidden md:flex flex-col">
-                                    {/* Header */}
-                                    <div className="px-4 py-2.5 flex items-center gap-2 border-b border-white/5 bg-[#16181d]">
-                                        {/* Real App Icon */}
-                                        <div className="relative w-5 h-5 opacity-90">
-                                            <Image src="/logo.svg" alt="CaptureAI Logo" fill />
-                                        </div>
-                                        <div className="text-white/80 font-bold tracking-tight text-sm">CaptureAI</div>
-                                    </div>
-
-                                    {/* Body */}
-                                    <div className="px-4 pt-4 pb-4 flex-1 bg-[#0f1115]">
-                                        <div className="h-3 w-16 bg-white/10 rounded mb-3" />
-                                        <div className="space-y-2 mt-1">
-                                            {/* Skeleton lines representing answer text */}
-                                            <div className="h-3 w-full bg-white/5 rounded" />
-                                            <div className="h-3 w-[85%] bg-white/5 rounded" />
-                                        </div>
-                                    </div>
-
-                                    {/* Buttons */}
-                                    <div className="px-4 pb-4 space-y-2.5 bg-[#0f1115] mt-auto">
-                                        {/* Primary Button */}
-                                        <div className="w-full h-7 bg-white/10 rounded-lg flex items-center justify-center">
-                                        </div>
-                                        {/* Secondary Button */}
-                                        <div className="w-full h-7 bg-white/2 rounded-lg flex items-center justify-center border border-white/5">
-                                        </div>
-                                    </div>
-                                </motion.div>
                             </motion.div>
                         </div>
                     </motion.div>

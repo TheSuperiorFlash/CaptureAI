@@ -246,14 +246,14 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-2xl glow-blue border transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue border transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
                             ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <div className="relative rounded-2xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                        <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
                             <div className="absolute right-6 top-6">
                                 <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                     ? 'border-cyan-400 bg-cyan-400'
