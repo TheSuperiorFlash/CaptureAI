@@ -61,24 +61,24 @@ export default function PrivacyGuardSlider() {
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerUp}
             >
-                {/* Background (On) */}
+                {/* Background (Off/Dirty) */}
                 <Image
-                    src="/action-log-canvas-2.png"
-                    alt="Privacy Guard On"
+                    src="/action-log-canvas-1.png"
+                    alt="Privacy Guard Off"
                     width={600}
                     height={600}
                     className="block h-auto w-full pointer-events-none"
                     priority
                 />
 
-                {/* Foreground (Off) */}
+                {/* Foreground (On/Clean) */}
                 <div
                     className="absolute inset-0 z-10 overflow-hidden"
                     style={{ clipPath: `inset(0 0 0 ${sliderValue}%)` }}
                 >
                     <Image
-                        src="/action-log-canvas-1.png"
-                        alt="Privacy Guard Off"
+                        src="/action-log-canvas-2.png"
+                        alt="Privacy Guard On"
                         width={600}
                         height={600}
                         className="absolute inset-0 block h-auto w-full max-w-none pointer-events-none object-contain"

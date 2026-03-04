@@ -185,7 +185,7 @@ export default function Features() {
     }
 
     return (
-        <section id="features" className="relative py-24 md:py-32 reveal-up">
+        <section id="features" className="relative py-24 md:py-32 reveal-up overflow-x-clip">
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
             <div className="relative z-10 mx-auto max-w-6xl px-6">
                 {/* Header */}
