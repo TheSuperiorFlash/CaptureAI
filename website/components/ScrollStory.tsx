@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
+import Image from 'next/image'
 
 export default function ScrollStory() {
     const reduced = useReducedMotion()
@@ -244,6 +245,32 @@ export default function ScrollStory() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Styled Popup Skeleton (desktop only) */}
+                                <motion.div style={{ opacity: cleanOpacity }} className="absolute top-6 right-6 w-[200px] rounded-2xl bg-[#0f1115] shadow-[0_12px_48px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 font-sans hidden md:flex flex-col">
+                                    {/* Header */}
+                                    <div className="px-4 py-2.5 flex items-center gap-2 border-b border-white/5 bg-[#16181d]">
+                                        <div className="relative w-5 h-5 opacity-90">
+                                            <Image src="/logo.svg" alt="CaptureAI Logo" fill />
+                                        </div>
+                                        <div className="text-white/80 font-bold tracking-tight text-sm">CaptureAI</div>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="px-4 pt-4 pb-4 flex-1 bg-[#0f1115]">
+                                        <div className="h-3 w-16 bg-white/10 rounded mb-3" />
+                                        <div className="space-y-2 mt-1">
+                                            <div className="h-3 w-full bg-white/5 rounded" />
+                                            <div className="h-3 w-[85%] bg-white/5 rounded" />
+                                        </div>
+                                    </div>
+
+                                    {/* Buttons */}
+                                    <div className="px-4 pb-4 space-y-2.5 bg-[#0f1115] mt-auto">
+                                        <div className="w-full h-7 bg-white/10 rounded-lg flex items-center justify-center" />
+                                        <div className="w-full h-7 bg-white/2 rounded-lg flex items-center justify-center border border-white/5" />
+                                    </div>
+                                </motion.div>
                             </motion.div>
                         </div>
                     </motion.div>
