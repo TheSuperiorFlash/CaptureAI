@@ -216,7 +216,7 @@ export default function Navbar() {
             {isOpen && (
                 <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
                     ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl'
-                    : 'absolute right-3 top-3 z-50 flex w-[32%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
+                    : 'absolute right-3 top-3 z-50 flex w-[35%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
                     }`}>
                     {!isScrolled && (
                         <div className="flex justify-end pr-2 pt-[10px] pb-2">
@@ -234,7 +234,7 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${!isScrolled ? 'text-right' : ''} ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${!isScrolled ? 'text-center' : ''} ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
