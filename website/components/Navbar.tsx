@@ -214,7 +214,7 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="pointer-events-auto w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl md:hidden">
+                <div className={`pointer-events-auto w-full overflow-hidden rounded-b-2xl transition-all duration-300 md:hidden ${isScrolled ? 'border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl' : 'bg-transparent'}`}>
                     <div className="space-y-1 px-5 py-5">
                         {navigation.map((item) => (
                             <Link
