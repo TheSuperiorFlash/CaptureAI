@@ -216,14 +216,14 @@ export default function Navbar() {
             {isOpen && (
                 <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
                     ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl'
-                    : 'absolute right-5 top-4 z-50 flex w-1/2 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
+                    : 'absolute right-3 top-3 z-50 flex w-[32%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
                     }`}>
                     {!isScrolled && (
-                        <div className="flex justify-end px-2 pt-2">
+                        <div className="flex justify-end pr-2 pt-[10px] pb-2">
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(false)}
-                                className="p-2 text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
+                                className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
                             >
                                 <X size={20} />
                             </button>
