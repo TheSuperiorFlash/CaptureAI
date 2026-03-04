@@ -18,7 +18,7 @@ const steps = [
 
 export default function HowItWorks() {
     return (
-        <section className="relative py-24 md:py-40">
+        <section className="relative py-24 md:py-40 overflow-x-clip">
             {/* Gradient divider top */}
             <div className="divider-gradient absolute left-0 right-0 top-0" aria-hidden="true" />
 

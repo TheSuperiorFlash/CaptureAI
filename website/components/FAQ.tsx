@@ -34,7 +34,7 @@ export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     return (
-        <section className="relative py-24 md:py-32 reveal-up">
+        <section className="relative py-24 md:py-32 reveal-up overflow-x-clip">
             <div className="divider-gradient absolute left-0 right-0 top-0" />
             <div className="mx-auto max-w-6xl px-6">
                 <div className="grid gap-12 md:grid-cols-[280px_1fr] lg:grid-cols-[360px_1fr]">
