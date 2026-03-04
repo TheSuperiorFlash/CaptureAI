@@ -105,7 +105,7 @@ h4 {
 
 /* Hero title: must fit "Screenshot any question." on one line at all widths */
 .hero-title {
-  font-size: clamp(1.25rem, 8vw, 2rem) !important;
+  font-size: clamp(1.25rem, 9vw, 2rem) !important;
 }
 
 @media (min-width: 640px) {
