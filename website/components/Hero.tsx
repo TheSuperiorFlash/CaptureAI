@@ -161,7 +161,7 @@ export default function Hero() {
                         <span className="text-[13px] font-medium text-[--color-text-tertiary]">Free to start</span>
                     </motion.div>
 
-                    <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center text-[7.5vw] sm:text-5xl font-extrabold tracking-tight md:text-7xl lg:text-[5rem] lg:leading-[1.1]">
+                    <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center text-[6.5vw] min-[430px]:text-[28px] sm:text-5xl font-extrabold tracking-tight md:text-7xl lg:text-[5rem] lg:leading-[1.1]">
                         <div className="flex flex-nowrap justify-center overflow-hidden pb-1 text-[--color-text]">
                             {text1Words.map((word, i) => (
                                 <motion.span key={`w1-${i}`} variants={itemVariants} className="mr-[0.3em] inline-block">

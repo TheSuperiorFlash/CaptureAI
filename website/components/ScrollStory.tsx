@@ -130,13 +130,13 @@ export default function ScrollStory() {
                                     <div className="h-3 w-3 rounded-full bg-green-500/80" />
                                 </div>
                                 {/* Cluttered Tabs */}
-                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-[70px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-[85px] md:left-24 flex gap-1.5 md:gap-2 pointer-events-none">
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
                                     <div className="hidden md:inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
                                 </motion.div>
                                 {/* Clean Tab */}
-                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-[70px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-[85px] md:left-24 flex gap-1.5 md:gap-2 pointer-events-none">
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                 </motion.div>
                             </div>
@@ -168,7 +168,7 @@ export default function ScrollStory() {
                             {/* Clean State (Mock Quiz UI + Capture) */}
                             <motion.div style={{ opacity: cleanOpacity }} className="absolute inset-0 pointer-events-none">
                                 {/* Top-Left Quiz Area */}
-                                <div className="absolute top-6 left-5 right-5 md:right-auto md:top-12 md:left-12 md:w-full md:max-w-[420px] flex flex-col gap-6 md:gap-8">
+                                <div className="absolute top-10 left-8 right-8 md:right-auto md:top-14 md:left-14 md:w-full md:max-w-[400px] flex flex-col gap-6 md:gap-8 origin-top scale-95 md:scale-100">
                                     {/* Mock Question Area 1 (Captured) */}
                                     <div className="relative">
                                         <div className="w-full space-y-4">
@@ -210,7 +210,7 @@ export default function ScrollStory() {
 
                                         {/* Floating Capture Overlay - Sized tightly around quiz 1 */}
                                         <motion.div
-                                            className="absolute -inset-4 md:-inset-6 overflow-hidden rounded-xl border-2 border-dashed border-cyan-400/50 bg-cyan-400/5 mix-blend-screen"
+                                            className="absolute -inset-3 md:-inset-5 overflow-hidden rounded-xl border-2 border-dashed border-cyan-400/50 bg-cyan-400/5 mix-blend-screen"
                                             style={{
                                                 opacity: captureBoxOpacity,
                                                 clipPath: captureBoxClipPath
