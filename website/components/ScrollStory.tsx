@@ -141,7 +141,7 @@ export default function ScrollStory() {
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                 </motion.div>
                             </div>
-                            <div className="hidden md:block h-4 w-24 rounded bg-white/5 relative z-10" />
+                            <div className="h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
                         </div>
                         {/* Mock Internal Content */}
                         <div className="relative flex h-full w-full flex-col p-6 overflow-hidden">
@@ -169,7 +169,7 @@ export default function ScrollStory() {
                             {/* Clean State (Mock Quiz UI + Capture) */}
                             <motion.div style={{ opacity: cleanOpacity }} className="absolute inset-0 pointer-events-none">
                                 {/* Top-Left Quiz Area */}
-                                <div className="absolute top-10 left-8 right-8 md:right-auto md:top-12 md:left-12 md:w-full md:max-w-[420px] flex flex-col gap-6 md:gap-8 origin-top scale-95 md:scale-100">
+                                <div className="absolute top-10 left-8 right-8 scale-95 origin-top md:scale-100 md:right-auto md:top-12 md:left-12 w-full md:max-w-[420px] flex flex-col gap-6 md:gap-8">
                                     {/* Mock Question Area 1 (Captured) */}
                                     <div className="relative">
                                         <div className="w-full space-y-4">
