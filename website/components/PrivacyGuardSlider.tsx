@@ -62,7 +62,7 @@ export default function PrivacyGuardSlider() {
                     max="100"
                     value={sliderValue}
                     onChange={(e) => setSliderValue(Number(e.target.value))}
-                    className="absolute inset-0 z-30 h-full w-full cursor-ew-resize opacity-0"
+                    className="absolute inset-0 z-30 h-full w-full cursor-ew-resize opacity-0 touch-none appearance-none"
                 />
             </div>
             <p className="mt-4 text-center text-sm text-[--color-text-tertiary]">

@@ -83,7 +83,7 @@ export default function RootLayout({
                     </a>
 
                     <Navbar />
-                    <main id="main-content" className="relative min-h-screen w-full overflow-x-clip">
+                    <main id="main-content" className="relative min-h-screen w-full">
                         {children}
                     </main>
                     <Footer />

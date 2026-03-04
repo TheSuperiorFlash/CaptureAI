@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
 
@@ -75,7 +76,7 @@ const features: Feature[] = [
     },
 ]
 
-function FeatureCard({ feature, index, shouldReduceMotion }: { feature: Feature, index: number, shouldReduceMotion: boolean | null }) {
+function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: { feature: Feature, index: number, shouldReduceMotion: boolean | null, disableAnimation?: boolean }) {
     const x = useMotionValue(0)
     const y = useMotionValue(0)
 
@@ -106,20 +107,21 @@ function FeatureCard({ feature, index, shouldReduceMotion }: { feature: Feature,
     }
 
     const Icon = feature.icon
+    const shouldDisable = shouldReduceMotion || disableAnimation;
 
     return (
         <motion.div
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
-                rotateX: shouldReduceMotion ? 0 : rotateX,
-                rotateY: shouldReduceMotion ? 0 : rotateY,
+                rotateX: shouldDisable ? 0 : rotateX,
+                rotateY: shouldDisable ? 0 : rotateY,
                 transformStyle: "preserve-3d",
             }}
-            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            initial={shouldDisable ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={shouldReduceMotion ? { duration: 0 } : {
+            transition={shouldDisable ? { duration: 0 } : {
                 type: "spring",
                 stiffness: 100,
                 damping: 15,
@@ -155,6 +157,33 @@ function FeatureCard({ feature, index, shouldReduceMotion }: { feature: Feature,
 
 export default function Features() {
     const shouldReduceMotion = useReducedMotion()
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        // Jump to the middle copy on mount to allow immediate infinite swiping
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current
+            // Use requestAnimationFrame to let the DOM settle and measure width accurately
+            requestAnimationFrame(() => {
+                if (container.scrollWidth > container.clientWidth) {
+                    container.scrollLeft = container.scrollWidth / 3
+                }
+            })
+        }
+    }, [])
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const container = e.currentTarget
+        const oneThird = container.scrollWidth / 3
+        if (container.scrollLeft <= 10) {
+            // Jump forward one full set length seamlessly
+            container.scrollLeft += oneThird
+        } else if (container.scrollLeft >= (oneThird * 2) - 10) {
+            // Jump backward one full set length seamlessly
+            container.scrollLeft -= oneThird
+        }
+    }
+
     return (
         <section id="features" className="relative py-24 md:py-32 reveal-up">
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
@@ -176,14 +205,31 @@ export default function Features() {
                     </p>
                 </motion.div>
 
-                {/* Grid / Horizontal Slider on Mobile */}
-                <div className="-mx-6 px-6 sm:mx-0 sm:px-0 flex sm:grid overflow-x-auto sm:overflow-visible snap-x snap-mandatory gap-5 sm:grid-cols-2 lg:grid-cols-4 perspective-[1200px] pb-6 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {/* Desktop Grid */}
+                <div className="hidden sm:grid gap-5 grid-cols-2 lg:grid-cols-4 perspective-[1200px]">
                     {features.map((feature, index) => (
-                        <div key={feature.title} className="w-[85vw] max-w-[320px] flex-none snap-center sm:w-auto sm:max-w-none h-full">
+                        <FeatureCard
+                            key={feature.title}
+                            feature={feature}
+                            index={index}
+                            shouldReduceMotion={shouldReduceMotion}
+                        />
+                    ))}
+                </div>
+
+                {/* Mobile Infinite Swipe Row */}
+                <div
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                    className="flex sm:hidden -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 perspective-[1200px] pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                >
+                    {[...features, ...features, ...features].map((feature, index) => (
+                        <div key={`${feature.title}-${index}`} className="w-[85vw] max-w-[320px] flex-none snap-center h-full">
                             <FeatureCard
                                 feature={feature}
                                 index={index}
                                 shouldReduceMotion={shouldReduceMotion}
+                                disableAnimation={true}
                             />
                         </div>
                     ))}
