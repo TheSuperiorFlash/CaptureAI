@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
-import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from './ScrollReveal'
+import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
 
 export default function Pricing() {
     const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')

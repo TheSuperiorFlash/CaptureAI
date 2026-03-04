@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { Check, X as XIcon, ChevronsLeftRight } from 'lucide-react'
 

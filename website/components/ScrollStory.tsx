@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
-import Image from 'next/image'
 
 export default function ScrollStory() {
     const reduced = useReducedMotion()
@@ -10,6 +9,7 @@ export default function ScrollStory() {
     const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true)
     }, [])
 
