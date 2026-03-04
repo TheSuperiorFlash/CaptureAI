@@ -109,7 +109,7 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between px-6 md:h-14 transition-[max-width] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-3xl' : 'max-w-5xl'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-3xl pl-6 pr-3' : 'max-w-5xl px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 rounded-full pointer-events-none ${isLowPerformance
@@ -169,14 +169,25 @@ export default function Navbar() {
                 </div>
 
                 {/* CTA */}
-                <div className="hidden md:block relative z-10 ml-2">
+                <div className="hidden md:flex items-center relative z-10">
                     <MagneticButton magneticRange={10}>
-                        <Link
-                            href="/activate"
-                            className="glow-btn inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
+                        <motion.div
+                            animate={{
+                                borderRadius: isScrolled ? "100px" : "12px"
+                            }}
+                            transition={{
+                                duration: 0.75,
+                                ease: [0.25, 1, 0.5, 1]
+                            }}
+                            className="overflow-hidden flex items-center justify-center"
                         >
-                            Get Started
-                        </Link>
+                            <Link
+                                href="/activate"
+                                className="glow-btn inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 whitespace-nowrap"
+                            >
+                                Get Started
+                            </Link>
+                        </motion.div>
                     </MagneticButton>
                 </div>
 
