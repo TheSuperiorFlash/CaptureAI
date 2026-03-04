@@ -196,104 +196,108 @@ export default function ActivatePage() {
                     onTouchEnd={handleTouchEnd}
                 >
                     {/* Free plan */}
-                    <div
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={selectedTier === 'free'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'free'
-                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100'
-                            : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
-                            }`}
-                        onClick={() => setSelectedTier('free')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
-                    >
-                        <div className="absolute right-6 top-6">
-                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'free'
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-white/20'
-                                }`}>
-                                {selectedTier === 'free' && <Check className="h-4 w-4 text-white" />}
-                            </div>
-                        </div>
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-[--color-text]">Free</h2>
-                            <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
-                        </div>
-
-                        <div className="mb-7">
-                            <span className="text-4xl font-extrabold font-inter text-[--color-text]">$0</span>
-                            <span className="text-sm text-[--color-text-tertiary]"> / month</span>
-                        </div>
-
-                        <ul className="space-y-3">
-                            {freeFeatures.map((f) => (
-                                <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
-                                    {f.limited ? (
-                                        <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
-                                    ) : f.included ? (
-                                        <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                    ) : (
-                                        <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                    )}
-                                    <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Pro plan */}
-                    <div
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue border transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 z-20 translate-x-0 scale-100 rotate-0 opacity-100'
-                            : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
-                            }`}
-                        onClick={() => setSelectedTier('pro')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
-                    >
-                        <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                    <div className={`row-start-1 col-start-1 md:row-auto md:col-auto relative w-full flex justify-center md:justify-self-start ${selectedTier === 'free' ? 'z-20 md:z-10' : 'z-10'}`}>
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={selectedTier === 'free'}
+                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none ${selectedTier === 'free'
+                                ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)] translate-x-0 scale-100 rotate-0 opacity-100'
+                                : '-translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
+                                }`}
+                            onClick={() => setSelectedTier('free')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
+                        >
                             <div className="absolute right-6 top-6">
-                                <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                    ? 'border-cyan-400 bg-cyan-400'
+                                <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'free'
+                                    ? 'border-blue-500 bg-blue-500'
                                     : 'border-white/20'
                                     }`}>
-                                    {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                    {selectedTier === 'free' && <Check className="h-4 w-4 text-white" />}
                                 </div>
                             </div>
                             <div className="mb-6">
-                                <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
-                                <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
+                                <h2 className="text-xl font-bold text-[--color-text]">Free</h2>
+                                <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                             </div>
 
                             <div className="mb-7">
-                                <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
+                                <span className="text-4xl font-extrabold font-inter text-[--color-text]">$0</span>
                                 <span className="text-sm text-[--color-text-tertiary]"> / month</span>
                             </div>
 
-                            {/* Pro highlights grid */}
-                            <div className="mb-7 grid grid-cols-2 gap-2.5">
-                                {proHighlights.map((h) => {
-                                    const Icon = h.icon
-                                    return (
-                                        <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
-                                            <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
-                                            <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
-                                            <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-
                             <ul className="space-y-3">
-                                {proFeatures.map((f) => (
-                                    <li key={f.text} className="flex items-center gap-3">
-                                        <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                {freeFeatures.map((f) => (
+                                    <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
+                                        {f.limited ? (
+                                            <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
+                                        ) : f.included ? (
+                                            <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        ) : (
+                                            <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        )}
                                         <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
                                     </li>
                                 ))}
                             </ul>
+                        </div>
+                    </div>
+
+                    {/* Pro plan */}
+                    <div className={`row-start-1 col-start-1 md:row-auto md:col-auto relative w-full flex justify-center md:justify-self-start ${selectedTier === 'pro' ? 'z-20 md:z-10' : 'z-10'}`}>
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={selectedTier === 'pro'}
+                            className={`relative cursor-pointer rounded-[24px] glow-blue border transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none ${selectedTier === 'pro'
+                                ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 translate-x-0 scale-100 rotate-0 opacity-100'
+                                : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
+                                }`}
+                            onClick={() => setSelectedTier('pro')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                        >
+                            <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                                <div className="absolute right-6 top-6">
+                                    <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
+                                        ? 'border-cyan-400 bg-cyan-400'
+                                        : 'border-white/20'
+                                        }`}>
+                                        {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                    </div>
+                                </div>
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
+                                    <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
+                                </div>
+
+                                <div className="mb-7">
+                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
+                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                </div>
+
+                                {/* Pro highlights grid */}
+                                <div className="mb-7 grid grid-cols-2 gap-2.5">
+                                    {proHighlights.map((h) => {
+                                        const Icon = h.icon
+                                        return (
+                                            <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
+                                                <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
+                                                <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
+                                                <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+
+                                <ul className="space-y-3">
+                                    {proFeatures.map((f) => (
+                                        <li key={f.text} className="flex items-center gap-3">
+                                            <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                            <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
