@@ -1,7 +1,7 @@
 'use client'
 
 import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
 
 interface Feature {
     icon: LucideIcon
@@ -16,7 +16,7 @@ const features: Feature[] = [
     {
         icon: Camera,
         title: 'Screenshot Capture',
-        description: 'Select any area of your screen with a keyboard shortcut. The extension reads the text and sends it for analysis automatically.',
+        description: 'Select any area of your screen with a keyboard shortcut. The extension reads the text and instantly gives you the correct answer.',
         color: 'from-blue-600/30 to-blue-700/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] group-hover:border-blue-500/30',
     },
@@ -75,6 +75,84 @@ const features: Feature[] = [
     },
 ]
 
+function FeatureCard({ feature, index, shouldReduceMotion }: { feature: Feature, index: number, shouldReduceMotion: boolean | null }) {
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+
+    const mouseXSpring = useSpring(x, { stiffness: 400, damping: 30 })
+    const mouseYSpring = useSpring(y, { stiffness: 400, damping: 30 })
+
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"])
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"])
+
+    // Dynamic Glare
+    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"])
+    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"])
+    const backgroundImage = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.12) 0%, transparent 70%)`
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const width = rect.width
+        const height = rect.height
+        const mouseX = e.clientX - rect.left
+        const mouseY = e.clientY - rect.top
+        x.set(mouseX / width - 0.5)
+        y.set(mouseY / height - 0.5)
+    }
+
+    const handleMouseLeave = () => {
+        x.set(0)
+        y.set(0)
+    }
+
+    const Icon = feature.icon
+
+    return (
+        <motion.div
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{
+                rotateX: shouldReduceMotion ? 0 : rotateX,
+                rotateY: shouldReduceMotion ? 0 : rotateY,
+                transformStyle: "preserve-3d",
+            }}
+            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={shouldReduceMotion ? { duration: 0 } : {
+                type: "spring",
+                stiffness: 100,
+                damping: 15,
+                delay: (index % 4) * 0.1
+            }}
+            className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
+        >
+            {/* Dynamic Glass Glare Overlay */}
+            <motion.div
+                className="absolute inset-0 rounded-3xl opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover:opacity-100 pointer-events-none"
+                style={{ backgroundImage }}
+            />
+            {/* Inner Content bumped up in Z space to create parallax */}
+            <div className="relative z-10 flex flex-col h-full pointer-events-none" style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}>
+                {feature.pro && (
+                    <span className="absolute right-0 top-0 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 border border-cyan-500/20 shadow-lg">
+                        PRO
+                    </span>
+                )}
+                <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br border border-white/5 shadow-inner ${feature.color}`}>
+                    <Icon className="h-5 w-5 text-white/90" strokeWidth={2.5} />
+                </div>
+                <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
+                    {feature.title}
+                </h3>
+                <p className="text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
+                    {feature.description}
+                </p>
+            </div>
+        </motion.div>
+    )
+}
+
 export default function Features() {
     const shouldReduceMotion = useReducedMotion()
     return (
@@ -99,42 +177,15 @@ export default function Features() {
                 </motion.div>
 
                 {/* Grid */}
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {features.map((feature, index) => {
-                        const Icon = feature.icon
-
-                        return (
-                            <motion.div
-                                key={feature.title}
-                                initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={shouldReduceMotion ? { duration: 0 } : {
-                                    type: "spring",
-                                    stiffness: 100,
-                                    damping: 15,
-                                    delay: (index % 4) * 0.1
-                                }}
-                                {...(!shouldReduceMotion && { whileHover: { y: -5, scale: 1.02, transition: { type: "spring", stiffness: 300 } } })}
-                                className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
-                            >
-                                {feature.pro && (
-                                    <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 border border-cyan-500/20">
-                                        PRO
-                                    </span>
-                                )}
-                                <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br border border-white/5 shadow-inner ${feature.color}`}>
-                                    <Icon className="h-5 w-5 text-white/90" strokeWidth={2.5} />
-                                </div>
-                                <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
-                                    {feature.description}
-                                </p>
-                            </motion.div>
-                        )
-                    })}
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 perspective-[1200px]">
+                    {features.map((feature, index) => (
+                        <FeatureCard
+                            key={feature.title}
+                            feature={feature}
+                            index={index}
+                            shouldReduceMotion={shouldReduceMotion}
+                        />
+                    ))}
                 </div>
             </div>
         </section>

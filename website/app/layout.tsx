@@ -14,6 +14,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { SITE_URL } from '@/lib/constants'
+import SmoothScroll from '@/components/SmoothScroll'
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
         default: 'CaptureAI - AI-Powered Screenshot Answers for Students',
         template: '%s | CaptureAI',
     },
-    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
+    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
     alternates: {
         canonical: '/',
     },
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
         url: SITE_URL,
         siteName: 'CaptureAI',
         title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
-        description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
+        description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
         images: [
             {
                 url: '/og-image.png',
@@ -76,15 +77,17 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="noise antialiased">
-                <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
-                    Skip to main content
-                </a>
+                <SmoothScroll>
+                    <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
+                        Skip to main content
+                    </a>
 
-                <Navbar />
-                <main id="main-content" className="relative min-h-screen pt-16">
-                    {children}
-                </main>
-                <Footer />
+                    <Navbar />
+                    <main id="main-content" className="relative min-h-screen">
+                        {children}
+                    </main>
+                    <Footer />
+                </SmoothScroll>
             </body>
         </html>
     )

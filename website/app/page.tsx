@@ -8,12 +8,13 @@ import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/component
 import ScrollStory from '@/components/ScrollStory'
 import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
 import type { Metadata } from 'next'
+import MagneticButton from '@/components/MagneticButton'
 
 export const metadata: Metadata = {
-    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, and every learning platform.',
+    description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
     openGraph: {
         title: 'CaptureAI - AI-Powered Screenshot Answers for Students',
-        description: 'Screenshot any question and get instant AI-powered answers. Works on every learning platform.',
+        description: 'Screenshot any question and get instant AI-powered answers. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
         images: ['/og-image.png'],
     },
 }
@@ -213,7 +214,7 @@ export default function Home() {
                         </ScrollRevealItem>
 
                         {/* Pro — premium gradient treatment */}
-                        <ScrollRevealItem className="gradient-border relative flex self-start rounded-3xl glow-blue z-10">
+                        <ScrollRevealItem className="relative flex self-start rounded-3xl glow-blue z-10 border border-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]">
                             <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400 border border-cyan-500/20">
                                     POPULAR
@@ -272,13 +273,15 @@ export default function Home() {
                         <p className="mb-10 text-lg text-[--color-text-secondary]">
                             Install the extension, get a license key, and start getting answers in under a minute.
                         </p>
-                        <Link
-                            href="/activate"
-                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
-                        >
-                            Get Started
-                            <ArrowRight className="h-5 w-5" />
-                        </Link>
+                        <MagneticButton>
+                            <Link
+                                href="/activate"
+                                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:shadow-[0_0_40px_rgba(0,71,255,0.4)]"
+                            >
+                                Get Started
+                                <ArrowRight className="h-5 w-5" />
+                            </Link>
+                        </MagneticButton>
                     </ScrollReveal>
                 </div>
             </section>

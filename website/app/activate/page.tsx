@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Check, X as XIcon, ArrowRight, Shield, Zap, MessageSquare, Repeat, Eye, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -229,59 +228,57 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`relative cursor-pointer rounded-2xl transition-all duration-300 ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
-                            : ''
+                        className={`relative cursor-pointer rounded-2xl glow-blue border transition-all duration-300 ${selectedTier === 'pro'
+                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 -translate-y-1'
+                            : 'border-cyan-500/20 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <div className="gradient-border rounded-2xl">
-                            <div className="relative rounded-2xl bg-gradient-to-b from-blue-500/[0.12] to-cyan-500/[0.08] p-7">
-                                <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
-                                    Recommended
-                                </span>
-                                <div className="mb-6 flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
-                                        <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
-                                    </div>
-                                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                        ? 'border-cyan-400 bg-cyan-400'
-                                        : 'border-white/20'
-                                        }`}>
-                                        {selectedTier === 'pro' && <Check className="h-3 w-3 text-[--color-background]" />}
-                                    </div>
+                        <div className="relative rounded-2xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-7">
+                            <span className="absolute right-5 top-5 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-400">
+                                Recommended
+                            </span>
+                            <div className="mb-6 flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
+                                    <p className="text-sm text-[--color-text-tertiary]">For daily use</p>
                                 </div>
-
-                                <div className="mb-7">
-                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
-                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
+                                    ? 'border-cyan-400 bg-cyan-400'
+                                    : 'border-white/20'
+                                    }`}>
+                                    {selectedTier === 'pro' && <Check className="h-3 w-3 text-[--color-background]" />}
                                 </div>
-
-                                {/* Pro highlights grid */}
-                                <div className="mb-7 grid grid-cols-2 gap-2.5">
-                                    {proHighlights.map((h) => {
-                                        const Icon = h.icon
-                                        return (
-                                            <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
-                                                <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
-                                                <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
-                                                <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
-
-                                <ul className="space-y-3">
-                                    {proFeatures.map((f) => (
-                                        <li key={f.text} className="flex items-center gap-3">
-                                            <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
-                                            <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
-                                        </li>
-                                    ))}
-                                </ul>
                             </div>
+
+                            <div className="mb-7">
+                                <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                            </div>
+
+                            {/* Pro highlights grid */}
+                            <div className="mb-7 grid grid-cols-2 gap-2.5">
+                                {proHighlights.map((h) => {
+                                    const Icon = h.icon
+                                    return (
+                                        <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
+                                            <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
+                                            <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
+                                            <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            <ul className="space-y-3">
+                                {proFeatures.map((f) => (
+                                    <li key={f.text} className="flex items-center gap-3">
+                                        <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                        <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -388,6 +385,6 @@ export default function ActivatePage() {
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

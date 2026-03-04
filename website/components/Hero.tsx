@@ -3,16 +3,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { motion, Variants, useReducedMotion } from 'framer-motion'
+import { motion, Variants, useReducedMotion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import MagneticButton from './MagneticButton'
 const MotionLink = motion.create(Link)
 
 const platformLogos = [
-    { src: '/platforms/canvas.png', alt: 'Canvas', heightClass: 'h-8' },
+    { src: '/platforms/moodle.png', alt: 'Moodle', heightClass: 'h-8' },
     { src: '/platforms/respondus.png', alt: 'Respondus', heightClass: 'h-7' },
     { src: '/platforms/schoology.png', alt: 'Schoology', heightClass: 'h-8' },
-    { src: '/platforms/moodle.png', alt: 'Moodle', heightClass: 'h-8' },
+    { src: '/platforms/canvas.png', alt: 'Canvas', heightClass: 'h-8' },
     { src: '/platforms/blackboard.png', alt: 'Blackboard', heightClass: 'h-5' },
+    { src: '/platforms/tophat.png', alt: 'Top Hat', heightClass: 'h-5' },
 ]
 
 const containerVariants: Variants = {
@@ -20,7 +22,7 @@ const containerVariants: Variants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.15,
+            staggerChildren: 0.05,
             delayChildren: 0.1,
         }
     }
@@ -45,18 +47,50 @@ export default function Hero() {
     const shouldReduceMotion = useReducedMotion()
     const [isMounted, setIsMounted] = useState(false)
 
+    // Interactive Mouse Glow
+    const mouseX = useMotionValue(0)
+    const mouseY = useMotionValue(0)
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const { currentTarget, clientX, clientY } = e
+        const { left, top, width, height } = currentTarget.getBoundingClientRect()
+        mouseX.set(clientX - left - width / 2)
+        mouseY.set(clientY - top - height / 2)
+    }
+
+    const springConfig = { damping: 40, stiffness: 100, mass: 2 }
+    const glowX1 = useSpring(useTransform(mouseX, x => !shouldReduceMotion ? x * 0.3 : 0), springConfig)
+    const glowY1 = useSpring(useTransform(mouseY, y => !shouldReduceMotion ? y * 0.3 : 0), springConfig)
+    const glowX2 = useSpring(useTransform(mouseX, x => !shouldReduceMotion ? x * -0.2 : 0), springConfig)
+    const glowY2 = useSpring(useTransform(mouseY, y => !shouldReduceMotion ? y * -0.2 : 0), springConfig)
+
+    const text1Words = "Screenshot any question.".split(' ')
+    const text2Words = "Get the exact answer.".split(' ')
+
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true)
     }, [])
 
+
+
     return (
-        <section className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-40">
+        <section
+            className="relative overflow-x-clip pb-32 pt-48 md:pb-48 md:pt-56"
+            onMouseMove={handleMouseMove}
+        >
             {/* Layered deeper gradient background with smooth fade-out */}
             <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
                 <div className="absolute inset-0 aurora-bg" />
-                <div className="absolute left-1/2 top-[-200px] h-[800px] w-[1000px] -translate-x-1/2 rounded-full bg-[#001e80] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.65 }} />
-                <div className="absolute right-[-100px] top-[50px] h-[500px] w-[500px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none motion-reduce:opacity-100" style={{ opacity: 0.25 }} />
-                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none motion-reduce:opacity-100" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: 0.65 } : { opacity: 0.65 }} />
+                <motion.div
+                    className="absolute left-[50%] top-[-200px] h-[800px] w-[1000px] -ml-[500px] rounded-full bg-[#0047ff] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none"
+                    style={{ x: glowX1, y: glowY1, opacity: (isMounted && shouldReduceMotion) ? 0.2 : 0.8 }}
+                />
+                <motion.div
+                    className="absolute right-[-100px] top-[50px] h-[600px] w-[600px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none"
+                    style={{ x: glowX2, y: glowY2, opacity: (isMounted && shouldReduceMotion) ? 0.08 : 0.3 }}
+                />
+                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: shouldReduceMotion ? 0.18 : 0.7 } : { opacity: 0.7 }} />
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
@@ -78,10 +112,29 @@ export default function Hero() {
                     </motion.div>
 
                     {/* Headline */}
-                    <motion.h1 variants={itemVariants} className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)]">
-                        <span className="text-[--color-text]">Screenshot any question.</span>
-                        <br />
-                        <span className="text-gradient">Get the exact answer.</span>
+                    <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center text-5xl font-extrabold tracking-tight md:text-7xl lg:text-[5rem] lg:leading-[1.1]">
+                        <div className="flex flex-wrap justify-center overflow-hidden pb-1 text-[--color-text]">
+                            {text1Words.map((word, i) => (
+                                <motion.span key={`w1-${i}`} variants={itemVariants} className="mr-[0.3em] inline-block">
+                                    {word}
+                                </motion.span>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap justify-center overflow-hidden pb-3">
+                            {text2Words.map((word, i) => (
+                                <motion.span
+                                    key={`w2-${i}`}
+                                    variants={itemVariants}
+                                    className="text-gradient-static mr-[0.3em] inline-block"
+                                    style={{
+                                        backgroundSize: `${text2Words.length * 100}% 100%`,
+                                        backgroundPosition: `${(i / (text2Words.length - 1)) * 100}% center`
+                                    }}
+                                >
+                                    {word}
+                                </motion.span>
+                            ))}
+                        </div>
                     </motion.h1>
 
                     {/* Subheading */}
@@ -91,14 +144,16 @@ export default function Hero() {
 
                     {/* CTA */}
                     <motion.div variants={itemVariants} className="flex flex-col items-center gap-6">
-                        <MotionLink
-                            href="/activate"
-                            whileTap={{ scale: 0.98 }}
-                            className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:scale-[1.02] hover:-translate-y-0.5"
-                        >
-                            Get Started Now
-                            <ArrowRight className="h-5 w-5" />
-                        </MotionLink>
+                        <MagneticButton>
+                            <MotionLink
+                                href="/activate"
+                                whileTap={{ scale: 0.98 }}
+                                className="glow-btn inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white transition-all hover:from-[#1a5cff] hover:to-[#00f0ff] md:px-14 md:py-5 md:text-lg hover:shadow-[0_0_40px_rgba(0,71,255,0.4)]"
+                            >
+                                Get Started Now
+                                <ArrowRight className="h-5 w-5" />
+                            </MotionLink>
+                        </MagneticButton>
                         <Link
                             href="/#features"
                             className="inline-flex items-center gap-2 text-[15px] font-semibold text-[--color-text-secondary] transition-colors hover:text-cyan-400"
@@ -110,7 +165,7 @@ export default function Hero() {
 
                 {/* Platform logos */}
                 <motion.div
-                    className="mt-28"
+                    className="mt-28 w-full"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
@@ -118,42 +173,23 @@ export default function Hero() {
                     <p className="mb-8 text-center text-[13px] font-semibold tracking-widest uppercase text-[--color-text-tertiary]">
                         Undetectable on every learning platform
                     </p>
-                    <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
-                        {platformLogos.map((platform, i) => (
-                            <motion.div
-                                key={platform.alt}
-                                className="opacity-40 grayscale hover:opacity-100 hover:grayscale-0"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={shouldReduceMotion
-                                    ? { opacity: 0.4 }
-                                    : { opacity: 0.4, y: [0, -4, 0] }
-                                }
-                                transition={shouldReduceMotion
-                                    ? { opacity: { delay: 1 + (i * 0.1), duration: 0.5 } }
-                                    : {
-                                        opacity: { delay: 1 + (i * 0.1), duration: 0.5 },
-                                        y: {
-                                            repeat: Infinity,
-                                            duration: 4,
-                                            delay: i * 0.6,
-                                            ease: "easeInOut"
-                                        }
-                                    }
-                                }
-                                whileHover={shouldReduceMotion
-                                    ? { opacity: 1 }
-                                    : { opacity: 1, filter: "grayscale(0%)", transition: { duration: 0.3 } }
-                                }
-                            >
-                                <Image
-                                    src={platform.src}
-                                    alt={platform.alt}
-                                    width={120}
-                                    height={40}
-                                    className={`${platform.heightClass} w-auto`}
-                                />
-                            </motion.div>
-                        ))}
+                    <div className="relative mx-auto flex max-w-5xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                        <div className="flex w-[200%] animate-marquee flex-row items-center justify-around gap-12 pr-12">
+                            {[...platformLogos, ...platformLogos, ...platformLogos, ...platformLogos].map((platform, i) => (
+                                <div
+                                    key={`${platform.alt}-${i}`}
+                                    className="flex-shrink-0 opacity-40 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+                                >
+                                    <Image
+                                        src={platform.src}
+                                        alt={platform.alt}
+                                        width={120}
+                                        height={40}
+                                        className={`${platform.heightClass} w-auto`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </motion.div>
             </div>
