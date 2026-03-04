@@ -221,10 +221,10 @@ export default function Features() {
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="flex sm:hidden -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 perspective-[1200px] pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                    className="grid sm:hidden grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 perspective-[1200px] pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
                 >
                     {[...features, ...features, ...features].map((feature, index) => (
-                        <div key={`${feature.title}-${index}`} className="w-[85vw] max-w-[320px] flex-none snap-center h-full">
+                        <div key={`${feature.title}-${index}`} className="snap-center h-full w-full">
                             <FeatureCard
                                 feature={feature}
                                 index={index}

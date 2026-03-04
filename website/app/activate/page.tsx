@@ -79,6 +79,20 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
+    const [touchStart, setTouchStart] = useState<number | null>(null)
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.touches[0].clientX)
+    }
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchStart === null) return
+        const touchEnd = e.changedTouches[0].clientX
+        const diff = touchStart - touchEnd
+        if (diff > 40) setSelectedTier('pro') // swipe left sets pro
+        if (diff < -40) setSelectedTier('free') // swipe right sets free
+        setTouchStart(null)
+    }
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
         type: 'success' | 'error'
@@ -176,15 +190,19 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Plans grid */}
-                <div className="mx-auto flex flex-col-reverse w-full max-w-4xl gap-6 md:grid md:grid-cols-2">
+                <div
+                    className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                >
                     {/* Free plan */}
                     <div
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'free'}
-                        className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 w-full md:self-start ${selectedTier === 'free'
-                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
-                            : ''
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-full md:self-start ${selectedTier === 'free'
+                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100'
+                            : 'z-10 -translate-x-5 sm:-translate-x-8 scale-[0.92] -rotate-3 opacity-60 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('free')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
@@ -228,9 +246,9 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`relative cursor-pointer rounded-2xl glow-blue border transition-all duration-300 w-full md:self-start ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 -translate-y-1'
-                            : 'border-cyan-500/20 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-2xl glow-blue border transition-all duration-500 origin-center w-full md:self-start ${selectedTier === 'pro'
+                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 z-20 translate-x-0 scale-100 rotate-0 opacity-100'
+                            : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] z-10 translate-x-5 sm:translate-x-8 scale-[0.92] rotate-3 opacity-60 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
