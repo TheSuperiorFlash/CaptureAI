@@ -160,9 +160,9 @@ export default function ActivatePage() {
             <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
             <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
 
-            <div className="relative z-10 mx-auto max-w-5xl px-6">
+            <div className="relative z-10 mx-auto max-w-5xl">
                 {/* Header */}
-                <div className="mx-auto mb-14 max-w-xl text-center">
+                <div className="mx-auto mb-14 max-w-xl text-center px-6">
                     <div className="mb-5 flex justify-center">
                         <Image src="/logo.svg" alt="CaptureAI" width={48} height={48} />
                     </div>
@@ -176,14 +176,14 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Plans grid */}
-                <div className="mx-auto flex flex-col-reverse max-w-4xl gap-6 md:grid md:grid-cols-2">
+                <div className="mx-auto flex flex-col-reverse w-full max-w-4xl gap-0 md:gap-6 md:grid md:grid-cols-2">
                     {/* Free plan */}
                     <div
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'free'}
-                        className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${selectedTier === 'free'
-                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
+                        className={`relative glass-card cursor-pointer rounded-none md:rounded-2xl p-7 border-x-0 md:border-x border-b-0 md:border-b transition-all duration-300 ${selectedTier === 'free'
+                            ? 'border-blue-500/30 md:border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                             : ''
                             }`}
                         onClick={() => setSelectedTier('free')}
@@ -228,14 +228,14 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`relative cursor-pointer rounded-2xl glow-blue border transition-all duration-300 ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 -translate-y-1'
-                            : 'border-cyan-500/20 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'
+                        className={`relative cursor-pointer rounded-none md:rounded-2xl glow-blue border border-x-0 md:border-x border-cyan-500/20 md:border-cyan-500/20 transition-all duration-300 ${selectedTier === 'pro'
+                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-[rgba(34,211,238,0.5)] border-y border-x-0 md:border-cyan-400/50 md:-translate-y-1'
+                            : 'md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <div className="relative rounded-2xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-7">
+                        <div className="relative rounded-none md:rounded-2xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-7">
                             <div className="absolute right-6 top-6">
                                 <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                     ? 'border-cyan-400 bg-cyan-400'
@@ -281,7 +281,7 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Email + CTA section */}
-                <div className="mx-auto mt-12 max-w-2xl">
+                <div className="mx-auto mt-12 max-w-2xl px-6">
                     <div className="glass-card rounded-2xl p-8 md:p-10">
                         <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
                             {selectedTier === 'free' ? 'Get your free license key' : 'Start your Pro subscription'}

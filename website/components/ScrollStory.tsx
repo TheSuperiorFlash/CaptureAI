@@ -113,7 +113,7 @@ export default function ScrollStory() {
                 {/* Central Visual Anchor (The "Interface") */}
                 <div className="absolute inset-0 flex items-center justify-center perspective-[1200px] pointer-events-none">
                     <motion.div
-                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060913]/90 md:bg-black/40 shadow-[0_0_30px_rgba(0,100,255,0.1)] md:shadow-[0_0_50px_rgba(0,100,255,0.15)] md:backdrop-blur-xl backdrop-blur-sm will-change-transform"
+                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060913] md:bg-black/40 shadow-[0_0_30px_rgba(0,100,255,0.1)] md:shadow-[0_0_50px_rgba(0,100,255,0.15)] md:backdrop-blur-xl will-change-transform"
                         style={{
                             scale: anchorScale,
                             rotateX: anchorRotateX,
@@ -133,7 +133,7 @@ export default function ScrollStory() {
                                 <motion.div style={{ opacity: clutterOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
                                     <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/10" />
                                     <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
+                                    <div className="hidden md:inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
                                 </motion.div>
                                 {/* Clean Tab */}
                                 <motion.div style={{ opacity: cleanOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
@@ -285,7 +285,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 1 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity1, y: y1, scale: scale1 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -299,7 +299,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 2 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity2, y: y2, scale: scale2 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -312,10 +312,10 @@ export default function ScrollStory() {
 
                     {/* Sequence 3 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity3, y: y3, scale: scale3 }}
                     >
-                        <h2 className="drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+                        <h2 className="md:drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
                             The answer appears <br className="hidden md:block" />
                             where you need it most.
                         </h2>

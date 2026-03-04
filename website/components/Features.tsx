@@ -125,7 +125,7 @@ function FeatureCard({ feature, index, shouldReduceMotion }: { feature: Feature,
                 damping: 15,
                 delay: (index % 4) * 0.1
             }}
-            className={`glass-card group relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
+            className={`glass-card group h-full relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
         >
             {/* Dynamic Glass Glare Overlay */}
             <motion.div
@@ -176,15 +176,16 @@ export default function Features() {
                     </p>
                 </motion.div>
 
-                {/* Grid */}
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 perspective-[1200px]">
+                {/* Grid / Horizontal Slider on Mobile */}
+                <div className="-mx-6 px-6 sm:mx-0 sm:px-0 flex sm:grid overflow-x-auto sm:overflow-visible snap-x snap-mandatory gap-5 sm:grid-cols-2 lg:grid-cols-4 perspective-[1200px] pb-6 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {features.map((feature, index) => (
-                        <FeatureCard
-                            key={feature.title}
-                            feature={feature}
-                            index={index}
-                            shouldReduceMotion={shouldReduceMotion}
-                        />
+                        <div key={feature.title} className="w-[85vw] max-w-[320px] flex-none snap-center sm:w-auto sm:max-w-none h-full">
+                            <FeatureCard
+                                feature={feature}
+                                index={index}
+                                shouldReduceMotion={shouldReduceMotion}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>

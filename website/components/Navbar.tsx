@@ -107,7 +107,7 @@ export default function Navbar() {
     const shouldUseSimpleGlass = isLowPerformance || isMobile
 
     return (
-        <nav className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center pt-5 transition-all duration-300 pointer-events-none">
+        <nav className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center pt-0 md:pt-5 transition-all duration-300 pointer-events-none">
             {/* SVG Displacement Engine for Liquid Glass */}
             <svg style={{ display: 'none' }}>
                 <filter id="displacementFilter">
@@ -119,12 +119,12 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-3xl pl-6 pr-3' : 'max-w-5xl px-6'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
-                    className={`absolute inset-0 rounded-full pointer-events-none ${shouldUseSimpleGlass
-                        ? 'border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
-                        : 'border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
+                    className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
+                        ? 'border-b md:border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+                        : 'border-b md:border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
                     style={!shouldUseSimpleGlass ? {
                         backdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
@@ -214,7 +214,7 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="pointer-events-auto mt-3 w-[calc(100%-48px)] overflow-hidden rounded-2xl border border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl md:hidden">
+                <div className="pointer-events-auto w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl md:hidden">
                     <div className="space-y-1 px-5 py-5">
                         {navigation.map((item) => (
                             <Link

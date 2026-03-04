@@ -9,6 +9,7 @@ import ScrollStory from '@/components/ScrollStory'
 import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
 import type { Metadata } from 'next'
 import MagneticButton from '@/components/MagneticButton'
+import PrivacyGuardSlider from '@/components/PrivacyGuardSlider'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -101,8 +102,10 @@ export default function Home() {
                         </p>
                     </ScrollReveal>
 
+                    <PrivacyGuardSlider />
+
                     {/* Before / After comparison */}
-                    <ScrollRevealStagger delay={0.2} stagger={0} className="grid gap-6 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="hidden md:grid gap-6 md:grid-cols-2">
                         {/* Without */}
                         <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5" transition={{ type: "spring", stiffness: 40, damping: 20 }}>
                             <div className="mb-4 flex items-center gap-2.5">
@@ -157,8 +160,8 @@ export default function Home() {
             {/* ---- Pricing ---- */}
             <section id="pricing" className="relative py-24 md:py-32">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
-                <div className="mx-auto max-w-6xl px-6">
-                    <ScrollReveal delay={0.1} className="mx-auto mb-16 max-w-xl text-center">
+                <div className="mx-auto max-w-6xl">
+                    <ScrollReveal delay={0.1} className="mx-auto mb-16 max-w-xl text-center px-6">
                         <h2 className="mb-4">
                             <span className="text-[--color-text]">Simple </span>
                             <span className="text-gradient-static">pricing</span>
@@ -168,9 +171,9 @@ export default function Home() {
                         </p>
                     </ScrollReveal>
 
-                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto flex flex-col-reverse max-w-3xl gap-8 md:grid md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto px-0 md:px-6 flex flex-col-reverse w-full max-w-3xl gap-0 md:gap-8 md:grid md:grid-cols-2">
                         {/* Free */}
-                        <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
+                        <ScrollRevealItem className="glass-card flex w-full flex-col self-start rounded-none md:rounded-3xl p-8 border-x-0 md:border-x border-b-0 md:border-b">
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold font-inter text-[--color-text]">$0</span>
@@ -214,8 +217,8 @@ export default function Home() {
                         </ScrollRevealItem>
 
                         {/* Pro — premium gradient treatment */}
-                        <ScrollRevealItem className="relative flex self-start rounded-3xl glow-blue z-10 border border-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]">
-                            <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
+                        <ScrollRevealItem className="relative flex w-full self-start rounded-none md:rounded-3xl glow-blue z-10 border-y md:border border-cyan-500/20 md:border-cyan-500/20 transition-all duration-300 md:hover:-translate-y-1 hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]">
+                            <div className="relative flex flex-1 w-full flex-col rounded-none md:rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>
