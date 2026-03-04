@@ -205,7 +205,7 @@ export default function Navbar() {
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden"
+                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
                     aria-label="Toggle menu"
                 >
                     {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -216,14 +216,25 @@ export default function Navbar() {
             {isOpen && (
                 <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
                     ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl'
-                    : 'absolute right-5 top-[76px] flex w-44 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-black/40 p-2 shadow-2xl backdrop-blur-xl'
+                    : 'absolute right-5 top-4 z-50 flex w-1/2 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
                     }`}>
-                    <div className={isScrolled ? 'space-y-1 px-5 py-5' : 'flex flex-col space-y-1 text-center items-center'}>
+                    {!isScrolled && (
+                        <div className="flex justify-end px-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                    )}
+                    <div className={isScrolled ? 'space-y-1 px-5 py-5' : 'flex flex-col space-y-1 px-3 pb-3'}>
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${!isScrolled ? 'text-right' : ''} ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
