@@ -103,6 +103,30 @@ h4 {
   line-height: 1.35;
 }
 
+/* Hero title: must fit "Screenshot any question." on one line at all widths */
+.hero-title {
+  font-size: clamp(1.1rem, 5.2vw, 1.75rem) !important;
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 3rem !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 4.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 5rem !important;
+    line-height: 1.1;
+  }
+}
+
 p {
   line-height: 1.7;
   letter-spacing: -0.01em;
