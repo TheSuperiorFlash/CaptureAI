@@ -214,13 +214,16 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className={`pointer-events-auto w-full overflow-hidden rounded-b-2xl transition-all duration-300 md:hidden ${isScrolled ? 'border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl' : 'bg-transparent'}`}>
-                    <div className="space-y-1 px-5 py-5">
+                <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
+                    ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.06] bg-[#060913]/90 shadow-2xl backdrop-blur-xl'
+                    : 'absolute right-5 top-[76px] flex w-44 flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-black/40 p-2 shadow-2xl backdrop-blur-xl'
+                    }`}>
+                    <div className={isScrolled ? 'space-y-1 px-5 py-5' : 'flex flex-col space-y-1 text-center items-center'}>
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
@@ -229,10 +232,11 @@ export default function Navbar() {
                                 {item.name}
                             </Link>
                         ))}
-                        <div className="pt-2">
+                        <div className={`w-full ${isScrolled ? 'pt-2' : 'pt-1 pb-1'}`}>
                             <Link
                                 href="/activate"
-                                className="glow-btn flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-sm font-semibold text-white"
+                                className={`glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white ${!isScrolled ? 'text-[13px] px-2 h-9' : 'text-sm px-3'
+                                    }`}
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started
