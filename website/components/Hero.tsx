@@ -164,7 +164,7 @@ export default function Hero() {
                     <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center font-extrabold tracking-tight">
                         <div className="hero-title flex flex-nowrap justify-center pb-1 text-[--color-text]">
                             {text1Words.map((word, i) => (
-                                <motion.span key={`w1-${i}`} variants={itemVariants} className="mr-[0.3em] inline-block">
+                                <motion.span key={`w1-${i}`} variants={itemVariants} className={`inline-block ${i !== text1Words.length - 1 ? 'mr-[0.3em]' : ''}`}>
                                     {word}
                                 </motion.span>
                             ))}
@@ -174,7 +174,7 @@ export default function Hero() {
                                 <motion.span
                                     key={`w2-${i}`}
                                     variants={itemVariants}
-                                    className="text-gradient-static mr-[0.3em] inline-block"
+                                    className={`text-gradient-static inline-block ${i !== text2Words.length - 1 ? 'mr-[0.3em]' : ''}`}
                                     style={{
                                         backgroundSize: `${text2Words.length * 100}% 100%`,
                                         backgroundPosition: `${(i / (text2Words.length - 1)) * 100}% center`
