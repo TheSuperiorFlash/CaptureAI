@@ -85,8 +85,7 @@ export default function PrivacyGuardSlider() {
                 aria-valuenow={Math.round(sliderValue)}
                 aria-label="Privacy Guard comparison"
                 tabIndex={0}
-                className="relative w-full select-none overflow-hidden rounded-xl border border-white/[0.04] touch-none cursor-ew-resize"
-                onPointerDown={onPointerDown}
+                className="relative w-full select-none overflow-hidden rounded-xl border border-white/[0.04] touch-none"
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerUp}
@@ -118,11 +117,13 @@ export default function PrivacyGuardSlider() {
 
                 {/* Slider Handle Line */}
                 <div
-                    className="absolute bottom-0 top-0 z-20 w-[2px] cursor-ew-resize bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center pointer-events-none"
-                    style={{ left: `calc(${sliderValue}% - 1px)` }}
+                    className="absolute bottom-0 top-0 z-20 w-10 -ml-5 cursor-ew-resize flex items-center justify-center"
+                    style={{ left: `${sliderValue}%` }}
+                    onPointerDown={onPointerDown}
                 >
+                    <div className="h-full w-[2px] bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] pointer-events-none" />
                     {/* Circle with arrows inside the line */}
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 pointer-events-none text-black">
+                    <div className="absolute flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-lg border border-gray-200 pointer-events-none text-black">
                         <ChevronsLeftRight className="h-4 w-4" />
                     </div>
                 </div>
