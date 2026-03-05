@@ -129,7 +129,7 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-300 ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
@@ -143,7 +143,7 @@ export default function Navbar() {
                     } : undefined}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isScrolled ? 1 : 0 }}
-                    transition={{ duration: 0.15, ease: 'easeIn' }}
+                    transition={{ duration: isScrolled ? 0.15 : 0.8, ease: 'easeOut' }}
                 />
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity">
