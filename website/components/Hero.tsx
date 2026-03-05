@@ -169,7 +169,7 @@ export default function Hero() {
                                 </motion.span>
                             ))}
                         </div>
-                        <div className="flex flex-wrap sm:flex-nowrap justify-center overflow-hidden pb-3">
+                        <div className="hero-title flex flex-wrap sm:flex-nowrap justify-center overflow-hidden pb-3">
                             {text2Words.map((word, i) => (
                                 <motion.span
                                     key={`w2-${i}`}
