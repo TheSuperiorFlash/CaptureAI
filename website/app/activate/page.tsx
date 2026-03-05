@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
+import { useSwipeTier } from '@/hooks/useSwipeTier'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -78,21 +79,8 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
 
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
-    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
-    const [touchStart, setTouchStart] = useState<number | null>(null)
+    const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
-    const handleTouchStart = (e: React.TouchEvent) => {
-        setTouchStart(e.touches[0].clientX)
-    }
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (touchStart === null) return
-        const touchEnd = e.changedTouches[0].clientX
-        const diff = touchStart - touchEnd
-        if (diff > 40) setSelectedTier('pro') // swipe left sets pro
-        if (diff < -40) setSelectedTier('free') // swipe right sets free
-        setTouchStart(null)
-    }
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
         type: 'success' | 'error'
@@ -194,6 +182,7 @@ export default function ActivatePage() {
                     className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchCancel}
                 >
                     {/* Free plan */}
                     <div

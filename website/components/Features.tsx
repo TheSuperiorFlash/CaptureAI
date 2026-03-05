@@ -160,25 +160,32 @@ export default function Features() {
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
+        let rafId: number | null = null
         // Jump to the middle copy on mount to allow immediate infinite swiping
         if (scrollContainerRef.current) {
             const container = scrollContainerRef.current
             // Use requestAnimationFrame to let the DOM settle and measure width accurately
-            requestAnimationFrame(() => {
+            rafId = requestAnimationFrame(() => {
                 if (container.scrollWidth > container.clientWidth) {
                     container.scrollLeft = container.scrollWidth / 3
                 }
             })
+        }
+        return () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId)
+            }
         }
     }, [])
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const container = e.currentTarget
         const oneThird = container.scrollWidth / 3
-        if (container.scrollLeft <= 10) {
+        const threshold = Math.max(10, oneThird * 0.03)
+        if (container.scrollLeft <= threshold) {
             // Jump forward one full set length seamlessly
             container.scrollLeft += oneThird
-        } else if (container.scrollLeft >= (oneThird * 2) - 10) {
+        } else if (container.scrollLeft >= (oneThird * 2) - threshold) {
             // Jump backward one full set length seamlessly
             container.scrollLeft -= oneThird
         }

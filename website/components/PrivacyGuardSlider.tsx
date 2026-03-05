@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { Check, X as XIcon, ChevronsLeftRight } from 'lucide-react'
 
@@ -31,10 +31,35 @@ export default function PrivacyGuardSlider() {
 
     const onPointerUp = (e: React.PointerEvent) => {
         setIsDragging(false)
-        if (containerRef.current) {
+        if (
+            containerRef.current &&
+            containerRef.current.hasPointerCapture(e.pointerId)
+        ) {
             containerRef.current.releasePointerCapture(e.pointerId)
         }
     }
+
+    const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+        let newValue = sliderValue
+        switch (e.key) {
+            case 'ArrowLeft':
+                newValue = Math.max(0, sliderValue - 5)
+                break
+            case 'ArrowRight':
+                newValue = Math.min(100, sliderValue + 5)
+                break
+            case 'Home':
+                newValue = 0
+                break
+            case 'End':
+                newValue = 100
+                break
+            default:
+                return
+        }
+        e.preventDefault()
+        setSliderValue(newValue)
+    }, [sliderValue])
 
     return (
         <div className="glass-card relative overflow-hidden rounded-2xl p-5 md:hidden">
@@ -55,11 +80,18 @@ export default function PrivacyGuardSlider() {
 
             <div
                 ref={containerRef}
+                role="slider"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(sliderValue)}
+                aria-label="Privacy Guard comparison"
+                tabIndex={0}
                 className="relative w-full select-none overflow-hidden rounded-xl border border-white/[0.04] touch-none cursor-ew-resize"
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerUp}
+                onKeyDown={onKeyDown}
             >
                 {/* Background (Off/Dirty) */}
                 <Image

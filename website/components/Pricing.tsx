@@ -1,26 +1,12 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
 import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
+import { useSwipeTier } from '@/hooks/useSwipeTier'
 
 export default function Pricing() {
-    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
-    const [touchStart, setTouchStart] = useState<number | null>(null)
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        setTouchStart(e.touches[0].clientX)
-    }
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (touchStart === null) return
-        const touchEnd = e.changedTouches[0].clientX
-        const diff = touchStart - touchEnd
-        if (diff > 40) setSelectedTier('pro') // swipe left sets pro
-        if (diff < -40) setSelectedTier('free') // swipe right sets free
-        setTouchStart(null)
-    }
+    const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
     return (
         <section id="pricing" className="relative py-24 md:py-32 overflow-x-clip">
@@ -40,14 +26,19 @@ export default function Pricing() {
                     className="mx-auto grid grid-cols-1 w-full max-w-3xl md:gap-8 md:grid-cols-2 perspective-[1200px]"
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchCancel}
                 >
                     {/* Free */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selectedTier === 'free'}
                         className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'free'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('free')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
                     >
                         <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-colors ${selectedTier === 'free' ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]' : ''}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
@@ -95,11 +86,15 @@ export default function Pricing() {
 
                     {/* Pro — premium gradient treatment */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selectedTier === 'pro'}
                         className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:-translate-y-1'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
                         <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] p-[1px] ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                             <div className="relative flex flex-1 w-full flex-col rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">

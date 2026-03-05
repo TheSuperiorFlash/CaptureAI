@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -46,18 +46,26 @@ export default function Navbar() {
             setIsMobile(window.innerWidth < 768)
         }
 
+        // Debounce resize to avoid frequent state updates
+        let resizeTimer: ReturnType<typeof setTimeout> | null = null
+        const debouncedResize = () => {
+            if (resizeTimer) clearTimeout(resizeTimer)
+            resizeTimer = setTimeout(handleResize, 150)
+        }
+
         checkPerformance()
         handleResize()
 
         mqlTransparency.addEventListener('change', checkPerformance)
         mqlMotion.addEventListener('change', checkPerformance)
-        window.addEventListener('resize', handleResize, { passive: true })
+        window.addEventListener('resize', debouncedResize, { passive: true })
         window.addEventListener('scroll', handleScroll, { passive: true })
         handleScroll() // Check on mount
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
-            window.removeEventListener('resize', handleResize)
+            window.removeEventListener('resize', debouncedResize)
+            if (resizeTimer) clearTimeout(resizeTimer)
             mqlTransparency.removeEventListener('change', checkPerformance)
             mqlMotion.removeEventListener('change', checkPerformance)
         }
@@ -224,6 +232,7 @@ export default function Navbar() {
                                 type="button"
                                 onClick={() => setIsOpen(false)}
                                 className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
+                                aria-label="Close menu"
                             >
                                 <X size={20} />
                             </button>
