@@ -53,10 +53,10 @@ export default function Home() {
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="grid items-start gap-12 lg:grid-cols-2">
-                        {/* Popup is absolutely positioned so it never affects section height */}
-                        <ScrollReveal delay={0.1} className="relative">
+                        {/* Popup is absolutely positioned so it never affects section height, but needs mobile height to prevent text overlap */}
+                        <ScrollReveal delay={0.1} className="relative h-[320px] lg:h-0">
                             <div className="absolute inset-0 flex items-start justify-center" style={{ overflow: 'visible', pointerEvents: 'none', top: -40 }}>
-                                <div style={{ pointerEvents: 'auto' }}>
+                                <div style={{ pointerEvents: 'auto' }} className="scale-[0.80] origin-top md:scale-100">
                                     <FloatingUIShowcase />
                                 </div>
                             </div>

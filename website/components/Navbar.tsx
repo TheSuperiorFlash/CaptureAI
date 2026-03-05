@@ -13,6 +13,7 @@ export default function Navbar() {
     const [activeHash, setActiveHash] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
     const [isLowPerformance, setIsLowPerformance] = useState(false)
+    const [isReducedMotion, setIsReducedMotion] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const [activePillIndex, setActivePillIndex] = useState<number | null>(null)
     const [isNavHovered, setIsNavHovered] = useState(false)
@@ -40,6 +41,7 @@ export default function Navbar() {
 
         const checkPerformance = () => {
             setIsLowPerformance(mqlTransparency.matches || mqlMotion.matches)
+            setIsReducedMotion(mqlMotion.matches)
         }
 
         const handleResize = () => {
@@ -135,8 +137,8 @@ export default function Navbar() {
                         : 'border-b md:border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
                     style={!shouldUseSimpleGlass ? {
-                        backdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
-                        WebkitBackdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
+                        backdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
+                        WebkitBackdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.5), inset 0 0 3px 1px rgba(255, 255, 255, 0.4)'
                     } : undefined}
                     initial={{ opacity: 0 }}
@@ -157,7 +159,7 @@ export default function Navbar() {
                             className="relative px-4 py-2 flex items-center justify-center cursor-pointer"
                             onMouseEnter={() => handleMouseEnter(index)}
                         >
-                            {activePillIndex === index && (
+                            {activePillIndex === index && !isReducedMotion && (
                                 <motion.div
                                     layoutId="nav-hover-pill"
                                     className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
@@ -165,8 +167,8 @@ export default function Navbar() {
                                         : 'border border-white/[0.02] bg-white/[0.02]'
                                         }`}
                                     style={!shouldUseSimpleGlass ? {
-                                        backdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
-                                        WebkitBackdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
+                                        backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                        WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
                                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
                                     } : undefined}
                                     animate={{ opacity: isNavHovered ? 1 : 0 }}
@@ -224,7 +226,7 @@ export default function Navbar() {
             {isOpen && (
                 <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
                     ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.08] bg-[#060913]/70 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl'
-                    : 'absolute right-3 top-3 z-50 flex w-[35%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
+                    : 'absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
                     }`}>
                     {!isScrolled && (
                         <div className="flex justify-end pr-2 pt-[10px] pb-2">
@@ -243,7 +245,7 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${!isScrolled ? 'text-center' : ''} ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${isScrolled ? 'text-right' : 'text-left'} ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}

@@ -18,7 +18,6 @@ export default function PrivacyGuardSlider() {
 
     const onPointerDown = (e: React.PointerEvent) => {
         setIsDragging(true)
-        handleMove(e.clientX)
         // Set pointer capture to the container so we don't lose drag if moving outside fast
         if (containerRef.current) {
             containerRef.current.setPointerCapture(e.pointerId)
