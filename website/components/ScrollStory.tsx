@@ -134,14 +134,14 @@ export default function ScrollStory() {
                                 <motion.div style={{ opacity: clutterOpacity }} className="absolute left-[85px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
-                                    <div className="hidden md:inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
                                 </motion.div>
                                 {/* Clean Tab */}
                                 <motion.div style={{ opacity: cleanOpacity }} className="absolute left-[85px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
                                     <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                 </motion.div>
                             </div>
-                            <div className="h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
+                            <div className="hidden md:block h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
                         </div>
                         {/* Mock Internal Content */}
                         <div className="relative flex h-full w-full flex-col p-6 overflow-hidden">
@@ -156,6 +156,12 @@ export default function ScrollStory() {
                                         <div className="h-4 w-full rounded bg-white/10" />
                                         <div className="h-4 w-5/6 rounded bg-white/10" />
                                         <div className="h-4 w-3/4 rounded bg-white/10" />
+                                        <div className="h-4 w-full rounded bg-white/10 md:hidden" />
+                                        <div className="h-4 w-5/6 rounded bg-white/10 md:hidden" />
+                                        <div className="h-4 w-1/2 rounded bg-white/10 md:hidden" />
+                                        <div className="h-4 w-3/4 rounded bg-white/10 md:hidden" />
+                                        <div className="h-4 w-full rounded bg-white/10 md:hidden" />
+                                        <div className="h-4 w-2/3 rounded bg-white/10 md:hidden" />
                                     </div>
                                     <div className="h-full flex-1 rounded-lg bg-white/5 flex flex-col gap-4 p-5">
                                         <div className="h-8 w-1/2 rounded bg-white/10" />
