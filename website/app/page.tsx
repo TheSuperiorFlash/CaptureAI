@@ -11,6 +11,7 @@ import type { Metadata } from 'next'
 import MagneticButton from '@/components/MagneticButton'
 import PrivacyGuardSlider from '@/components/PrivacyGuardSlider'
 import Pricing from '@/components/Pricing'
+import FloatingUIShowcase from '@/components/FloatingUIShowcase'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -48,23 +49,16 @@ export default function Home() {
             <ScrollStory />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="relative py-24 md:py-32 overflow-x-clip">
+            <section className="relative py-32 md:py-42 overflow-x-clip">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="grid items-center gap-12 lg:grid-cols-2">
-                        {/* Image with glow frame */}
+                    <div className="grid items-start gap-12 lg:grid-cols-2">
+                        {/* Popup is absolutely positioned so it never affects section height */}
                         <ScrollReveal delay={0.1} className="relative">
-                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-600/30 via-transparent to-cyan-400/20 blur-md" />
-                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-blue-900/20">
-                                <Image
-                                    src="/floating-ui.png"
-                                    alt="CaptureAI floating interface on a webpage"
-                                    width={600}
-                                    height={600}
-                                    priority
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="block h-auto w-full"
-                                />
+                            <div className="absolute inset-0 flex items-start justify-center" style={{ overflow: 'visible', pointerEvents: 'none', top: -40 }}>
+                                <div style={{ pointerEvents: 'auto' }}>
+                                    <FloatingUIShowcase />
+                                </div>
                             </div>
                         </ScrollReveal>
 

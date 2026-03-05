@@ -117,6 +117,7 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                 rotateX: shouldDisable ? 0 : rotateX,
                 rotateY: shouldDisable ? 0 : rotateY,
                 transformStyle: "preserve-3d",
+                transitionProperty: "color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow",
             }}
             initial={shouldDisable ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
