@@ -240,7 +240,7 @@ export default function Navbar() {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-right ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-center ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
