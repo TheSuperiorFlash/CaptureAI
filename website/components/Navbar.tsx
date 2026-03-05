@@ -215,7 +215,7 @@ export default function Navbar() {
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
+                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${isOpen ? 'opacity-0 pointer-events-none' : ''}`}
                     aria-label="Toggle menu"
                 >
                     {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -224,28 +224,23 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className={`pointer-events-auto transition-all duration-300 md:hidden ${isScrolled
-                    ? 'w-full overflow-hidden rounded-b-2xl border-b border-white/[0.08] bg-[#060913]/70 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl'
-                    : 'absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl'
-                    }`}>
-                    {!isScrolled && (
-                        <div className="flex justify-end pr-2 pt-[10px] pb-2">
-                            <button
-                                type="button"
-                                onClick={() => setIsOpen(false)}
-                                className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
-                                aria-label="Close menu"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                    )}
-                    <div className={isScrolled ? 'space-y-1 px-5 py-5' : 'flex flex-col space-y-1 px-3 pb-3'}>
+                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
+                    <div className="flex justify-end pr-2 pt-[10px] pb-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsOpen(false)}
+                            className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
+                            aria-label="Close menu"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-3 pb-3">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors ${isScrolled ? 'text-right' : 'text-left'} ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-right ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
@@ -254,11 +249,10 @@ export default function Navbar() {
                                 {item.name}
                             </Link>
                         ))}
-                        <div className={`w-full ${isScrolled ? 'pt-2' : 'pt-1 pb-1'}`}>
+                        <div className="w-full pt-1 pb-1">
                             <Link
                                 href="/activate"
-                                className={`glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white ${!isScrolled ? 'text-[13px] px-2 h-9' : 'text-sm px-3'
-                                    }`}
+                                className="glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white text-[13px] px-2 h-9"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started
