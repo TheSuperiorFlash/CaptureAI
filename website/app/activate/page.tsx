@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
+import { useSwipeTier } from '@/hooks/useSwipeTier'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -78,7 +79,8 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
 
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
-    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
+    const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
+
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
         type: 'success' | 'error'
@@ -176,15 +178,20 @@ export default function ActivatePage() {
                 </div>
 
                 {/* Plans grid */}
-                <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+                <div
+                    className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchCancel}
+                >
                     {/* Free plan */}
                     <div
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'free'}
-                        className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 ${selectedTier === 'free'
-                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]'
-                            : ''
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'free'
+                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100'
+                            : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('free')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
@@ -228,14 +235,14 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`relative cursor-pointer rounded-2xl glow-blue border transition-all duration-300 ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 -translate-y-1'
-                            : 'border-cyan-500/20 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue border transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
+                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 z-20 translate-x-0 scale-100 rotate-0 opacity-100'
+                            : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <div className="relative rounded-2xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-7">
+                        <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
                             <div className="absolute right-6 top-6">
                                 <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                     ? 'border-cyan-400 bg-cyan-400'

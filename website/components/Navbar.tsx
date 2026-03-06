@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -13,6 +13,8 @@ export default function Navbar() {
     const [activeHash, setActiveHash] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
     const [isLowPerformance, setIsLowPerformance] = useState(false)
+    const [isReducedMotion, setIsReducedMotion] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
     const [activePillIndex, setActivePillIndex] = useState<number | null>(null)
     const [isNavHovered, setIsNavHovered] = useState(false)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
@@ -39,17 +41,33 @@ export default function Navbar() {
 
         const checkPerformance = () => {
             setIsLowPerformance(mqlTransparency.matches || mqlMotion.matches)
+            setIsReducedMotion(mqlMotion.matches)
+        }
+
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+
+        // Debounce resize to avoid frequent state updates
+        let resizeTimer: ReturnType<typeof setTimeout> | null = null
+        const debouncedResize = () => {
+            if (resizeTimer) clearTimeout(resizeTimer)
+            resizeTimer = setTimeout(handleResize, 150)
         }
 
         checkPerformance()
+        handleResize()
+
         mqlTransparency.addEventListener('change', checkPerformance)
         mqlMotion.addEventListener('change', checkPerformance)
-
+        window.addEventListener('resize', debouncedResize, { passive: true })
         window.addEventListener('scroll', handleScroll, { passive: true })
         handleScroll() // Check on mount
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
+            window.removeEventListener('resize', debouncedResize)
+            if (resizeTimer) clearTimeout(resizeTimer)
             mqlTransparency.removeEventListener('change', checkPerformance)
             mqlMotion.removeEventListener('change', checkPerformance)
         }
@@ -96,8 +114,10 @@ export default function Navbar() {
         return pathname === href
     }
 
+    const shouldUseSimpleGlass = isLowPerformance || isMobile
+
     return (
-        <nav className="fixed left-0 right-0 top-0 z-50 flex justify-center pt-5 transition-all duration-300 pointer-events-none">
+        <nav className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center pt-0 md:pt-5 transition-all duration-300 pointer-events-none">
             {/* SVG Displacement Engine for Liquid Glass */}
             <svg style={{ display: 'none' }}>
                 <filter id="displacementFilter">
@@ -109,21 +129,21 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-750 ease-[cubic-bezier(0.25,1,0.5,1)] ${isScrolled ? 'max-w-3xl pl-6 pr-3' : 'max-w-5xl px-6'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-400 ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
-                    className={`absolute inset-0 rounded-full pointer-events-none ${isLowPerformance
-                        ? 'border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
-                        : 'border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
+                    className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
+                        ? 'border-b md:border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+                        : 'border-b md:border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
-                    style={!isLowPerformance ? {
-                        backdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
-                        WebkitBackdropFilter: 'brightness(1.1) blur(4px) url(#displacementFilter)',
+                    style={!shouldUseSimpleGlass ? {
+                        backdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
+                        WebkitBackdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.5), inset 0 0 3px 1px rgba(255, 255, 255, 0.4)'
                     } : undefined}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isScrolled ? 1 : 0 }}
-                    transition={{ duration: 0.15, ease: 'easeIn' }}
+                    transition={{ duration: isScrolled ? 0.15 : 0.3, ease: 'easeOut' }}
                 />
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity">
@@ -139,16 +159,16 @@ export default function Navbar() {
                             className="relative px-4 py-2 flex items-center justify-center cursor-pointer"
                             onMouseEnter={() => handleMouseEnter(index)}
                         >
-                            {activePillIndex === index && (
+                            {activePillIndex === index && !isReducedMotion && (
                                 <motion.div
                                     layoutId="nav-hover-pill"
-                                    className={`absolute inset-0 rounded-full ${isLowPerformance
+                                    className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
                                         ? 'bg-white/[0.06] backdrop-blur-md'
                                         : 'border border-white/[0.02] bg-white/[0.02]'
                                         }`}
-                                    style={!isLowPerformance ? {
-                                        backdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
-                                        WebkitBackdropFilter: 'brightness(1.1) blur(6px) url(#displacementFilter)',
+                                    style={!shouldUseSimpleGlass ? {
+                                        backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                        WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
                                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
                                     } : undefined}
                                     animate={{ opacity: isNavHovered ? 1 : 0 }}
@@ -195,22 +215,32 @@ export default function Navbar() {
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className="relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden"
+                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${isOpen ? 'opacity-0 pointer-events-none' : ''}`}
                     aria-label="Toggle menu"
                 >
-                    {isOpen ? <X size={20} /> : <Menu size={20} />}
+                    {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
             </div>
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="border-t border-white/[0.04] bg-[--color-background]/95 backdrop-blur-xl md:hidden">
-                    <div className="space-y-1 px-6 py-4">
+                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
+                    <div className="flex justify-end pr-2 pt-[10px] pb-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsOpen(false)}
+                            className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
+                            aria-label="Close menu"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+                    <div className="flex flex-col space-y-1 px-3 pb-3">
                         {navigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`block rounded-lg px-3 py-2.5 text-sm transition-colors ${isActive(item.href)
+                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-center ${isActive(item.href)
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
@@ -219,10 +249,10 @@ export default function Navbar() {
                                 {item.name}
                             </Link>
                         ))}
-                        <div className="pt-2">
+                        <div className="w-full pt-1 pb-1">
                             <Link
                                 href="/activate"
-                                className="glow-btn flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-2.5 text-sm font-semibold text-white"
+                                className="glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white text-[13px] px-2 h-9"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Get Started

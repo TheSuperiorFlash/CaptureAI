@@ -126,7 +126,7 @@ export default function Hero() {
 
     return (
         <section
-            className="relative overflow-x-clip pb-32 pt-24 md:pb-48 md:pt-48"
+            className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-48"
             onMouseMove={handleMouseMove}
         >
             {/* Layered deeper gradient background with smooth fade-out */}
@@ -161,21 +161,20 @@ export default function Hero() {
                         <span className="text-[13px] font-medium text-[--color-text-tertiary]">Free to start</span>
                     </motion.div>
 
-                    {/* Headline */}
-                    <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center text-5xl font-extrabold tracking-tight md:text-7xl lg:text-[5rem] lg:leading-[1.1]">
-                        <div className="flex flex-wrap justify-center overflow-hidden pb-1 text-[--color-text]">
+                    <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center font-extrabold tracking-tight">
+                        <div className="hero-title flex flex-nowrap justify-center pb-1 text-[--color-text]">
                             {text1Words.map((word, i) => (
-                                <motion.span key={`w1-${i}`} variants={itemVariants} className="mr-[0.3em] inline-block">
+                                <motion.span key={`w1-${i}`} variants={itemVariants} className={`inline-block ${i !== text1Words.length - 1 ? 'mr-[0.3em]' : ''}`}>
                                     {word}
                                 </motion.span>
                             ))}
                         </div>
-                        <div className="flex flex-wrap justify-center overflow-hidden pb-3">
+                        <div className="hero-title flex flex-wrap sm:flex-nowrap justify-center overflow-hidden pb-3">
                             {text2Words.map((word, i) => (
                                 <motion.span
                                     key={`w2-${i}`}
                                     variants={itemVariants}
-                                    className="text-gradient-static mr-[0.3em] inline-block"
+                                    className={`text-gradient-static inline-block ${i !== text2Words.length - 1 ? 'mr-[0.3em]' : ''}`}
                                     style={{
                                         backgroundSize: `${text2Words.length * 100}% 100%`,
                                         backgroundPosition: `${(i / (text2Words.length - 1)) * 100}% center`
