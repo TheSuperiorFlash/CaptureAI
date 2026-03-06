@@ -15,6 +15,7 @@ export default function Navbar() {
     const [isLowPerformance, setIsLowPerformance] = useState(false)
     const [isReducedMotion, setIsReducedMotion] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [isSafari, setIsSafari] = useState(false)
     const [activePillIndex, setActivePillIndex] = useState<number | null>(null)
     const [isNavHovered, setIsNavHovered] = useState(false)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
@@ -44,6 +45,11 @@ export default function Navbar() {
             setIsReducedMotion(mqlMotion.matches)
         }
 
+        const checkSafari = () => {
+            const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+            setIsSafari(isSafariBrowser)
+        }
+
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768)
         }
@@ -56,6 +62,7 @@ export default function Navbar() {
         }
 
         checkPerformance()
+        checkSafari()
         handleResize()
 
         mqlTransparency.addEventListener('change', checkPerformance)
@@ -114,7 +121,7 @@ export default function Navbar() {
         return pathname === href
     }
 
-    const shouldUseSimpleGlass = isLowPerformance || isMobile
+    const shouldUseSimpleGlass = isLowPerformance || isMobile || isSafari
 
     return (
         <nav className="fixed left-0 right-0 top-0 z-50 flex flex-col items-center pt-0 md:pt-5 transition-all duration-300 pointer-events-none">
