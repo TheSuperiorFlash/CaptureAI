@@ -218,11 +218,12 @@ export default function Navbar() {
                     </MagneticButton>
                 </div>
 
-                {/* Mobile toggle */}
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${isOpen ? 'opacity-0 pointer-events-none' : ''}`}
+                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
+                    aria-hidden={!isScrolled && isOpen}
+                    tabIndex={!isScrolled && isOpen ? -1 : undefined}
                     aria-label="Toggle menu"
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
