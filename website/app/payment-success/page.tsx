@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Check, X, Zap } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
 const MAX_RETRIES = 5
@@ -151,7 +151,7 @@ function PaymentSuccessContent() {
 
                             <h1 className="mb-2 text-2xl font-bold text-[--color-text]">Verification failed</h1>
                             <p className="mb-6 text-[15px] text-[--color-text-tertiary]">
-                                We couldn't verify your payment.
+                                We couldn&apos;t verify your payment.
                             </p>
 
                             <div className="mb-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[14px] leading-relaxed text-[--color-text-secondary]">

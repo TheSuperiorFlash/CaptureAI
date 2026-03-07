@@ -10,6 +10,7 @@ export default function ScrollStory() {
     const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true)
     }, [])
 
@@ -102,7 +103,7 @@ export default function ScrollStory() {
 
                 {/* Immersive background glow tracking the scroll */}
                 <motion.div
-                    className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full mix-blend-screen gradient-blur pointer-events-none"
+                    className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full hidden md:block mix-blend-screen gradient-blur pointer-events-none"
                     style={{
                         scale: glowScale,
                         opacity: glowOpacity,
@@ -113,7 +114,7 @@ export default function ScrollStory() {
                 {/* Central Visual Anchor (The "Interface") */}
                 <div className="absolute inset-0 flex items-center justify-center perspective-[1200px] pointer-events-none">
                     <motion.div
-                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-[0_0_50px_rgba(0,100,255,0.15)] backdrop-blur-xl"
+                        className="flex h-[400px] w-[320px] md:h-[600px] md:w-[800px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#060913] md:bg-black/40 shadow-[0_0_30px_rgba(0,100,255,0.1)] md:shadow-[0_0_50px_rgba(0,100,255,0.15)] md:backdrop-blur-xl will-change-transform"
                         style={{
                             scale: anchorScale,
                             rotateX: anchorRotateX,
@@ -130,17 +131,17 @@ export default function ScrollStory() {
                                     <div className="h-3 w-3 rounded-full bg-green-500/80" />
                                 </div>
                                 {/* Cluttered Tabs */}
-                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/10" />
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/5" />
+                                <motion.div style={{ opacity: clutterOpacity }} className="absolute left-[85px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/5" />
                                 </motion.div>
                                 {/* Clean Tab */}
-                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-20 flex gap-2 pointer-events-none">
-                                    <div className="inline-flex h-5 w-20 md:h-6 md:w-24 rounded bg-white/10" />
+                                <motion.div style={{ opacity: cleanOpacity }} className="absolute left-[85px] md:left-20 flex gap-1.5 md:gap-2 pointer-events-none">
+                                    <div className="inline-flex h-4 w-16 md:h-6 md:w-24 rounded bg-white/10" />
                                 </motion.div>
                             </div>
-                            <div className="h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
+                            <div className="hidden md:block h-4 w-16 md:w-24 rounded bg-white/5 relative z-10" />
                         </div>
                         {/* Mock Internal Content */}
                         <div className="relative flex h-full w-full flex-col p-6 overflow-hidden">
@@ -152,9 +153,9 @@ export default function ScrollStory() {
                                 </div>
                                 <div className="flex gap-4 flex-1">
                                     <div className="h-full w-1/4 rounded-lg bg-white/5 flex flex-col gap-3 p-3">
-                                        <div className="h-4 w-full rounded bg-white/10" />
-                                        <div className="h-4 w-5/6 rounded bg-white/10" />
-                                        <div className="h-4 w-3/4 rounded bg-white/10" />
+                                        <div className="hidden md:block h-4 w-full rounded bg-white/10" />
+                                        <div className="hidden md:block h-4 w-5/6 rounded bg-white/10" />
+                                        <div className="hidden md:block h-4 w-3/4 rounded bg-white/10" />
                                     </div>
                                     <div className="h-full flex-1 rounded-lg bg-white/5 flex flex-col gap-4 p-5">
                                         <div className="h-8 w-1/2 rounded bg-white/10" />
@@ -168,7 +169,7 @@ export default function ScrollStory() {
                             {/* Clean State (Mock Quiz UI + Capture) */}
                             <motion.div style={{ opacity: cleanOpacity }} className="absolute inset-0 pointer-events-none">
                                 {/* Top-Left Quiz Area */}
-                                <div className="absolute top-8 left-8 md:top-12 md:left-12 w-full max-w-[320px] md:max-w-[420px] flex flex-col gap-8">
+                                <div className="absolute top-10 left-8 right-8 scale-95 origin-top md:scale-100 md:right-auto md:top-12 md:left-12 md:w-full md:max-w-[420px] flex flex-col gap-6 md:gap-8">
                                     {/* Mock Question Area 1 (Captured) */}
                                     <div className="relative">
                                         <div className="w-full space-y-4">
@@ -210,7 +211,7 @@ export default function ScrollStory() {
 
                                         {/* Floating Capture Overlay - Sized tightly around quiz 1 */}
                                         <motion.div
-                                            className="absolute -inset-4 md:-inset-6 overflow-hidden rounded-xl border-2 border-dashed border-cyan-400/50 bg-cyan-400/5 mix-blend-screen"
+                                            className="absolute -inset-3 md:-inset-6 overflow-hidden rounded-xl border-2 border-dashed border-cyan-400/50 bg-cyan-400/5 mix-blend-screen"
                                             style={{
                                                 opacity: captureBoxOpacity,
                                                 clipPath: captureBoxClipPath
@@ -245,11 +246,10 @@ export default function ScrollStory() {
                                     </div>
                                 </div>
 
-                                {/* Styled Popup Skeleton */}
+                                {/* Styled Popup Skeleton (desktop only) */}
                                 <motion.div style={{ opacity: cleanOpacity }} className="absolute top-6 right-6 w-[200px] rounded-2xl bg-[#0f1115] shadow-[0_12px_48px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 font-sans hidden md:flex flex-col">
                                     {/* Header */}
                                     <div className="px-4 py-2.5 flex items-center gap-2 border-b border-white/5 bg-[#16181d]">
-                                        {/* Real App Icon */}
                                         <div className="relative w-5 h-5 opacity-90">
                                             <Image src="/logo.svg" alt="CaptureAI Logo" fill />
                                         </div>
@@ -260,7 +260,6 @@ export default function ScrollStory() {
                                     <div className="px-4 pt-4 pb-4 flex-1 bg-[#0f1115]">
                                         <div className="h-3 w-16 bg-white/10 rounded mb-3" />
                                         <div className="space-y-2 mt-1">
-                                            {/* Skeleton lines representing answer text */}
                                             <div className="h-3 w-full bg-white/5 rounded" />
                                             <div className="h-3 w-[85%] bg-white/5 rounded" />
                                         </div>
@@ -268,12 +267,8 @@ export default function ScrollStory() {
 
                                     {/* Buttons */}
                                     <div className="px-4 pb-4 space-y-2.5 bg-[#0f1115] mt-auto">
-                                        {/* Primary Button */}
-                                        <div className="w-full h-7 bg-white/10 rounded-lg flex items-center justify-center">
-                                        </div>
-                                        {/* Secondary Button */}
-                                        <div className="w-full h-7 bg-white/2 rounded-lg flex items-center justify-center border border-white/5">
-                                        </div>
+                                        <div className="w-full h-7 bg-white/10 rounded-lg flex items-center justify-center" />
+                                        <div className="w-full h-7 bg-white/2 rounded-lg flex items-center justify-center border border-white/5" />
                                     </div>
                                 </motion.div>
                             </motion.div>
@@ -285,7 +280,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 1 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity1, y: y1, scale: scale1 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -299,7 +294,7 @@ export default function ScrollStory() {
 
                     {/* Sequence 2 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity2, y: y2, scale: scale2 }}
                     >
                         <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
@@ -312,10 +307,10 @@ export default function ScrollStory() {
 
                     {/* Sequence 3 */}
                     <motion.div
-                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
+                        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity3, y: y3, scale: scale3 }}
                     >
-                        <h2 className="drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+                        <h2 className="md:drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
                             The answer appears <br className="hidden md:block" />
                             where you need it most.
                         </h2>

@@ -75,7 +75,7 @@ h6 {
   color: var(--color-text);
 }
 
-h1 {
+:where(h1) {
   font-size: clamp(2.75rem, 6vw + 0.5rem, 4.5rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -101,6 +101,35 @@ h4 {
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.35;
+}
+
+/* Hero title: must fit "Screenshot any question." on one line at all widths */
+.hero-title {
+  font-size: clamp(1.5rem, 8.5vw, 2.5rem);
+}
+
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 5rem;
+    line-height: 1.1;
+  }
+}
+
+/* Text shadow for mobile readability over animated backgrounds */
+.text-shadow-glow {
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
 p {
@@ -206,7 +235,11 @@ p {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
@@ -354,7 +387,8 @@ p {
   animation-delay: 500ms;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce),
+(prefers-reduced-transparency: reduce) {
 
   .animate-float-slow,
   .animate-pulse-glow,
@@ -362,6 +396,10 @@ p {
   .reveal-up {
     animation: none !important;
     transform: none !important;
+  }
+
+  .reveal-up {
+    opacity: 1 !important;
   }
 }
 

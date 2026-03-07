@@ -6,9 +6,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
 import ScrollStory from '@/components/ScrollStory'
-import { ArrowRight, Check, X as XIcon, Minus } from 'lucide-react'
+import { ArrowRight, Check, X as XIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import MagneticButton from '@/components/MagneticButton'
+import PrivacyGuardSlider from '@/components/PrivacyGuardSlider'
+import Pricing from '@/components/Pricing'
+import FloatingUIShowcase from '@/components/FloatingUIShowcase'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -46,23 +49,16 @@ export default function Home() {
             <ScrollStory />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="relative py-24 md:py-32">
+            <section className="relative py-32 md:py-42 overflow-x-clip">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
-                    <div className="grid items-center gap-12 lg:grid-cols-2">
-                        {/* Image with glow frame */}
-                        <ScrollReveal delay={0.1} className="relative">
-                            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-600/30 via-transparent to-cyan-400/20 blur-md" />
-                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl shadow-blue-900/20">
-                                <Image
-                                    src="/floating-ui.png"
-                                    alt="CaptureAI floating interface on a webpage"
-                                    width={600}
-                                    height={600}
-                                    priority
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="block h-auto w-full"
-                                />
+                    <div className="grid items-start gap-12 lg:grid-cols-2">
+                        {/* Popup is absolutely positioned so it never affects section height, but needs mobile height to prevent text overlap */}
+                        <ScrollReveal delay={0.1} className="relative h-[320px] lg:h-0">
+                            <div className="absolute inset-0 flex items-start justify-center" style={{ overflow: 'visible', pointerEvents: 'none', top: -40 }}>
+                                <div style={{ pointerEvents: 'auto' }} className="scale-[0.80] origin-top md:scale-100">
+                                    <FloatingUIShowcase />
+                                </div>
                             </div>
                         </ScrollReveal>
 
@@ -86,7 +82,7 @@ export default function Home() {
             </section>
 
             {/* ---- Privacy Guard Showcase ---- */}
-            <section className="relative py-24 md:py-32">
+            <section className="relative py-24 md:py-32 overflow-x-clip">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="pointer-events-none absolute inset-0 aurora-bg opacity-40" />
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
@@ -101,8 +97,10 @@ export default function Home() {
                         </p>
                     </ScrollReveal>
 
+                    <PrivacyGuardSlider />
+
                     {/* Before / After comparison */}
-                    <ScrollRevealStagger delay={0.2} stagger={0} className="grid gap-6 md:grid-cols-2">
+                    <ScrollRevealStagger delay={0.2} stagger={0} className="hidden md:grid gap-6 md:grid-cols-2">
                         {/* Without */}
                         <ScrollRevealItem className="glass-card overflow-hidden rounded-2xl p-5" transition={{ type: "spring", stiffness: 40, damping: 20 }}>
                             <div className="mb-4 flex items-center gap-2.5">
@@ -155,105 +153,7 @@ export default function Home() {
             <HowItWorks />
 
             {/* ---- Pricing ---- */}
-            <section id="pricing" className="relative py-24 md:py-32">
-                <div className="divider-gradient absolute left-0 right-0 top-0" />
-                <div className="mx-auto max-w-6xl px-6">
-                    <ScrollReveal delay={0.1} className="mx-auto mb-16 max-w-xl text-center">
-                        <h2 className="mb-4">
-                            <span className="text-[--color-text]">Simple </span>
-                            <span className="text-gradient-static">pricing</span>
-                        </h2>
-                        <p className="text-lg text-[--color-text-secondary]">
-                            Start free. Upgrade when you need more.
-                        </p>
-                    </ScrollReveal>
-
-                    <ScrollRevealStagger delay={0.2} stagger={0} className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
-                        {/* Free */}
-                        <ScrollRevealItem className="glass-card flex flex-col self-start rounded-3xl p-8">
-                            <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
-                            <div className="mb-7">
-                                <span className="text-4xl font-bold font-inter text-[--color-text]">$0</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
-                            </div>
-
-                            <ul className="mb-8 space-y-3.5">
-                                <li className="flex items-start gap-3">
-                                    <Minus className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
-                                    <span className="text-sm text-[--color-text-secondary]">10 requests per day</span>
-                                </li>
-                                {[
-                                    'Screenshot capture',
-                                    'Floating interface',
-                                    'Stealth Mode',
-                                    'Works on any website',
-                                ].map((item) => (
-                                    <li key={item} className="flex items-start gap-3">
-                                        <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                        <span className="text-sm text-[--color-text-secondary]">{item}</span>
-                                    </li>
-                                ))}
-                                {[
-                                    'Privacy Guard',
-                                    'Ask Mode',
-                                    'Auto-Solve',
-                                ].map((item) => (
-                                    <li key={item} className="flex items-start gap-3 opacity-30">
-                                        <XIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                        <span className="text-sm text-[--color-text-tertiary]">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <Link
-                                href="/activate"
-                                className="glass block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text] hover:bg-white/[0.05]"
-                            >
-                                Get Started
-                            </Link>
-                        </ScrollRevealItem>
-
-                        {/* Pro — premium gradient treatment */}
-                        <ScrollRevealItem className="relative flex self-start rounded-3xl glow-blue z-10 border border-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]">
-                            <div className="relative flex flex-1 flex-col rounded-3xl bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
-                                <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
-                                    POPULAR
-                                </span>
-                                <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
-                                <div className="mb-7">
-                                    <span className="text-4xl font-bold font-inter text-gradient-static">$9.99</span>
-                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
-                                </div>
-
-                                <ul className="mb-8 space-y-3.5">
-                                    {[
-                                        'Unlimited requests',
-                                        'Screenshot capture',
-                                        'Floating interface',
-                                        'Stealth Mode',
-                                        'Works on any website',
-                                        'Privacy Guard',
-                                        'Ask Mode',
-                                        'Auto-Solve',
-                                    ].map((item) => (
-                                        <li key={item} className="flex items-start gap-3">
-                                            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-400" />
-                                            <span className="text-sm text-[--color-text-secondary]">{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                <Link
-                                    href="/activate"
-                                    className="glow-btn block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:scale-105 hover:-translate-y-1"
-                                >
-                                    Get Pro
-                                </Link>
-                            </div>
-                        </ScrollRevealItem>
-                    </ScrollRevealStagger>
-                </div>
-            </section>
+            <Pricing />
 
             <FAQ />
 

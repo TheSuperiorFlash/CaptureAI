@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export default function Footer() {
     return (
-        <footer className="relative reveal-up">
+        <footer className="relative reveal-up overflow-x-clip">
             {/* Gradient top border */}
             <div className="divider-gradient" />
 

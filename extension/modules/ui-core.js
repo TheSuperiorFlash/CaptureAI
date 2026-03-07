@@ -230,9 +230,9 @@ export const UICore = {
     modeToggleSwitch.style.cssText = `
             position: relative !important;
             width: 90px !important;
-            height: 24px !important;
+            height: 22px !important;
             background-color: ${theme.toggleBg} !important;
-            border-radius: 12px !important;
+            border-radius: 11px !important;
             border: 1px solid ${theme.border} !important;
             transition: all 0.3s ease !important;
             display: flex !important;
@@ -241,18 +241,19 @@ export const UICore = {
             font-weight: 500 !important;
             font-family: 'Inter', sans-serif !important;
             overflow: hidden !important;
+            box-sizing: border-box !important;
         `;
 
     // Sliding indicator
     const toggleSlider = document.createElement('div');
     toggleSlider.style.cssText = `
             position: absolute !important;
-            width: ${STATE.isAskMode ? '38px' : '54px'} !important;
-            height: 24px !important;
+            width: ${STATE.isAskMode ? '34px' : '52px'} !important;
+            height: 22px !important;
             background-color: ${theme.buttonPrimary} !important;
-            border-radius: 12px !important;
-            top: 0px !important;
-            left: ${STATE.isAskMode ? '52px' : '0px'} !important;
+            border-radius: 11px !important;
+            top: -1px !important;
+            left: ${STATE.isAskMode ? '53px' : '-1px'} !important;
             transition: all 0.3s ease !important;
             z-index: 1 !important;
         `;
@@ -300,13 +301,13 @@ export const UICore = {
 
       // Update UI
       if (STATE.isAskMode) {
-        toggleSlider.style.left = '52px';
-        toggleSlider.style.width = '38px';
+        toggleSlider.style.left = '53px';
+        toggleSlider.style.width = '34px';
         captureLabel.style.color = theme.secondaryText;
         askLabel.style.color = 'white';
       } else {
-        toggleSlider.style.left = '0px';
-        toggleSlider.style.width = '54px';
+        toggleSlider.style.left = '-1px';
+        toggleSlider.style.width = '52px';
         captureLabel.style.color = 'white';
         askLabel.style.color = theme.secondaryText;
       }
