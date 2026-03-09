@@ -249,13 +249,11 @@ class OCRService {
         const img = new Image();
         img.onload = () => {
           try {
-            // Adaptive upscale: 3x for small items, 2x for medium, 1.5x for already large
-            let scale = 3;
-            if (img.width > 800 || img.height > 600) scale = 1.5;
-            else if (img.width > 400 || img.height > 300) scale = 2;
-
+            // Guard against extremely large images (after 3x upscale)
+            const scale = 3;
             if (img.width * scale > MAX_DIMENSION || img.height * scale > MAX_DIMENSION) {
-              scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height);
+              reject(new Error('Image dimensions too large for preprocessing'));
+              return;
             }
 
             const canvas = document.createElement('canvas');
@@ -266,11 +264,12 @@ class OCRService {
               return;
             }
 
-            // Upscale so characters are large enough for Tesseract
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            ctx.imageSmoothingEnabled = true; // Use linear interpolation instead of nearest-neighbor for smoother edges
-            ctx.imageSmoothingQuality = 'high';
+            // 3x upscale so 1-2px thin lines (underlines) become 3-6px,
+            // thick enough for Tesseract to recognize as characters.
+            // Nearest-neighbor keeps edges sharp instead of blurring them.
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             let imageData;
@@ -286,66 +285,58 @@ class OCRService {
             const w = canvas.width;
             const h = canvas.height;
 
-            // Step 1: Convert to grayscale with high-quality luma weights
+            // Step 1: Convert to grayscale with contrast stretch
             const gray = new Uint8Array(w * h);
-            const factor = 1.8; // Normalized contrast
+            const factor = 1.5;
             for (let i = 0; i < data.length; i += 4) {
-              // Standard BT.601 luma coefficients
-              const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
               const stretched = ((avg / 255 - 0.5) * factor + 0.5) * 255;
               gray[i >> 2] = stretched < 0 ? 0 : stretched > 255 ? 255 : Math.round(stretched);
             }
 
-            // Step 2: Unsharp Mask pass (3x3 kernel)
-            const sharpened = new Uint8Array(w * h);
-            for (let y = 1; y < h - 1; y++) {
-              for (let x = 1; x < w - 1; x++) {
-                const idx = y * w + x;
-                const val = (9 * gray[idx] -
-                  gray[idx - w - 1] - gray[idx - w] - gray[idx - w + 1] -
-                  gray[idx - 1] - gray[idx + 1] -
-                  gray[idx + w - 1] - gray[idx + w] - gray[idx + w + 1]);
-                sharpened[idx] = val < 0 ? 0 : val > 255 ? 255 : val;
-              }
-            }
-
-            // Step 3: Local Blend - preserves character structure
-            const final = new Uint8Array(w * h);
+            // Step 2: Local smooth grow — 3x3 box blur that spreads dark
+            // pixels into their neighbors, softly thickening thin strokes
+            // (underlines) without the harsh artifacts of min-dilation.
+            const smoothed = new Uint8Array(w * h);
             for (let y = 0; y < h; y++) {
               for (let x = 0; x < w; x++) {
-                if (y === 0 || y === h - 1 || x === 0 || x === w - 1) {
-                  final[y * w + x] = sharpened[y * w + x];
-                  continue;
-                }
-
                 let sum = 0;
-                let min = 255;
+                let count = 0;
                 for (let dy = -1; dy <= 1; dy++) {
+                  const ny = y + dy;
+                  if (ny < 0 || ny >= h) {
+                    continue;
+                  }
                   for (let dx = -1; dx <= 1; dx++) {
-                    const v = sharpened[(y + dy) * w + (x + dx)];
-                    sum += v;
-                    if (v < min) min = v;
+                    const nx = x + dx;
+                    if (nx < 0 || nx >= w) {
+                      continue;
+                    }
+                    sum += gray[ny * w + nx];
+                    count++;
                   }
                 }
-
-                const avg = sum / 9;
-                // Favor the darker value (min) to ensure thin character strokes don't break
-                final[y * w + x] = Math.round(avg * 0.3 + min * 0.7);
+                const avg = sum / count;
+                // Bias toward darker value: blend 60% smoothed + 40% min
+                // so thin dark lines grow outward while text stays readable
+                const orig = gray[y * w + x];
+                const dark = orig < avg ? orig : avg;
+                smoothed[y * w + x] = Math.round(avg * 0.6 + dark * 0.4);
               }
             }
 
-            // Write final processed grayscale back to RGBA
-            for (let i = 0; i < final.length; i++) {
+            // Write smoothed grayscale back to RGBA
+            for (let i = 0; i < smoothed.length; i++) {
               const idx = i << 2;
-              data[idx] = final[i];
-              data[idx + 1] = final[i];
-              data[idx + 2] = final[i];
+              data[idx] = smoothed[i];
+              data[idx + 1] = smoothed[i];
+              data[idx + 2] = smoothed[i];
             }
 
             // Put processed image back
             ctx.putImageData(imageData, 0, 0);
 
-            // Return processed image as WebP data URL (best compression for complex images)
+            // Return processed image as WebP data URL
             resolve(canvas.toDataURL('image/webp', 0.90));
           } catch (error) {
             reject(error);
