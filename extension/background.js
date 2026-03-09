@@ -966,19 +966,8 @@ function isWrongAnswerPrompt(text) {
 function isImageSelectionQuestion(text) {
   if (!text) return false;
   const lower = text.toLowerCase();
-  const patterns = [
-    /which\s+(image|picture|photo|option)\s+(shows?|is|depicts?|contains?|best|correct|right)/,
-    /(best|correct|right)\s+(image|picture|photo)/,
-    /select\s+(all\s+)?(the\s+)?(image|picture|photo)s?\s+(that|of|showing|with|containing)/,
-    /click\s+(all\s+)?(the\s+)?(image|picture|photo)s?\s+(that|of|showing|with|containing)/,
-    /choose\s+(the\s+)?(correct\s+)?(image|picture|photo)/,
-    /identify\s+(the\s+)?(image|picture|photo)/,
-    /pick\s+(the\s+)?(best\s+)?(image|picture|photo)/,
-    /which\s+(of\s+)?(the\s+)?(following\s+)?(image|picture|photo)s?/,
-    /select\s+images?\s+of/,
-    /click\s+on\s+(all\s+)?(image|picture|photo)s?/,
-  ];
-  return patterns.some(pattern => pattern.test(lower));
+  // If OCR text contains references to images/pictures, AI needs to see them
+  return /\b(image|picture|photo)s?\b/.test(lower);
 }
 
 
