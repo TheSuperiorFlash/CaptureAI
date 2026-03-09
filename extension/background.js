@@ -967,7 +967,7 @@ function isImageSelectionQuestion(text) {
   if (!text) return false;
   const lower = text.toLowerCase();
   // If OCR text contains references to images/pictures, AI needs to see them
-  return /\b(image|picture|photo)s?\b/.test(lower);
+  return /\b(image|picture|photo|diagram|graph|chart|figure|table|map|illustration)s?\b/.test(lower);
 }
 
 
