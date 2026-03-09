@@ -142,7 +142,7 @@ class OCRService {
         ? await this.preprocessImage(imageDataUrl)
         : imageDataUrl;
 
-      // Log preprocessed image URL for visual inspection in browser
+      // Log preprocessed image URL for visual inspection
       if (isDebug && options.preprocessImage) {
         console.log('CaptureAI OCR - Preprocessed image (paste URL in browser to view):');
         console.log(sourceImage);
@@ -249,11 +249,13 @@ class OCRService {
         const img = new Image();
         img.onload = () => {
           try {
-            // Guard against extremely large images (after 3x upscale)
-            const scale = 3;
+            // Adaptive upscale: 3x for small items, 2x for medium, 1.5x for already large
+            let scale = 3;
+            if (img.width > 800 || img.height > 600) scale = 1.5;
+            else if (img.width > 400 || img.height > 300) scale = 2;
+
             if (img.width * scale > MAX_DIMENSION || img.height * scale > MAX_DIMENSION) {
-              reject(new Error('Image dimensions too large for preprocessing'));
-              return;
+              scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height);
             }
 
             const canvas = document.createElement('canvas');
@@ -264,12 +266,11 @@ class OCRService {
               return;
             }
 
-            // 3x upscale so 1-2px thin lines (underlines) become 3-6px,
-            // thick enough for Tesseract to recognize as characters.
-            // Nearest-neighbor keeps edges sharp instead of blurring them.
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.imageSmoothingEnabled = false;
+            // Upscale so characters are large enough for Tesseract
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            ctx.imageSmoothingEnabled = true; // Use linear interpolation instead of nearest-neighbor for smoother edges
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             let imageData;
@@ -285,33 +286,30 @@ class OCRService {
             const w = canvas.width;
             const h = canvas.height;
 
-            // Step 1: Convert to grayscale with contrast stretch
+            // Step 1: Convert to grayscale with high-quality luma weights
             const gray = new Uint8Array(w * h);
-            const factor = 2.2; // Increased from 1.5 for sharper contrast
+            const factor = 1.8; // Normalized contrast
             for (let i = 0; i < data.length; i += 4) {
-              const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114); // Better grayscale weights
+              // Standard BT.601 luma coefficients
+              const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
               const stretched = ((avg / 255 - 0.5) * factor + 0.5) * 255;
               gray[i >> 2] = stretched < 0 ? 0 : stretched > 255 ? 255 : Math.round(stretched);
             }
 
-            // Step 2: Sharpening kernel (3x3)
-            // [ 0, -1,  0]
-            // [-1,  5, -1]
-            // [ 0, -1,  0]
+            // Step 2: Unsharp Mask pass (3x3 kernel)
             const sharpened = new Uint8Array(w * h);
             for (let y = 1; y < h - 1; y++) {
               for (let x = 1; x < w - 1; x++) {
                 const idx = y * w + x;
-                const val = 5 * gray[idx] -
-                  gray[idx - w] -
-                  gray[idx - 1] -
-                  gray[idx + 1] -
-                  gray[idx + w];
+                const val = (9 * gray[idx] -
+                  gray[idx - w - 1] - gray[idx - w] - gray[idx - w + 1] -
+                  gray[idx - 1] - gray[idx + 1] -
+                  gray[idx + w - 1] - gray[idx + w] - gray[idx + w + 1]);
                 sharpened[idx] = val < 0 ? 0 : val > 255 ? 255 : val;
               }
             }
 
-            // Step 3: Local smooth grow — thickening thin strokes while keeping them sharp
+            // Step 3: Local Blend - preserves character structure
             const final = new Uint8Array(w * h);
             for (let y = 0; y < h; y++) {
               for (let x = 0; x < w; x++) {
@@ -321,22 +319,18 @@ class OCRService {
                 }
 
                 let sum = 0;
-                let count = 0;
                 let min = 255;
-
                 for (let dy = -1; dy <= 1; dy++) {
                   for (let dx = -1; dx <= 1; dx++) {
                     const v = sharpened[(y + dy) * w + (x + dx)];
                     sum += v;
-                    count++;
                     if (v < min) min = v;
                   }
                 }
 
-                const avg = sum / count;
-                // Blend sharpened value with local minimum to thicken thin dark lines
-                // but keep the overall result crisp.
-                final[y * w + x] = Math.round(avg * 0.4 + min * 0.6);
+                const avg = sum / 9;
+                // Favor the darker value (min) to ensure thin character strokes don't break
+                final[y * w + x] = Math.round(avg * 0.3 + min * 0.7);
               }
             }
 
@@ -351,8 +345,8 @@ class OCRService {
             // Put processed image back
             ctx.putImageData(imageData, 0, 0);
 
-            // Return processed image as data URL
-            resolve(canvas.toDataURL('image/png'));
+            // Return processed image as WebP data URL (best compression for complex images)
+            resolve(canvas.toDataURL('image/webp', 0.90));
           } catch (error) {
             reject(error);
           }
