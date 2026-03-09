@@ -1,0 +1,299 @@
+/* 
+  Semantic Theme Architecture for CaptureAI
+  Layer 1: Primitives (Absolute Values)
+  Layer 2: Semantic (Context/Function Mappings)
+  Layer 3: Component (Specific UI Mappings)
+*/
+
+:root,
+#captureai-panel {
+   /* =========================================
+      LAYER 0: CONFIGURATION
+      ========================================= */
+   /* Handled via JS Config (config.js -> PILLED_UI_BUTTONS) */
+   --config-button-radius: 10px;
+   --config-toggle-radius: 4px;
+
+
+   /* =========================================
+      LAYER 1: PRIMITIVES
+      ========================================= */
+
+   /* Colors - Base Palette */
+   --color-base-white: #ffffff;
+   --color-base-white-translucent-98: rgba(255, 255, 255, 0.98);
+   --color-base-white-translucent-85: rgba(255, 255, 255, 0.85);
+   --color-base-white-translucent-78: rgba(255, 255, 255, 0.78);
+   --color-base-white-translucent-12: rgba(255, 255, 255, 0.12);
+   --color-base-white-translucent-10: rgba(255, 255, 255, 0.1);
+   --color-base-white-translucent-08: rgba(255, 255, 255, 0.08);
+   --color-base-white-translucent-05: rgba(255, 255, 255, 0.05);
+
+   --color-base-black: #000000;
+   --color-base-black-translucent-85: rgba(0, 0, 0, 0.85);
+   --color-base-black-translucent-65: rgba(0, 0, 0, 0.65);
+   --color-base-black-translucent-58: rgba(0, 0, 0, 0.58);
+   --color-base-black-translucent-12: rgba(0, 0, 0, 0.12);
+   --color-base-black-translucent-08: rgba(0, 0, 0, 0.08);
+   --color-base-black-translucent-06: rgba(0, 0, 0, 0.06);
+   --color-base-black-translucent-04: rgba(0, 0, 0, 0.04);
+   --color-base-black-translucent-03: rgba(0, 0, 0, 0.03);
+   --color-base-black-translucent-02: rgba(0, 0, 0, 0.02);
+
+   --color-base-gray-50: #fafafa;
+   --color-base-gray-100: #f9f9f9;
+   --color-base-gray-200: #f5f5f5;
+   --color-base-gray-300: #f1f1f1;
+   --color-base-gray-400: #e0e0e0;
+   --color-base-gray-500: #cccccc;
+   --color-base-gray-600: #999999;
+   --color-base-gray-700: #666666;
+   --color-base-gray-800: #444444;
+   --color-base-gray-900: #333333;
+
+   --color-base-blue-100: #f0f7ff;
+   --color-base-blue-500: #218aff;
+   --color-base-blue-600: #1a6fd9;
+   --color-base-blue-700: #0066ff;
+   --color-base-blue-translucent-30: rgba(33, 138, 255, 0.3);
+   --color-base-blue-translucent-20: rgba(33, 138, 255, 0.2);
+   --color-base-blue-translucent-10: rgba(33, 138, 255, 0.1);
+   --color-base-blue-translucent-08: rgba(33, 138, 255, 0.08);
+
+   --color-base-red-500: #ff4444;
+   --color-base-red-600: #cc0000;
+   --color-base-red-400: #ff6b6b;
+   /* original errorText */
+
+   --color-base-green-500: #4caf65;
+   --color-base-green-600: #008000;
+
+   --color-base-yellow-100: #fff3cd;
+   --color-base-yellow-500: #ffc107;
+   --color-base-yellow-700: #856404;
+
+   --color-base-purple-500: #a252ff;
+
+   --color-base-transparent: transparent;
+
+   /* Spacing */
+   --space-size-base-0: 0px;
+   --space-size-base-1: 1px;
+   --space-size-base-2: 2px;
+   --space-size-base-3: 3px;
+   --space-size-base-4: 4px;
+   --space-size-base-5: 5px;
+   --space-size-base-6: 6px;
+   --space-size-base-8: 8px;
+   --space-size-base-10: 10px;
+   --space-size-base-12: 12px;
+   --space-size-base-15: 15px;
+   --space-size-base-16: 16px;
+   --space-size-base-20: 20px;
+   --space-size-base-24: 24px;
+   --space-size-base-35: 35px;
+
+   /* Sizes */
+   --size-base-10: 10px;
+   --size-base-12: 12px;
+   --size-base-14: 14px;
+   --size-base-20: 20px;
+   --size-base-24: 24px;
+   --size-base-32: 32px;
+   --size-base-40: 40px;
+   --size-base-42: 42px;
+   --size-base-44: 44px;
+   --size-base-48: 48px;
+   --size-base-52: 52px;
+   --size-base-56: 56px;
+   --size-base-60: 60px;
+   --size-base-90: 90px;
+   --size-base-150: 150px;
+   --size-base-250: 250px;
+   --size-base-300: 300px;
+   --size-base-full: 100%;
+
+   /* Radiuses */
+   --border-radius-base-0: 0px;
+   --border-radius-base-sm: 4px;
+   --border-radius-base-md: 6px;
+   --border-radius-base-lg: 8px;
+   --border-radius-base-xl: 12px;
+   --border-radius-base-2xl: 16px;
+   --border-radius-base-pill: 100px;
+
+   /* Typography */
+   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+   --font-family-mono: monospace;
+
+   --font-size-base-10: 10px;
+   --font-size-base-11: 11px;
+   --font-size-base-12: 12px;
+   --font-size-base-13: 13px;
+   --font-size-base-14: 14px;
+   --font-size-base-16: 16px;
+   --font-size-base-18: 18px;
+   --font-size-base-20: 20px;
+
+   --font-weight-base-normal: 400;
+   --font-weight-base-medium: 500;
+   --font-weight-base-semibold: 600;
+   --font-weight-base-bold: 700;
+
+   /* Backdrops */
+   --backdrop-blur-base-md: blur(6px);
+   --backdrop-blur-base-lg: blur(4px);
+
+   /* Shadows */
+   --shadow-base-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+   --shadow-base-md: 0 2px 8px rgba(0, 0, 0, 0.02);
+   --shadow-base-lg: 0 4px 12px var(--color-base-blue-translucent-30);
+   --shadow-base-xl-light: 0 16px 48px var(--color-base-black-translucent-12), 0 0 0 1px var(--color-base-black-translucent-04);
+   --shadow-base-xl-dark: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-base-white-translucent-08);
+
+   /* =========================================
+     LAYER 2: SEMANTIC (Light Mode Default)
+     ========================================= */
+
+   /* Surfaces */
+   --color-surface-primary-default: var(--color-base-gray-50);
+   /* Body background */
+   --color-surface-secondary-default: var(--color-base-white);
+   /* Cards, Panels */
+   --color-surface-tertiary-default: var(--color-base-gray-100);
+   /* Secondary cards */
+   --color-surface-floating-default: var(--color-base-white);
+   /* Floating UI */
+
+   --color-surface-brand-default: var(--color-base-blue-500);
+   --color-surface-brand-hover: var(--color-base-blue-600);
+   --color-surface-brand-active: var(--color-base-blue-700);
+   --color-surface-brand-subtle: var(--color-base-blue-100);
+
+   --color-surface-neutral-default: var(--color-base-black-translucent-03);
+   --color-surface-neutral-hover: var(--color-base-black-translucent-06);
+   --color-surface-neutral-disabled: var(--color-base-gray-400);
+
+   --color-surface-danger-default: var(--color-base-red-500);
+
+   --color-surface-warning-default: var(--color-base-yellow-100);
+
+   /* Borders */
+   --color-border-subtle-default: var(--color-base-black-translucent-06);
+   --color-border-neutral-default: var(--color-base-black-translucent-08);
+   --color-border-brand-default: var(--color-base-blue-500);
+   --color-border-danger-default: var(--color-base-red-500);
+   --color-border-warning-default: var(--color-base-yellow-500);
+
+   /* Text */
+   --color-text-primary-default: var(--color-base-gray-900);
+   --color-text-secondary-default: var(--color-base-gray-700);
+   --color-text-tertiary-default: var(--color-base-gray-600);
+
+   --color-text-brand-default: var(--color-base-blue-500);
+   --color-text-inverse-default: var(--color-base-white);
+   --color-text-danger-default: var(--color-base-red-600);
+   --color-text-danger-inverse: var(--color-base-red-400);
+   --color-text-success-default: var(--color-base-green-600);
+   --color-text-warning-default: var(--color-base-yellow-700);
+
+   /* Specific Effects */
+   --shadow-floating-default: var(--shadow-base-xl-light);
+   --shadow-button-brand-default: var(--shadow-base-lg);
+
+   /* =========================================
+     LAYER 3: COMPONENT
+     ========================================= */
+
+   /* Floating Panel */
+   --color-floating-panel-background: var(--color-surface-floating-default);
+   --border-radius-floating-panel: var(--border-radius-base-xl);
+   --shadow-floating-panel: var(--shadow-floating-default);
+   --backdrop-floating-panel: var(--backdrop-blur-base-lg);
+   --color-floating-panel-text: var(--color-text-primary-default);
+
+   /* Buttons */
+   --color-button-primary-background: var(--color-surface-brand-default);
+   --color-button-primary-hover: var(--color-surface-brand-hover);
+   --color-button-primary-text: var(--color-text-inverse-default);
+   --shadow-button-primary: var(--shadow-button-brand-default);
+
+   --color-button-secondary-background: var(--color-surface-neutral-default);
+   --color-button-secondary-hover: var(--color-surface-neutral-hover);
+   --color-button-secondary-text: var(--color-text-primary-default);
+   --color-button-secondary-border: var(--color-border-subtle-default);
+
+   /* Final Button Styling (Config Driven) */
+   --border-radius-button-pill: var(--config-button-radius);
+   --space-button-padding: var(--space-size-base-16);
+   --space-button-padding: var(--space-size-base-16);
+
+   /* Toggles & Sliders */
+   --color-toggle-track-background: var(--color-surface-neutral-default);
+   --color-toggle-track-border: var(--color-border-subtle-default);
+   --color-toggle-slider-background: var(--color-surface-secondary-default);
+   --color-toggle-active-background: var(--color-surface-brand-default);
+
+   --border-radius-toggle-track: var(--border-radius-base-pill);
+   --border-radius-toggle-slider: var(--border-radius-base-pill);
+
+   /* Inputs */
+   --color-input-background: var(--color-surface-neutral-default);
+   --color-input-border: var(--color-border-neutral-default);
+   --color-input-text: var(--color-text-primary-default);
+   --color-input-focus-border: var(--color-border-brand-default);
+   --color-input-focus-background: var(--color-surface-secondary-default);
+
+   --border-radius-input: var(--border-radius-base-2xl);
+
+   /* Cards/Sections */
+   --color-card-background: var(--color-surface-secondary-default);
+   --color-card-border: var(--color-border-subtle-default);
+   --border-radius-card: var(--border-radius-base-xl);
+
+   /* Image Remove Button */
+   --color-image-remove-background: var(--color-base-white);
+   --color-image-remove-text: var(--color-base-gray-700);
+   --color-image-remove-border: rgba(0, 0, 0, 0.3);
+   --color-image-attach-background-active: rgba(40, 40, 40, 0.45);
+}
+
+/* =========================================
+   LAYER 2: SEMANTIC (Dark Mode Overrides)
+   ========================================= */
+[data-theme="dark"],
+#captureai-panel[data-theme="dark"] {
+   color-scheme: dark;
+   /* Surfaces */
+   --color-surface-primary-default: #141414;
+   --color-surface-secondary-default: #1f1f1f;
+   --color-surface-tertiary-default: #2a2a2a;
+   --color-surface-floating-default: rgba(20, 20, 20, 0.85);
+
+   --color-surface-neutral-default: var(--color-base-white-translucent-10);
+   --color-surface-neutral-hover: var(--color-base-white-translucent-05);
+
+   --color-border-subtle-default: var(--color-base-white-translucent-08);
+   --color-border-neutral-default: var(--color-base-white-translucent-10);
+
+   --color-text-primary-default: var(--color-base-white);
+   --color-text-secondary-default: var(--color-base-gray-500);
+   --color-text-tertiary-default: var(--color-base-gray-600);
+
+   --color-toggle-slider-background: var(--color-base-white);
+
+   --shadow-floating-default: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+   /* Image Remove Button overrides */
+   --color-image-remove-background: var(--color-base-white);
+   --color-image-remove-text: var(--color-base-black);
+   --color-image-remove-border: rgba(0, 0, 0, 0.3);
+   --color-image-attach-background-active: rgba(20, 20, 20, 0.8);
+}
+
+/* Global Switch for Pilled Buttons (Reacts to JS Config) */
+:root[data-pill-style="true"],
+[data-pill-style="true"] #captureai-panel {
+   --config-button-radius: 100px;
+   --config-toggle-radius: 100px;
+}

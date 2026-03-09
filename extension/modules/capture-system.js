@@ -18,8 +18,8 @@ export const CaptureSystem = {
     this.wasVisible = STATE.isPanelVisible;
 
     // Hide panel during capture
-    if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-      window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
+    if (window.CaptureAI.UICore && window.CaptureAI.UICore.setPanelVisibility) {
+      window.CaptureAI.UICore.setPanelVisibility(false);
     }
 
     // Track ask mode state from parameter
@@ -104,7 +104,7 @@ export const CaptureSystem = {
     overlay.id = 'captureai-overlay';
 
     // In stealth mode (UI hidden), don't show the translucent gray background
-    const isStealthMode = !STATE.isPanelVisible;
+    const isStealthMode = !this.wasVisible;
 
     Object.assign(overlay.style, {
       position: 'fixed',
@@ -112,10 +112,12 @@ export const CaptureSystem = {
       left: '0',
       width: '100vw',
       height: '100vh',
-      backgroundColor: isStealthMode ? 'transparent' : 'rgba(0, 0, 0, 0.3)',
+      backgroundColor: isStealthMode ? 'transparent' : 'rgba(0, 0, 0, 0.55)',
       cursor: isStealthMode ? 'default' : 'crosshair',
       zIndex: '2147483646',
-      outline: 'none'
+      outline: 'none',
+      transition: 'none',
+      willChange: 'background-color'
     });
 
     overlay.tabIndex = -1;
@@ -136,14 +138,20 @@ export const CaptureSystem = {
     selectionBox.id = 'captureai-selection';
 
     // In stealth mode (UI hidden), hide the selection box
-    const isStealthMode = !STATE.isPanelVisible;
+    const isStealthMode = !this.wasVisible;
 
     Object.assign(selectionBox.style, {
       position: 'absolute',
       border: isStealthMode ? 'none' : '2px dashed #218aff',
-      backgroundColor: isStealthMode ? 'transparent' : 'rgba(33,138,255,0.2)',
+      borderRadius: isStealthMode ? '0' : '14px 14px 0 14px',
+      backgroundColor: 'transparent',
+      boxShadow: isStealthMode ? 'none' :
+        '0 0 25px rgba(33, 138, 255, 0.8), 0 0 70px rgba(33, 138, 255, 0.4), 0 0 150px rgba(33, 138, 255, 0.2), 0 0 0 9999px rgba(0, 0, 0, 0.55)',
       pointerEvents: 'none',
-      zIndex: '2147483647'
+      zIndex: '2147483647',
+      opacity: '1',
+      transition: 'none',
+      willChange: 'left, top, width, height'
     });
 
     const overlay = document.getElementById('captureai-overlay');
@@ -167,6 +175,12 @@ export const CaptureSystem = {
     STATE.startY = e.clientY;
     STATE.endX = e.clientX;
     STATE.endY = e.clientY;
+
+    const isStealthMode = !this.wasVisible;
+    if (!isStealthMode) {
+      const overlay = document.getElementById('captureai-overlay');
+      if (overlay) overlay.style.backgroundColor = 'transparent';
+    }
 
     this.createSelectionBox();
     this.updateSelectionBox();
@@ -276,8 +290,12 @@ export const CaptureSystem = {
     // Store for quick capture
     await window.CaptureAI.StorageUtils.setValue(STORAGE_KEYS.LAST_CAPTURE_AREA, coordinates);
 
-    // Clean up selection UI FIRST (before capture)
+    // Clean up selection UI (with animation)
     this.cleanupSelection();
+
+    // Wait slightly more for the fade to be effectively invisible for the shot
+    // while still letting the user see the start of the animation
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     // Wait for DOM to update and repaint
     await new Promise(resolve => requestAnimationFrame(() => {
@@ -305,8 +323,8 @@ export const CaptureSystem = {
         STATE.isForAskMode = false;
 
         // Restore panel visibility
-        if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-          window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
+        if (window.CaptureAI.UICore && window.CaptureAI.UICore.setPanelVisibility) {
+          window.CaptureAI.UICore.setPanelVisibility(true);
         }
       }
     });
@@ -327,24 +345,35 @@ export const CaptureSystem = {
          */
   cleanupSelection() {
     const { STATE } = window.CaptureAI;
-
-    // Remove overlay
     const overlay = document.getElementById('captureai-overlay');
+    const selection = STATE.selectionBox;
+
+    // Remove overlay with fade
     if (overlay) {
-      overlay.remove();
+      overlay.style.transition = 'opacity 0.1s ease-out';
+      overlay.style.opacity = '0';
     }
 
-    // Clear selection box reference
-    if (STATE.selectionBox) {
-      STATE.selectionBox.remove();
-      STATE.selectionBox = null;
+    // Selection box fade (handled by its existing transition property)
+    if (selection) {
+      selection.style.opacity = '0';
     }
 
-    // Reset drag state
+    // Final removal after animation
+    setTimeout(() => {
+      if (overlay) overlay.remove();
+      if (selection) selection.remove();
+      if (STATE.selectionBox === selection) {
+        STATE.selectionBox = null;
+      }
+    }, 100);
+
+    // Reset drag state immediately
     STATE.isDragging = false;
 
-    // Restore panel to original visibility state
-    this.restorePanelVisibility();
+    // Restore panel to original visibility state after a brief delay
+    // to separate capture UI from panel UI re-entry
+    setTimeout(() => this.restorePanelVisibility(), 100);
   },
 
   /**
@@ -353,16 +382,9 @@ export const CaptureSystem = {
   restorePanelVisibility() {
     const { STATE } = window.CaptureAI;
 
-    if (window.CaptureAI.DOM_CACHE.panel) {
+    if (window.CaptureAI.UICore && window.CaptureAI.UICore.setPanelVisibility) {
       // Only show panel if it was originally visible
-      if (this.wasVisible) {
-        window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-        STATE.isPanelVisible = true;
-      } else {
-        // Keep it hidden if it was originally hidden
-        window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
-        STATE.isPanelVisible = false;
-      }
+      window.CaptureAI.UICore.setPanelVisibility(!!this.wasVisible);
     }
   },
 

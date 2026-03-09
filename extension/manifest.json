@@ -58,39 +58,49 @@
     },
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": [ "libs/tesseract/tesseract.min.js", "content.js" ],
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "libs/tesseract/tesseract.min.js",
+                "content.js"
+            ],
             "run_at": "document_idle"
         }
     ],
-    "web_accessible_resources": [{
-        "resources": [
-            "inject.js",
-            "icons/icon128.png",
-            "icons/camera.png",
-            "icons/attach.png",
-            "icons/attached.png",
-            "modules/config.js",
-            "modules/storage.js",
-            "modules/domains.js",
-            "modules/utils.js",
-            "modules/image-processing.js",
-            "modules/ocr-service.js",
-            "modules/ui-stealthy-result.js",
-            "modules/ui-core.js",
-            "modules/ui-components.js",
-            "modules/capture-system.js",
-            "modules/auto-solve.js",
-            "modules/messaging.js",
-            "modules/keyboard.js",
-            "modules/event-manager.js",
-            "modules/privacy-guard.js",
-            "modules/auth-service.js",
-            "modules/migration.js",
-            "libs/tesseract/tesseract.min.js",
-            "libs/tesseract/worker.min.js",
-            "libs/tesseract/lang-data/eng.traineddata.gz"
-        ],
-        "matches": ["<all_urls>"]
-    }]
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "inject.js",
+                "icons/icon128.png",
+                "icons/camera.png",
+                "icons/attach.png",
+                "icons/attached.png",
+                "modules/theme.css",
+                "modules/config.js",
+                "modules/storage.js",
+                "modules/domains.js",
+                "modules/utils.js",
+                "modules/image-processing.js",
+                "modules/ocr-service.js",
+                "modules/ui-stealthy-result.js",
+                "modules/ui-core.js",
+                "modules/ui-components.js",
+                "modules/capture-system.js",
+                "modules/auto-solve.js",
+                "modules/messaging.js",
+                "modules/keyboard.js",
+                "modules/event-manager.js",
+                "modules/privacy-guard.js",
+                "modules/auth-service.js",
+                "modules/migration.js",
+                "libs/tesseract/tesseract.min.js",
+                "libs/tesseract/worker.min.js",
+                "libs/tesseract/lang-data/eng.traineddata.gz"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
 }

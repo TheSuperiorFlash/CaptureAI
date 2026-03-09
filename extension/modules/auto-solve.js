@@ -71,11 +71,11 @@ export const AutoSolve = {
       const toggleButton = toggleSlider?.querySelector('span');
 
       if (toggleSlider) {
-        const theme = window.CaptureAI.UICore?.getCurrentTheme?.() || { buttonPrimary: '#4caf65', toggleInactiveBg: '#f1f1f1' };
-        toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? theme.buttonPrimary : theme.toggleInactiveBg;
+        toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-background)';
+        toggleSlider.style.borderColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-border)';
       }
       if (toggleButton) {
-        toggleButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
+        toggleButton.style.transform = STATE.isAutoSolveMode ? 'translateX(12px)' : 'translateX(0px)';
       }
     }
   },
@@ -191,7 +191,7 @@ export const AutoSolve = {
 
       // Validate coordinates are not undefined
       if (coordinates.startX !== undefined && coordinates.startY !== undefined &&
-                    coordinates.width !== undefined && coordinates.height !== undefined) {
+        coordinates.width !== undefined && coordinates.height !== undefined) {
         return coordinates;
       } else {
         return null;
@@ -227,8 +227,8 @@ export const AutoSolve = {
 
     // Check for invalid responses: 'invalid question', 'no response found', or any error
     if (cleanResponse.includes('invalid question') ||
-                cleanResponse.includes('no response found') ||
-                cleanResponse.startsWith('error:')) {
+      cleanResponse.includes('no response found') ||
+      cleanResponse.startsWith('error:')) {
       STATE.invalidQuestionCount++;
 
       if (STATE.invalidQuestionCount >= CONFIG.MAX_INVALID_QUESTIONS) {
@@ -283,8 +283,8 @@ export const AutoSolve = {
 
     // Check if we need to refocus (if focus is on our panel, body, or nowhere)
     const needsRefocus = !currentElement ||
-                        currentElement === document.body ||
-                        (captureAIPanel && captureAIPanel.contains(currentElement));
+      currentElement === document.body ||
+      (captureAIPanel && captureAIPanel.contains(currentElement));
 
     if (needsRefocus) {
       // Blur current element if it's in our panel
@@ -296,9 +296,9 @@ export const AutoSolve = {
       // find and focus the challenge container
       // Try multiple selectors to find the main content area
       const challengeContainer = document.querySelector('.vcom-challenge[tabindex="0"]') ||
-                                 document.querySelector('.vcom-challenge') ||
-                                 document.querySelector('[tabindex="0"]') ||
-                                 document.body;
+        document.querySelector('.vcom-challenge') ||
+        document.querySelector('[tabindex="0"]') ||
+        document.body;
 
       if (challengeContainer) {
         try {
@@ -330,9 +330,9 @@ export const AutoSolve = {
     if (key && key.trim() !== '') {
       try {
         if (activeElement &&
-                        (activeElement.isContentEditable ||
-                            activeElement.tagName === 'INPUT' ||
-                            activeElement.tagName === 'TEXTAREA')) {
+          (activeElement.isContentEditable ||
+            activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA')) {
 
           activeElement.focus();
           // Use native setter to trigger React/Vue/Angular change detection
@@ -360,9 +360,9 @@ export const AutoSolve = {
 
       // Fallback approach if InputEvent didn't work
       if (!success && activeElement &&
-                    (activeElement.isContentEditable ||
-                        activeElement.tagName === 'INPUT' ||
-                        activeElement.tagName === 'TEXTAREA')) {
+        (activeElement.isContentEditable ||
+          activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA')) {
         try {
           activeElement.focus();
           const event = new KeyboardEvent('keydown', {

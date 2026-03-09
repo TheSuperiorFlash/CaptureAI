@@ -140,13 +140,13 @@ export default function Navbar() {
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
-                        ? 'border-b md:border border-white/[0.08] bg-[#060913]/70 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
-                        : 'border-b md:border border-white/[0.02] bg-[#000000]/10 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
+                        ? 'border-b md:border border-white/[0.08] bg-[#060913]/85 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+                        : 'border-b md:border border-white/[0.02] bg-[#000000]/25 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
                     style={!shouldUseSimpleGlass ? {
-                        backdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
-                        WebkitBackdropFilter: 'brightness(1.1) blur(2px) url(#displacementFilter)',
-                        boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.5), inset 0 0 3px 1px rgba(255, 255, 255, 0.4)'
+                        backdropFilter: 'brightness(0.9) blur(2px) url(#displacementFilter)',
+                        WebkitBackdropFilter: 'brightness(0.9) blur(2px) url(#displacementFilter)',
+                        boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.4), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
                     } : undefined}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isScrolled ? 1 : 0 }}

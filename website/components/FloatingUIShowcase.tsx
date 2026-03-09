@@ -5,13 +5,14 @@ import Image from 'next/image'
 
 /**
  * Interactive replica of the extension's floating UI panel.
- * All dimensions are the original extension values × 1.48 to
+ * All dimensions are the original extension values × 1.75 to
  * match the exact extension proportions at a larger display size.
  * No CSS transform — every value is literal so height changes work correctly.
  */
 
 // Scale factor applied to every pixel value from the original 250px panel
 const S = 1.75
+const BUTTON_RADIUS = 10 // Change to 24 for pilled, 10 for rounded
 
 export default function FloatingUIShowcase() {
     const [isAskMode, setIsAskMode] = useState(false)
@@ -19,13 +20,14 @@ export default function FloatingUIShowcase() {
     return (
         <div
             style={{
-                width: Math.round(250 * S),   // 370
-                borderRadius: Math.round(10 * S),
+                width: Math.round(250 * S),   // 437.5
+                borderRadius: Math.round(18 * S),
                 fontFamily: "'Inter', sans-serif",
                 color: '#333333',
                 overflow: 'hidden',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)',
+                backgroundColor: '#ffffff',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 16px 48px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)',
             }}
         >
             {/* ---- Header ---- */}
@@ -33,10 +35,10 @@ export default function FloatingUIShowcase() {
                 style={{
                     display: 'flex',
                     alignItems: 'center',
-                    padding: `${Math.round(10 * S)}px ${Math.round(15 * S)}px`,
+                    padding: `${Math.round(12 * S)}px ${Math.round(15 * S)}px`,
                     justifyContent: 'space-between',
-                    backgroundColor: '#f5f5f5',
-                    borderBottom: '1px solid #e0e0e0',
+                    backgroundColor: 'transparent',
+                    borderBottom: '1px solid rgba(0,0,0,0.06)',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -59,7 +61,7 @@ export default function FloatingUIShowcase() {
             <div
                 style={{
                     padding: `${Math.round(10 * S)}px ${Math.round(15 * S)}px`,
-                    backgroundColor: 'white',
+                    backgroundColor: 'transparent',
                     minHeight: Math.round(52 * S),
                     boxSizing: 'border-box',
                     display: 'flex',
@@ -78,7 +80,7 @@ export default function FloatingUIShowcase() {
                     style={{
                         padding: Math.round(15 * S),
                         display: 'flex',
-                        backgroundColor: 'white',
+                        backgroundColor: 'transparent',
                         flexDirection: 'column',
                         gap: Math.round(10 * S),
                         boxSizing: 'border-box',
@@ -90,11 +92,12 @@ export default function FloatingUIShowcase() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: Math.round(10 * S),
+                            height: Math.round(48 * S),
+                            padding: `0 ${Math.round(15 * S)}px`,
                             backgroundColor: '#218aff',
-                            borderRadius: Math.round(8 * S),
+                            borderRadius: Math.round(BUTTON_RADIUS * S),
                             cursor: 'pointer',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                            boxShadow: '0 4px 12px rgba(33,138,255,0.3)',
                         }}
                     >
                         {/* Camera icon from extension */}
@@ -116,12 +119,12 @@ export default function FloatingUIShowcase() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: Math.round(10 * S),
-                            backgroundColor: '#f1f1f1',
-                            borderRadius: Math.round(8 * S),
+                            height: Math.round(48 * S),
+                            padding: `0 ${Math.round(15 * S)}px`,
+                            backgroundColor: 'rgba(0,0,0,0.03)',
+                            borderRadius: Math.round(BUTTON_RADIUS * S),
                             cursor: 'pointer',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                            border: '1px solid #d1d1d1',
+                            border: '1px solid rgba(0,0,0,0.06)',
                         }}
                     >
                         <span style={{ fontWeight: 'bold', color: '#333333', fontSize: Math.round(14 * S) }}>
@@ -137,7 +140,7 @@ export default function FloatingUIShowcase() {
                     style={{
                         padding: Math.round(15 * S),
                         display: 'flex',
-                        backgroundColor: 'white',
+                        backgroundColor: 'transparent',
                         flexDirection: 'column',
                         gap: Math.round(10 * S),
                         boxSizing: 'border-box',
@@ -149,13 +152,13 @@ export default function FloatingUIShowcase() {
                         style={{
                             width: '100%',
                             minHeight: Math.round(60 * S),
-                            padding: Math.round(10 * S),
-                            border: '1px solid #e0e0e0',
-                            borderRadius: Math.round(8 * S),
+                            padding: Math.round(12 * S),
+                            border: '1px solid rgba(0,0,0,0.08)',
+                            borderRadius: Math.round(12 * S),
                             fontFamily: "'Inter', sans-serif",
                             fontSize: Math.round(14 * S),
                             color: '#333333',
-                            backgroundColor: '#f0f0f0',
+                            backgroundColor: 'rgba(0,0,0,0.03)',
                             resize: 'none',
                             outline: 'none',
                             boxSizing: 'border-box',
@@ -169,11 +172,12 @@ export default function FloatingUIShowcase() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                padding: Math.round(10 * S),
-                                width: Math.round(40 * S),
-                                backgroundColor: '#f1f1f1',
-                                border: '1px solid #d1d1d1',
-                                borderRadius: Math.round(8 * S),
+                                height: Math.round(48 * S),
+                                padding: `0 ${Math.round(12 * S)}px`,
+                                width: Math.round(44 * S),
+                                backgroundColor: 'rgba(0,0,0,0.03)',
+                                border: '1px solid rgba(0,0,0,0.06)',
+                                borderRadius: Math.round(BUTTON_RADIUS * S),
                                 cursor: 'pointer',
                                 flexShrink: 0,
                             }}
@@ -189,11 +193,13 @@ export default function FloatingUIShowcase() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                padding: Math.round(10 * S),
+                                height: Math.round(48 * S),
+                                padding: `0 ${Math.round(12 * S)}px`,
                                 flex: 1,
                                 backgroundColor: '#218aff',
-                                borderRadius: Math.round(8 * S),
+                                borderRadius: Math.round(BUTTON_RADIUS * S),
                                 cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(33,138,255,0.3)',
                             }}
                         >
                             <span style={{ fontWeight: 'bold', color: 'white', fontSize: Math.round(14 * S) }}>
@@ -210,13 +216,14 @@ export default function FloatingUIShowcase() {
 /* Capture / Ask toggle scaled to match */
 function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () => void }) {
     const trackW = Math.round(90 * S)   // 133
-    const trackH = Math.round(22 * S)   // 33
-    const r = Math.round(11 * S)        // 16
+    const trackH = Math.round(24 * S)   // 33
+    const r = 100 * S                   // 100 radius for perfect pill
 
-    const slideWActive = Math.round(34 * S)    // ask side — 34 base × 1.75 = ~60px display
-    const slideWInactive = Math.round(52 * S)  // capture side
-    const slideLeftActive = trackW - slideWActive - 1  // flush to right edge
-    const slideLeftInactive = -1
+    const slideWActive = Math.round(34 * S)    // ask side (refined width)
+    const slideWInactive = Math.round(54 * S)  // capture side
+    const slideLeftActive = Math.round(56 * S) // refined left position
+    const slideLeftInactive = Math.round(-1 * S)
+    const slideHeight = Math.round(22 * S)     // matched to track height exactly
 
     return (
         <div onClick={onToggle} style={{ display: 'inline-block', cursor: 'pointer' }}>
@@ -224,10 +231,10 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
                 style={{
                     position: 'relative',
                     width: trackW,
-                    height: trackH,
-                    backgroundColor: '#f0f0f0',
+                    height: Math.round(22 * S),
+                    backgroundColor: 'rgba(0,0,0,0.03)',
                     borderRadius: r,
-                    border: '1px solid #e0e0e0',
+                    boxShadow: '0 0 0 1px rgba(0,0,0,0.06)',
                     overflow: 'hidden',
                     boxSizing: 'border-box',
                 }}
@@ -237,13 +244,14 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
                     style={{
                         position: 'absolute',
                         width: isAskMode ? slideWActive : slideWInactive,
-                        height: trackH,
+                        height: slideHeight,
                         backgroundColor: '#218aff',
-                        borderRadius: r,
-                        top: -1,
+                        borderRadius: 100 * S,
+                        top: 0,
                         left: isAskMode ? slideLeftActive : slideLeftInactive,
                         transition: 'all 0.3s ease',
                         zIndex: 1,
+                        transform: 'translateZ(0)',
                     }}
                 />
                 <span

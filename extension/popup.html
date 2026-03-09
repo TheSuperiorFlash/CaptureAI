@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="modules/theme.css">
     <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
     <div class="header">
         <div class="header-left">
@@ -18,7 +21,7 @@
             <button id="header-ui-toggle" class="header-ui-toggle">Show UI</button>
         </div>
     </div>
-    
+
     <div class="content">
         <!-- Main View -->
         <div id="main-view">
@@ -28,65 +31,68 @@
                 <div id="response-content" class="response-content empty"></div>
             </div>
 
-        <!-- Status Section -->
-        <div id="status-section" class="section hidden">
-            <div id="status-message" class="status"></div>
-        </div>
-
-        <!-- Migration Notice Section -->
-        <div id="migration-notice" class="section hidden migration-notice">
-            <div class="migration-notice-title">Important Update</div>
-            <div id="migration-notice-text" class="migration-notice-text"></div>
-        </div>
-
-        <!-- License Key Section -->
-        <div id="license-key-section" class="section hidden">
-            <div class="activation-header">
-                <p>Paste your license key or obtain one at <a href="https://captureai.dev/activate" target="_blank" rel="noopener noreferrer" class="activation-link">captureai.dev</a></p>
+            <!-- Status Section -->
+            <div id="status-section" class="section hidden">
+                <div id="status-message" class="status"></div>
             </div>
 
-            <div class="input-group">
-                <label>License Key</label>
-                <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" class="license-key-input">
-            </div>
-            <button id="activate-btn" class="button button-primary">Activate</button>
-        </div>
-
-        <!-- Main Controls Section (for activated users) -->
-        <div id="main-controls" class="section hidden">
-            <!-- Usage Stats -->
-            <div id="usage-stats" class="usage-stats">
-                <div class="usage-stats-label">Usage</div>
-                <div id="usage-content"></div>
+            <!-- Migration Notice Section -->
+            <div id="migration-notice" class="section hidden migration-notice">
+                <div class="migration-notice-title">Important Update</div>
+                <div id="migration-notice-text" class="migration-notice-text"></div>
             </div>
 
-            <button id="capture-btn" class="button button-primary button-with-icon">
-                <img src="icons/camera.png" alt="Camera" class="button-icon">
-                Capture a Question
-            </button>
-            <button id="quick-capture-btn" class="button button-secondary">Quick Capture</button>
-        </div>
+            <!-- License Key Section -->
+            <div id="license-key-section" class="section hidden">
+                <div class="activation-header">
+                    <p>Paste your license key or obtain one at <a href="https://captureai.dev/activate" target="_blank"
+                            rel="noopener noreferrer" class="activation-link">captureai.dev</a></p>
+                </div>
 
-        <!-- Help Section -->
-        <div id="help-section" class="help-section hidden">
-            <div class="help-toggle" id="help-toggle">
-                <span>Help</span>
-                <span class="help-arrow" id="help-arrow">▶</span>
+                <div class="input-group">
+                    <label>License Key</label>
+                    <input type="text" id="license-key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX"
+                        class="license-key-input">
+                </div>
+                <button id="activate-btn" class="button button-primary">Activate</button>
             </div>
-            <div class="help-content" id="help-content">
-                <div class="help-category">Keybinds</div>
-                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+E</span> Toggle UI panel</div>
-                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+X</span> Start area capture</div>
-                <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
-                <div class="help-category">Stealth Mode</div>
-                <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or selection box.</div>
 
-                <!-- Settings Button -->
-                <div class="help-item settings-button-container">
-                    <button id="settings-btn">Settings</button>
+            <!-- Main Controls Section (for activated users) -->
+            <div id="main-controls" class="section hidden">
+                <!-- Usage Stats -->
+                <div id="usage-stats" class="usage-stats">
+                    <div class="usage-stats-label">Usage</div>
+                    <div id="usage-content"></div>
+                </div>
+
+                <button id="capture-btn" class="button button-primary button-with-icon">
+                    <img src="icons/camera.png" alt="Camera" class="button-icon">
+                    Capture a Question
+                </button>
+                <button id="quick-capture-btn" class="button button-secondary">Quick Capture</button>
+            </div>
+
+            <!-- Help Section -->
+            <div id="help-section" class="help-section hidden">
+                <div class="help-toggle" id="help-toggle">
+                    <span>Help</span>
+                    <span class="help-arrow" id="help-arrow">▶</span>
+                </div>
+                <div class="help-content" id="help-content">
+                    <div class="help-category">Keybinds</div>
+                    <div class="help-item"><span class="help-shortcut">Ctrl+Shift+E</span> Toggle UI panel</div>
+                    <div class="help-item"><span class="help-shortcut">Ctrl+Shift+X</span> Start area capture</div>
+                    <div class="help-item"><span class="help-shortcut">Ctrl+Shift+F</span> Quick capture</div>
+                    <div class="help-category">Stealth Mode</div>
+                    <div class="help-item">When UI is hidden, question capture works invisibly with no overlay or
+                        selection box.</div>
+
+                    <!-- Settings Button -->
+                    <div class="help-item settings-button-container">
+                        <button id="settings-btn">Settings</button>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
 
         <!-- Settings View -->
@@ -109,6 +115,24 @@
                     <div class="user-info-footer">
                         <div id="user-tier"></div>
                         <button id="upgrade-btn" class="hidden">Upgrade to Pro</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-card theme-card">
+                    <div class="settings-item-header theme-item-header">
+                        <div>
+                            <div class="settings-item-title">Theme</div>
+                            <div class="settings-item-description">
+                                Choose appearance
+                            </div>
+                        </div>
+                        <select id="theme-selector" class="theme-dropdown">
+                            <option value="auto">Automatic (System)</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -144,7 +168,8 @@
 
             <!-- Advanced Settings Section -->
             <div class="settings-section">
-                <button type="button" class="advanced-toggle" id="advanced-toggle" aria-expanded="false" aria-controls="advanced-content">
+                <button type="button" class="advanced-toggle" id="advanced-toggle" aria-expanded="false"
+                    aria-controls="advanced-content">
                     <span>Advanced</span>
                     <span class="advanced-arrow" id="advanced-arrow">▶</span>
                 </button>
@@ -152,7 +177,8 @@
                     <div id="reasoning-level-item" class="settings-card">
                         <div class="reasoning-level-title">Reasoning Level</div>
                         <div class="reasoning-level-description">
-                            Control how deeply the AI analyzes questions. Higher levels provide better answers but increase response time
+                            Control how deeply the AI analyzes questions. Higher levels provide better answers but
+                            increase response time
                         </div>
                         <div class="reasoning-toggle-container reasoning-toggle-wrapper">
                             <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1">
@@ -183,8 +209,9 @@
         </div>
     </div>
 
-<script src="modules/auth-service.js"></script>
+    <script src="modules/auth-service.js"></script>
     <script src="modules/migration.js"></script>
     <script src="popup.js"></script>
 </body>
+
 </html>

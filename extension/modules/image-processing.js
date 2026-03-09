@@ -157,12 +157,17 @@ export const ImageProcessing = {
         maxHeight: 480
       };
 
+      // Skip OCR if the capture area is too small for meaningful text recognition.
+      // Tesseract requires a minimum region size; very thin captures (e.g. a single
+      // toolbar row) produce "Image too small to scale" errors inside the WASM.
+      const captureIsTooSmall = coordinates.width < 30 || coordinates.height < 15;
+
       // Optimization #5: Run OCR and compression in parallel
       const [compressedImageData, ocrData] = await Promise.all([
         // Compression task
         this.compressImage(croppedImage, 0.3, compressionOptions),
-        // OCR task (only if enabled)
-        enableOCR
+        // OCR task (only if enabled and capture is large enough)
+        (enableOCR && !captureIsTooSmall)
           ? this.performOCR(croppedImage)
           : Promise.resolve(null)
       ]);

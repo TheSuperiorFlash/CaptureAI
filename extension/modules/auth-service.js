@@ -196,7 +196,7 @@ const AuthService = {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch usage statistics');
+      throw new Error(`Failed to fetch usage statistics (HTTP ${response.status})`);
     }
 
     return await response.json();
@@ -251,7 +251,20 @@ const AuthService = {
         }
 
         if (response.status === 429) {
-          // Rate limit exceeded - backend returns specific messages
+          // Cache usage data from the 429 body so the popup can show current stats
+          if (typeof chrome !== 'undefined' && chrome.storage && error.limitType) {
+            chrome.storage.local.set({
+              'captureai-last-usage': {
+                data: {
+                  tokensUsed: 0,
+                  dailyLimit: error.limitType === 'per_day' ? error.limit : null,
+                  usedToday: error.limitType === 'per_day' ? error.used : null,
+                  limitType: error.limitType
+                },
+                updatedAt: Date.now()
+              }
+            });
+          }
           throw new Error(error.error || 'Rate limit exceeded');
         }
 
