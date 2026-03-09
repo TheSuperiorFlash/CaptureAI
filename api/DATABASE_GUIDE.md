@@ -1,5 +1,7 @@
 # CaptureAI Database Guide
 
+> **Self-update rule:** When you add/change tables, columns, indexes, or views — update this file. When you add a migration, also update [api/migrations/README.md](migrations/README.md).
+
 Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migrations in `api/migrations/`.
 
 ## Quick Access

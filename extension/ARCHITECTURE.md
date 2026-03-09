@@ -1,5 +1,7 @@
 # Extension Architecture
 
+> **Self-update rule:** When you add/change modules, storage keys, message actions, manifest permissions, Privacy Guard protections, or OCR pipeline behavior — update this file and the Storage Keys / Key Concepts sections of [CLAUDE.md](../CLAUDE.md) before committing.
+
 Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded dynamically in `content.js` and accessible via `window.CaptureAI`.
 
 ## Script Contexts

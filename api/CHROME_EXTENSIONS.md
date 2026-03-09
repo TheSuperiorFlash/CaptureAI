@@ -1,5 +1,7 @@
 # Chrome Extension Configuration
 
+> **Self-update rule:** When you change CORS origins, extension IDs, or allowed-origin logic in `src/index.js` or `wrangler.toml` — update this file.
+
 The backend restricts CORS access to specific Chrome extension IDs.
 
 ## Current Configuration

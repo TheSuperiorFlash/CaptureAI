@@ -1,5 +1,7 @@
 # CaptureAI Design System — Midnight Glow
 
+> **Self-update rule:** When you add/change design tokens, CSS utility classes, component patterns, or page files — update this file.
+
 Maximalist/expressive aesthetic: deep dark backgrounds, blue-to-cyan luminous accents, glassmorphic surfaces, ambient glow effects.
 
 **Stack:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Lucide React, Inter font

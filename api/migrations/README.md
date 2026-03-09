@@ -1,5 +1,7 @@
 # Database Migrations
 
+> **Self-update rule:** When you add a new migration file, add it to the Migration List table below and update the migration count in [api/DATABASE_GUIDE.md](../DATABASE_GUIDE.md) and [CLAUDE.md](../../CLAUDE.md).
+
 ## Running Migrations
 
 **Fresh database:** Use the main schema file (includes all optimizations):

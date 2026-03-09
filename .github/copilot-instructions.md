@@ -1,5 +1,7 @@
 # CaptureAI - GitHub Copilot Instructions
 
+> **Self-update rule:** When you change the tech stack, npm scripts, coding conventions, or development workflow — update this file and [CLAUDE.md](../CLAUDE.md).
+
 ## Project Overview
 
 CaptureAI is a Chrome extension for capturing questions from webpages and receiving AI-powered answers.

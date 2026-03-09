@@ -1,5 +1,7 @@
 # API Architecture
 
+> **Self-update rule:** When you add/change routes, auth logic, rate limit presets, AI models, prompt types, webhook events, CORS origins, or security headers — update this file and the Key Concepts section of [CLAUDE.md](../CLAUDE.md) before committing.
+
 Backend runs on Cloudflare Workers with D1 (SQLite) database, accessed at `https://api.captureai.workers.dev`.
 
 ## Routes

@@ -1,5 +1,7 @@
 # CaptureAI Testing Guide
 
+> **Self-update rule:** When you add/remove test files, change coverage thresholds, or modify test setup — update this file. Keep the file tree and counts accurate.
+
 ## Running Tests
 
 ```bash
