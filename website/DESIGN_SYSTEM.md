@@ -1,10 +1,9 @@
 # CaptureAI Design System — Midnight Glow
 
-A maximalist/expressive aesthetic with deep dark backgrounds, blue-to-cyan luminous accents, glassmorphic surfaces, and subtle ambient glow effects.
+Maximalist/expressive aesthetic: deep dark backgrounds, blue-to-cyan luminous accents, glassmorphic surfaces, ambient glow effects.
 
-**Tech stack**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Lucide React icons, Inter font via Google Fonts
-
-**Source of truth**: `app/globals.css` contains all tokens, utility classes, and animations.
+**Stack:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Lucide React, Inter font
+**Source of truth:** `app/globals.css` (all tokens, utilities, animations)
 
 ---
 

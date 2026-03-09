@@ -13,170 +13,41 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 ## Commands
 
 ```bash
-# Root-level commands
 npm test                    # Run all tests (Jest)
-npm run test:watch          # Watch mode
-npm run test:coverage       # Coverage report
 npm run lint                # ESLint
 npm run lint:fix            # ESLint auto-fix
-
-# Backend (Cloudflare Workers)
 cd api && npm run dev       # Local dev server on http://localhost:8787
 cd api && npm run deploy    # Deploy to production
-cd api && npm run tail      # Monitor logs
-
-# Backend database
-cd api && npm run db:init     # Initialize D1 database
 cd api && npm run db:migrate  # Run migrations
-
-# Extension development
-# 1. Edit files in extension/
-# 2. chrome://extensions → Reload CaptureAI
-# 3. Test on a webpage
-```
-
-## Project Structure
-
-```
-CaptureAI/
-├── extension/                    # Chrome Extension source
-│   ├── manifest.json             # Manifest V3 config
-│   ├── background.js             # Service worker (API communication)
-│   ├── content.js                # Content script entry point, module loader
-│   ├── inject.js                 # MAIN world script for Privacy Guard
-│   ├── popup.html / popup.js / popup.css  # Extension popup UI
-│   ├── icons/                    # Extension icons
-│   ├── libs/tesseract/           # Tesseract.js OCR library
-│   └── modules/                  # Extension modules (17 total)
-│       ├── config.js             # CONFIG, TIMING, STORAGE_KEYS, STATE, DOM_CACHE
-│       ├── storage.js            # Chrome storage utilities
-│       ├── auth-service.js       # Backend API client, license validation
-│       ├── ocr-service.js        # OCR text extraction with Tesseract.js
-│       ├── domains.js            # Site detection, CSP checking
-│       ├── utils.js              # General utilities
-│       ├── image-processing.js   # Image crop, compress, OCR integration
-│       ├── messaging.js          # Chrome message passing handlers
-│       ├── keyboard.js           # Keyboard shortcuts
-│       ├── event-manager.js      # Global error handling, cleanup
-│       ├── capture-system.js     # Screenshot selection logic
-│       ├── auto-solve.js         # Auto-solve mode (Pro only)
-│       ├── ui-core.js            # Main UI panel with tier logic
-│       ├── ui-components.js      # Reusable UI components, Pro indicators
-│       ├── ui-stealthy-result.js # Stealth answer overlay
-│       ├── privacy-guard.js      # Privacy protection coordinator
-│       └── migration.js          # API key → license key migration
-│
-├── api/                          # Cloudflare Workers backend
-│   ├── wrangler.toml             # Workers config, D1 bindings, env vars
-│   ├── schema.sql                # D1 database schema
-│   ├── migrations/               # Database migrations
-│   └── src/
-│       ├── index.js              # Worker entry, CORS, routing
-│       ├── router.js             # Request routing
-│       ├── auth.js               # License key auth, tier validation
-│       ├── subscription.js       # Stripe webhooks, payment handling
-│       ├── ai.js                 # AI Gateway integration, usage tracking
-│       ├── validation.js         # Input validation, security
-│       ├── logger.js             # Structured logging
-│       ├── utils.js              # Helpers
-│       ├── ratelimit.js          # Rate limiting logic
-│       └── durable-objects/
-│           └── RateLimiter.js    # Distributed rate limiting (Durable Objects)
-│
-├── website/                      # Next.js support website (separate app)
-├── tests/                        # Jest test suites
-│   ├── setup/                    # Chrome mocks, test setup
-│   └── unit/                     # Unit tests (~19 test files)
-├── config/                       # ESLint, Jest, EditorConfig configs
-├── package.json                  # Root deps, test/lint scripts
-└── babel.config.js               # Babel config for Jest
 ```
 
 ## Key Concepts
 
-### Module System
-All extension modules use ES6 exports, loaded dynamically in `content.js`:
-```javascript
-const mod = await import(chrome.runtime.getURL('modules/example.js'));
-window.CaptureAI.Example = mod.ExampleModule;
-```
-All modules accessible via `window.CaptureAI` global namespace.
-
-### Storage Keys (from config.js)
-```javascript
-API_KEY: 'captureai-api-key'
-AUTO_SOLVE_MODE: 'captureai-auto-solve-mode'
-LAST_CAPTURE_AREA: 'captureai-last-capture-area'
-ASK_MODE: 'captureai-ask-mode'
-REASONING_LEVEL: 'captureai-reasoning-level'
-```
-
-### AI Models & Reasoning
-- `gpt-4.1-nano`: Fastest, no reasoning
-- `gpt-5-nano` with low reasoning: Default
-- `gpt-5-nano` with medium reasoning: Best quality, Pro only
-
-### Privacy Guard System
-- `inject.js`: Runs in MAIN world before page scripts; overrides `document.hasFocus()`, blocks `visibilitychange`/`focus`/`blur` events, removes AI honeypot elements
-- `privacy-guard.js`: Coordinator module; checks Pro access/settings, verifies MAIN world overrides are active
-
-### OCR Flow
-Capture → Tesseract.js extracts text → if confidence >60%, send text only (90% token savings) → else fallback to image
-
-### Keyboard Shortcuts
-- `Ctrl+Shift+X`: Start capture
-- `Ctrl+Shift+F`: Quick recapture
-- `Ctrl+Shift+E`: Toggle panel
-
-### Backend Rate Limiting
-Uses Cloudflare Durable Objects (`RateLimiterDO`) for distributed rate limiting. Free: 10/day, Pro: 20/min.
-
-### Webhook Security
-Stripe webhooks verified with HMAC SHA256 + timestamp validation (2-min window) + event deduplication via `webhook_events` table + constant-time comparison.
+- **Module System**: ES6 exports loaded dynamically in `content.js`, accessible via `window.CaptureAI` namespace
+- **Storage Keys**: Defined in `config.js` as `STORAGE_KEYS` constants (e.g., `captureai-api-key`)
+- **AI Models**: `gpt-4.1-nano` (fastest) | `gpt-5-nano` low reasoning (default) | `gpt-5-nano` medium reasoning (Pro only)
+- **Privacy Guard**: `inject.js` in MAIN world overrides `document.hasFocus()`, blocks visibility/focus events, removes AI honeypots
+- **OCR Flow**: Capture -> Tesseract.js -> if confidence >60% send text only (90% savings) -> else fallback to image
+- **Shortcuts**: `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle panel
+- **Rate Limiting**: Cloudflare Durable Objects (`RateLimiterDO`). Free: 10/day, Pro: 20/min
 
 ## Coding Standards
 
-- Vanilla JS only (no TypeScript)
-- 2-space indentation, single quotes, semicolons required
-- Max 100 char line length
-- Modules: max 500 lines; functions: max 50 lines
+- Vanilla JS only, 2-space indentation, single quotes, semicolons required
+- Max 100 char lines, 500 line modules, 50 line functions
 - JSDoc all public functions
-- `camelCase` vars/functions, `UPPER_SNAKE_CASE` constants
-- Booleans: `isX`, `hasX`, `canX`
-- Event handlers: `handleEventName`
+- `camelCase` vars/functions, `UPPER_SNAKE_CASE` constants, `isX`/`hasX`/`canX` booleans, `handleEventName` handlers
 
 ## Critical Rules
 
-**Always:**
-- Read files before editing
-- Use `textContent` for user content (never `innerHTML` with untrusted data)
-- Use `STORAGE_KEYS` constants (never hardcode storage keys)
-- Access state via `window.CaptureAI.STATE` and config via `window.CaptureAI.CONFIG` (never access directly)
-- Use parameterized queries in backend (never string concatenation)
-- Validate all input (email, license keys, request bodies)
-- Verify webhook signatures
-- Try-catch all async operations
-- Check `chrome.runtime.lastError` in callbacks
+**Always:** Read files before editing | `textContent` over `innerHTML` | `STORAGE_KEYS` constants | Access state via `window.CaptureAI.STATE`/`CONFIG` | Parameterized DB queries | Validate all input | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError`
 
-**Never:**
-- Use `innerHTML` with untrusted content or dynamic code execution
-- Hardcode API keys, secrets, or credentials
-- Log sensitive data (license keys, emails, tokens)
-- Bypass tier restrictions
-- Deploy without testing locally
-- Modify database schema without migrations
-- Commit secrets to git
+**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Deploy without testing | Modify schema without migrations | Commit secrets
 
 ## Backend Environment
 
-**Secrets (via `wrangler secret put`):**
-`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `RESEND_API_KEY`, `FROM_EMAIL`
-
-**Env vars (in wrangler.toml):**
-`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `FREE_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
-
-## Manifest Permissions
-`storage`, `activeTab`, `scripting`, `contextMenus`, `alarms` + `host_permissions: <all_urls>`
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `RESEND_API_KEY`, `FROM_EMAIL`
+**Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `FREE_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow
 
@@ -185,8 +56,17 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
 ## Debugging
 
-- **Background**: `chrome://extensions` → CaptureAI service worker
+- **Background**: `chrome://extensions` -> CaptureAI service worker
 - **Content**: F12 console on any webpage
-- **Popup**: Right-click extension icon → "Inspect popup"
+- **Popup**: Right-click extension icon -> "Inspect popup"
 - **State**: `window.CaptureAI.STATE` in content script console
-- **Storage**: `await chrome.storage.local.get(null)` in any extension context
+
+## Deep Documentation
+
+- **Chrome Extension Config**: [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md)
+- **Database Guide**: [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md)
+- **Security Audit**: [api/SECURITY_FIXES.md](api/SECURITY_FIXES.md)
+- **Backend Improvements**: [api/IMPROVEMENTS_IMPLEMENTED.md](api/IMPROVEMENTS_IMPLEMENTED.md)
+- **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md)
+- **Testing Guide**: [tests/README.md](tests/README.md)
+- **Website Design System**: [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md)
