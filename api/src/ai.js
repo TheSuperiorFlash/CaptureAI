@@ -9,12 +9,12 @@ import { validateRequestBody } from './validation';
 import { checkRateLimit, RateLimitPresets } from './ratelimit';
 
 const PROMPTS = {
-  SYSTEM:       'You are a helpful assistant.',
+  SYSTEM: 'You are a helpful assistant.',
   SYSTEM_IMAGE: 'You are a helpful assistant. Do not select choices highlighted in red.',
-  AUTO_SOLVE:       'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. If there are not exactly 4 choices, respond with exactly: Invalid question.',
-  AUTO_SOLVE_IMAGE: 'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. Do not select choices highlighted in red. If there are not exactly 4 choices, respond with exactly: Invalid question.',
-  ANSWER:       'Reply with the answer only.',
-  ASK:          'You are a helpful assistant. Provide an accurate and clear answer.'
+  AUTO_SOLVE: 'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. If there are not exactly 4 choices, respond with exactly: Invalid question.',
+  AUTO_SOLVE_IMAGE: 'Respond with ONLY a single digit — 1, 2, 3, or 4 — for the correct answer choice. Choices run left-to-right, then top-to-bottom. Do not select choices highlighted in red. If there are not exactly 4 choices or 4 images, respond with exactly: Invalid question.',
+  ANSWER: 'Reply with the answer only.',
+  ASK: 'You are a helpful assistant. Provide an accurate and clear answer.'
 };
 
 export class AIHandler {
@@ -169,7 +169,7 @@ export class AIHandler {
       if (this.ctx) {
         this.ctx.waitUntil(usagePromise);
       } else {
-        await usagePromise.catch(() => {});
+        await usagePromise.catch(() => { });
       }
 
       return jsonResponse({
@@ -188,8 +188,8 @@ export class AIHandler {
     } catch (error) {
       // Surface DB/table errors clearly so missing migrations are obvious
       const isDbError = error?.message?.includes('no such table') ||
-                        error?.message?.includes('D1_ERROR') ||
-                        error?.message?.includes('SQLITE_ERROR');
+        error?.message?.includes('D1_ERROR') ||
+        error?.message?.includes('SQLITE_ERROR');
       const clientMessage = isDbError
         ? 'Database error: a required table is missing. Run db:migrate to apply pending migrations.'
         : 'AI request failed';
@@ -617,9 +617,9 @@ export class AIHandler {
 
     // Pricing per million tokens (matches UI slider: low/medium/high)
     const PRICING = {
-      'low':    { input: 0.10, output: 0.40, cached: 0.025 },  // GPT-4.1-nano
+      'low': { input: 0.10, output: 0.40, cached: 0.025 },  // GPT-4.1-nano
       'medium': { input: 0.05, output: 0.40, cached: 0.005 },  // GPT-5-nano low
-      'high':   { input: 0.05, output: 0.40, cached: 0.005 }   // GPT-5-nano medium
+      'high': { input: 0.05, output: 0.40, cached: 0.005 }   // GPT-5-nano medium
     };
 
     const pricing = PRICING[model] || PRICING['medium'];
