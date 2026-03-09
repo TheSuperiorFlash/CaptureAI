@@ -112,11 +112,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   elements.ocrToggle.addEventListener('click', toggleOCR);
   elements.advancedToggle.addEventListener('click', toggleAdvanced);
-  elements.themeSelector.addEventListener('change', async (e) => {
-    settings.theme = e.target.value;
-    applyTheme(settings.theme);
-    await saveSettings();
-  });
+  if (elements.themeSelector) {
+    elements.themeSelector.addEventListener('change', async (e) => {
+      settings.theme = e.target.value;
+      applyTheme(settings.theme);
+      await saveSettings();
+    });
+  }
 
   // Add Enter key support for license key input
   elements.licenseKeyInput.addEventListener('keydown', (e) => {
