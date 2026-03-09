@@ -287,50 +287,65 @@ class OCRService {
 
             // Step 1: Convert to grayscale with contrast stretch
             const gray = new Uint8Array(w * h);
-            const factor = 1.5;
+            const factor = 2.2; // Increased from 1.5 for sharper contrast
             for (let i = 0; i < data.length; i += 4) {
-              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+              const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114); // Better grayscale weights
               const stretched = ((avg / 255 - 0.5) * factor + 0.5) * 255;
               gray[i >> 2] = stretched < 0 ? 0 : stretched > 255 ? 255 : Math.round(stretched);
             }
 
-            // Step 2: Local smooth grow — 3x3 box blur that spreads dark
-            // pixels into their neighbors, softly thickening thin strokes
-            // (underlines) without the harsh artifacts of min-dilation.
-            const smoothed = new Uint8Array(w * h);
-            for (let y = 0; y < h; y++) {
-              for (let x = 0; x < w; x++) {
-                let sum = 0;
-                let count = 0;
-                for (let dy = -1; dy <= 1; dy++) {
-                  const ny = y + dy;
-                  if (ny < 0 || ny >= h) {
-                    continue;
-                  }
-                  for (let dx = -1; dx <= 1; dx++) {
-                    const nx = x + dx;
-                    if (nx < 0 || nx >= w) {
-                      continue;
-                    }
-                    sum += gray[ny * w + nx];
-                    count++;
-                  }
-                }
-                const avg = sum / count;
-                // Bias toward darker value: blend 60% smoothed + 40% min
-                // so thin dark lines grow outward while text stays readable
-                const orig = gray[y * w + x];
-                const dark = orig < avg ? orig : avg;
-                smoothed[y * w + x] = Math.round(avg * 0.6 + dark * 0.4);
+            // Step 2: Sharpening kernel (3x3)
+            // [ 0, -1,  0]
+            // [-1,  5, -1]
+            // [ 0, -1,  0]
+            const sharpened = new Uint8Array(w * h);
+            for (let y = 1; y < h - 1; y++) {
+              for (let x = 1; x < w - 1; x++) {
+                const idx = y * w + x;
+                const val = 5 * gray[idx] -
+                  gray[idx - w] -
+                  gray[idx - 1] -
+                  gray[idx + 1] -
+                  gray[idx + w];
+                sharpened[idx] = val < 0 ? 0 : val > 255 ? 255 : val;
               }
             }
 
-            // Write smoothed grayscale back to RGBA
-            for (let i = 0; i < smoothed.length; i++) {
+            // Step 3: Local smooth grow — thickening thin strokes while keeping them sharp
+            const final = new Uint8Array(w * h);
+            for (let y = 0; y < h; y++) {
+              for (let x = 0; x < w; x++) {
+                if (y === 0 || y === h - 1 || x === 0 || x === w - 1) {
+                  final[y * w + x] = sharpened[y * w + x];
+                  continue;
+                }
+
+                let sum = 0;
+                let count = 0;
+                let min = 255;
+
+                for (let dy = -1; dy <= 1; dy++) {
+                  for (let dx = -1; dx <= 1; dx++) {
+                    const v = sharpened[(y + dy) * w + (x + dx)];
+                    sum += v;
+                    count++;
+                    if (v < min) min = v;
+                  }
+                }
+
+                const avg = sum / count;
+                // Blend sharpened value with local minimum to thicken thin dark lines
+                // but keep the overall result crisp.
+                final[y * w + x] = Math.round(avg * 0.4 + min * 0.6);
+              }
+            }
+
+            // Write final processed grayscale back to RGBA
+            for (let i = 0; i < final.length; i++) {
               const idx = i << 2;
-              data[idx] = smoothed[i];
-              data[idx + 1] = smoothed[i];
-              data[idx + 2] = smoothed[i];
+              data[idx] = final[i];
+              data[idx + 1] = final[i];
+              data[idx + 2] = final[i];
             }
 
             // Put processed image back
