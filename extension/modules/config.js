@@ -4,7 +4,7 @@
 
 // Configuration Constants
 export const CONFIG = {
-  DEBUG: false,
+  DEBUG: true,
   PILLED_UI_BUTTONS: false,
   PANEL_ID: 'captureai-panel',
   RESULT_ID: 'captureai-result',
