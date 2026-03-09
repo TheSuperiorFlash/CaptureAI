@@ -295,7 +295,7 @@ export const UICore = {
             background-color: var(--color-toggle-active-background) !important;
             border-radius: var(--border-radius-toggle-slider) !important;
             top: 0 !important;
-            left: ${STATE.isAskMode ? '56px' : '-1px'} !important;
+            left: ${STATE.isAskMode ? '54px' : '-1px'} !important;
             transition: all 0.3s ease !important;
             z-index: 1 !important;
             transform: translateZ(0) !important;
