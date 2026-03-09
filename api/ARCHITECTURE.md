@@ -90,23 +90,26 @@ Handled events: `checkout.session.completed`, `invoice.payment_succeeded`, `invo
 
 ## Security Headers
 
-Applied to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection`, `Strict-Transport-Security` (1 year), `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (restricts geo/mic/camera)
+Applied to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: geolocation=(), microphone=(), camera=()`
 
 ## CORS
 
-Allowed origins: `https://captureai.dev` + chrome extensions from `CHROME_EXTENSION_IDS` env var. Dev mode adds localhost:3000/8080.
+**Response CORS** (`getCORSHeaders` in `index.js`): `https://captureai.dev` + chrome extensions from `CHROME_EXTENSION_IDS` env var. Dev mode adds `localhost:3000/8080` and `127.0.0.1:3000`.
+
+**Preflight CORS** (`handleCORS` in `utils.js`): Same as above + `https://thesuperiorflash.github.io`. Credentials header only set for non-null origins.
 
 ## File Map
 
 | File | Purpose |
 |------|---------|
-| `src/index.js` | Entry point, CORS, security headers, env validation |
-| `src/router.js` | Route definitions and dispatch |
+| `src/index.js` | Entry point, response CORS, security headers, env validation |
+| `src/router.js` | Route definitions, dispatch, global rate limiting |
 | `src/auth.js` | License key CRUD, email delivery (Resend), authentication |
 | `src/ai.js` | AI Gateway integration, usage tracking, analytics |
-| `src/subscription.js` | Stripe checkout, webhooks, billing portal |
+| `src/subscription.js` | Stripe checkout, webhooks, billing portal, payment verification |
 | `src/ratelimit.js` | Native Cloudflare rate limiting with in-memory fallback |
 | `src/validation.js` | Input validation, disposable email blocking, sanitization |
-| `src/utils.js` | JSON responses, fetchWithTimeout, PBKDF2 hashing, JWT, CORS |
-| `src/logger.js` | Structured logging with PII redaction |
+| `src/utils.js` | JSON responses, fetchWithTimeout, PBKDF2 hashing, JWT, preflight CORS, constant-time comparison |
+| `src/logger.js` | Structured logging with PII redaction, CORS rejection logging |
 | `wrangler.toml` | Worker config, D1 binding, rate limit bindings, env vars |
+| `schema.sql` | Complete database schema (users, usage_records, usage_daily, webhook_events, views) |

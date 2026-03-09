@@ -8,7 +8,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 
 | Script | World | Purpose |
 |--------|-------|---------|
-| `background.js` | Service Worker | API communication, screenshot capture, message routing, Privacy Guard registration |
+| `background.js` | Service Worker | API communication, screenshot capture, message routing, Privacy Guard registration, context menu, periodic cache refresh |
 | `content.js` | Isolated | Module loader, initialization, event coordination |
 | `inject.js` | MAIN | Privacy Guard — runs before page scripts at `document_start` |
 | `popup.js` | Extension | Popup UI, settings, license activation |
@@ -17,20 +17,20 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 
 | Module | Responsibility |
 |--------|---------------|
-| `config.js` | CONFIG, TIMING, STORAGE_KEYS, STATE, DOM_CACHE constants |
-| `storage.js` | Chrome storage wrappers (setValue, getValue, removeValue, clear) |
+| `config.js` | CONFIG, TIMING, STORAGE_KEYS, PROMPT_TYPES, ICONS, STATE, DOM_CACHE constants |
+| `storage.js` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
 | `auth-service.js` | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
 | `ocr-service.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
-| `domains.js` | Site detection (vocabulary.com), strict CSP site detection, URL validation |
+| `domains.js` | Site detection (vocabulary.com, quizlet.com), strict CSP site detection, URL validation |
 | `utils.js` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
-| `image-processing.js` | WebP/JPEG compression (0.3 quality), max 800x600, zoom-aware capture |
+| `image-processing.js` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
 | `messaging.js` | Chrome message listener/dispatcher for content script actions |
 | `keyboard.js` | Keyboard shortcuts (Escape two-stage: disable auto-solve, then hide UI) |
 | `event-manager.js` | Event listener tracking, global error handling, timer cleanup |
 | `capture-system.js` | Overlay creation, drag-to-select, quick capture from saved area |
 | `auto-solve.js` | Vocabulary.com auto-solve, 2500ms cycle delay, max 2 invalid questions |
-| `ui-core.js` | Main UI panel, theme management (auto/light/dark), Google Fonts |
-| `ui-components.js` | Floating panel buttons, Pro indicators, mode switching |
+| `ui-core.js` | Main UI panel, theme management (auto/light/dark), Google Fonts loading |
+| `ui-components.js` | Floating panel buttons, Pro indicators, mode switching, ask mode UI |
 | `ui-stealthy-result.js` | Invisible answer overlay (bottom-right, rgba gray, 2s fadeout, pointer-events: none) |
 | `privacy-guard.js` | Content-side coordinator — checks Pro + settings, verifies inject.js active |
 | `migration.js` | One-time API key -> license key migration (v3) |
@@ -43,8 +43,8 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 | `captureai-license-key` | string | Active license key |
 | `captureai-user-email` | string | User email |
 | `captureai-user-tier` | string | `free` or `pro` |
-| `captureai-user-cache` | object | Cached user data with timestamp |
-| `captureai-backend-url` | string | Backend URL (default: `api.captureai.workers.dev`) |
+| `captureai-user-cache` | object | `{user, updatedAt}` — cached user data with timestamp |
+| `captureai-backend-url` | string | Backend URL (default: `https://api.captureai.workers.dev`) |
 
 ### User Preferences
 | Key | Type | Description |
@@ -58,9 +58,11 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 ### Internal State
 | Key | Type | Description |
 |-----|------|-------------|
-| `captureai-last-usage` | object | Cached AI response usage stats with timestamp |
+| `captureai-last-usage` | object | `{data, updatedAt}` — cached AI response usage stats |
 | `captureai-privacy-guard-defaulted` | boolean | Auto-enable flag on first Pro upgrade |
 | `captureai-migration-license-v3-complete` | boolean | Migration completion flag |
+| `captureai-migration-notice` | string | Message shown in popup after migration |
+| `captureai-api-key` | string | Legacy API key (deprecated, read as fallback during migration) |
 
 ## Privacy Guard System
 
@@ -69,9 +71,13 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 2. **Events blocked**: visibilitychange, blur, focus, focusin, focusout, pagehide, pageshow (via WeakMap tracking)
 3. **Property handlers blocked**: window.onblur, window.onfocus, document.onvisibilitychange
 4. **Clipboard**: Intercepts copy/cut/paste, enables user-select CSS, enables pointer-events
-5. **AI Honeypots**: Removes hidden elements with keywords (ignore, disregard, ai, bot, llm, gpt, claude), watches via MutationObserver
+5. **AI Honeypots**: Removes hidden elements with keywords (ignore, disregard, ai, bot, llm, gpt, claude), watches via MutationObserver for dynamically added honeypots
+6. **Canvas-specific**: Extra protections for Canvas/Instructure sites (detected via meta tag)
+7. **Style overrides**: `getComputedStyle()` overridden for user-select and pointer-events properties
 
-**Activation**: Pro tier required + `settings.privacyGuard.enabled` + registered dynamically via `chrome.scripting.registerContentScripts`
+All property descriptors set with `configurable: false` to prevent page scripts from undoing overrides. Uses `Symbol.for()` as guard key to prevent double-injection.
+
+**Activation**: Pro tier required + `settings.privacyGuard.enabled` + registered dynamically via `chrome.scripting.registerContentScripts`. Domain blacklist via `excludeMatches`.
 
 ## Message Flow
 
@@ -79,21 +85,62 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 Popup -> chrome.runtime.sendMessage() -> Background (service worker)
 Background -> chrome.tabs.sendMessage() -> Content Script
 Content Script -> chrome.runtime.sendMessage() -> Background
+Background -> chrome.runtime.sendMessage() -> Popup (fire-and-forget)
 ```
 
-**Content script actions:** ping, getState, startCapture, quickCapture, togglePanel, setAutoSolve, setAskModeImage, processCapturedImage, displayAnswer
+### Content script actions (messaging.js)
+
+| Action | Purpose |
+|--------|---------|
+| `ping` | Keep-alive check |
+| `getState` | Get current STATE object |
+| `startCapture` | Begin capture mode |
+| `quickCapture` | Repeat last capture |
+| `togglePanel` | Show/hide floating UI |
+| `setAutoSolve` | Enable/disable auto-solve mode |
+| `setAskModeImage` | Attach captured image to ask mode |
+| `processCapturedImage` | Crop/compress/OCR the screenshot |
+| `showCapturingMessage` | Display "Capturing..." in UI |
+| `showProcessingMessage` | Display "Processing..." in UI |
+| `displayResponse` | Show AI response in UI + trigger auto-solve if applicable |
+| `debugLogImage` | Log base64 image to console |
+| `keyboardCommand` | Forward manifest keyboard shortcut command |
+
+### Background script actions (background.js)
+
+| Action | Purpose |
+|--------|---------|
+| `captureArea` | Capture screenshot, process image, send to AI |
+| `askQuestion` | Process user question with optional image attachments |
+| `enablePrivacyGuard` | Inject privacy protection script into MAIN world |
+| `disablePrivacyGuard` | Acknowledge disable request (persists until page reload) |
+| `getPrivacyGuardStatus` | Check if Privacy Guard is available |
+
+### Popup action
+
+| Action | Purpose |
+|--------|---------|
+| `updateResponse` | Background → Popup: relay AI response for display |
+
+## Context Menu
+
+"Ask CaptureAI" context menu item on text selection. Sends selected text directly to AI via `sendTextOnlyQuestion()`.
+
+## Periodic Tasks
+
+- `captureai-refresh-user-cache` alarm: Refreshes user cache every 30 minutes via `AuthService.refreshUserCache()`. Created on install and startup.
 
 ## OCR Pipeline
 
 1. Screenshot captured via `chrome.tabs.captureVisibleTab()` (PNG)
 2. Image sent to content script for cropping/compression
-3. If OCR enabled: Tesseract.js v5 processes with 3x upscale + grayscale + contrast stretch
+3. If OCR enabled: Tesseract.js v5 processes with 3x upscale + grayscale + box blur
 4. If confidence >= 60%: Send text only (90% token savings)
 5. If confidence < 60% OR image-selection question detected OR wrong-answer prompt: Send image
-6. Site-specific OCR cleanup for vocabulary.com artifacts
+6. Site-specific OCR cleanup for vocabulary.com artifacts (removes QO/OO/QQ patterns)
 
 ## Manifest Permissions
 
 `storage`, `activeTab`, `scripting`, `contextMenus`, `alarms` + `host_permissions: <all_urls>`
 
-CSP: `wasm-unsafe-eval` required for Tesseract.js
+CSP: `script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; worker-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;`
