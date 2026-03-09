@@ -468,7 +468,8 @@ async function handleCaptureArea(request, sender, sendResponse) {
       ocrText.trim().length > 0 &&
       !processedData.ocrData?.shouldFallbackToImage &&
       !isImageQuestion &&
-      !isWrongAnswer;
+      !isWrongAnswer &&
+      !request.forceImageFallback;
 
     // For normal captures: send OCR text instead of image data (token optimization)
     // Fallback to image if OCR fails, has low confidence, detects image-selection question,
@@ -480,13 +481,15 @@ async function handleCaptureArea(request, sender, sendResponse) {
     };
 
     if (DEBUG && !hasValidOCR) {
-      const reason = isWrongAnswer
-        ? 'wrong-answer prompt detected (red highlighting)'
-        : isImageQuestion
-          ? 'image-selection question detected'
-          : processedData.ocrData?.shouldFallbackToImage
-            ? `low confidence (${processedData.ocrData?.confidence}%)`
-            : 'no text extracted';
+      const reason = request.forceImageFallback
+        ? 'retry after invalid response'
+        : isWrongAnswer
+          ? 'wrong-answer prompt detected (red highlighting)'
+          : isImageQuestion
+            ? 'image-selection question detected'
+            : processedData.ocrData?.shouldFallbackToImage
+              ? `low confidence (${processedData.ocrData?.confidence}%)`
+              : 'no text extracted';
       console.warn(`OCR ${reason}, falling back to image data`);
     }
 

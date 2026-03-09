@@ -150,7 +150,8 @@ export const AutoSolve = {
       chrome.runtime.sendMessage({
         action: 'captureArea',
         coordinates: captureArea,
-        promptType: window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE
+        promptType: window.CaptureAI.PROMPT_TYPES.AUTO_SOLVE,
+        forceImageFallback: STATE.invalidQuestionCount >= 1
       }, () => {
         if (chrome.runtime.lastError) {
           STATE.isProcessing = false;
