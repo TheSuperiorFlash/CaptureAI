@@ -5,11 +5,12 @@
 // Configuration Constants
 export const CONFIG = {
   DEBUG: false,
+  PILLED_UI_BUTTONS: false,
   PANEL_ID: 'captureai-panel',
   RESULT_ID: 'captureai-result',
   STEALTHY_RESULT_ID: 'captureai-stealthy-result',
   ESC_KEY_CODE: 'Escape',
-  MAX_INVALID_QUESTIONS: 2
+  MAX_INVALID_QUESTIONS: 2,
 };
 
 // Timing Constants (all values in milliseconds)
@@ -87,3 +88,9 @@ export const DOM_CACHE = {
   panel: null,
   stealthyResult: null
 };
+
+// Make available globally for non-module scripts
+if (typeof window !== 'undefined') {
+  window.CaptureAI = window.CaptureAI || {};
+  window.CaptureAI.CONFIG = CONFIG;
+}

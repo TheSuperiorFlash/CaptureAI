@@ -4,6 +4,18 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Apply pill rounding style from config
+  try {
+    const { CONFIG } = await import('./modules/config.js');
+    const isPilled = CONFIG.PILLED_UI_BUTTONS;
+    const buttonRadius = isPilled ? '100px' : '10px';
+    const toggleRadius = isPilled ? '100px' : '6px';
+    document.documentElement.style.setProperty('--config-button-radius', buttonRadius);
+    document.documentElement.style.setProperty('--config-toggle-radius', toggleRadius);
+  } catch (e) {
+    console.error('Failed to apply pill style:', e);
+  }
+
   // Get DOM elements
   const elements = {
     statusSection: document.getElementById('status-section'),
@@ -45,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     ocrToggle: document.getElementById('ocr-toggle'),
     advancedToggle: document.getElementById('advanced-toggle'),
     advancedContent: document.getElementById('advanced-content'),
-    advancedArrow: document.getElementById('advanced-arrow')
+    advancedArrow: document.getElementById('advanced-arrow'),
+    themeSelector: document.getElementById('theme-selector')
   };
 
   // State variables
@@ -65,8 +78,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     reasoningLevel: 1,
     ocr: {
       disabled: false  // Changed from enabled to disabled
-    }
+    },
+    theme: 'light'
   };
+
+  // Load and apply settings
+  await loadSettings();
 
   // Initialize popup state and UI
   await initializePopup();
@@ -95,6 +112,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   elements.ocrToggle.addEventListener('click', toggleOCR);
   elements.advancedToggle.addEventListener('click', toggleAdvanced);
+  elements.themeSelector.addEventListener('change', async (e) => {
+    settings.theme = e.target.value;
+    applyTheme(settings.theme);
+    await saveSettings();
+  });
 
   // Add Enter key support for license key input
   elements.licenseKeyInput.addEventListener('keydown', (e) => {
@@ -371,32 +393,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       // Try cached usage from last AI response first (avoids separate API call)
       let usage = null;
+      let staleUsage = null;
       const cached = await chrome.storage.local.get('captureai-last-usage');
       const cachedUsage = cached['captureai-last-usage'];
 
       if (cachedUsage && cachedUsage.data && cachedUsage.updatedAt) {
-        const age = Date.now() - cachedUsage.updatedAt;
-        if (age < 2 * 60 * 1000) { // Fresh if < 2 minutes old
-          const d = cachedUsage.data;
-          // Build usage object matching getUsage() format from cached AI response data
-          if (d.limitType === 'per_day') {
-            const used = d.usedToday || 0;
-            const limit = d.dailyLimit || 0;
-            usage = {
-              limitType: 'per_day',
-              today: {
-                used,
-                limit,
-                percentage: limit > 0 ? Math.round((used / limit) * 100) : 0
-              }
-            };
+        const d = cachedUsage.data;
+        if (d.limitType === 'per_day') {
+          const used = d.usedToday || 0;
+          const limit = d.dailyLimit || 0;
+          const builtUsage = {
+            limitType: 'per_day',
+            today: {
+              used,
+              limit,
+              percentage: limit > 0 ? Math.round((used / limit) * 100) : 0
+            }
+          };
+          const age = Date.now() - cachedUsage.updatedAt;
+          if (age < 2 * 60 * 1000) {
+            usage = builtUsage; // Fresh cache - use immediately
+          } else {
+            staleUsage = builtUsage; // Stale cache - keep as fallback
           }
         }
       }
 
-      // Fall back to API call if no recent cached data
+      // Fall back to API call if no fresh cached data
       if (!usage) {
-        usage = await AuthService.getUsage();
+        try {
+          usage = await AuthService.getUsage();
+        } catch (e) {
+          console.error('API getUsage failed', e);
+          // Use stale cache rather than showing an error if we have any data
+          if (staleUsage) {
+            usage = staleUsage;
+          } else {
+            elements.usageContent.textContent = 'Unable to fetch usage data right now.';
+            return;
+          }
+        }
       }
 
       // Build DOM elements instead of innerHTML to prevent XSS from API data
@@ -474,11 +510,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Check if we're on a valid page for content scripts
       if (tab.url.startsWith('chrome://') ||
-          tab.url.startsWith('chrome-extension://') ||
-          tab.url.startsWith('moz-extension://') ||
-          tab.url.startsWith('edge-extension://') ||
-          tab.url === 'about:blank' ||
-          tab.url.startsWith('about:')) {
+        tab.url.startsWith('chrome-extension://') ||
+        tab.url.startsWith('moz-extension://') ||
+        tab.url.startsWith('edge-extension://') ||
+        tab.url === 'about:blank' ||
+        tab.url.startsWith('about:')) {
         showResponseMessage('Extension doesn\'t work on this page. Please open a different website.', 'info');
         disableContentScriptFeatures();
         return;
@@ -701,8 +737,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Update UI with loaded settings
       updateSettingsUI();
+      applyTheme(settings.theme);
     } catch (error) {
       console.error('Error loading settings:', error);
+    }
+  }
+
+  /**
+   * Apply theme to popup
+   * @param {string} themeValue - 'auto', 'dark', or 'light'
+   */
+  function applyTheme(themeValue) {
+    let isDark = false;
+    if (themeValue === 'dark') {
+      isDark = true;
+    } else if (themeValue === 'light') {
+      isDark = false;
+    } else {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
     }
   }
 
@@ -733,6 +791,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Setup reasoning toggle for settings page
     setupSettingsReasoningToggle();
+
+    if (elements.themeSelector) {
+      elements.themeSelector.value = settings.theme || 'auto';
+    }
   }
 
   /**
@@ -901,13 +963,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const trackWidth = track.offsetWidth;
-    const sliderWidth = 40;
+    const trackHalfWidth = trackWidth / 2;
+    const sliderWidth = 48; // Updated to match new CSS width (48px instead of 40px)
     const sliderHalfWidth = sliderWidth / 2;
-    const edgePadding = sliderHalfWidth;
+    const edgePadding = sliderHalfWidth - 4;
 
     const positions = {
       0: edgePadding,
-      1: trackWidth / 2,
+      1: trackHalfWidth,
       2: trackWidth - edgePadding
     };
 
@@ -1008,16 +1071,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /**
    * Listen for storage changes to update tier UI in real time
-   * when the user upgrades from free to pro or vice versa
+   * when the user upgrades from free to pro or vice versa,
+   * and to refresh usage stats after each AI request.
    */
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local' || !changes['captureai-user-tier']) {
+    if (area !== 'local') {
       return;
     }
-    const newTier = changes['captureai-user-tier'].newValue;
-    if (newTier && currentState.user && !elements.mainControls.classList.contains('hidden')) {
-      currentState.user = { ...currentState.user, tier: newTier };
-      applyTierUI(newTier);
+    if (changes['captureai-user-tier']) {
+      const newTier = changes['captureai-user-tier'].newValue;
+      if (newTier && currentState.user && !elements.mainControls.classList.contains('hidden')) {
+        currentState.user = { ...currentState.user, tier: newTier };
+        applyTierUI(newTier);
+      }
+    }
+    if (changes['captureai-last-usage'] && !elements.usageSection.classList.contains('hidden')) {
+      updateUsageStats();
     }
   });
 

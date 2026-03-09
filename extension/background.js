@@ -460,22 +460,33 @@ async function handleCaptureArea(request, sender, sendResponse) {
     const promptType = request.promptType || PROMPT_TYPES.ANSWER;
 
     // Check if OCR extraction succeeded and has sufficient confidence
-    const hasValidOCR = processedData.ocrData?.text &&
-                        processedData.ocrData.text.trim().length > 0 &&
-                        !processedData.ocrData?.shouldFallbackToImage;
+    const ocrText = processedData.ocrData?.text || null;
+    const isImageQuestion = isImageSelectionQuestion(ocrText);
+    const isWrongAnswer = isWrongAnswerPrompt(ocrText);
+
+    const hasValidOCR = ocrText &&
+                        ocrText.trim().length > 0 &&
+                        !processedData.ocrData?.shouldFallbackToImage &&
+                        !isImageQuestion &&
+                        !isWrongAnswer;
 
     // For normal captures: send OCR text instead of image data (token optimization)
-    // Fallback to image if OCR fails or has low confidence
+    // Fallback to image if OCR fails, has low confidence, detects image-selection question,
+    // or detects a wrong-answer prompt (AI needs to see red highlighting)
     const aiData = {
-      imageData: hasValidOCR ? null : processedData.compressedImageData,  // Send image only if OCR failed or low confidence
-      ocrText: processedData.ocrData?.text || null,
+      imageData: hasValidOCR ? null : processedData.compressedImageData,
+      ocrText: hasValidOCR ? ocrText : null,
       ocrConfidence: processedData.ocrData?.confidence || null
     };
 
     if (DEBUG && !hasValidOCR) {
-      const reason = processedData.ocrData?.shouldFallbackToImage
-        ? `low confidence (${processedData.ocrData?.confidence}%)`
-        : 'no text extracted';
+      const reason = isWrongAnswer
+        ? 'wrong-answer prompt detected (red highlighting)'
+        : isImageQuestion
+          ? 'image-selection question detected'
+          : processedData.ocrData?.shouldFallbackToImage
+            ? `low confidence (${processedData.ocrData?.confidence}%)`
+            : 'no text extracted';
       console.warn(`OCR ${reason}, falling back to image data`);
     }
 
@@ -923,6 +934,52 @@ function formatError(message) {
   return `Error: ${message}`;
 }
 
+/**
+ * Detects if OCR text indicates a wrong-answer prompt (e.g. "Try again"),
+ * where the AI needs to see the image to identify which option is highlighted in red.
+ * @param {string} text - OCR extracted text
+ * @returns {boolean} true if a wrong-answer prompt is detected
+ */
+function isWrongAnswerPrompt(text) {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  const patterns = [
+    /\btry\s+again\b/,
+    /\bincorrect\b/,
+    /\bwrong\s+answer\b/,
+    /\bnot\s+(quite|correct|right)\b/,
+    /\bthat('s|\s+is|\s+was)\s+(not|wrong|incorrect)\b/,
+    /\bplease\s+try\s+again\b/,
+    /\btry\s+once\s+more\b/,
+    /\banswer\s+(is\s+)?(wrong|incorrect)\b/,
+  ];
+  return patterns.some(pattern => pattern.test(lower));
+}
+
+/**
+ * Detects if OCR text describes an image-selection question,
+ * where the AI needs to see the actual image to answer correctly.
+ * @param {string} text - OCR extracted text
+ * @returns {boolean} true if question requires image analysis
+ */
+function isImageSelectionQuestion(text) {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  const patterns = [
+    /which\s+(image|picture|photo|option)\s+(shows?|is|depicts?|contains?|best|correct|right)/,
+    /(best|correct|right)\s+(image|picture|photo)/,
+    /select\s+(all\s+)?(the\s+)?(image|picture|photo)s?\s+(that|of|showing|with|containing)/,
+    /click\s+(all\s+)?(the\s+)?(image|picture|photo)s?\s+(that|of|showing|with|containing)/,
+    /choose\s+(the\s+)?(correct\s+)?(image|picture|photo)/,
+    /identify\s+(the\s+)?(image|picture|photo)/,
+    /pick\s+(the\s+)?(best\s+)?(image|picture|photo)/,
+    /which\s+(of\s+)?(the\s+)?(following\s+)?(image|picture|photo)s?/,
+    /select\s+images?\s+of/,
+    /click\s+on\s+(all\s+)?(image|picture|photo)s?/,
+  ];
+  return patterns.some(pattern => pattern.test(lower));
+}
+
 
 // ============================================================================
 // TEST EXPORTS
@@ -943,6 +1000,8 @@ if (typeof module !== 'undefined' && module.exports) {
     // Functions
     getAIConfig,
     formatError,
+    isImageSelectionQuestion,
+    isWrongAnswerPrompt,
     sendToOpenAI,
     sendTextOnlyQuestion,
     getStoredApiKey,

@@ -65,18 +65,16 @@ export const UIComponents = {
       return;
     }
 
-    const theme = this.getTheme();
-
     this.buttonsContainer = document.createElement('div');
     this.buttonsContainer.setAttribute('data-captureai-buttons', 'true');
     this.buttonsContainer.style.cssText = `
             padding: 15px; width: 250px !important; display: flex;
-            background-color: ${theme.primaryBg} !important; flex-direction: column;
+            background-color: transparent !important; flex-direction: column;
             gap: 10px; box-sizing: border-box !important;
         `;
 
-    const captureButton = this.createCaptureButton(theme);
-    const quickCaptureButton = this.createQuickCaptureButton(theme);
+    const captureButton = this.createCaptureButton();
+    const quickCaptureButton = this.createQuickCaptureButton();
 
     this.buttonsContainer.appendChild(captureButton);
     this.buttonsContainer.appendChild(quickCaptureButton);
@@ -93,29 +91,10 @@ export const UIComponents = {
     }
   },
 
-  getTheme() {
-    if (window.CaptureAI.UICore?.getCurrentTheme) {
-      return window.CaptureAI.UICore.getCurrentTheme();
-    }
-    // Fallback theme
-    return {
-      primaryBg: 'white',
-      headerBg: '#f5f5f5',
-      toggleBg: '#f0f0f0',
-      toggleInactiveBg: '#f1f1f1',
-      primaryText: '#333333',
-      secondaryText: '#666666',
-      border: '#e0e0e0',
-      buttonBorder: '#d1d1d1',
-      buttonPrimary: '#4caf65',
-      errorText: '#ff6b6b'
-    };
-  },
-
-  createCaptureButton(theme) {
+  createCaptureButton() {
     const captureButton = document.createElement('div');
-    captureButton.style.cssText = `display: flex; align-items: center; justify-content: center; padding: 10px; width: 100% !important; background-color: ${theme.buttonPrimary} !important; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); box-sizing: border-box !important;`;
-    captureButton.innerHTML = `<img src="${window.CaptureAI?.ICONS?.CAMERA || ''}" style="width: 20px; height: 20px; margin-right: 10px;"><span style="font-weight: bold; color: white !important; font-size: 14px;">Capture a Question</span>`;
+    captureButton.style.cssText = `display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-primary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid transparent; box-shadow: var(--shadow-button-primary); box-sizing: border-box !important; padding: 0 15px;`;
+    captureButton.innerHTML = `<img src="${window.CaptureAI?.ICONS?.CAMERA || ''}" style="width: 20px; height: 20px; margin-right: 10px;"><span style="font-weight: bold; color: var(--color-button-primary-text) !important; font-size: 14px;">Capture a Question</span>`;
 
     captureButton.addEventListener('click', () => {
       if (window.CaptureAI.CaptureSystem?.startCapture) {
@@ -126,10 +105,10 @@ export const UIComponents = {
     return captureButton;
   },
 
-  createQuickCaptureButton(theme) {
+  createQuickCaptureButton() {
     const quickCaptureButton = document.createElement('div');
-    quickCaptureButton.style.cssText = `display: flex; align-items: center; justify-content: center; padding: 10px; width: 100% !important; background-color: ${theme.toggleInactiveBg} !important; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1px solid ${theme.buttonBorder}; box-sizing: border-box !important;`;
-    quickCaptureButton.innerHTML = `<span style="font-weight: bold; color: ${theme.primaryText} !important; font-size: 14px;">Quick Capture</span>`;
+    quickCaptureButton.style.cssText = `display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-secondary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid var(--color-button-secondary-border); box-sizing: border-box !important; padding: 0 15px;`;
+    quickCaptureButton.innerHTML = `<span style="font-weight: bold; color: var(--color-button-secondary-text) !important; font-size: 14px;">Quick Capture</span>`;
 
     quickCaptureButton.addEventListener('click', () => {
       if (window.CaptureAI.CaptureSystem?.quickCapture) {
@@ -142,13 +121,13 @@ export const UIComponents = {
     return quickCaptureButton;
   },
 
-  createAutoSolveToggle(theme) {
+  createAutoSolveToggle() {
     const autoSolveContainer = document.createElement('div');
     autoSolveContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 4px 5px 0px 5px; width: 100% !important; box-sizing: border-box !important;';
-    autoSolveContainer.innerHTML = `<span style="font-size: 14px; color: ${theme.secondaryText} !important; font-weight: 500;">Auto-solve:</span>`;
+    autoSolveContainer.innerHTML = `<span style="font-size: 14px; color: var(--color-text-secondary-default) !important; font-weight: 500;">Auto-solve:</span>`;
     const toggleLabel = autoSolveContainer.querySelector('span');
 
-    const toggleSwitch = this.createToggleSwitch(theme);
+    const toggleSwitch = this.createToggleSwitch();
 
     autoSolveContainer.appendChild(toggleLabel);
     autoSolveContainer.appendChild(toggleSwitch);
@@ -156,24 +135,27 @@ export const UIComponents = {
     return autoSolveContainer;
   },
 
-  createToggleSwitch(theme) {
+  createToggleSwitch() {
     const { STATE } = window.CaptureAI;
 
     const toggleSwitch = document.createElement('label');
     toggleSwitch.className = 'captureai-toggle-switch';
-    toggleSwitch.style.cssText = 'position: relative; display: inline-block; width: 30px; height: 20px;';
+    toggleSwitch.style.cssText = 'position: relative; display: inline-block; width: 32px; height: 20px; flex-shrink: 0; box-sizing: border-box;';
 
     const toggleInput = document.createElement('input');
     toggleInput.type = 'checkbox';
     toggleInput.id = 'auto-solve-toggle';
     toggleInput.checked = STATE.isAutoSolveMode;
-    toggleInput.style.cssText = 'opacity: 0; width: 0; height: 0;';
+    toggleInput.style.cssText = 'opacity: 0; width: 0; height: 0; position: absolute;';
+
+    const trackColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-background)';
+    const borderColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-border)';
 
     const toggleSlider = document.createElement('span');
-    toggleSlider.style.cssText = `position: absolute; cursor: pointer; top: 0; left: 0; width: 30px; height: 20px; transition: .3s; border-radius: 34px; background-color: ${STATE.isAutoSolveMode ? theme.buttonPrimary : theme.toggleInactiveBg};`;
+    toggleSlider.style.cssText = `position: absolute; cursor: pointer; top: 0; left: 0; width: 32px; height: 20px; transition: background-color 0.3s ease, border-color 0.3s ease; border-radius: 100px; background-color: ${trackColor}; border: 1px solid ${borderColor}; box-sizing: border-box;`;
 
     const toggleSliderButton = document.createElement('span');
-    toggleSliderButton.style.cssText = `position: absolute !important; height: 16px !important; width: 16px !important; top: 2px !important; background-color: #ffffff !important; transition: .4s !important; border-radius: 34px !important; box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; left: ${STATE.isAutoSolveMode ? '12px' : '2px'} !important;`;
+    toggleSliderButton.style.cssText = `position: absolute !important; height: 14px !important; width: 14px !important; top: 2px !important; left: 2px !important; background-color: var(--color-toggle-slider-background) !important; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; border-radius: 50% !important; box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important; transform: translateX(${STATE.isAutoSolveMode ? '12px' : '0px'}) !important;`;
 
     toggleSlider.appendChild(toggleSliderButton);
     toggleSwitch.appendChild(toggleInput);
@@ -183,8 +165,9 @@ export const UIComponents = {
       if (window.CaptureAI.AutoSolve?.toggleAutoSolveMode) {
         try {
           await window.CaptureAI.AutoSolve.toggleAutoSolveMode();
-          toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? theme.buttonPrimary : theme.toggleInactiveBg;
-          toggleSliderButton.style.left = STATE.isAutoSolveMode ? '12px' : '2px';
+          toggleSlider.style.backgroundColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-background)';
+          toggleSlider.style.borderColor = STATE.isAutoSolveMode ? 'var(--color-toggle-active-background)' : 'var(--color-toggle-track-border)';
+          toggleSliderButton.style.transform = STATE.isAutoSolveMode ? 'translateX(12px)' : 'translateX(0px)';
         } catch (error) {
           const { CONFIG } = window.CaptureAI || {};
           if (CONFIG?.DEBUG) {
@@ -205,9 +188,7 @@ export const UIComponents = {
       return;
     }
 
-    const theme = this.getTheme();
-
-    this.createAskModeComponents(theme);
+    this.createAskModeComponents();
     this.setupAskModeEventHandlers();
 
     if (window.CaptureAI.UICore?.attachComponent) {
@@ -217,7 +198,7 @@ export const UIComponents = {
     }
   },
 
-  createAskModeComponents(theme) {
+  createAskModeComponents() {
     // Create container
     this.askModeContainer = document.createElement('div');
     this.askModeContainer.setAttribute('data-captureai-ask', 'true');
@@ -228,7 +209,7 @@ export const UIComponents = {
             min-width: 250px !important;
             max-width: 250px !important;
             display: none;
-            background-color: ${theme.primaryBg} !important;
+            background-color: transparent !important;
             flex-direction: column;
             gap: 10px;
             box-sizing: border-box !important;
@@ -246,16 +227,16 @@ export const UIComponents = {
     this.askTextInput = document.createElement('textarea');
     this.askTextInput.placeholder = 'Ask anything...';
     this.askTextInput.style.cssText = `
-            width: 100% !important;
-            min-height: 60px;
-            max-height: 150px;
-            padding: 10px;
-            border: 1px solid ${theme.border};
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            color: ${theme.primaryText};
-            background-color: ${theme.toggleBg};
+            width: var(--size-base-full) !important;
+            min-height: var(--size-base-60);
+            max-height: var(--size-base-150);
+            padding: var(--space-size-base-12);
+            border: var(--space-size-base-1) solid var(--color-input-border);
+            border-radius: var(--border-radius-base-xl);
+            font-family: var(--font-family-base);
+            font-size: var(--font-size-base-14);
+            color: var(--color-input-text);
+            background-color: var(--color-input-background);
             resize: none;
             outline: none;
             box-sizing: border-box;
@@ -286,13 +267,12 @@ export const UIComponents = {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
-            width: 40px;
-            background-color: ${theme.toggleInactiveBg} !important;
-            border: 1px solid ${theme.buttonBorder};
-            border-radius: 8px;
+            height: 48px;
+            width: var(--size-base-44);
+            background-color: var(--color-button-secondary-background) !important;
+            border: var(--space-size-base-1) solid var(--color-button-secondary-border);
+            border-radius: var(--border-radius-button-pill);
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             box-sizing: border-box !important;
             transition: background-color 0.2s;
         `;
@@ -316,12 +296,13 @@ export const UIComponents = {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            height: 48px;
             flex: 1;
-            background-color: ${theme.buttonPrimary} !important;
-            border-radius: 8px;
+            background-color: var(--color-button-primary-background) !important;
+            border: var(--space-size-base-1) solid transparent;
+            border-radius: var(--border-radius-button-pill);
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-button-primary);
             box-sizing: border-box !important;
         `;
 
@@ -460,8 +441,7 @@ export const UIComponents = {
       this.imagePreviewContainer.style.display = 'none';
       this.askTextInput.style.paddingTop = '10px';
       this.resizeTextarea();
-      const theme = this.getTheme();
-      this.attachImageButton.style.backgroundColor = theme.toggleInactiveBg;
+      this.attachImageButton.style.backgroundColor = 'var(--color-toggle-track-background)';
       this.attachImageButton.style.display = 'flex';
       const attachIcon = this.attachImageButton.querySelector('img');
       if (attachIcon && window.CaptureAI?.ICONS?.ATTACH) {
@@ -486,7 +466,7 @@ export const UIComponents = {
       this.attachImageButton.style.display = 'none';
     } else {
       this.attachImageButton.style.display = 'flex';
-      this.attachImageButton.style.backgroundColor = 'rgba(40, 40, 40, 0.45)';
+      this.attachImageButton.style.backgroundColor = 'var(--color-image-attach-background-active)';
       const attachIcon = this.attachImageButton.querySelector('img');
       if (attachIcon && window.CaptureAI?.ICONS?.ATTACHED) {
         attachIcon.src = window.CaptureAI.ICONS.ATTACHED;
@@ -495,17 +475,15 @@ export const UIComponents = {
   },
 
   createImagePreviewSlot(imageEntry, index) {
-    const theme = this.getTheme();
-
     const slot = document.createElement('div');
     slot.style.cssText = `
             position: relative;
-            width: 64px;
-            height: 64px;
-            border-radius: 10px;
+            width: var(--size-base-60);
+            height: var(--size-base-60);
+            border-radius: var(--border-radius-base-lg);
             overflow: hidden;
-            border: 2px solid ${theme.border};
-            background-color: ${theme.toggleBg};
+            border: var(--space-size-base-2) solid var(--color-border-subtle-default);
+            background-color: var(--color-surface-secondary-default);
             flex-shrink: 0;
         `;
 
@@ -516,19 +494,20 @@ export const UIComponents = {
     const removeBtn = document.createElement('div');
     removeBtn.style.cssText = `
             position: absolute;
-            top: 3px;
-            right: 3px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: ${theme.primaryBg};
-            color: ${theme.primaryText};
+            top: var(--space-size-base-3);
+            right: var(--space-size-base-3);
+            width: var(--space-size-base-16);
+            height: var(--space-size-base-16);
+            border-radius: var(--size-base-full);
+            background-color: var(--color-image-remove-background);
+            color: var(--color-image-remove-text);
+            border: 1px solid var(--color-image-remove-border);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 10px;
-            font-weight: bold;
+            font-size: var(--font-size-base-10);
+            font-weight: var(--font-weight-base-bold);
             line-height: 1;
         `;
     removeBtn.textContent = '\u2715';
@@ -597,8 +576,7 @@ export const UIComponents = {
       if (autoSolveContainer) {
         autoSolveContainer.style.display = 'flex';
       } else {
-        const theme = this.getTheme();
-        const newAutoSolveContainer = this.createAutoSolveToggle(theme);
+        const newAutoSolveContainer = this.createAutoSolveToggle();
         this.buttonsContainer.appendChild(newAutoSolveContainer);
       }
     } else {

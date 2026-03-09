@@ -39,8 +39,11 @@ class OCRService {
         this.worker = await Tesseract.createWorker('eng');
 
         // Optimize Tesseract parameters for better accuracy and token reduction
+        // SPARSE_TEXT avoids the full layout analysis of AUTO, preventing Tesseract
+        // from trying to segment thin UI elements (borders, underlines) as text lines,
+        // which causes "Image too small to scale" and "Line cannot be recognized" errors.
         await this.worker.setParameters({
-          tessedit_pageseg_mode: Tesseract.PSM.AUTO, // Auto page segmentation
+          tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT, // Find text anywhere, no layout assumptions
           preserve_interword_spaces: '0', // Reduce excessive spacing
           tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,?!()+-=×÷/:;\'"%@#$^&*{}[]<>_|\\~ \n'
         });

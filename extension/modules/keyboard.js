@@ -105,9 +105,8 @@ export const Keyboard = {
     }
 
     // Stage 2: Auto-solve is already disabled, now hide the UI
-    if (STATE.isPanelVisible && DOM_CACHE.panel) {
-      DOM_CACHE.panel.style.display = 'none';
-      STATE.isPanelVisible = false;
+    if (STATE.isPanelVisible && window.CaptureAI.UICore?.setPanelVisibility) {
+      window.CaptureAI.UICore.setPanelVisibility(false);
     }
 
     // Clear fadeout timer but don't automatically clear showing answers

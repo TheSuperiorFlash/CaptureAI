@@ -6,17 +6,69 @@ export const UICore = {
   initialized: false,
   floatingUICreated: false,
   panel: null,
-  currentTheme: null,
-  modeToggleElement: null,  // Store reference to mode toggle
+  themeCSS: null,
+  modeToggleElement: null,
 
-  async init() {
+  init() {
     if (this.initialized) {
       return;
     }
 
     this.loadFont();
-    this.currentTheme = this.getThemeColors(false);
+
+    // Listen for dark mode changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      this.refreshThemeFromSettings();
+    });
+
+    // Listen for storage changes
+    if (chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes['captureai-settings']) {
+          this.refreshThemeFromSettings(changes['captureai-settings'].newValue);
+        }
+      });
+    }
+
+    // Set initial mode
+    this.refreshThemeFromSettings();
+
     this.initialized = true;
+  },
+
+  async refreshThemeFromSettings(settingsOverride = null) {
+    let themeValue = 'light';
+    try {
+      if (settingsOverride && settingsOverride.theme) {
+        themeValue = settingsOverride.theme;
+      } else if (chrome.storage && chrome.storage.local) {
+        const result = await chrome.storage.local.get('captureai-settings');
+        if (result['captureai-settings'] && result['captureai-settings'].theme) {
+          themeValue = result['captureai-settings'].theme;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load theme settings:', e);
+    }
+
+    let isDark = false;
+    if (themeValue === 'dark') {
+      isDark = true;
+    } else if (themeValue === 'light') {
+      isDark = false;
+    } else {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    this.updateThemeMode(isDark);
+
+    // Apply pill style from config
+    const { CONFIG } = window.CaptureAI;
+    if (CONFIG.PILLED_UI_BUTTONS) {
+      document.documentElement.setAttribute('data-pill-style', 'true');
+    } else {
+      document.documentElement.removeAttribute('data-pill-style');
+    }
   },
 
   loadFont() {
@@ -28,41 +80,27 @@ export const UICore = {
     }
   },
 
-  getThemeColors(isDarkMode = false) {
-    return isDarkMode ? {
-      primaryBg: 'rgba(0, 0, 0, 0.3)',
-      headerBg: 'rgba(0, 0, 0, 0.4)',
-      toggleBg: 'rgba(40, 40, 40, 0.2)',
-      toggleInactiveBg: 'rgba(60, 60, 60, 0.2)',
-      primaryText: '#ffffff',
-      secondaryText: '#cccccc',
-      border: 'rgba(170,170,170,0.15)',
-      buttonBorder: 'rgba(102,102,102,0.2)',
-      buttonPrimary: '#218aff',
-      errorText: '#ff6b6b'
-    } : {
-      primaryBg: 'white',
-      headerBg: '#f5f5f5',
-      toggleBg: '#f0f0f0',
-      toggleInactiveBg: '#f1f1f1',
-      primaryText: '#333333',
-      secondaryText: '#666666',
-      border: '#e0e0e0',
-      buttonBorder: '#d1d1d1',
-      buttonPrimary: '#218aff',
-      errorText: '#ff6b6b'
-    };
-  },
 
-  getCurrentTheme() {
-    if (!this.initialized) {
-      this.init();
+
+  updateThemeMode(isDark) {
+    this.isDarkMode = isDark;
+    if (this.panel) {
+      if (isDark) {
+        this.panel.setAttribute('data-theme', 'dark');
+      } else {
+        this.panel.removeAttribute('data-theme');
+      }
     }
-    return this.currentTheme;
   },
 
-  getPanelShadow() {
-    return '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)';
+  injectThemeCSS() {
+    if (!document.head.querySelector('#captureai-theme')) {
+      const link = document.createElement('link');
+      link.id = 'captureai-theme';
+      link.rel = 'stylesheet';
+      link.href = chrome.runtime.getURL('modules/theme.css');
+      document.head.appendChild(link);
+    }
   },
 
   createUI() {
@@ -87,6 +125,13 @@ export const UICore = {
       this.makeDraggable(this.panel, header);
       document.body.appendChild(this.panel);
 
+      this.injectThemeCSS();
+      if (this.isDarkMode !== undefined) {
+        this.updateThemeMode(this.isDarkMode);
+      } else {
+        this.updateThemeMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+
       STATE.uiElements.panel = this.panel;
       DOM_CACHE.panel = this.panel;
       DOM_CACHE.resultElement = document.getElementById(CONFIG.RESULT_ID);
@@ -105,29 +150,29 @@ export const UICore = {
 
   createPanel() {
     const { CONFIG } = window.CaptureAI;
-    const theme = this.getCurrentTheme();
 
     const panel = document.createElement('div');
     panel.id = CONFIG.PANEL_ID;
     panel.style.cssText = `
             position: fixed; top: 20px; right: 20px; width: 250px !important;
-            background-color: ${theme.primaryBg} !important; border-radius: 10px;
-            box-shadow: ${this.getPanelShadow()}; z-index: 9999;
-            font-family: 'Inter', sans-serif; color: ${theme.primaryText} !important;
-            overflow: hidden; transition: opacity 0.3s ease; display: none;
+            background-color: var(--color-floating-panel-background) !important; 
+            border-radius: var(--border-radius-floating-panel);
+            backdrop-filter: var(--backdrop-floating-panel) !important; -webkit-backdrop-filter: var(--backdrop-floating-panel) !important;
+            box-shadow: var(--shadow-floating-panel); z-index: 9999;
+            font-family: var(--font-family-base); color: var(--color-floating-panel-text) !important;
+            overflow: hidden; transition: opacity 0.1s ease-in-out; 
+            opacity: 0; pointer-events: none;
         `;
 
     return panel;
   },
 
   createHeader() {
-    const theme = this.getCurrentTheme();
-
     const header = document.createElement('div');
     header.style.cssText = `
-            display: flex; align-items: center; padding: 10px 15px;
-            justify-content: space-between; background-color: ${theme.headerBg} !important;
-            border-bottom: 1px solid ${theme.border} !important; cursor: move;
+            display: flex; align-items: center; padding: var(--space-size-base-12) var(--space-size-base-15);
+            justify-content: space-between; background-color: var(--color-base-transparent) !important;
+            border-bottom: var(--space-size-base-1) solid var(--color-border-subtle-default) !important; cursor: move;
         `;
 
     const titleContainer = document.createElement('div');
@@ -142,8 +187,8 @@ export const UICore = {
     const title = document.createElement('span');
     title.textContent = 'CaptureAI';
     title.style.cssText = `
-            font-weight: bold; font-size: 16px; margin-right: 10px;
-            color: ${theme.primaryText} !important;
+            font-weight: var(--font-weight-base-bold); font-size: var(--font-size-base-16); margin-right: var(--space-size-base-10);
+            color: var(--color-text-primary-default) !important;
         `;
 
     titleContainer.appendChild(logo);
@@ -163,33 +208,32 @@ export const UICore = {
 
   createResponseContainer() {
     const { STATE, CONFIG } = window.CaptureAI;
-    const theme = this.getCurrentTheme();
 
     const responseContainer = document.createElement('div');
     responseContainer.style.cssText = `
-            padding: 10px 15px; background-color: ${theme.primaryBg} !important;
-            font-size: 14px; color: ${theme.primaryText} !important;
-            min-height: 52px; box-sizing: border-box;
+            padding: var(--space-size-base-10) var(--space-size-base-15); background-color: transparent !important;
+            font-size: var(--font-size-base-14); color: var(--color-text-primary-default) !important;
+            min-height: var(--size-base-52); box-sizing: border-box;
             display: flex; flex-direction: column;
         `;
 
     const responseTitle = document.createElement('div');
     responseTitle.textContent = 'Response:';
     responseTitle.style.cssText = `
-            font-size: 12px; color: ${theme.secondaryText} !important; margin-bottom: 5px;
+            font-size: 14px; color: var(--color-text-secondary-default) !important; margin-bottom: var(--space-size-base-5);
         `;
 
     const responseContent = document.createElement('div');
     responseContent.id = CONFIG.RESULT_ID;
     responseContent.style.cssText = `
-            font-size: 14px; color: ${theme.primaryText} !important;
-            word-break: break-word; background-color: transparent !important;
+            font-size: var(--font-size-base-14); color: var(--color-text-primary-default) !important;
+            word-break: break-word; background-color: var(--color-base-transparent) !important;
             flex: 1; line-height: 1.3; min-height: 18px;
         `;
 
     if (!STATE.apiKey) {
       responseContent.textContent = 'Extension is not activated';
-      responseContent.style.color = `${theme.errorText} !important`;
+      responseContent.style.color = `var(--color-text-danger-default) !important`;
     }
 
     responseContainer.appendChild(responseTitle);
@@ -200,7 +244,6 @@ export const UICore = {
 
   createModeToggle() {
     const { STATE } = window.CaptureAI;
-    const theme = this.getCurrentTheme();
 
     // Create toggle container
     const toggleContainer = document.createElement('div');
@@ -225,21 +268,20 @@ export const UICore = {
             z-index: -1 !important;
         `;
 
-    // Toggle switch background
     const modeToggleSwitch = document.createElement('div');
     modeToggleSwitch.style.cssText = `
             position: relative !important;
-            width: 90px !important;
+            width: var(--size-base-90) !important;
             height: 22px !important;
-            background-color: ${theme.toggleBg} !important;
-            border-radius: 11px !important;
-            border: 1px solid ${theme.border} !important;
+            background-color: var(--color-toggle-track-background) !important;
+            border-radius: var(--border-radius-toggle-track) !important;
+            box-shadow: 0 0 0 1px var(--color-toggle-track-border) !important;
             transition: all 0.3s ease !important;
             display: flex !important;
             align-items: center !important;
-            font-size: 11px !important;
-            font-weight: 500 !important;
-            font-family: 'Inter', sans-serif !important;
+            font-size: var(--font-size-base-11) !important;
+            font-weight: var(--font-weight-base-medium) !important;
+            font-family: var(--font-family-base) !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
         `;
@@ -248,14 +290,15 @@ export const UICore = {
     const toggleSlider = document.createElement('div');
     toggleSlider.style.cssText = `
             position: absolute !important;
-            width: ${STATE.isAskMode ? '34px' : '52px'} !important;
+            width: ${STATE.isAskMode ? '34px' : '56px'} !important;
             height: 22px !important;
-            background-color: ${theme.buttonPrimary} !important;
-            border-radius: 11px !important;
-            top: -1px !important;
-            left: ${STATE.isAskMode ? '53px' : '-1px'} !important;
+            background-color: var(--color-toggle-active-background) !important;
+            border-radius: var(--border-radius-toggle-slider) !important;
+            top: 0 !important;
+            left: ${STATE.isAskMode ? '56px' : '-1px'} !important;
             transition: all 0.3s ease !important;
             z-index: 1 !important;
+            transform: translateZ(0) !important;
         `;
 
     // Capture label
@@ -263,13 +306,13 @@ export const UICore = {
     captureLabel.textContent = 'Capture';
     captureLabel.style.cssText = `
             position: absolute !important;
-            left: 8px !important;
-            color: ${STATE.isAskMode ? theme.secondaryText : 'white'} !important;
-            font-size: 10px !important;
-            font-weight: 500 !important;
+            left: var(--space-size-base-8) !important;
+            color: ${STATE.isAskMode ? 'var(--color-text-secondary-default)' : 'var(--color-text-inverse-default)'} !important;
+            font-size: var(--font-size-base-10) !important;
+            font-weight: var(--font-weight-base-medium) !important;
             z-index: 2 !important;
             transition: color 0.3s ease !important;
-            font-family: 'Inter', sans-serif !important;
+            font-family: var(--font-family-base) !important;
             white-space: nowrap !important;
         `;
 
@@ -278,13 +321,13 @@ export const UICore = {
     askLabel.textContent = 'Ask';
     askLabel.style.cssText = `
             position: absolute !important;
-            right: 8px !important;
-            color: ${STATE.isAskMode ? 'white' : theme.secondaryText} !important;
-            font-size: 10px !important;
-            font-weight: 500 !important;
+            right: var(--space-size-base-8) !important;
+            color: ${STATE.isAskMode ? 'var(--color-text-inverse-default)' : 'var(--color-text-secondary-default)'} !important;
+            font-size: var(--font-size-base-10) !important;
+            font-weight: var(--font-weight-base-medium) !important;
             z-index: 2 !important;
             transition: color 0.3s ease !important;
-            font-family: 'Inter', sans-serif !important;
+            font-family: var(--font-family-base) !important;
             white-space: nowrap !important;
         `;
 
@@ -301,15 +344,15 @@ export const UICore = {
 
       // Update UI
       if (STATE.isAskMode) {
-        toggleSlider.style.left = '53px';
-        toggleSlider.style.width = '34px';
-        captureLabel.style.color = theme.secondaryText;
-        askLabel.style.color = 'white';
+        toggleSlider.style.left = '55px';
+        toggleSlider.style.width = '38px';
+        captureLabel.style.color = 'var(--color-text-secondary-default)';
+        askLabel.style.color = 'var(--color-text-inverse-default)';
       } else {
         toggleSlider.style.left = '-1px';
-        toggleSlider.style.width = '52px';
-        captureLabel.style.color = 'white';
-        askLabel.style.color = theme.secondaryText;
+        toggleSlider.style.width = '55px';
+        captureLabel.style.color = 'var(--color-text-inverse-default)';
+        askLabel.style.color = 'var(--color-text-secondary-default)';
       }
 
       // Switch UI mode
@@ -411,6 +454,21 @@ export const UICore = {
     }
   },
 
+  setPanelVisibility(visible) {
+    const { STATE, DOM_CACHE } = window.CaptureAI;
+    if (!DOM_CACHE.panel) return;
+
+    if (visible) {
+      DOM_CACHE.panel.style.opacity = '1';
+      DOM_CACHE.panel.style.pointerEvents = 'auto';
+      STATE.isPanelVisible = true;
+    } else {
+      DOM_CACHE.panel.style.opacity = '0';
+      DOM_CACHE.panel.style.pointerEvents = 'none';
+      STATE.isPanelVisible = false;
+    }
+  },
+
   togglePanelVisibility() {
     const { STATE, DOM_CACHE } = window.CaptureAI;
 
@@ -420,12 +478,15 @@ export const UICore = {
       } else {
         this.createUI();
       }
+
+      // If we just created it, we need a frame delay for the transition to show
+      requestAnimationFrame(() => {
+        this.setPanelVisibility(true);
+      });
+      return;
     }
 
-    if (DOM_CACHE.panel) {
-      DOM_CACHE.panel.style.display = STATE.isPanelVisible ? 'none' : 'block';
-      STATE.isPanelVisible = !STATE.isPanelVisible;
-    }
+    this.setPanelVisibility(!STATE.isPanelVisible);
   },
 
   makeDraggable(element, handle) {
@@ -472,10 +533,7 @@ export const UICore = {
     const { STATE } = window.CaptureAI || {};
     const isErrorFlag = isError === true || isError === 'error';
 
-    if (STATE?.isPanelVisible) {
-      this.showInFloatingPanel(message, isErrorFlag);
-    }
-
+    this.showInFloatingPanel(message, isErrorFlag);
     this.sendToPopup(message, isErrorFlag);
 
     if (autoHideDelay > 0 && STATE?.isPanelVisible) {
@@ -497,11 +555,9 @@ export const UICore = {
     const resultElement = document.getElementById(CONFIG?.RESULT_ID || 'captureai-result');
 
     if (resultElement) {
-      const theme = this.getCurrentTheme();
-
       resultElement.textContent = message;
       resultElement.style.backgroundColor = 'transparent';
-      resultElement.style.color = isError ? theme.errorText : theme.primaryText;
+      resultElement.style.color = isError ? 'var(--color-text-danger-default)' : 'var(--color-text-primary-default)';
     }
   },
 
@@ -547,9 +603,7 @@ export const UICore = {
     const { STATE } = window.CaptureAI || {};
     const isErrorFlag = isError === true || isError === 'error';
 
-    if (STATE?.isPanelVisible) {
-      this.showInFloatingPanel(response, isErrorFlag);
-    }
+    this.showInFloatingPanel(response, isErrorFlag);
 
     // OpenAI responses DO go to stealth result
     this.handleStealthyResult(response, isErrorFlag);

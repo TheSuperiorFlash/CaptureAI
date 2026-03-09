@@ -333,15 +333,9 @@ export const Messaging = {
       STATE.isForAskMode = false;
 
       // Restore panel visibility to original state
-      if (window.CaptureAI.DOM_CACHE && window.CaptureAI.DOM_CACHE.panel) {
-        // Use the capture system's original visibility state
-        if (window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.wasVisible) {
-          window.CaptureAI.DOM_CACHE.panel.style.display = 'block';
-          STATE.isPanelVisible = true;
-        } else {
-          window.CaptureAI.DOM_CACHE.panel.style.display = 'none';
-          STATE.isPanelVisible = false;
-        }
+      if (window.CaptureAI.UICore && window.CaptureAI.UICore.setPanelVisibility) {
+        const wasVisible = window.CaptureAI.CaptureSystem && window.CaptureAI.CaptureSystem.wasVisible;
+        window.CaptureAI.UICore.setPanelVisibility(!!wasVisible);
       }
 
       // Pass image data and OCR data to ask mode instance

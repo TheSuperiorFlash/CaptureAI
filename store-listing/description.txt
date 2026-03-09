@@ -1,0 +1,102 @@
+Screenshot any question. Get the exact answer.
+
+CaptureAI is the fastest way to get answers while studying online. Select any question on your screen — from multiple choice to complex math — and get an accurate, AI-powered answer in seconds. No copy-pasting, no switching tabs, no hassle.
+
+━━━━━━━━━━━━━━━━━━━━
+
+HOW IT WORKS
+
+1️⃣ Capture — Press Ctrl+Shift+X or click the extension icon to start a screenshot selection. Drag over any question on your screen.
+
+2️⃣ Process — CaptureAI uses advanced OCR to extract the text from your screenshot. If text confidence is high, only the text is sent (saving bandwidth). Otherwise, the image is analyzed directly.
+
+3️⃣ Answer — AI analyzes the question and returns a clear, accurate answer in a floating panel right on your page. No tab switching required.
+
+━━━━━━━━━━━━━━━━━━━━
+
+SUPPORTED PLATFORMS
+
+Works seamlessly on every major learning platform:
+• Canvas (Instructure)
+• Moodle
+• Blackboard
+• Top Hat
+• Schoology
+• Respondus
+• Google Forms, Microsoft Forms
+• And virtually any website with questions
+
+━━━━━━━━━━━━━━━━━━━━
+
+KEY FEATURES
+
+🎯 Floating Answer Panel — A sleek, draggable panel appears right on your page with the AI's answer. No pop-ups, no new tabs. Resize, reposition, or minimize it to fit your workflow.
+
+👻 Stealth Mode — Answers appear as barely-visible text in the corner of your screen. Only you can see them. Perfect for when you need discretion.
+
+🔍 Smart OCR — Powered by Tesseract.js, CaptureAI extracts text from screenshots with high accuracy. When confidence is above 60%, only text is sent to the AI — reducing tokens by up to 90% for faster responses.
+
+⌨️ Keyboard Shortcuts — Work without touching the mouse:
+  • Ctrl+Shift+X — Start a new capture
+  • Ctrl+Shift+F — Quick recapture (reuses your last selection area)
+  • Ctrl+Shift+E — Toggle the answer panel
+
+🧠 Multiple AI Models — Choose your reasoning level:
+  • Fast mode (gpt-4.1-nano) — Instant answers, no reasoning
+  • Default (gpt-5-nano, low reasoning) — Balanced speed and accuracy
+  • Best quality (gpt-5-nano, medium reasoning) — Pro only, most accurate
+
+━━━━━━━━━━━━━━━━━━━━
+
+PRO FEATURES ($9.99/month)
+
+Upgrade to Pro for the ultimate experience:
+
+🛡️ Privacy Guard — Prevents Canvas, Moodle, and Blackboard from detecting your activity. Blocks tab-switch monitoring, overrides focus detection, removes honeypot elements, and intercepts visibility change events. Stay completely invisible to proctoring systems.
+
+💬 Ask Mode — Type follow-up questions in natural language. Attach screenshots for additional context. Get detailed, multi-step explanations for complex problems.
+
+⚡ Auto-Solve Mode — Automatically captures and answers questions as you navigate through a quiz. Set it and let CaptureAI work in the background.
+
+♾️ Unlimited Questions — No daily limits. Pro users get 20 requests per minute with no cap on total usage.
+
+🧠 Advanced Reasoning — Access medium-reasoning mode for the highest accuracy on complex questions, multi-step problems, and detailed explanations.
+
+━━━━━━━━━━━━━━━━━━━━
+
+FREE TIER
+
+Get started at no cost:
+• 10 questions per day
+• Screenshot capture with OCR
+• Floating answer panel
+• Stealth mode
+• All keyboard shortcuts
+• Works on all platforms
+
+━━━━━━━━━━━━━━━━━━━━
+
+PRIVACY & SECURITY
+
+• No data is stored on our servers beyond what's needed for processing
+• OCR runs locally in your browser using Tesseract.js — your screenshots never leave your device when text extraction succeeds
+• License keys are securely validated via Cloudflare Workers
+• No tracking, no analytics, no ads
+• Open communication: visit captureai.dev for full details
+
+━━━━━━━━━━━━━━━━━━━━
+
+GETTING STARTED
+
+1. Install CaptureAI from the Chrome Web Store
+2. Click the extension icon or press Ctrl+Shift+X
+3. Drag to select any question on your screen
+4. Get your answer instantly in the floating panel
+
+For Pro features, visit captureai.dev to subscribe. Your license key activates automatically.
+
+━━━━━━━━━━━━━━━━━━━━
+
+Need help? Visit captureai.dev or reach out through the extension's support page.
+
+CaptureAI — Screenshot any question. Get the exact answer.
