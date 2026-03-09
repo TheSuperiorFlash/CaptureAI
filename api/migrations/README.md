@@ -2,21 +2,30 @@
 
 ## Running Migrations
 
-**Fresh database:** Use the main schema file:
+**Fresh database:** Use the main schema file (includes all optimizations):
 ```bash
 wrangler d1 execute captureai-db --file=schema.sql
 ```
 
-**Existing database:** Run migrations in order:
+**Existing database:** Run migrations sequentially:
 ```bash
 wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_tracking.sql
+# ... through 007
 ```
 
 ## Migration List
 
-| Migration | Description |
-|-----------|-------------|
-| `001_add_indexes_and_webhook_tracking.sql` | Adds `webhook_events` table, performance indexes for users/usage_records/webhook_events. Safe to re-run (uses `IF NOT EXISTS`). |
+| # | File | Description |
+|---|------|-------------|
+| 001 | `add_indexes_and_webhook_tracking.sql` | `webhook_events` table, performance indexes for users/usage_records |
+| 002 | `add_token_breakdown.sql` | Token breakdown columns (input, output, reasoning, cached tokens) |
+| 003 | `remove_unused_columns.sql` | Cleanup of deprecated columns |
+| 004 | `usage_records_user_id_to_email.sql` | Schema refactor: `user_id` -> `email` in usage_records |
+| 005 | `add_cached_column.sql` | `cached` (yes/no) tracking on usage_records |
+| 006 | `create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
+| 007 | `add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
+
+All migrations use `IF NOT EXISTS` for idempotency.
 
 ## Maintenance
 
@@ -43,8 +52,4 @@ DROP INDEX IF EXISTS idx_usage_records_user_id;
 DROP INDEX IF EXISTS idx_usage_records_model;
 ```
 
-## Performance Tips
-
-- Clean old `usage_records` and `webhook_events` periodically
-- Use `EXPLAIN QUERY PLAN` for slow queries
-- The `user_date` composite index on `usage_records` speeds up per-user time-range queries
+See individual migration files for specific rollback instructions.

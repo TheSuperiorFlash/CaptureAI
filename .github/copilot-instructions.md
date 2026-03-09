@@ -6,13 +6,16 @@ CaptureAI is a Chrome extension for capturing questions from webpages and receiv
 
 **Components:** Chrome Extension (Manifest V3) | Cloudflare Workers API (D1 database) | Next.js Website
 
-See [CLAUDE.md](../CLAUDE.md) for full project structure, commands, and coding standards.
+See [CLAUDE.md](../CLAUDE.md) for full commands, coding standards, and critical rules.
+See [api/ARCHITECTURE.md](../api/ARCHITECTURE.md) for API routes, rate limiting, and auth flow.
+See [extension/ARCHITECTURE.md](../extension/ARCHITECTURE.md) for module system, storage keys, and privacy guard.
 
 ## Technology Stack
 
-- **Extension**: Manifest V3, ES6 Modules, Tesseract.js OCR, Chrome Storage API
-- **Backend**: Cloudflare Workers, D1 (SQLite), OpenAI via AI Gateway, Stripe
-- **Dev tools**: ESLint v9 (flat config), Jest v30 (jsdom), bash/PowerShell scripts
+- **Extension**: Manifest V3, ES6 Modules, Tesseract.js v5 OCR, Chrome Storage API
+- **Backend**: Cloudflare Workers, D1 (SQLite), OpenAI via AI Gateway, Stripe, Cloudflare native Rate Limiting API
+- **Website**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- **Dev tools**: ESLint v9 (flat config), Jest v30, Playwright e2e
 
 ## Code Conventions
 
@@ -20,54 +23,40 @@ See [CLAUDE.md](../CLAUDE.md) for full project structure, commands, and coding s
 - **Classes**: PascalCase (`CaptureSystem`)
 - **Functions/Variables**: camelCase (`handleCapture`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_INVALID_QUESTIONS`)
-- **Style**: Single quotes, semicolons, 2-space indent, 80-100 char lines
-- **Errors**: Try-catch all async ops, user-friendly UI messages, never expose secrets
+- **Style**: Single quotes, semicolons, 2-space indent, max 100 char lines
+- **Errors**: Try-catch all async ops, never expose secrets, `textContent` over `innerHTML`
 
 ## Chrome Extension Guidelines
 
 ### Script Contexts
-- **Content scripts**: Isolated world, DOM access
-- **Background script**: Service worker, API calls and storage
-- **Inject script**: MAIN world, privacy protection
+- **Content scripts**: Isolated world, DOM access, 14 ES6 modules via `window.CaptureAI`
+- **Background script**: Service worker, API calls, screenshot capture, Privacy Guard registration
+- **Inject script**: MAIN world at `document_start`, privacy protection (Pro only)
 
 ### Key Patterns
 - Message passing: `chrome.runtime.sendMessage()` (content -> background), `chrome.tabs.sendMessage()` (background -> content)
-- Storage: Always use `chrome.storage.local` via `modules/storage.js` utilities
-- Permissions: Minimal, prefer `activeTab` over broad permissions
-- Security: `textContent` over `innerHTML`, no `eval()`, validate message sources
+- Storage: Always use `chrome.storage.local` via `modules/storage.js` wrappers
+- Auth: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), header `Authorization: LicenseKey`
+- AI Models: `gpt-4.1-nano` (level 0) | `gpt-5-nano` low (level 1, default) | `gpt-5-nano` medium (level 2, Pro)
 
 ### Manifest V3 Requirements
 - Service workers (not background pages), handle lifecycle restarts
-- `chrome.scripting.executeScript` for dynamic injection
 - State in `chrome.storage`, not memory
 - `wasm-unsafe-eval` required for Tesseract.js
 
 ## API Development Guidelines
 
 - D1 prepared statements (`.bind()`) for all queries
-- CORS restricted to `CHROME_EXTENSION_IDS`
-- AI Gateway for OpenAI calls (caching, rate limiting)
-- Validate license key format (`XXXX-XXXX-XXXX-XXXX-XXXX`) on every request
-- Durable Objects for distributed rate limiting
-- Stripe webhook signature verification required
-
-## Common Tasks
-
-| Task | Steps |
-|------|-------|
-| New module | Create in `extension/modules/`, export ES6, import in consumer, add to `web_accessible_resources` if needed, write tests |
-| New API endpoint | Add route in `router.js`, implement in appropriate module, add auth check, return JSON |
-| New supported site | Add detection in `domains.js`, update `isOnSupportedSite()`, implement in `auto-solve.js` |
+- CORS restricted to `CHROME_EXTENSION_IDS` env var
+- Rate limiting via Cloudflare native bindings (6 presets in `wrangler.toml`)
+- Stripe webhook: HMAC-SHA256 + timestamp validation + event deduplication
+- Usage tracking: dual-table (`usage_records` + `usage_daily`)
 
 ## Commands
 
 ```bash
 npm test && npm run lint          # Validate before committing
+npm run test:e2e                  # End-to-end tests
 cd api && npm run dev             # Local API server
 cd api && npm run deploy          # Deploy to Cloudflare
 ```
-
-## Resources
-
-- [Chrome Extensions](https://developer.chrome.com/docs/extensions/) | [Cloudflare Workers](https://developers.cloudflare.com/workers/) | [D1](https://developers.cloudflare.com/d1/)
-- [OpenAI API](https://platform.openai.com/docs/) | [Tesseract.js](https://tesseract.projectnaptha.com/) | [Jest](https://jestjs.io/)

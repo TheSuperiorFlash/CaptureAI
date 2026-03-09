@@ -1,5 +1,7 @@
 # CaptureAI Database Guide
 
+Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migrations in `api/migrations/`.
+
 ## Quick Access
 
 1. [Cloudflare Dashboard](https://dash.cloudflare.com/) -> **Workers & Pages** -> **D1** -> **captureai-db** -> **Console**
@@ -8,8 +10,7 @@
 ## Helper Scripts
 
 ```bash
-# Windows: query-db.bat <command>
-# Linux/Mac: chmod +x query-db.sh && ./query-db.sh <command>
+# Windows: query-db.bat <command>   |   Linux/Mac: ./query-db.sh <command>
 ```
 
 | Command | Description |
@@ -23,77 +24,91 @@
 | `costs` | Cost analysis by date (last 7 days) |
 | `export` | SQL backup file |
 
-## Common Queries
-
-### Users
-
-```bash
-wrangler d1 execute captureai-db --command "SELECT * FROM users;"
-wrangler d1 execute captureai-db --command "SELECT * FROM users WHERE email = 'user@example.com';"
-```
-
-### Usage Analytics
-
-```bash
-wrangler d1 execute captureai-db --command "
-  SELECT DATE(created_at) as date, COUNT(*) as requests,
-    SUM(input_tokens) as input_tokens, SUM(total_cost) as total_cost
-  FROM usage_records GROUP BY DATE(created_at) ORDER BY date DESC;"
-```
-
-### Cost by Model
-
-```bash
-wrangler d1 execute captureai-db --command "
-  SELECT model, COUNT(*) as requests, SUM(total_cost) as total_cost,
-    AVG(total_cost) as avg_cost
-  FROM usage_records GROUP BY model;"
-```
-
-### Active Subscriptions
-
-```bash
-wrangler d1 execute captureai-db --command "
-  SELECT email, tier, subscription_status, created_at
-  FROM users WHERE tier = 'pro' AND subscription_status = 'active';"
-```
-
-## Schema Reference
+## Schema
 
 ### users
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | TEXT PK | UUID |
-| license_key | TEXT UNIQUE | Format: XXXX-XXXX-XXXX-XXXX-XXXX |
 | email | TEXT | User email |
+| license_key | TEXT UNIQUE | Format: XXXX-XXXX-XXXX-XXXX-XXXX |
 | tier | TEXT | `free` or `pro` |
 | stripe_customer_id | TEXT UNIQUE | Stripe customer reference |
 | stripe_subscription_id | TEXT | Stripe subscription reference |
 | subscription_status | TEXT | `active`, `inactive`, `cancelled`, `past_due` |
-| created_at, updated_at, last_validated_at | TEXT | ISO timestamps |
+| created_at | TEXT | ISO timestamp |
+
+**Indexes:** email, license_key, stripe_subscription, tier, created_at
 
 ### usage_records
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | INTEGER PK | Auto-increment |
-| user_id | TEXT FK | References users(id) |
-| prompt_type | TEXT | `ask`, `auto_solve`, etc. |
+| email | TEXT | User email (was user_id before migration 004) |
+| prompt_type | TEXT | `answer`, `ask`, `auto_solve`, etc. |
 | model | TEXT | `none`, `low`, `medium` |
-| input_tokens, output_tokens, reasoning_tokens, cached_tokens | INTEGER | Token counts |
+| input_tokens, output_tokens | INTEGER | Token counts |
 | total_cost | REAL | Cost in USD |
+| cached | TEXT | `yes` or `no` |
 | response_time | INTEGER | Milliseconds |
 | created_at | TEXT | ISO timestamp |
 
+**Indexes:** email_date (composite)
+
+### usage_daily
+
+O(1) rate limit checks — atomic upsert per (email, date).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| email | TEXT | Composite PK with date |
+| date | TEXT | YYYY-MM-DD |
+| request_count | INTEGER | Daily request count |
+| input_tokens, output_tokens | INTEGER | Daily token totals |
+| total_cost | REAL | Daily cost |
+
+**Indexes:** email_date (composite)
+
 ### webhook_events
+
+Stripe event deduplication for replay attack prevention.
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | INTEGER PK | Auto-increment |
-| event_id | TEXT UNIQUE | Stripe event ID (deduplication) |
+| event_id | TEXT UNIQUE | Stripe event ID |
 | event_type | TEXT | Stripe event type |
 | webhook_timestamp, processed_at, created_at | TEXT | ISO timestamps |
+
+### Views
+
+- **total_usage** — Grand totals by prompt_type and model
+- **user_usage** — Per-user usage statistics
+- **total_usage_daily** — Daily aggregate totals
+
+## Common Queries
+
+```bash
+# All users
+wrangler d1 execute captureai-db --command "SELECT * FROM users;"
+
+# Daily usage summary
+wrangler d1 execute captureai-db --command "
+  SELECT date, SUM(request_count) as requests, SUM(total_cost) as cost
+  FROM usage_daily GROUP BY date ORDER BY date DESC LIMIT 7;"
+
+# Cost by model
+wrangler d1 execute captureai-db --command "
+  SELECT model, COUNT(*) as requests, SUM(total_cost) as total_cost
+  FROM usage_records GROUP BY model;"
+
+# Active Pro subscriptions
+wrangler d1 execute captureai-db --command "
+  SELECT email, subscription_status, created_at
+  FROM users WHERE tier = 'pro' AND subscription_status = 'active';"
+```
 
 ## Maintenance
 
@@ -107,13 +122,9 @@ wrangler d1 execute captureai-db --command "DELETE FROM usage_records WHERE crea
 # Clean old webhook events (>30 days)
 wrangler d1 execute captureai-db --command "DELETE FROM webhook_events WHERE created_at < datetime('now', '-30 days');"
 
-# Run migrations
-wrangler d1 execute captureai-db --file=./migrations/002_add_token_breakdown.sql
+# Run a migration
+wrangler d1 execute captureai-db --file=./migrations/007_add_usage_daily.sql
 ```
-
-## Indexed Columns
-
-`users.license_key`, `users.email`, `usage_records.user_id`, `usage_records.created_at`, `webhook_events.event_id`
 
 ## Troubleshooting
 

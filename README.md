@@ -21,13 +21,13 @@ CaptureAI is a Chrome extension that captures questions from any webpage and del
 ### Features
 
 - **Smart Screenshot Capture** — Select any screen area to capture questions
-- **OCR Text Extraction** — Tesseract.js extracts text for 90% token cost reduction
-- **AI-Powered Answers** — Instant responses via OpenAI
+- **OCR Text Extraction** — Tesseract.js v5 extracts text for 90% token cost reduction
+- **AI-Powered Answers** — Instant responses via OpenAI (gpt-4.1-nano / gpt-5-nano)
 - **Quick Capture** — Repeat last capture area with one click
 - **Auto-Solve Mode** — Automatically answers multiple-choice questions (Vocabulary.com)
 - **Ask Mode** — Custom questions with optional image attachments
 - **Stealth Mode** — Invisible operation when UI is hidden
-- **Privacy Guard** — Blocks focus/visibility detection, spoofs `hasFocus()`, removes AI honeypots
+- **Privacy Guard** — Blocks focus/visibility detection, spoofs `hasFocus()`, removes AI honeypots, blocks clipboard events
 - **Reasoning Slider** — Adjustable AI reasoning level (Pro)
 - **Keyboard Shortcuts** — `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle
 
@@ -89,14 +89,14 @@ Toggle to **Ask** mode, type a question, optionally attach a screenshot, press `
 ## Architecture
 
 ```
-User Action -> Content Script -> Background Script -> API Server -> OpenAI
-                    |                                      |
-              OCR Processing                        License Validation
-                    |                                      |
-              UI Display <--------------------------  API Response
+User Action -> Content Script -> Background Script -> Cloudflare Workers -> OpenAI
+                    |                                        |
+              OCR (Tesseract.js)                    License Validation
+                    |                               Rate Limiting (native CF)
+              UI Display <-----------------------------  AI Response
 ```
 
-**Stack:** Manifest V3 + ES6 Modules + Tesseract.js + Cloudflare Workers (D1) + OpenAI + Stripe
+**Stack:** Manifest V3 + ES6 Modules + Tesseract.js v5 + Cloudflare Workers (D1) + AI Gateway + Stripe
 
 ---
 
@@ -104,7 +104,7 @@ User Action -> Content Script -> Background Script -> API Server -> OpenAI
 
 | Feature | Free | Pro ($9.99/mo) |
 |---------|------|----------------|
-| Daily Requests | 10 | Unlimited |
+| Daily Requests | 10 | Unlimited (20/min) |
 | Screenshot Capture + OCR | Yes | Yes |
 | Stealth Mode | Yes | Yes |
 | Auto-Solve / Ask Mode | — | Yes |
@@ -116,7 +116,7 @@ User Action -> Content Script -> Background Script -> API Server -> OpenAI
 
 ### Prerequisites
 
-Google Chrome, Node.js, Cloudflare account (for API deployment)
+Google Chrome, Node.js 18+, Cloudflare account (for API deployment)
 
 ### Local Setup
 
@@ -127,14 +127,12 @@ Google Chrome, Node.js, Cloudflare account (for API deployment)
 ### Testing
 
 ```bash
-npm test              # Run all tests
-npm run test:coverage # With coverage
+npm test              # Jest tests (30 files)
+npm run test:coverage # Coverage report
+npm run test:e2e      # Playwright e2e tests
+npm run test:all      # All tests
 npm run lint          # ESLint check
 ```
-
-### Adding Supported Sites
-
-Edit `modules/domains.js` — add a detection method and include it in `isOnSupportedSite()`.
 
 ---
 
