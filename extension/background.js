@@ -465,10 +465,10 @@ async function handleCaptureArea(request, sender, sendResponse) {
     const isWrongAnswer = isWrongAnswerPrompt(ocrText);
 
     const hasValidOCR = ocrText &&
-                        ocrText.trim().length > 0 &&
-                        !processedData.ocrData?.shouldFallbackToImage &&
-                        !isImageQuestion &&
-                        !isWrongAnswer;
+      ocrText.trim().length > 0 &&
+      !processedData.ocrData?.shouldFallbackToImage &&
+      !isImageQuestion &&
+      !isWrongAnswer;
 
     // For normal captures: send OCR text instead of image data (token optimization)
     // Fallback to image if OCR fails, has low confidence, detects image-selection question,
@@ -895,9 +895,9 @@ async function displayResponse(tabId, response, promptType) {
  */
 function isValidUrl(url) {
   return (url.startsWith('http://') || url.startsWith('https://')) &&
-         !url.startsWith('chrome://') &&
-         !url.startsWith('chrome-extension://') &&
-         !url.includes('chrome.google.com/webstore');
+    !url.startsWith('chrome://') &&
+    !url.startsWith('chrome-extension://') &&
+    !url.includes('chrome.google.com/webstore');
 }
 
 
@@ -952,6 +952,7 @@ function isWrongAnswerPrompt(text) {
     /\bplease\s+try\s+again\b/,
     /\btry\s+once\s+more\b/,
     /\banswer\s+(is\s+)?(wrong|incorrect)\b/,
+    /\bprogress\s*:\s*0\s+points\b/,
   ];
   return patterns.some(pattern => pattern.test(lower));
 }
