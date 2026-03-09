@@ -220,7 +220,7 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
     const r = 100 * S                   // 100 radius for perfect pill
 
     const slideWActive = Math.round(34 * S)    // ask side (refined width)
-    const slideWInactive = Math.round(54 * S)  // capture side
+    const slideWInactive = Math.round(52 * S)  // capture side
     const slideLeftActive = Math.round(56 * S) // refined left position
     const slideLeftInactive = Math.round(-1 * S)
     const slideHeight = Math.round(22 * S)     // matched to track height exactly
