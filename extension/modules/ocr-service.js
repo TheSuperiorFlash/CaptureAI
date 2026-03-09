@@ -110,7 +110,7 @@ class OCRService {
       return text || '';
     }
     if (hostname === 'vocabulary.com' || hostname.endsWith('.vocabulary.com')) {
-      text = text.replace(/^(QO|Q|O|\(@\))[ \t]*/gm, '');
+      text = text.replace(/^(QO|Q|O|\(@\))(?![A-Za-z])[ \t]*/gm, '');
       text = text.replace(/\n{2,}/g, '\n').trim();
     }
     return text;
