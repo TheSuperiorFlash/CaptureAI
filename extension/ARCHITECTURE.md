@@ -2,7 +2,11 @@
 
 > **Self-update rule:** When you add/change modules, storage keys, message actions, manifest permissions, Privacy Guard protections, or OCR pipeline behavior — update this file and the Storage Keys / Key Concepts sections of [CLAUDE.md](../CLAUDE.md) before committing.
 
-Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded dynamically in `content.js` and accessible via `window.CaptureAI`.
+Chrome Extension (Manifest V3) with modular ES6 architecture.
+
+- **`content.js`** (Isolated world): Loads 14 modules via `import()` and exposes each via `window.CaptureAI`.
+- **`background.js`** (Service Worker): Loads `auth-service.js` and `migration.js` directly via `importScripts()` — these are not exposed via `window.CaptureAI`.
+- **`ocr-service.js`**: Not loaded directly by `content.js`; it is a transitive ES module dependency of `image-processing.js`.
 
 ## Script Contexts
 
@@ -15,25 +19,25 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 
 ## Module Map
 
-| Module | Responsibility |
-|--------|---------------|
-| `config.js` | CONFIG, TIMING, STORAGE_KEYS, PROMPT_TYPES, ICONS, STATE, DOM_CACHE constants |
-| `storage.js` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
-| `auth-service.js` | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
-| `ocr-service.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
-| `domains.js` | Site detection (vocabulary.com, quizlet.com), strict CSP site detection, URL validation |
-| `utils.js` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
-| `image-processing.js` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
-| `messaging.js` | Chrome message listener/dispatcher for content script actions |
-| `keyboard.js` | Keyboard shortcuts (Escape two-stage: disable auto-solve, then hide UI) |
-| `event-manager.js` | Event listener tracking, global error handling, timer cleanup |
-| `capture-system.js` | Overlay creation, drag-to-select, quick capture from saved area |
-| `auto-solve.js` | Vocabulary.com auto-solve, 2500ms cycle delay, max 2 invalid questions |
-| `ui-core.js` | Main UI panel, theme management (auto/light/dark), Google Fonts loading |
-| `ui-components.js` | Floating panel buttons, Pro indicators, mode switching, ask mode UI |
-| `ui-stealthy-result.js` | Invisible answer overlay (bottom-right, rgba gray, 2s fadeout, pointer-events: none) |
-| `privacy-guard.js` | Content-side coordinator — checks Pro + settings, verifies inject.js active |
-| `migration.js` | One-time API key -> license key migration (v3) |
+| Module | Load Context | Responsibility |
+|--------|-------------|---------------|
+| `config.js` | content.js (`import()`) → `window.CaptureAI` | CONFIG, TIMING, STORAGE_KEYS, PROMPT_TYPES, ICONS, STATE, DOM_CACHE constants |
+| `storage.js` | content.js (`import()`) → `window.CaptureAI` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
+| `auth-service.js` | background.js (`importScripts()`) | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
+| `ocr-service.js` | transitive dep of `image-processing.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
+| `domains.js` | content.js (`import()`) → `window.CaptureAI` | Site detection (vocabulary.com, quizlet.com), strict CSP site detection, URL validation |
+| `utils.js` | content.js (`import()`) → `window.CaptureAI` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
+| `image-processing.js` | content.js (`import()`) → `window.CaptureAI` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
+| `messaging.js` | content.js (`import()`) → `window.CaptureAI` | Chrome message listener/dispatcher for content script actions |
+| `keyboard.js` | content.js (`import()`) → `window.CaptureAI` | Keyboard shortcuts (Escape two-stage: disable auto-solve, then hide UI) |
+| `event-manager.js` | content.js (`import()`) → `window.CaptureAI` | Event listener tracking, global error handling, timer cleanup |
+| `capture-system.js` | content.js (`import()`) → `window.CaptureAI` | Overlay creation, drag-to-select, quick capture from saved area |
+| `auto-solve.js` | content.js (`import()`) → `window.CaptureAI` | Vocabulary.com auto-solve, 2500ms cycle delay, max 2 invalid questions |
+| `ui-core.js` | content.js (`import()`) → `window.CaptureAI` | Main UI panel, theme management (auto/light/dark), Google Fonts loading |
+| `ui-components.js` | content.js (`import()`) → `window.CaptureAI` | Floating panel buttons, Pro indicators, mode switching, ask mode UI |
+| `ui-stealthy-result.js` | content.js (`import()`) → `window.CaptureAI` | Invisible answer overlay (bottom-right, rgba gray, 2s fadeout, pointer-events: none) |
+| `privacy-guard.js` | content.js (`import()`) → `window.CaptureAI` | Content-side coordinator — checks Pro + settings, verifies inject.js active |
+| `migration.js` | background.js (`importScripts()`) | One-time API key -> license key migration (v3) |
 
 ## Storage Keys
 
