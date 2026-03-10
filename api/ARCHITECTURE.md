@@ -94,7 +94,7 @@ Applied to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: D
 
 ## CORS
 
-**Response CORS** (`getCORSHeaders` in `index.js`): `https://captureai.dev` + `https://thesuperiorflash.github.io` + chrome extensions from `CHROME_EXTENSION_IDS` env var. Dev mode adds `localhost:3000/8080` and `127.0.0.1:3000`.
+**Response CORS** (`getCORSHeaders` in `index.js`): `https://captureai.dev` + chrome extensions from `CHROME_EXTENSION_IDS` env var. Dev mode adds `localhost:3000/8080` and `127.0.0.1:3000`.
 
 **Preflight CORS** (`handleCORS` in `utils.js`): Same origins as above. Credentials header only set for non-null origins.
 
