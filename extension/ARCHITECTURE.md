@@ -72,8 +72,8 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 
 **Protections** (all in `inject.js`, MAIN world, `document_start`):
 1. **Visibility**: `document.visibilityState` -> 'visible', `document.hidden` -> false, `document.hasFocus()` -> true
-2. **Events blocked**: visibilitychange, blur, focus, focusin, focusout, pagehide, pageshow (via WeakMap tracking)
-3. **Property handlers blocked**: window.onblur, window.onfocus, document.onvisibilitychange
+2. **Events blocked**: visibilitychange, blur, focus, focusin, focusout, pagehide, pageshow, unload, beforeunload (via WeakMap tracking)
+3. **Property handlers blocked**: window.onblur, window.onfocus, document.onvisibilitychange, window.onunload, window.onbeforeunload, window.onpagehide, window.onpageshow
 4. **Clipboard**: Intercepts copy/cut/paste, enables user-select CSS, enables pointer-events
 5. **AI Honeypots**: Removes hidden elements with keywords (ignore, disregard, ai, bot, llm, gpt, claude), watches via MutationObserver for dynamically added honeypots
 6. **Canvas-specific**: Extra protections for Canvas/Instructure sites (detected via meta tag)
