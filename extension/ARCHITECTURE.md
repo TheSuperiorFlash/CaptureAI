@@ -20,7 +20,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. All modules loaded
 | `config.js` | CONFIG, TIMING, STORAGE_KEYS, PROMPT_TYPES, ICONS, STATE, DOM_CACHE constants |
 | `storage.js` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
 | `auth-service.js` | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
-| `ocr-service.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
+| `ocr-service.js` | Tesseract.js v7 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
 | `domains.js` | Site detection (vocabulary.com, quizlet.com), strict CSP site detection, URL validation |
 | `utils.js` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
 | `image-processing.js` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
@@ -134,7 +134,7 @@ Background -> chrome.runtime.sendMessage() -> Popup (fire-and-forget)
 
 1. Screenshot captured via `chrome.tabs.captureVisibleTab()` (PNG)
 2. Image sent to content script for cropping/compression
-3. If OCR enabled: Tesseract.js v5 processes with 3x upscale + grayscale + box blur
+3. If OCR enabled: Tesseract.js v7 processes with 3x upscale + grayscale + box blur
 4. If confidence >= 60%: Send text only (90% token savings)
 5. If confidence < 60% OR image-selection question detected OR wrong-answer prompt: Send image
 6. Site-specific OCR cleanup for vocabulary.com artifacts (removes QO/OO/QQ patterns)
