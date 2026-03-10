@@ -1,6 +1,6 @@
 # CaptureAI - GitHub Copilot Instructions
 
-> **Self-update rule:** When you change the tech stack, npm scripts, coding conventions, or development workflow — update this file and [CLAUDE.md](../CLAUDE.md).
+> **Self-update rule:** When you change the tech stack, npm scripts, coding conventions, or development workflow — update this file, [CLAUDE.md](../CLAUDE.md), and [GEMINI.md](../GEMINI.md).
 
 ## Project Overview
 

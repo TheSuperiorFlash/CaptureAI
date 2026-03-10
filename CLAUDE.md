@@ -8,15 +8,15 @@ Development guide for CaptureAI Chrome extension.
 
 | What you changed | Update these files |
 |------------------|--------------------|
-| API routes, auth, rate limits, AI models, webhooks | This file (Key Concepts) + [api/ARCHITECTURE.md](api/ARCHITECTURE.md) |
-| Extension modules, storage keys, message actions, Privacy Guard | This file (Storage Keys) + [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) |
+| API routes, auth, rate limits, AI models, webhooks | This file (Key Concepts) + [GEMINI.md](GEMINI.md) + [api/ARCHITECTURE.md](api/ARCHITECTURE.md) |
+| Extension modules, storage keys, message actions, Privacy Guard | This file (Storage Keys) + [GEMINI.md](GEMINI.md) + [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) |
 | Database tables, columns, indexes, views | [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) |
 | New migration file added | [api/migrations/README.md](api/migrations/README.md) |
 | CORS config, extension IDs | [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) |
 | Test files added/removed, coverage thresholds, test setup | [tests/README.md](tests/README.md) |
 | Website components, design tokens, pages | [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md) |
-| npm scripts, dependencies, dev tooling | This file (Commands) + [.github/copilot-instructions.md](.github/copilot-instructions.md) |
-| Coding standards, critical rules, git workflow | This file + [.github/copilot-instructions.md](.github/copilot-instructions.md) + [GEMINI.md](GEMINI.md) |
+| npm scripts, dependencies, dev tooling | This file (Commands) + [GEMINI.md](GEMINI.md) + [.github/copilot-instructions.md](.github/copilot-instructions.md) |
+| Coding standards, critical rules, git workflow | This file + [GEMINI.md](GEMINI.md) + [.github/copilot-instructions.md](.github/copilot-instructions.md) |
 
 **Every doc has a self-update reminder at the top. Follow it.**
 
