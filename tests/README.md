@@ -1,234 +1,101 @@
 # CaptureAI Testing Guide
 
-## Overview
-
-This directory contains unit and integration tests for the CaptureAI Chrome extension.
-
-## Test Structure
-
-```
-tests/
-├── setup/                      # Test configuration and mocks
-│   ├── test-setup.js          # Global test setup
-│   └── chrome-mock.js         # Chrome API mocks
-├── unit/                       # Unit tests for individual functions
-│   ├── message-builder.test.js   # OpenAI message builder tests
-│   ├── url-validator.test.js     # URL validation tests
-│   ├── storage.test.js           # Storage function tests
-│   ├── screenshot.test.js        # Screenshot capture tests
-│   └── utils.test.js             # Utility function tests
-├── integration/                # Integration tests (future)
-└── fixtures/                   # Test data and mock responses (future)
-```
+> **Self-update rule:** When you add/remove test files, change coverage thresholds, or modify test setup — update this file. Keep the file tree and counts accurate.
 
 ## Running Tests
 
-### Run all tests
 ```bash
-npm test
+npm test                    # Jest unit + integration tests (25 files)
+npm run test:watch          # Watch mode
+npm run test:coverage       # Coverage report
+npm run test:e2e            # Playwright e2e tests
+npm run test:e2e:headed     # E2e with visible browser
+npm run test:all            # All tests (extension + API + e2e)
+npm test tests/unit/FILE    # Specific file
 ```
 
-### Run tests in watch mode
-```bash
-npm run test:watch
+## Structure
+
+```
+tests/
+├── setup/
+│   ├── test-setup.js           # Global setup, Chrome mocks, fetch mocks
+│   ├── chrome-mock.js          # Chrome API mock implementation
+│   └── privacy-guard-test.html # HTML fixture for Privacy Guard tests
+├── unit/                       # 22 unit test files
+│   ├── auth-service.test.js    # License key validation, caching, API
+│   ├── auto-solve-module.test.js
+│   ├── background.test.js      # Service worker logic
+│   ├── capture-system.test.js
+│   ├── config.test.js
+│   ├── domains-utils.test.js   # Site detection, CSP checking
+│   ├── edge-cases.test.js      # Error handling edge cases
+│   ├── event-manager.test.js
+│   ├── image-processing.test.js
+│   ├── inject.test.js          # MAIN world Privacy Guard
+│   ├── keyboard.test.js
+│   ├── message-handlers.test.js
+│   ├── messaging.test.js
+│   ├── migration.test.js
+│   ├── ocr-service.test.js
+│   ├── openai-api.test.js
+│   ├── privacy-guard.test.js
+│   ├── screenshot.test.js
+│   ├── storage-wrapper.test.js
+│   ├── ui-components.test.js
+│   ├── ui-stealthy-result.test.js
+│   └── utils-functions.test.js
+├── integration/                # 3 integration test files
+│   ├── auth-flow.test.js
+│   ├── message-routing.test.js
+│   └── migration-auth.test.js
+└── e2e/                        # 2 Playwright e2e tests + fixtures
+    ├── extension-load.spec.js
+    ├── popup-ui.spec.js
+    └── fixtures.js
 ```
 
-### Run tests with coverage
-```bash
-npm run test:coverage
-```
+## Coverage
 
-### Run tests verbosely
-```bash
-npm run test:verbose
-```
+Thresholds (in `config/jest.config.js`): **40%** statements/branches/lines, **47%** functions.
 
-### Run specific test file
-```bash
-npm test tests/unit/message-builder.test.js
-```
+DOM-heavy files (`popup.js`, `ui-core.js`, `ui-components.js`, `content.js`) are included in coverage collection but are currently under-tested (0% coverage), as they rely heavily on browser DOM APIs that are difficult to unit test. They pull the global average down toward the 40% thresholds.
 
-### Run tests matching pattern
-```bash
-npm test -- --testNamePattern="should build message"
-```
+View report after `npm run test:coverage` at `coverage/index.html`.
 
-## Test Coverage Goals
+## Test Setup
 
-Current coverage thresholds (configured in jest.config.js):
-- **Statements:** 70%
-- **Branches:** 70%
-- **Functions:** 70%
-- **Lines:** 70%
+`tests/setup/test-setup.js` provides:
+- Chrome API mocks (`chrome.storage`, `chrome.runtime`, `chrome.tabs`, etc.)
+- Global `fetch` mock via jest-fetch-mock
+- `importScripts()` mock providing `AuthService` and `Migration` globals
+- `AbortController` polyfill
 
-## Writing New Tests
+## Writing Tests
 
-### Test File Naming Convention
-- Unit tests: `<module-name>.test.js`
-- Integration tests: `<feature-name>.integration.test.js`
-- Place in appropriate directory
-
-### Test Structure
+- Name files `<module-name>.test.js` for both unit and integration tests
+- Follow AAA pattern: Arrange, Act, Assert
+- Reset mocks between tests with `resetChromeMocks()`
 
 ```javascript
 const { describe, test, expect, beforeEach } = require('@jest/globals');
+const { resetChromeMocks } = require('../setup/chrome-mock');
 
-describe('Module or Function Name', () => {
-  beforeEach(() => {
-    // Setup before each test
-  });
+describe('Module Name', () => {
+  beforeEach(() => resetChromeMocks());
 
-  describe('specific functionality', () => {
-    test('should do something specific', () => {
-      // Arrange
-      const input = 'test';
-
-      // Act
-      const result = functionToTest(input);
-
-      // Assert
-      expect(result).toBe('expected');
-    });
+  test('should do specific thing', () => {
+    const result = functionToTest('input');
+    expect(result).toBe('expected');
   });
 });
 ```
 
-### Using Chrome API Mocks
+## Troubleshooting
 
-```javascript
-const { resetChromeMocks, storageMock } = require('../setup/chrome-mock');
-
-describe('Function using Chrome APIs', () => {
-  beforeEach(() => {
-    resetChromeMocks();
-  });
-
-  test('should interact with chrome.storage', async () => {
-    storageMock.local.get.mockImplementation((keys, callback) => {
-      callback({ 'key': 'value' });
-    });
-
-    const result = await yourFunction();
-
-    expect(storageMock.local.get).toHaveBeenCalledTimes(1);
-  });
-});
-```
-
-## Current Test Coverage
-
-### Tested Modules
-✅ **background.js**
-- `buildMessages()` - Message builder (15 tests)
-- `isValidUrl()` - URL validator (21 tests)
-- `captureScreenshot()` - Screenshot capture (5 tests)
-- `getStoredApiKey()` - Storage retrieval (6 tests)
-
-✅ **modules/utils.js**
-- `generateId()` - ID generation (4 tests)
-- `delay()` - Delay utility (3 tests)
-- `debounce()` - Debounce utility (4 tests)
-
-**Total:** 58 unit tests
-
-### Not Yet Tested
-⏳ `sendToOpenAI()` - Requires fetch mocking
-⏳ `processImage()` - Complex integration test
-⏳ `handleCaptureArea()` - Integration test
-⏳ Modules: `image-processing.js`, `capture-system.js`, `auto-solve.js`
-
-## Best Practices
-
-### DO:
-- ✅ Test one thing per test
-- ✅ Use descriptive test names
-- ✅ Follow AAA pattern (Arrange, Act, Assert)
-- ✅ Reset mocks between tests
-- ✅ Test edge cases and error conditions
-- ✅ Keep tests independent
-
-### DON'T:
-- ❌ Test implementation details
-- ❌ Write overly complex tests
-- ❌ Share state between tests
-- ❌ Mock everything
-- ❌ Ignore failing tests
-
-## Debugging Tests
-
-### Run single test with verbose output
-```bash
-npm test -- tests/unit/message-builder.test.js --verbose
-```
-
-### Run tests with Node debugger
-```bash
-node --inspect-brk node_modules/.bin/jest --runInBand
-```
-
-Then open `chrome://inspect` in Chrome.
-
-### See what's being called
-```javascript
-console.log(mockFunction.mock.calls);
-console.log(mockFunction.mock.results);
-```
-
-## Common Issues
-
-### Issue: "Cannot find module"
-**Solution:** Check import paths in test files. Module imports need relative paths.
-
-### Issue: "chrome is not defined"
-**Solution:** Import Chrome mocks: `const { setupChromeMock } = require('../setup/chrome-mock');`
-
-### Issue: "Timer not advancing"
-**Solution:** Use fake timers:
-```javascript
-beforeEach(() => jest.useFakeTimers());
-afterEach(() => jest.useRealTimers());
-```
-
-### Issue: "async test not completing"
-**Solution:** Make sure to `await` promises and use `async` keyword:
-```javascript
-test('should work', async () => {
-  const result = await asyncFunction();
-  expect(result).toBe('value');
-});
-```
-
-## Coverage Reports
-
-After running `npm run test:coverage`, open:
-```
-coverage/index.html
-```
-
-This provides detailed line-by-line coverage information.
-
-## Future Enhancements
-
-### Planned Test Additions:
-1. Integration tests for full capture workflow
-2. Tests for image processing functions
-3. Tests for auto-solve logic
-4. Tests for UI components
-5. E2E tests using Puppeteer
-
-### CI/CD Integration:
-- GitHub Actions workflow
-- Automatic test runs on PR
-- Coverage reporting to Codecov
-
-## Resources
-
-- [Jest Documentation](https://jestjs.io/)
-- [Testing Best Practices](https://testingjavascript.com/)
-- [Chrome Extension Testing](https://developer.chrome.com/docs/extensions/mv3/tut_testing/)
-
----
-
-**Last Updated:** December 13, 2024
-**Test Framework:** Jest 30.2.0
-**Coverage Goal:** 70%+
+| Issue | Solution |
+|-------|----------|
+| `Cannot find module` | Check relative import paths |
+| `chrome is not defined` | Import mocks from `../setup/chrome-mock` |
+| Timer not advancing | `jest.useFakeTimers()` / `jest.useRealTimers()` |
+| Async test hanging | Ensure `await` and `async` keywords are present |

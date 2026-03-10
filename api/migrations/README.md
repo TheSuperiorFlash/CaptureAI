@@ -1,60 +1,47 @@
 # Database Migrations
 
-This directory contains database migration scripts for the CaptureAI backend.
+> **Self-update rule:** When you add a new migration file, add it to the Migration List table below and update the migration count in [api/DATABASE_GUIDE.md](../DATABASE_GUIDE.md) and [CLAUDE.md](../../CLAUDE.md).
 
 ## Running Migrations
 
-### For new databases
-If you're setting up a fresh database, use the main `schema.sql` file which includes all optimizations:
-
+**Fresh database:** Use the main schema file (includes all optimizations):
 ```bash
 wrangler d1 execute captureai-db --file=schema.sql
 ```
 
-### For existing databases
-If you have an existing database, run migrations in order:
-
+**Existing database:** Run migrations sequentially:
 ```bash
-# Run migration 001
 wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_tracking.sql
+# ... through 007
 ```
 
 ## Migration List
 
-- **001_add_indexes_and_webhook_tracking.sql**
-  - Adds webhook_events table for replay attack prevention
-  - Adds performance indexes for users, usage_records, and webhook_events tables
-  - Safe to run on existing databases (uses IF NOT EXISTS)
+| # | File | Description |
+|---|------|-------------|
+| 001 | `001_add_indexes_and_webhook_tracking.sql` | `webhook_events` table, performance indexes for users/usage_records |
+| 002 | `002_add_token_breakdown.sql` | Token breakdown columns (input, output, reasoning, cached tokens) |
+| 003 | `003_remove_unused_columns.sql` | Cleanup of deprecated columns |
+| 004 | `004_usage_records_user_id_to_email.sql` | Schema refactor: `user_id` -> `email` in usage_records |
+| 005 | `005_add_cached_column.sql` | `cached` (yes/no) tracking on usage_records |
+| 006 | `006_create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
+| 007 | `007_add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
+
+Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), and 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite) are **not idempotent** and will fail if re-run.
 
 ## Maintenance
 
-### Clean up old webhook events
-
-To prevent the webhook_events table from growing indefinitely, periodically clean up old events:
-
 ```sql
-DELETE FROM webhook_events WHERE created_at < datetime('now', '-7 days');
+-- Clean old webhook events (run periodically)
+DELETE FROM webhook_events WHERE processed_at < datetime('now', '-30 days');
 ```
 
-You can set this up as a scheduled task or run it manually.
-
-### Verify indexes
-
-To check which indexes exist on your database:
-
 ```bash
+# Verify indexes
 wrangler d1 execute captureai-db --command="SELECT name, tbl_name FROM sqlite_master WHERE type='index';"
 ```
 
-## Performance Tips
-
-1. **Regular cleanup**: Clean up old usage_records and webhook_events periodically
-2. **Monitor query performance**: Use EXPLAIN QUERY PLAN to analyze slow queries
-3. **Composite indexes**: The user_date index on usage_records speeds up time-range queries per user
-
 ## Rollback
-
-If you need to rollback a migration, you can drop the added tables/indexes:
 
 ```sql
 -- Rollback migration 001
@@ -66,3 +53,5 @@ DROP INDEX IF EXISTS idx_users_created_at;
 DROP INDEX IF EXISTS idx_usage_records_user_id;
 DROP INDEX IF EXISTS idx_usage_records_model;
 ```
+
+See individual migration files for specific rollback instructions.
