@@ -8,9 +8,8 @@
 :root,
 #captureai-panel {
    /* =========================================
-      LAYER 0: CONFIGURATION
-      ========================================= */
-   /* Handled via JS Config (config.js -> PILLED_UI_BUTTONS) */
+       LAYER 0: CONFIGURATION
+       ========================================= */
    --config-button-radius: 10px;
    --config-toggle-radius: 4px;
 

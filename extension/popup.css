@@ -298,14 +298,22 @@ body {
 }
 
 .help-arrow {
-    font-size: 12px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+    margin-right: 4px;
     transition: transform 0.3s ease-in-out;
     transform-origin: center;
-    color: var(--color-text-primary-default);
+    transform: rotate(180deg);
 }
 
 .help-arrow.expanded {
-    transform: rotate(90deg);
+    transform: rotate(270deg);
+}
+
+[data-theme="dark"] .help-arrow {
+    filter: invert(1);
+    opacity: 0.8;
 }
 
 .help-content {
@@ -887,14 +895,22 @@ body {
 }
 
 .advanced-arrow {
-    font-size: 12px;
+    width: 14px;
+    height: 14px;
+    opacity: 0.8;
+    margin-right: 4px;
     transition: transform 0.3s ease-in-out;
     transform-origin: center;
-    color: var(--color-text-primary-default);
+    transform: rotate(180deg);
 }
 
 .advanced-arrow.expanded {
-    transform: rotate(90deg);
+    transform: rotate(270deg);
+}
+
+[data-theme="dark"] .advanced-arrow {
+    filter: invert(1);
+    opacity: 0.8;
 }
 
 .advanced-content {

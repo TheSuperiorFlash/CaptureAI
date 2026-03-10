@@ -33,7 +33,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 | `event-manager.js` | content.js (`import()`) → `window.CaptureAI` | Event listener tracking, global error handling, timer cleanup |
 | `capture-system.js` | content.js (`import()`) → `window.CaptureAI` | Overlay creation, drag-to-select, quick capture from saved area |
 | `auto-solve.js` | content.js (`import()`) → `window.CaptureAI` | Vocabulary.com auto-solve, 2500ms cycle delay, max 2 invalid questions |
-| `ui-core.js` | content.js (`import()`) → `window.CaptureAI` | Main UI panel, theme management (auto/light/dark), Google Fonts loading |
+| `ui-core.js` | content.js (`import()`) → `window.CaptureAI` | Main UI panel, theme management (auto/light/dark/light-pilled/dark-pilled), Google Fonts loading |
 | `ui-components.js` | content.js (`import()`) → `window.CaptureAI` | Floating panel buttons, Pro indicators, mode switching, ask mode UI |
 | `ui-stealthy-result.js` | content.js (`import()`) → `window.CaptureAI` | Invisible answer overlay (bottom-right, rgba gray, 2s fadeout, pointer-events: none) |
 | `privacy-guard.js` | content.js (`import()`) → `window.CaptureAI` | Content-side coordinator — checks Pro + settings, verifies inject.js active |

@@ -52,19 +52,26 @@ export const UICore = {
     }
 
     let isDark = false;
+    let isPilled = false;
+
     if (themeValue === 'dark') {
       isDark = true;
     } else if (themeValue === 'light') {
       isDark = false;
+    } else if (themeValue === 'dark-pilled') {
+      isDark = true;
+      isPilled = true;
+    } else if (themeValue === 'light-pilled') {
+      isDark = false;
+      isPilled = true;
     } else {
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
     this.updateThemeMode(isDark);
 
-    // Apply pill style from config
-    const { CONFIG } = window.CaptureAI;
-    if (CONFIG.PILLED_UI_BUTTONS) {
+    // Apply pill style based on theme
+    if (isPilled) {
       document.documentElement.setAttribute('data-pill-style', 'true');
     } else {
       document.documentElement.removeAttribute('data-pill-style');

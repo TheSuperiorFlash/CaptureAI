@@ -4,17 +4,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Apply pill rounding style from config
-  try {
-    const { CONFIG } = await import('./modules/config.js');
-    const isPilled = CONFIG.PILLED_UI_BUTTONS;
-    const buttonRadius = isPilled ? '100px' : '10px';
-    const toggleRadius = isPilled ? '100px' : '6px';
-    document.documentElement.style.setProperty('--config-button-radius', buttonRadius);
-    document.documentElement.style.setProperty('--config-toggle-radius', toggleRadius);
-  } catch (e) {
-    console.error('Failed to apply pill style:', e);
-  }
 
   // Get DOM elements
   const elements = {
@@ -751,10 +740,18 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function applyTheme(themeValue) {
     let isDark = false;
+    let isPilled = false;
+
     if (themeValue === 'dark') {
       isDark = true;
     } else if (themeValue === 'light') {
       isDark = false;
+    } else if (themeValue === 'dark-pilled') {
+      isDark = true;
+      isPilled = true;
+    } else if (themeValue === 'light-pilled') {
+      isDark = false;
+      isPilled = true;
     } else {
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
@@ -763,6 +760,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
+    }
+
+    // Apply pill style based on theme
+    if (isPilled) {
+      document.documentElement.setAttribute('data-pill-style', 'true');
+    } else {
+      document.documentElement.removeAttribute('data-pill-style');
     }
   }
 
