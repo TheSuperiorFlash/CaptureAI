@@ -33,7 +33,7 @@ Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Mi
 
 ```sql
 -- Clean old webhook events (run periodically)
-DELETE FROM webhook_events WHERE created_at < datetime('now', '-30 days');
+DELETE FROM webhook_events WHERE processed_at < datetime('now', '-30 days');
 ```
 
 ```bash
