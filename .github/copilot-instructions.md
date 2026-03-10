@@ -25,8 +25,17 @@ See [extension/ARCHITECTURE.md](../extension/ARCHITECTURE.md) for module system,
 - **Classes**: PascalCase (`CaptureSystem`)
 - **Functions/Variables**: camelCase (`handleCapture`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_INVALID_QUESTIONS`)
-- **Style**: Single quotes, semicolons, 2-space indent, max 100 char lines
-- **Errors**: Try-catch all async ops, never expose secrets, `textContent` over `innerHTML`
+- **Booleans**: `isX`/`hasX`/`canX`; **Handlers**: `handleEventName`
+- **Style**: Vanilla JS, single quotes, semicolons, 2-space indent
+
+### Clean Code Rules
+
+- **Variables**: Meaningful, pronounceable, searchable names — no Hungarian notation, no redundant context
+- **Functions**: Do one thing, single abstraction level, ≤ 50 lines. Enforce Command Query Separation (action OR return, never both). Eliminate side effects. DRY at 3+ repetitions
+- **Comments**: Delete syntactic restatements; keep only *why* comments (business rules, historical context, non-obvious tradeoffs)
+- **Dead code**: Remove unused functions/variables/imports and their exclusive tests
+- **Errors**: Catch specific exceptions, never swallow with empty `catch`, no exceptions for control flow. Always check `chrome.runtime.lastError`
+- **Constants**: Extract all magic numbers and hardcoded config strings into named constants
 
 ## Chrome Extension Guidelines
 

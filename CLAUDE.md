@@ -72,16 +72,72 @@ captureai-privacy-guard-defaulted  # Auto-enable flag on first Pro upgrade
 
 ## Coding Standards
 
-- Vanilla JS only, 2-space indentation, single quotes, semicolons required
-- Max 100 char lines, 500 line modules, 50 line functions
-- JSDoc all public functions
-- `camelCase` vars/functions, `UPPER_SNAKE_CASE` constants, `isX`/`hasX`/`canX` booleans, `handleEventName` handlers
+### Formatting & Language
+
+- Vanilla JS only (extension), 2-space indentation, single quotes, semicolons required
+- `camelCase` variables/functions, `UPPER_SNAKE_CASE` constants, `PascalCase` classes
+- `isX`/`hasX`/`canX` booleans, `handleEventName` event handlers
+- kebab-case filenames (`auth-service.js`)
+
+### Variables
+
+- Use meaningful, pronounceable, searchable names — never single letters or mental mappings
+- Avoid Hungarian notation, type prefixes, and redundant context (e.g., `userEmail` not `strUserEmailAddress`)
+- One declaration per `const`/`let` statement; no `var`
+
+### Functions
+
+- Each function does exactly one thing at a single level of abstraction
+- Keep functions short (≤ 50 lines); extract when logic branches or nests deeply
+- **Command Query Separation**: a function either performs an action OR returns a value, never both
+- Eliminate side effects — a function should not modify state outside its scope unless that is its sole declared purpose
+- Apply DRY: if logic repeats three or more times, extract it; two similar lines are fine
+- JSDoc all public functions; omit for trivial internal helpers
+
+### Comments
+
+- Delete comments that restate what the code does syntactically (`// increment counter` above `counter++`)
+- Retain or write comments only to explain *why* — business rules, historical context, non-obvious tradeoffs
+- Retain comments that explain highly specific visual formatting or alignment choices
+
+### Dead Code
+
+- Trace execution paths; remove entirely unused functions, variables, imports, and unreachable branches
+- When removing dead code, also remove any unit tests that exclusively cover it
+
+### Error Handling
+
+- Catch specific exceptions; never swallow errors with empty `catch` blocks
+- Do not use exceptions for standard control flow (e.g., don't throw to signal "not found")
+- Always check `chrome.runtime.lastError` in extension callbacks
+- Try-catch all async operations; surface meaningful error messages
+
+### Constants & Magic Values
+
+- Extract all magic numbers and hardcoded configuration strings into well-named constants
+- Group related constants in `config.js` or at the top of the module they belong to
+
+### Chrome Extension Specifics
+
+- Manifest V3: service workers, not background pages — handle lifecycle restarts
+- Persist state in `chrome.storage.local`, never in service worker memory
+- `textContent` over `innerHTML`; never inject untrusted content via `innerHTML`
+- Access shared state only via `window.CaptureAI.STATE` / `window.CaptureAI.CONFIG`
+- Message passing: `chrome.runtime.sendMessage()` (content → background), `chrome.tabs.sendMessage()` (background → content)
+- `wasm-unsafe-eval` required in CSP for Tesseract.js
+
+### API / Backend Specifics
+
+- Parameterized D1 queries (`.bind()`) — no string concatenation in SQL
+- Validate all input at the handler boundary
+- Verify Stripe webhook signatures (HMAC-SHA256 + timestamp)
+- Never hardcode secrets; never log sensitive data
 
 ## Critical Rules
 
-**Always:** Read files before editing | `textContent` over `innerHTML` | Access state via `window.CaptureAI.STATE`/`CONFIG` | Parameterized DB queries (`.bind()`) | Validate all input | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError`
+**Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants
 
-**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Deploy without testing | Modify schema without migrations | Commit secrets
+**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Deploy without testing | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
 
 ## Backend Environment
 
