@@ -149,7 +149,7 @@ npm run lint          # ESLint check
 
 ## Privacy
 
-No data collection, no analytics, no telemetry. Screenshots are processed and discarded immediately. See [privacy-policy.html](privacy-policy.html).
+No data collection, no analytics, no telemetry. Screenshots are processed and discarded immediately. See [Privacy Policy](https://captureai.dev/privacy).
 
 ---
 
