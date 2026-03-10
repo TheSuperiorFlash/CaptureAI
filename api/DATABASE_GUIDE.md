@@ -80,9 +80,9 @@ Stripe event deduplication for replay attack prevention.
 | Column | Type | Notes |
 |--------|------|-------|
 | id | INTEGER PK | Auto-increment |
-| event_id | TEXT UNIQUE | Stripe event ID |
-| event_type | TEXT | Stripe event type |
-| webhook_timestamp, processed_at, created_at | TEXT | ISO timestamps |
+| event_id | TEXT UNIQUE NOT NULL | Stripe event ID |
+| processed_at | TEXT | Set to datetime('now') on insert |
+| webhook_timestamp | TEXT | Timestamp from Stripe event payload |
 
 ### Views
 
