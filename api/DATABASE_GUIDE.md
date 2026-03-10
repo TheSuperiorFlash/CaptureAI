@@ -50,7 +50,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migration
 | id | INTEGER PK | Auto-increment |
 | email | TEXT | User email (was user_id before migration 004) |
 | prompt_type | TEXT | `answer`, `ask`, `auto_solve`, etc. |
-| model | TEXT | `none`, `low`, `medium` |
+| model | TEXT | `low`, `medium`, `high` |
 | input_tokens, output_tokens | INTEGER | Token counts |
 | total_cost | REAL | Cost in USD |
 | cached | TEXT | `yes` or `no` |
