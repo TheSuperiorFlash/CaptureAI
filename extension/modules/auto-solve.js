@@ -301,6 +301,8 @@ export const AutoSolve = {
         document.querySelector('[tabindex="0"]') ||
         document.body;
 
+
+
       if (challengeContainer) {
         try {
           challengeContainer.focus();

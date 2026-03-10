@@ -4,29 +4,21 @@
 
 export const DomainUtils = {
   /**
+   * List of sites that support auto-solve functionality
+   */
+  SUPPORTED_DOMAINS: [
+    'vocabulary.com'
+  ],
+
+  /**
    * Check if current site supports auto-solve functionality
    * @returns {boolean}
    */
   isOnSupportedSite() {
-    return this.isOnVocabulary();
-  },
-
-  /**
-   * Check if current site is Quizlet
-   * @returns {boolean}
-   */
-  isOnQuizlet() {
-    const h = window.location.hostname;
-    return h === 'quizlet.com' || h.endsWith('.quizlet.com');
-  },
-
-  /**
-   * Check if current site is Vocabulary.com
-   * @returns {boolean}
-   */
-  isOnVocabulary() {
-    const h = window.location.hostname;
-    return h === 'vocabulary.com' || h.endsWith('.vocabulary.com');
+    const hostname = window.location.hostname.toLowerCase();
+    return this.SUPPORTED_DOMAINS.some(domain =>
+      hostname === domain || hostname.endsWith('.' + domain)
+    );
   },
 
   /**
@@ -88,8 +80,8 @@ export const DomainUtils = {
    */
   isValidUrl(url) {
     return (url.startsWith('http://') || url.startsWith('https://')) &&
-           !url.startsWith('chrome://') &&
-           !url.startsWith('chrome-extension://') &&
-           !url.includes('chrome.google.com/webstore');
+      !url.startsWith('chrome://') &&
+      !url.startsWith('chrome-extension://') &&
+      !url.includes('chrome.google.com/webstore');
   }
 };

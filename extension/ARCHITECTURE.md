@@ -25,7 +25,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 | `storage.js` | content.js (`import()`) → `window.CaptureAI` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
 | `auth-service.js` | background.js (`importScripts()`) | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
 | `ocr-service.js` | transitive dep of `image-processing.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
-| `domains.js` | content.js (`import()`) → `window.CaptureAI` | Site detection (vocabulary.com, quizlet.com), strict CSP site detection, URL validation |
+| `domains.js` | content.js (`import()`) → `window.CaptureAI` | Site detection (vocabulary.com), strict CSP site detection, URL validation |
 | `utils.js` | content.js (`import()`) → `window.CaptureAI` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
 | `image-processing.js` | content.js (`import()`) → `window.CaptureAI` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
 | `messaging.js` | content.js (`import()`) → `window.CaptureAI` | Chrome message listener/dispatcher for content script actions |

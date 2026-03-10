@@ -47,6 +47,7 @@ cd api && npm run db:migrate  # Run migrations
 ## Key Concepts
 
 - **Module System**: ES6 exports loaded dynamically in `content.js`, accessible via `window.CaptureAI` namespace (14 modules)
+- **Auto-solve Sites**: Vocabulary.com
 - **Backend URL**: `https://api.captureai.workers.dev`
 - **AI Models**: `gpt-4.1-nano` (level 0, fastest) | `gpt-5-nano` low reasoning (level 1, default) | `gpt-5-nano` medium reasoning (level 2, Pro only)
 - **Privacy Guard**: `inject.js` in `MAIN` world overrides `document.hasFocus()`, blocks visibility/focus/lifecycle events, blocks clipboard events, removes AI honeypots. Pro only, requires enabled in settings. Prevents `unload` policy violations.
