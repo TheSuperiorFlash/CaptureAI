@@ -41,7 +41,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migration
 | subscription_status | TEXT | `active`, `inactive`, `cancelled`, `past_due` |
 | created_at | TEXT | ISO timestamp |
 
-**Indexes:** email, license_key, stripe_subscription, tier, created_at
+**Indexes:** email (explicit), stripe_subscription_id (explicit), license_key (implicit, UNIQUE), stripe_customer_id (implicit, UNIQUE)
 
 ### usage_records
 
