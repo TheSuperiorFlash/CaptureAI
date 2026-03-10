@@ -5,7 +5,7 @@
 ## Running Tests
 
 ```bash
-npm test                    # Jest unit + integration tests (30 files)
+npm test                    # Jest unit + integration tests (25 files)
 npm run test:watch          # Watch mode
 npm run test:coverage       # Coverage report
 npm run test:e2e            # Playwright e2e tests
