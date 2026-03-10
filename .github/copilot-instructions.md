@@ -14,7 +14,7 @@ See [extension/ARCHITECTURE.md](../extension/ARCHITECTURE.md) for module system,
 
 ## Technology Stack
 
-- **Extension**: Manifest V3, ES6 Modules, Tesseract.js v5 OCR, Chrome Storage API
+- **Extension**: Manifest V3, ES6 Modules, Tesseract.js v7.0.0 OCR, Chrome Storage API
 - **Backend**: Cloudflare Workers, D1 (SQLite), OpenAI via AI Gateway, Stripe, Cloudflare native Rate Limiting API
 - **Website**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
 - **Dev tools**: ESLint v9 (flat config), Jest v30, Playwright e2e
