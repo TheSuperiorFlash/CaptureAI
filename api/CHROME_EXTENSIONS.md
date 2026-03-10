@@ -19,9 +19,9 @@ CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickca
 
 ## How It Works
 
-- **Comma-separated list** with automatic whitespace trimming
-- **Production mode**: Only exact IDs in `CHROME_EXTENSION_IDS` + `https://captureai.dev`
-- **Development mode**: Also allows localhost:3000/8080
+- **`CHROME_EXTENSION_IDS`**: Comma-separated list with automatic whitespace trimming
+- **Production mode**: Only exact IDs in `CHROME_EXTENSION_IDS` + `https://captureai.dev` + `https://thesuperiorflash.github.io`
+- **Development mode**: Also allows `http://localhost:3000`, `http://localhost:8080`, and `http://127.0.0.1:3000`
 
 ## Adding a New Extension ID
 

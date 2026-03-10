@@ -88,7 +88,7 @@ Toggle to **Ask** mode, type a question, optionally attach a screenshot, press `
 
 ## Architecture
 
-```
+```text
 User Action -> Content Script -> Background Script -> Cloudflare Workers -> OpenAI
                     |                                        |
               OCR (Tesseract.js)                    License Validation

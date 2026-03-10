@@ -164,27 +164,32 @@ Colors in use: blue/cyan, violet/blue, amber/orange, emerald/cyan, teal/teal, in
 ### Buttons
 
 **Primary CTA**:
-```
+
+```text
 glow-btn rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500
 ```
 
 **Hero CTA** (larger):
-```
+
+```text
 glow-btn rounded-2xl bg-gradient-to-r from-[#0047ff] to-[#1a5cff] px-10 py-4 text-base font-bold tracking-wide text-white hover:from-[#1a5cff] hover:to-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,71,255,0.4)]
 ```
 
 **Secondary**:
-```
+
+```text
 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-white/[0.15] hover:text-[--color-text]
 ```
 
 **Glass secondary** (pricing):
-```
+
+```text
 glass rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] hover:text-[--color-text] hover:bg-white/[0.05]
 ```
 
 **Text link**:
-```
+
+```text
 text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300
 ```
 

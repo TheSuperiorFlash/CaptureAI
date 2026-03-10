@@ -27,13 +27,13 @@ wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_t
 | 006 | `create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
 | 007 | `add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
 
-All migrations use `IF NOT EXISTS` for idempotency.
+Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), and 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite) are **not idempotent** and will fail if re-run.
 
 ## Maintenance
 
 ```sql
 -- Clean old webhook events (run periodically)
-DELETE FROM webhook_events WHERE created_at < datetime('now', '-7 days');
+DELETE FROM webhook_events WHERE created_at < datetime('now', '-30 days');
 ```
 
 ```bash

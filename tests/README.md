@@ -73,7 +73,7 @@ View report after `npm run test:coverage` at `coverage/index.html`.
 
 ## Writing Tests
 
-- Name files `<module-name>.test.js` (unit) or `<feature-name>.integration.test.js`
+- Name files `<module-name>.test.js` for both unit and integration tests
 - Follow AAA pattern: Arrange, Act, Assert
 - Reset mocks between tests with `resetChromeMocks()`
 
