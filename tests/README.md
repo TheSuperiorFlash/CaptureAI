@@ -59,7 +59,7 @@ tests/
 
 Thresholds (in `config/jest.config.js`): **40%** statements/branches/lines, **47%** functions.
 
-DOM-heavy files excluded from coverage: `popup.js`, `ui-core.js`, `ui-components.js`, `content.js`.
+DOM-heavy files (`popup.js`, `ui-core.js`, `ui-components.js`, `content.js`) are included in coverage collection but are currently under-tested (0% coverage), as they rely heavily on browser DOM APIs that are difficult to unit test. They pull the global average down toward the 40% thresholds.
 
 View report after `npm run test:coverage` at `coverage/index.html`.
 
