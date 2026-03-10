@@ -31,7 +31,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 ## Commands
 
 ```bash
-npm test                    # Run all tests (Jest, 30 test files)
+npm test                    # Run all tests (Jest, 25 test files)
 npm run test:coverage       # Coverage report (thresholds: 40%)
 npm run test:e2e            # Playwright e2e tests
 npm run test:all            # All tests (extension + API + e2e)
@@ -167,5 +167,5 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 - **Chrome Extension Config**: [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) — CORS extension ID management
 - **Database Guide**: [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) — schema, queries, maintenance
 - **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 7 migrations
-- **Testing Guide**: [tests/README.md](tests/README.md) — 30 test files, setup, patterns
+- **Testing Guide**: [tests/README.md](tests/README.md) — 25 test files, setup, patterns
 - **Website Design System**: [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md) — tokens, components, patterns
