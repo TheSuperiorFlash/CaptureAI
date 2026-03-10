@@ -21,7 +21,7 @@ CaptureAI is a Chrome extension that captures questions from any webpage and del
 ### Features
 
 - **Smart Screenshot Capture** — Select any screen area to capture questions
-- **OCR Text Extraction** — Tesseract.js v5 extracts text for 90% token cost reduction
+- **OCR Text Extraction** — Tesseract.js v7.0.0 extracts text for 90% token cost reduction
 - **AI-Powered Answers** — Instant responses via OpenAI (gpt-4.1-nano / gpt-5-nano)
 - **Quick Capture** — Repeat last capture area with one click
 - **Auto-Solve Mode** — Automatically answers multiple-choice questions (Vocabulary.com)
@@ -96,7 +96,7 @@ User Action -> Content Script -> Background Script -> Cloudflare Workers -> Open
               UI Display <-----------------------------  AI Response
 ```
 
-**Stack:** Manifest V3 + ES6 Modules + Tesseract.js v5 + Cloudflare Workers (D1) + AI Gateway + Stripe
+**Stack:** Manifest V3 + ES6 Modules + Tesseract.js v7.0.0 + Cloudflare Workers (D1) + AI Gateway + Stripe
 
 ---
 
