@@ -41,7 +41,7 @@ module.exports = {
   // Coverage thresholds
   // Current baseline: ~40% stmts/branches/lines, ~48% functions (Feb 2026).
   // popup.js (0%), ui-core.js (0%), ui-components.js (0%), and content.js (0%)
-  // are DOM-heavy files excluded from unit tests; they pull the global average down.
+  // are DOM-heavy files included in coverage but currently under-tested; they pull the global average down.
   // Target: raise to 60%+ once Priority 2 DOM tests (ui-core, ui-components, popup)
   // are completed (see testing-plan.md).
   coverageThreshold: {

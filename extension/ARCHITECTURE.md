@@ -138,7 +138,7 @@ Background -> chrome.runtime.sendMessage() -> Popup (fire-and-forget)
 
 1. Screenshot captured via `chrome.tabs.captureVisibleTab()` (PNG)
 2. Image sent to content script for cropping/compression
-3. If OCR enabled: Tesseract.js v5 processes with 3x upscale + grayscale + box blur
+3. If OCR enabled: Tesseract.js v7 processes with 3x upscale + grayscale + box blur
 4. If confidence >= 60%: Send text only (90% token savings)
 5. If confidence < 60% OR image-selection question detected OR wrong-answer prompt: Send image
 6. Site-specific OCR cleanup for vocabulary.com artifacts (removes QO/OO/QQ patterns)

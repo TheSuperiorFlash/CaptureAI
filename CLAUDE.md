@@ -24,14 +24,14 @@ Development guide for CaptureAI Chrome extension.
 
 Full-stack Chrome extension with Cloudflare Workers backend for AI-powered screenshot analysis. Users capture screen areas, text is extracted via OCR, and AI provides answers.
 
-**Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v5
+**Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
 **Tiers:** Free (10 req/day) | Pro ($9.99/mo, 20 req/min unlimited)
 
 ## Commands
 
 ```bash
-npm test                    # Run all tests (Jest, 30 test files)
+npm test                    # Run all tests (Jest, 25 test files)
 npm run test:coverage       # Coverage report (thresholds: 40%)
 npm run test:e2e            # Playwright e2e tests
 npm run test:all            # All tests (extension + API + e2e)
@@ -48,7 +48,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Backend URL**: `https://api.captureai.workers.dev`
 - **AI Models**: `gpt-4.1-nano` (level 0, fastest) | `gpt-5-nano` low reasoning (level 1, default) | `gpt-5-nano` medium reasoning (level 2, Pro only)
 - **Privacy Guard**: `inject.js` in MAIN world overrides `document.hasFocus()`, blocks visibility/focus events, blocks clipboard events, removes AI honeypots. Pro only, requires enabled in settings
-- **OCR Flow**: Capture -> Tesseract.js v5 -> if confidence >60% send text only (90% savings) -> else fallback to image
+- **OCR Flow**: Capture -> Tesseract.js v7 -> if confidence >60% send text only (90% savings) -> else fallback to image
 - **Shortcuts**: `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle panel
 - **Rate Limiting**: Cloudflare native Rate Limiting API with 6 presets (AUTH: 5/min, FREE_KEY: 3/min, LICENSE: 10/min, CHECKOUT: 10/min, GLOBAL: 60/min, PRO_AI: 20/min)
 - **Auth**: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), sent via `Authorization: LicenseKey YOUR-KEY` header
@@ -167,5 +167,5 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 - **Chrome Extension Config**: [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) — CORS extension ID management
 - **Database Guide**: [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) — schema, queries, maintenance
 - **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 7 migrations
-- **Testing Guide**: [tests/README.md](tests/README.md) — 30 test files, setup, patterns
+- **Testing Guide**: [tests/README.md](tests/README.md) — 25 test files, setup, patterns
 - **Website Design System**: [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md) — tokens, components, patterns

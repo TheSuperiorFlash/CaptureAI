@@ -41,7 +41,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migration
 | subscription_status | TEXT | `active`, `inactive`, `cancelled`, `past_due` |
 | created_at | TEXT | ISO timestamp |
 
-**Indexes:** email, license_key, stripe_subscription, tier, created_at
+**Indexes:** email (explicit), stripe_subscription_id (explicit), license_key (implicit, UNIQUE), stripe_customer_id (implicit, UNIQUE)
 
 ### usage_records
 
@@ -50,7 +50,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migration
 | id | INTEGER PK | Auto-increment |
 | email | TEXT | User email (was user_id before migration 004) |
 | prompt_type | TEXT | `answer`, `ask`, `auto_solve`, etc. |
-| model | TEXT | `none`, `low`, `medium` |
+| model | TEXT | `low`, `medium`, `high` |
 | input_tokens, output_tokens | INTEGER | Token counts |
 | total_cost | REAL | Cost in USD |
 | cached | TEXT | `yes` or `no` |
@@ -80,9 +80,9 @@ Stripe event deduplication for replay attack prevention.
 | Column | Type | Notes |
 |--------|------|-------|
 | id | INTEGER PK | Auto-increment |
-| event_id | TEXT UNIQUE | Stripe event ID |
-| event_type | TEXT | Stripe event type |
-| webhook_timestamp, processed_at, created_at | TEXT | ISO timestamps |
+| event_id | TEXT UNIQUE NOT NULL | Stripe event ID |
+| processed_at | TEXT | Set to datetime('now') on insert |
+| webhook_timestamp | TEXT | Timestamp from Stripe event payload |
 
 ### Views
 

@@ -19,13 +19,13 @@ wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_t
 
 | # | File | Description |
 |---|------|-------------|
-| 001 | `add_indexes_and_webhook_tracking.sql` | `webhook_events` table, performance indexes for users/usage_records |
-| 002 | `add_token_breakdown.sql` | Token breakdown columns (input, output, reasoning, cached tokens) |
-| 003 | `remove_unused_columns.sql` | Cleanup of deprecated columns |
-| 004 | `usage_records_user_id_to_email.sql` | Schema refactor: `user_id` -> `email` in usage_records |
-| 005 | `add_cached_column.sql` | `cached` (yes/no) tracking on usage_records |
-| 006 | `create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
-| 007 | `add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
+| 001 | `001_add_indexes_and_webhook_tracking.sql` | `webhook_events` table, performance indexes for users/usage_records |
+| 002 | `002_add_token_breakdown.sql` | Token breakdown columns (input, output, reasoning, cached tokens) |
+| 003 | `003_remove_unused_columns.sql` | Cleanup of deprecated columns |
+| 004 | `004_usage_records_user_id_to_email.sql` | Schema refactor: `user_id` -> `email` in usage_records |
+| 005 | `005_add_cached_column.sql` | `cached` (yes/no) tracking on usage_records |
+| 006 | `006_create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
+| 007 | `007_add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
 
 Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), and 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite) are **not idempotent** and will fail if re-run.
 
@@ -33,7 +33,7 @@ Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Mi
 
 ```sql
 -- Clean old webhook events (run periodically)
-DELETE FROM webhook_events WHERE created_at < datetime('now', '-30 days');
+DELETE FROM webhook_events WHERE processed_at < datetime('now', '-30 days');
 ```
 
 ```bash
