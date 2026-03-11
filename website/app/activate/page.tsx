@@ -109,7 +109,6 @@ export default function ActivatePage() {
             }
         } catch (error) {
             setResult({
-                type: 'error',
                 message: error instanceof Error ? error.message : 'An error occurred',
             })
         } finally {
