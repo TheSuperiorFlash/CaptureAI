@@ -3,12 +3,12 @@
 import { useState, useRef, useCallback } from 'react'
 
 /**
- * Shared hook for swiping between 'free' and 'pro' tiers on mobile.
+ * Shared hook for swiping between 'basic' and 'pro' tiers on mobile.
  * Uses a ref for the touch coordinate to avoid extra renders and stale-value issues.
  */
 export function useSwipeTier(options?: { threshold?: number }) {
     const threshold = options?.threshold ?? 40
-    const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro')
+    const [selectedTier, setSelectedTier] = useState<'basic' | 'pro'>('pro')
     const touchStartRef = useRef<number | null>(null)
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -19,8 +19,8 @@ export function useSwipeTier(options?: { threshold?: number }) {
         if (touchStartRef.current === null) return
         const touchEnd = e.changedTouches[0].clientX
         const diff = touchStartRef.current - touchEnd
-        if (diff > threshold) setSelectedTier('pro')   // swipe left → pro
-        if (diff < -threshold) setSelectedTier('free')  // swipe right → free
+        if (diff > threshold) setSelectedTier('pro')    // swipe left → pro
+        if (diff < -threshold) setSelectedTier('basic') // swipe right → basic
         touchStartRef.current = null
     }, [threshold])
 

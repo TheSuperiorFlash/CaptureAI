@@ -143,7 +143,7 @@ describe('STATE', () => {
     expect(STATE.autoSolveToggle).toBeNull();
     expect(STATE.isAskMode).toBe(false);
     expect(STATE.currentResponse).toBe('');
-    expect(STATE.userTier).toBe('free');
+    expect(STATE.userTier).toBe('basic');
   });
 
   test('should have eventListeners as empty array', () => {

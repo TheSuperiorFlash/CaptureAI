@@ -3,9 +3,9 @@
  * Handles license key validation and user management
  */
 
-import { jsonResponse, parseJSON, generateUUID, fetchWithTimeout } from './utils';
+import { jsonResponse, fetchWithTimeout } from './utils';
 import { validateRequestBody, validateEmail, validateLicenseKey, ValidationError } from './validation';
-import { logAuth, logLicenseCreation, logValidationError } from './logger';
+import { logAuth, logValidationError } from './logger';
 import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
 export class AuthHandler {
@@ -143,11 +143,12 @@ export class AuthHandler {
         return null;
       }
 
-      // Check subscription status for Pro users
-      if (user.tier === 'pro' && user.subscription_status !== 'active') {
+      // Paid tiers require an active subscription
+      if ((user.tier === 'pro' || user.tier === 'basic') && user.subscription_status !== 'active') {
         if (this.logger) {
-          this.logger.security('Pro user with inactive subscription attempted access', {
+          this.logger.security('Paid user with inactive subscription attempted access', {
             userId: user.id,
+            tier: user.tier,
             subscriptionStatus: user.subscription_status
           });
         }
@@ -206,123 +207,6 @@ export class AuthHandler {
   }
 
   /**
-   * Create a new free license key
-   * POST /api/auth/create-free-key
-   * Required: email - to prevent abuse and track free tier users
-   */
-  async createFreeKey(request) {
-    try {
-      // Rate limiting - prevent abuse of free key creation
-      const clientId = getClientIdentifier(request);
-      const rateLimitError = await checkRateLimit(
-        `freekey:${clientId}`,
-        RateLimitPresets.FREE_KEY_CREATION.limit,
-        RateLimitPresets.FREE_KEY_CREATION.windowMs,
-        this.env,
-        RateLimitPresets.FREE_KEY_CREATION.bindingName
-      );
-      if (rateLimitError && rateLimitError.error) {
-        return jsonResponse(rateLimitError, 429);
-      }
-
-      const body = await validateRequestBody(request);
-      const normalizedEmail = validateEmail(body.email, true);
-
-      // Check if email already has a free key
-      const existingUser = await this.db
-        .prepare('SELECT license_key, tier FROM users WHERE LOWER(email) = ? AND tier = ?')
-        .bind(normalizedEmail, 'free')
-        .first();
-
-      if (existingUser) {
-        // Resend email with existing key (don't return it in response to prevent enumeration)
-        if (this.env.RESEND_API_KEY) {
-          await this.sendLicenseKeyEmail(normalizedEmail, existingUser.license_key, 'free');
-        }
-
-        // Return same response as new key creation to prevent email enumeration
-        return jsonResponse({
-          message: 'Free license key created successfully. Please check your email.',
-          tier: 'free'
-        }, 201);
-      }
-
-      // Generate unique license key
-      let licenseKey;
-      let attempts = 0;
-      const maxAttempts = 10;
-
-      while (attempts < maxAttempts) {
-        licenseKey = this.generateLicenseKey();
-
-        // Check if key already exists
-        const existing = await this.db
-          .prepare('SELECT id FROM users WHERE license_key = ?')
-          .bind(licenseKey)
-          .first();
-
-        if (!existing) {
-          break;
-        }
-        attempts++;
-      }
-
-      if (attempts >= maxAttempts) {
-        return jsonResponse({ error: 'Failed to generate unique license key' }, 500);
-      }
-
-      // Create user with free tier
-      const userId = generateUUID();
-      await this.db
-        .prepare('INSERT INTO users (id, license_key, email, tier, subscription_status) VALUES (?, ?, ?, ?, ?)')
-        .bind(userId, licenseKey, normalizedEmail, 'free', 'inactive')
-        .run();
-
-      if (this.logger) {
-        logLicenseCreation(this.logger, userId, 'free');
-      }
-
-      // If email service configured, send the key
-      let emailSent = false;
-      if (this.env.RESEND_API_KEY) {
-        emailSent = await this.sendLicenseKeyEmail(normalizedEmail, licenseKey, 'free');
-      }
-
-      // Return appropriate message based on email status
-      if (!this.env.RESEND_API_KEY) {
-        return jsonResponse({
-          message: 'Free license key created successfully. Email service not configured.',
-          licenseKey, // Include key in response if email can't be sent
-          tier: 'free'
-        }, 201);
-      } else if (!emailSent) {
-        return jsonResponse({
-          message: 'Free license key created but email delivery failed. Please contact support.',
-          tier: 'free',
-          emailFailed: true
-        }, 201);
-      }
-
-      return jsonResponse({
-        message: 'Free license key created successfully. Please check your email.',
-        tier: 'free'
-      }, 201);
-
-    } catch (error) {
-      if (this.logger) {
-        this.logger.error('Create free key error', error);
-      }
-      if (error instanceof ValidationError) {
-        if (this.logger) {
-          logValidationError(this.logger, error.field, error);
-        }
-        return jsonResponse({ error: error.message, field: error.field }, 400);
-      }
-      return jsonResponse({ error: 'Failed to create license key' }, 500);
-    }
-  }
-
-  /**
    * Send license key via email using Resend
    * @param {string} email
    * @param {string} licenseKey
@@ -339,20 +223,25 @@ export class AuthHandler {
         return false;
       }
 
+      const tierNames = { pro: 'Pro', basic: 'Basic Plan' };
+      const tierDisplay = tierNames[tier] || tier;
+
       const subject = tier === 'pro'
         ? 'Your CaptureAI Pro License Key'
-        : 'Your CaptureAI Free License Key';
+        : tier === 'basic'
+          ? 'Your CaptureAI Basic Plan License Key'
+          : 'Your CaptureAI License Key';
 
-      // Use separate function for Pro tier email
-      if (tier === 'pro') {
+      // Use paid subscription email for pro and basic tiers
+      if (tier === 'pro' || tier === 'basic') {
         const billingDate = nextBillingDate instanceof Date
           ? nextBillingDate
           : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
         const formattedDate = billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        const htmlContent = this.generateProEmailHTML(licenseKey, billingDate, isNewUser);
+        const htmlContent = this.generateProEmailHTML(licenseKey, billingDate, isNewUser, tierDisplay);
 
-        const textContent = `Thanks for starting your Pro subscription.
+        const textContent = `Thanks for starting your ${tierDisplay} subscription.
 
 Your payment method has been charged. The next charge will be on ${formattedDate}.
 
@@ -366,7 +255,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
         return await this.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
       }
 
-      // Plain text version for free tier (prevents spam filtering)
+      // Plain text version for unknown/fallback tier
       const textContent = `Welcome to CaptureAI
 
 CaptureAI is your AI-powered screenshot assistant, ready to analyze images, extract text, and answer questions you capture instantly.
@@ -376,11 +265,11 @@ ${licenseKey}
 
 Install and activate the extension at https://captureai.dev/activate
 
-You're currently using the free tier. Upgrade to Pro for unlimited access and advanced features.
+Upgrade to Pro for unlimited access and advanced features.
 
 Need help? Visit our help page: https://captureai.dev/help`;
 
-      // HTML version - free tier email
+      // HTML version - fallback email
       const htmlContent = `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
 <head>
@@ -562,12 +451,13 @@ Need help? Visit our help page: https://captureai.dev/help`;
   }
 
   /**
-   * Generate Pro tier email HTML
+   * Generate paid tier email HTML
    * @param {string} licenseKey
    * @param {Date} nextBillingDate - Actual next billing date from Stripe
    * @param {boolean} isNewUser - Whether to include install instructions
+   * @param {string} tierName - Display name for the tier (e.g. 'Pro', 'Basic Plan')
    */
-  generateProEmailHTML(licenseKey, nextBillingDate, isNewUser = false) {
+  generateProEmailHTML(licenseKey, nextBillingDate, isNewUser = false, tierName = 'Pro') {
     const formattedDate = nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     return `<!DOCTYPE html>
@@ -624,7 +514,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
                                       <td class="pad" style="padding: 0 0 8px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 16px; color: #29261b; line-height: 1.5;">
-                                            <p style="margin: 0;">Thanks for starting your Pro subscription.</p>
+                                            <p style="margin: 0;">Thanks for starting your ${tierName} subscription.</p>
                                           </div>
                                         </div>
                                       </td>
@@ -742,7 +632,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
    * Send email via Resend
    * @returns {boolean} - True if email sent successfully, false otherwise
    */
-  async sendEmailViaResend(email, subject, htmlContent, textContent, tier = 'free') {
+  async sendEmailViaResend(email, subject, htmlContent, textContent, tier = 'basic') {
     console.log('Attempting to send email via Resend');
 
     try {
@@ -764,7 +654,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
           tags: [
             {
               name: 'category',
-              value: tier === 'pro' ? 'license_pro' : 'license_free'
+              value: tier === 'pro' ? 'license_pro' : 'license_basic'
             }
           ]
         })

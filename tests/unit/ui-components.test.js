@@ -31,38 +31,6 @@ describe('UIComponents', () => {
   });
 
   // --------------------------------------------------------------------------
-  // getTheme
-  // --------------------------------------------------------------------------
-
-  describe('getTheme()', () => {
-    test('delegates to UICore.getCurrentTheme when available', () => {
-      const customTheme = { primaryBg: '#111', buttonPrimary: '#222' };
-      window.CaptureAI.UICore = { getCurrentTheme: jest.fn().mockReturnValue(customTheme) };
-
-      const theme = UIComponents.getTheme();
-
-      expect(theme).toBe(customTheme);
-      expect(window.CaptureAI.UICore.getCurrentTheme).toHaveBeenCalledTimes(1);
-    });
-
-    test('returns fallback theme when UICore is absent', () => {
-      const theme = UIComponents.getTheme();
-
-      expect(theme.primaryBg).toBe('white');
-      expect(theme.buttonPrimary).toBe('#4caf65');
-      expect(theme.errorText).toBe('#ff6b6b');
-    });
-
-    test('returns fallback theme when UICore has no getCurrentTheme method', () => {
-      window.CaptureAI.UICore = {};
-
-      const theme = UIComponents.getTheme();
-
-      expect(theme.primaryBg).toBe('white');
-    });
-  });
-
-  // --------------------------------------------------------------------------
   // showMessage
   // --------------------------------------------------------------------------
 
@@ -132,8 +100,7 @@ describe('UIComponents', () => {
 
   describe('createToggleSwitch()', () => {
     test('returns a label element with an inner checkbox input', () => {
-      const theme = UIComponents.getTheme();
-      const toggle = UIComponents.createToggleSwitch(theme);
+      const toggle = UIComponents.createToggleSwitch();
 
       expect(toggle.tagName).toBe('LABEL');
       expect(toggle.querySelector('input[type="checkbox"]')).not.toBeNull();
@@ -141,14 +108,14 @@ describe('UIComponents', () => {
 
     test('checkbox is unchecked when isAutoSolveMode is false', () => {
       window.CaptureAI.STATE.isAutoSolveMode = false;
-      const toggle = UIComponents.createToggleSwitch(UIComponents.getTheme());
+      const toggle = UIComponents.createToggleSwitch();
 
       expect(toggle.querySelector('input').checked).toBe(false);
     });
 
     test('checkbox is checked when isAutoSolveMode is true', () => {
       window.CaptureAI.STATE.isAutoSolveMode = true;
-      const toggle = UIComponents.createToggleSwitch(UIComponents.getTheme());
+      const toggle = UIComponents.createToggleSwitch();
 
       expect(toggle.querySelector('input').checked).toBe(true);
     });
@@ -176,9 +143,9 @@ describe('UIComponents', () => {
       expect(UIComponents.buttonsContainer.children.length).toBe(1);
     });
 
-    test('does not append a toggle for free-tier users', async () => {
+    test('does not append a toggle for basic-tier users', async () => {
       storageMock.local.get.mockImplementationOnce(
-        makeStorageGetMock({ 'captureai-user-tier': 'free' })
+        makeStorageGetMock({ 'captureai-user-tier': 'basic' })
       );
       UIComponents.buttonsContainer = document.createElement('div');
 
@@ -187,7 +154,7 @@ describe('UIComponents', () => {
       expect(UIComponents.buttonsContainer.children.length).toBe(0);
     });
 
-    test('defaults to free tier when storage has no tier key', async () => {
+    test('defaults to basic tier when storage has no tier key', async () => {
       storageMock.local.get.mockImplementationOnce(makeStorageGetMock({}));
       UIComponents.buttonsContainer = document.createElement('div');
 
@@ -215,9 +182,9 @@ describe('UIComponents', () => {
       expect(existingContainer.style.display).toBe('flex');
     });
 
-    test('hides existing toggle when user is free', async () => {
+    test('hides existing toggle when user is basic', async () => {
       storageMock.local.get.mockImplementationOnce(
-        makeStorageGetMock({ 'captureai-user-tier': 'free' })
+        makeStorageGetMock({ 'captureai-user-tier': 'basic' })
       );
       UIComponents.buttonsContainer = document.createElement('div');
 

@@ -44,7 +44,11 @@ describe('Keyboard Module', () => {
       },
       UICore: {
         togglePanelVisibility: jest.fn(),
-        switchMode: jest.fn()
+        switchMode: jest.fn(),
+        setPanelVisibility: jest.fn((visible) => {
+          mockState.isPanelVisible = visible;
+          mockDomCache.panel.style.display = visible ? 'block' : 'none';
+        })
       },
       AutoSolve: {
         toggleAutoSolveMode: jest.fn()

@@ -46,7 +46,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 |-----|------|-------------|
 | `captureai-license-key` | string | Active license key |
 | `captureai-user-email` | string | User email |
-| `captureai-user-tier` | string | `free` or `pro` |
+| `captureai-user-tier` | string | `basic` or `pro` |
 | `captureai-user-cache` | object | `{user, updatedAt}` — cached user data with timestamp |
 | `captureai-backend-url` | string | Backend URL (default: `https://api.captureai.workers.dev`) |
 

@@ -31,13 +31,6 @@ namespace_id = "1001"
   limit = 5
   period = 60
 
-[[ratelimits]]
-name = "RATE_LIMITER_FREE_KEY"
-namespace_id = "1002"
-
-  [ratelimits.simple]
-  limit = 3
-  period = 60
 
 [[ratelimits]]
 name = "RATE_LIMITER_LICENSE"
@@ -77,7 +70,7 @@ namespace_id = "1006"
 # Public variables (not sensitive)
 CLOUDFLARE_ACCOUNT_ID = "e411f43b15c9122c0056a08f727eef15"
 CLOUDFLARE_GATEWAY_NAME = "captureai-gateway"
-FREE_TIER_DAILY_LIMIT = "10"
+BASIC_TIER_DAILY_LIMIT = "50"
 PRO_TIER_RATE_LIMIT_PER_MINUTE = "20"  # 20 requests per minute for Pro tier
 EXTENSION_URL = "https://captureai.dev"
 # Chrome Extension IDs - Comma-separated list of allowed extension IDs
@@ -90,6 +83,7 @@ CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickca
 #   wrangler secret put STRIPE_SECRET_KEY
 #   wrangler secret put STRIPE_WEBHOOK_SECRET
 #   wrangler secret put STRIPE_PRICE_PRO
+#   wrangler secret put STRIPE_PRICE_BASIC
 #   wrangler secret put RESEND_API_KEY
 #   wrangler secret put FROM_EMAIL
 # Recommended FROM_EMAIL format: CaptureAI <license@mail.captureai.dev>

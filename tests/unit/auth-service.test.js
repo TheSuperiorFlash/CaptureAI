@@ -134,7 +134,7 @@ describe('AuthService.getLicenseKey', () => {
 // validateKey
 // ---------------------------------------------------------------------------
 describe('AuthService.validateKey', () => {
-  const fakeUser = { email: 'user@test.com', tier: 'free' };
+  const fakeUser = { email: 'user@test.com', tier: 'basic' };
 
   test('stores key and user info on successful validation', async () => {
     global.fetch.mockResolvedValueOnce(
@@ -147,7 +147,7 @@ describe('AuthService.validateKey', () => {
     expect(storageMock.local.set).toHaveBeenCalledWith({
       'captureai-license-key': 'FREE-1111-2222-3333-4444',
       'captureai-user-email': 'user@test.com',
-      'captureai-user-tier': 'free'
+      'captureai-user-tier': 'basic'
     });
   });
 
@@ -740,7 +740,7 @@ describe('AuthService.refreshUserCache', () => {
       return Promise.resolve(result);
     });
 
-    const user = { email: 'test@test.com', tier: 'free' };
+    const user = { email: 'test@test.com', tier: 'basic' };
     global.fetch.mockResolvedValue(mockResponse({ body: user }));
 
     // Fire two concurrent refreshes
@@ -866,7 +866,7 @@ describe('AuthService.isActivated', () => {
 describe('AuthService.requestFreeKey', () => {
   test('validates and returns key when backend returns it', async () => {
     const freeKey = 'FREE-AAAA-BBBB-CCCC-DDDD';
-    const fakeUser = { email: 'new@test.com', tier: 'free' };
+    const fakeUser = { email: 'new@test.com', tier: 'basic' };
 
     // First fetch: create-free-key
     global.fetch.mockResolvedValueOnce(

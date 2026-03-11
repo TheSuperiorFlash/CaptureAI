@@ -117,8 +117,8 @@ describe('Privacy Guard Module', () => {
       expect(result).toBe(true);
     });
 
-    test('should return false when tier is free', async () => {
-      chrome.storage.local.get.mockResolvedValue({ 'captureai-user-tier': 'free' });
+    test('should return false when tier is basic', async () => {
+      chrome.storage.local.get.mockResolvedValue({ 'captureai-user-tier': 'basic' });
 
       const result = await PrivacyGuard.checkProAccess();
       expect(result).toBe(false);

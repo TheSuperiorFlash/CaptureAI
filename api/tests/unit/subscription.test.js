@@ -81,7 +81,7 @@ function createMockEnv(overrides = {}) {
     STRIPE_PRICE_PRO: 'price_pro_123',
     RESEND_API_KEY: 'resend_key_123',
     EXTENSION_URL: 'https://captureai.dev',
-    FREE_TIER_DAILY_LIMIT: '10',
+    BASIC_TIER_DAILY_LIMIT: '50',
     RATE_LIMITER: {
       idFromName: jest.fn().mockReturnValue('mock-id'),
       get: jest.fn().mockReturnValue({
@@ -136,12 +136,12 @@ describe('SubscriptionHandler', () => {
   });
 
   describe('getPlans', () => {
-    test('should return free and pro plans', async () => {
+    test('should return basic and pro plans', async () => {
       const response = await handler.getPlans();
       const body = JSON.parse(await response.text());
 
       expect(body.plans).toHaveLength(2);
-      expect(body.plans[0].tier).toBe('free');
+      expect(body.plans[0].tier).toBe('basic');
       expect(body.plans[0].price).toBe(0);
       expect(body.plans[1].tier).toBe('pro');
       expect(body.plans[1].price).toBe(9.99);
@@ -149,7 +149,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should use configured daily limit', async () => {
-      env.FREE_TIER_DAILY_LIMIT = '20';
+      env.BASIC_TIER_DAILY_LIMIT = '20';
       handler = new SubscriptionHandler(env);
 
       const response = await handler.getPlans();
@@ -242,7 +242,7 @@ describe('SubscriptionHandler', () => {
         id: 'user-1',
         email: 'test@example.com',
         license_key: 'ABCD-EFGH-IJKL-MNOP-QRST',
-        tier: 'free'
+        tier: 'basic'
       });
 
       await handler.handleCheckoutCompleted({
@@ -276,7 +276,7 @@ describe('SubscriptionHandler', () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         id: 'user-1',
         license_key: 'KEY',
-        tier: 'free'
+        tier: 'basic'
       });
 
       global.fetch.mockResolvedValueOnce({
@@ -345,7 +345,7 @@ describe('SubscriptionHandler', () => {
   });
 
   describe('handleSubscriptionCancelled', () => {
-    test('should downgrade to free tier', async () => {
+    test('should downgrade tier', async () => {
       await handler.handleSubscriptionCancelled({
         id: 'sub_123'
       });
@@ -384,7 +384,7 @@ describe('SubscriptionHandler', () => {
       expect(env.DB.prepare).toHaveBeenCalled();
     });
 
-    test('should downgrade to free for cancelled status', async () => {
+    test('should update status for cancelled subscription', async () => {
       await handler.handleSubscriptionUpdated({
         id: 'sub_123',
         status: 'canceled'
@@ -393,7 +393,7 @@ describe('SubscriptionHandler', () => {
       expect(env.DB.prepare).toHaveBeenCalled();
     });
 
-    test('should downgrade to free for unpaid status', async () => {
+    test('should update status for unpaid subscription', async () => {
       await handler.handleSubscriptionUpdated({
         id: 'sub_123',
         status: 'unpaid'
@@ -825,7 +825,7 @@ describe('SubscriptionHandler', () => {
         id: 'user-1',
         email: 'test@example.com',
         license_key: 'EXIST-KEY1-KEY2-KEY3-KEY4',
-        tier: 'free'
+        tier: 'basic'
       });
 
       await handler.handleCheckoutCompleted({
@@ -843,7 +843,7 @@ describe('SubscriptionHandler', () => {
   });
 
   describe('handleSubscriptionUpdated - status mapping', () => {
-    test('should map incomplete_expired to free tier', async () => {
+    test('should update status for incomplete_expired subscription', async () => {
       await handler.handleSubscriptionUpdated({
         id: 'sub_123',
         status: 'incomplete_expired'
@@ -852,7 +852,7 @@ describe('SubscriptionHandler', () => {
       expect(env.DB.prepare).toHaveBeenCalled();
     });
 
-    test('should map paused to free tier', async () => {
+    test('should update status for paused subscription', async () => {
       await handler.handleSubscriptionUpdated({
         id: 'sub_123',
         status: 'paused'

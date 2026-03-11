@@ -31,82 +31,6 @@ describe('DomainUtils', () => {
     }
   });
 
-  describe('isOnQuizlet', () => {
-    test('should return true for quizlet.com', () => {
-      global.window.location.hostname = 'quizlet.com';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(true);
-    });
-
-    test('should return true for subdomains of quizlet.com', () => {
-      global.window.location.hostname = 'www.quizlet.com';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(true);
-    });
-
-    test('should return true for quizlet.com with path', () => {
-      global.window.location.hostname = 'quizlet.com';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(true);
-    });
-
-    test('should return false for non-quizlet domains', () => {
-      global.window.location.hostname = 'google.com';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(false);
-    });
-
-    test('should return false for empty hostname', () => {
-      global.window.location.hostname = '';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(false);
-    });
-
-    test('should not match domains merely containing quizlet', () => {
-      global.window.location.hostname = 'notquizlet.com';
-
-      expect(DomainUtils.isOnQuizlet()).toBe(false);
-    });
-  });
-
-  describe('isOnVocabulary', () => {
-    test('should return true for vocabulary.com', () => {
-      global.window.location.hostname = 'vocabulary.com';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(true);
-    });
-
-    test('should return true for subdomains of vocabulary.com', () => {
-      global.window.location.hostname = 'www.vocabulary.com';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(true);
-    });
-
-    test('should return true for vocabulary.com with path', () => {
-      global.window.location.hostname = 'vocabulary.com';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(true);
-    });
-
-    test('should return false for non-vocabulary domains', () => {
-      global.window.location.hostname = 'google.com';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(false);
-    });
-
-    test('should return false for empty hostname', () => {
-      global.window.location.hostname = '';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(false);
-    });
-
-    test('should not match domains merely containing vocabulary', () => {
-      global.window.location.hostname = 'notvocabulary.com';
-
-      expect(DomainUtils.isOnVocabulary()).toBe(false);
-    });
-  });
-
   describe('isOnSupportedSite', () => {
     test('should return false for quizlet.com (only vocabulary supported)', () => {
       global.window.location.hostname = 'quizlet.com';
@@ -120,7 +44,13 @@ describe('DomainUtils', () => {
       expect(DomainUtils.isOnSupportedSite()).toBe(true);
     });
 
-    test('should return false for unsupported site', () => {
+    test('should return true for subdomains of vocabulary.com', () => {
+      global.window.location.hostname = 'www.vocabulary.com';
+
+      expect(DomainUtils.isOnSupportedSite()).toBe(true);
+    });
+
+    test('should return false for non-vocabulary domains', () => {
       global.window.location.hostname = 'google.com';
 
       expect(DomainUtils.isOnSupportedSite()).toBe(false);
@@ -128,6 +58,12 @@ describe('DomainUtils', () => {
 
     test('should return false for empty hostname', () => {
       global.window.location.hostname = '';
+
+      expect(DomainUtils.isOnSupportedSite()).toBe(false);
+    });
+
+    test('should not match domains merely containing vocabulary', () => {
+      global.window.location.hostname = 'notvocabulary.com';
 
       expect(DomainUtils.isOnSupportedSite()).toBe(false);
     });
@@ -435,11 +371,10 @@ describe('DomainUtils', () => {
     });
 
     test('should handle subdomain variations', () => {
-      global.window.location.hostname = 'subdomain.quizlet.com';
+      global.window.location.hostname = 'subdomain.vocabulary.com';
 
-      expect(DomainUtils.isOnQuizlet()).toBe(true);
-      expect(DomainUtils.isOnVocabulary()).toBe(false);
-      expect(DomainUtils.isOnSupportedSite()).toBe(false);
+      expect(DomainUtils.isOnSupportedSite()).toBe(true);
+      expect(DomainUtils.isOnStrictCSPSite()).toBe(false);
     });
   });
 });

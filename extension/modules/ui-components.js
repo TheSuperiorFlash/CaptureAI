@@ -563,10 +563,10 @@ export const UIComponents = {
     const autoSolveContainer = this.buttonsContainer.querySelector('.captureai-toggle-switch')?.closest('div');
 
     // Check user tier
-    let userTier = 'free';
+    let userTier = 'basic';
     try {
       const userTierData = await chrome.storage.local.get('captureai-user-tier');
-      userTier = userTierData['captureai-user-tier'] || 'free';
+      userTier = userTierData['captureai-user-tier'] || 'basic';
     } catch (error) {
       console.error('Failed to get user tier:', error);
     }

@@ -439,10 +439,10 @@ export const UICore = {
     }
 
     // Check user tier from storage
-    let userTier = 'free';
+    let userTier = 'basic';
     try {
       const userTierData = await chrome.storage.local.get('captureai-user-tier');
-      userTier = userTierData['captureai-user-tier'] || 'free';
+      userTier = userTierData['captureai-user-tier'] || 'basic';
     } catch (error) {
       console.error('Failed to get user tier:', error);
     }
@@ -452,7 +452,7 @@ export const UICore = {
       this.modeToggleElement.style.display = 'inline-block';
     } else {
       this.modeToggleElement.style.display = 'none';
-      // Also ensure ask mode is disabled for free users
+      // Also ensure ask mode is disabled for non-pro users
       const { STATE } = window.CaptureAI;
       if (STATE.isAskMode) {
         STATE.isAskMode = false;

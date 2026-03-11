@@ -53,7 +53,7 @@ describe('Auth Flow Integration', () => {
   const MOCK_LICENSE_KEY = 'ABCD-EFGH-IJKL-MNOP-QRST';
   const MOCK_USER = {
     email: 'user@example.com',
-    tier: 'free',
+    tier: 'basic',
     subscription_status: 'inactive'
   };
 
@@ -81,7 +81,7 @@ describe('Auth Flow Integration', () => {
       // Verify key and user info stored
       expect(storageState['captureai-license-key']).toBe(MOCK_LICENSE_KEY);
       expect(storageState['captureai-user-email']).toBe('user@example.com');
-      expect(storageState['captureai-user-tier']).toBe('free');
+      expect(storageState['captureai-user-tier']).toBe('basic');
 
       // Step 2: Get current user (uses stored key)
       global.fetch.mockResolvedValueOnce(mockFetchJSON(MOCK_USER));
@@ -166,7 +166,7 @@ describe('Auth Flow Integration', () => {
     test('should clear key on 401 and require re-validation', async () => {
       // Setup key
       storageState['captureai-license-key'] = MOCK_LICENSE_KEY;
-      storageState['captureai-user-tier'] = 'free';
+      storageState['captureai-user-tier'] = 'basic';
 
       // API returns 401 - expired key
       global.fetch.mockResolvedValueOnce(mockFetchJSON(
@@ -202,7 +202,7 @@ describe('Auth Flow Integration', () => {
     test('should handle free → pro upgrade via checkout', async () => {
       // Start as free user
       storageState['captureai-license-key'] = MOCK_LICENSE_KEY;
-      storageState['captureai-user-tier'] = 'free';
+      storageState['captureai-user-tier'] = 'basic';
 
       // Create checkout session
       global.fetch.mockResolvedValueOnce(mockFetchJSON({

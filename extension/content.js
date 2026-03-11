@@ -155,7 +155,7 @@
 
           // Load user tier
           const userTierResult = await chrome.storage.local.get('captureai-user-tier');
-          const userTier = userTierResult['captureai-user-tier'] || 'free';
+          const userTier = userTierResult['captureai-user-tier'] || 'basic';
 
           STATE.apiKey = licenseKey || preferences[STORAGE_KEYS.API_KEY] || '';
           STATE.userTier = userTier;

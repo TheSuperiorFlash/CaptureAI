@@ -218,7 +218,7 @@ export class AIHandler {
 
       const used = usageToday?.request_count || 0;
 
-      // Free tier: 10/day, Pro tier: unlimited daily (rate limited per minute)
+      // Basic tier: 50/day, Pro tier: unlimited daily (rate limited per minute)
       if (user.tier === 'pro') {
         // For Pro users, show per-minute usage
         const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
@@ -252,8 +252,8 @@ export class AIHandler {
           limitType: 'per_minute'
         });
       } else {
-        // Free tier
-        const dailyLimit = parseInt(this.env.FREE_TIER_DAILY_LIMIT || '10');
+        // Basic tier
+        const dailyLimit = parseInt(this.env.BASIC_TIER_DAILY_LIMIT || '50');
 
         return jsonResponse({
           today: {
@@ -548,8 +548,8 @@ export class AIHandler {
       };
     }
 
-    // Free tier has daily limit
-    const limit = parseInt(this.env.FREE_TIER_DAILY_LIMIT || '10');
+    // Basic tier has daily limit
+    const limit = parseInt(this.env.BASIC_TIER_DAILY_LIMIT || '50');
 
     // Point-lookup by primary key (email, date) — O(1) instead of COUNT(*) scan
     const today = new Date().toISOString().split('T')[0];

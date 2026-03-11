@@ -18,7 +18,7 @@ export default function Pricing() {
                         <span className="text-gradient-static">pricing</span>
                     </h2>
                     <p className="text-lg text-[--color-text-secondary]">
-                        Start free. Upgrade when you need more.
+                        Simple plans. Upgrade when you need more.
                     </p>
                 </ScrollReveal>
 
@@ -28,29 +28,29 @@ export default function Pricing() {
                     onTouchEnd={handleTouchEnd}
                     onTouchCancel={handleTouchCancel}
                 >
-                    {/* Free */}
+                    {/* Basic */}
                     <div
                         role="button"
                         tabIndex={0}
-                        aria-pressed={selectedTier === 'free'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'free'
+                        aria-pressed={selectedTier === 'basic'}
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'basic'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
-                        onClick={() => setSelectedTier('free')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
+                        onClick={() => setSelectedTier('basic')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
                     >
-                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-colors ${selectedTier === 'free' ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]' : ''}`}>
-                            <h3 className="mb-1 text-xl text-[--color-text]">Free</h3>
+                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-colors ${selectedTier === 'basic' ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]' : ''}`}>
+                            <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
-                                <span className="text-4xl font-bold font-inter text-[--color-text]">$0</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                <span className="text-4xl font-bold font-inter text-[--color-text]">$1.49</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / week</span>
                             </div>
 
                             <ul className="mb-8 space-y-3.5 flex-1">
                                 <li className="flex items-start gap-3">
                                     <Minus className="mt-0.5 h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
-                                    <span className="text-sm text-[--color-text-secondary]">10 requests per day</span>
+                                    <span className="text-sm text-[--color-text-secondary]">50 requests per day</span>
                                 </li>
                                 {[
                                     'Screenshot capture',
@@ -79,7 +79,7 @@ export default function Pricing() {
                                 href="/activate"
                                 className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text] hover:bg-white/[0.05] pointer-events-auto"
                             >
-                                Get Started
+                                Get Basic
                             </Link>
                         </ScrollRevealItem>
                     </div>

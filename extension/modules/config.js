@@ -4,7 +4,7 @@
 
 // Configuration Constants
 export const CONFIG = {
-  DEBUG: true,
+  DEBUG: false,
   PANEL_ID: 'captureai-panel',
   RESULT_ID: 'captureai-result',
   STEALTHY_RESULT_ID: 'captureai-stealthy-result',
@@ -79,7 +79,7 @@ export const STATE = {
   autoSolveToggle: null,
   isAskMode: false,
   currentResponse: '',
-  userTier: 'free'  // User tier: 'free' or 'pro'
+  userTier: 'basic'  // User tier: 'basic' or 'pro'
 };
 
 // Cached DOM elements

@@ -24,6 +24,7 @@ export function createMockEnv(overrides = {}) {
     STRIPE_SECRET_KEY: 'sk_test_mock_key_123',
     STRIPE_WEBHOOK_SECRET: 'whsec_test_mock_secret_456',
     STRIPE_PRICE_PRO: 'price_test_pro_789',
+    STRIPE_PRICE_BASIC: 'price_test_basic_mock',
 
     // Optional secrets (email)
     RESEND_API_KEY: 're_test_mock_resend_key',
@@ -32,7 +33,7 @@ export function createMockEnv(overrides = {}) {
     // Environment variables (from wrangler.toml)
     CLOUDFLARE_ACCOUNT_ID: 'mock-account-id',
     CLOUDFLARE_GATEWAY_NAME: 'captureai-gateway',
-    FREE_TIER_DAILY_LIMIT: '10',
+    BASIC_TIER_DAILY_LIMIT: '50',
     PRO_TIER_RATE_LIMIT_PER_MINUTE: '60',
     EXTENSION_URL: 'https://captureai.dev',
     CHROME_EXTENSION_IDS: 'mock-ext-id-aaa,mock-ext-id-bbb',
