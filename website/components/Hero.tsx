@@ -158,7 +158,7 @@ export default function Hero() {
                         </span>
                         <span className="text-[13px] font-semibold tracking-wide text-cyan-50">Chrome Extension</span>
                         <span className="h-3 w-px bg-[--color-border]" />
-                        <span className="text-[13px] font-medium text-[--color-text-tertiary]">Free to start</span>
+                        <span className="text-[13px] font-medium text-[--color-text-tertiary]">Easy install</span>
                     </motion.div>
 
                     <motion.h1 className="mb-4 drop-shadow-[0_4px_32px_rgba(0,0,0,0.85)] flex flex-col items-center font-extrabold tracking-tight">
