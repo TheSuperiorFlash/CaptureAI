@@ -40,7 +40,14 @@ export class SubscriptionHandler {
 
       const body = await validateRequestBody(request);
       const email = validateEmail(body.email, true);
-      const tier = (body.tier === 'basic' || body.tier === 'pro') ? body.tier : 'pro';
+      let tier;
+      if (body.tier === undefined || body.tier === null) {
+        tier = 'pro';
+      } else if (body.tier === 'basic' || body.tier === 'pro') {
+        tier = body.tier;
+      } else {
+        return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
+      }
 
       const priceId = tier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
       if (!priceId) {
@@ -313,8 +320,8 @@ export class SubscriptionHandler {
       const subscriptionId = subscription.id;
 
       await this.db
-        .prepare('UPDATE users SET subscription_status = ? WHERE stripe_subscription_id = ?')
-        .bind('cancelled', subscriptionId)
+        .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+        .bind('cancelled', null, subscriptionId)
         .run();
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
@@ -337,10 +344,18 @@ export class SubscriptionHandler {
         : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
-      await this.db
-        .prepare('UPDATE users SET subscription_status = ? WHERE stripe_subscription_id = ?')
-        .bind(subscriptionStatus, subscriptionId)
-        .run();
+      // Downgrade tier to 'basic' when subscription access is revoked
+      if (subscriptionStatus === 'inactive') {
+        await this.db
+          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+          .bind(subscriptionStatus, null, subscriptionId)
+          .run();
+      } else {
+        await this.db
+          .prepare('UPDATE users SET subscription_status = ? WHERE stripe_subscription_id = ?')
+          .bind(subscriptionStatus, subscriptionId)
+          .run();
+      }
     } catch (error) {
       console.error('Subscription update handler error:', error);
     }

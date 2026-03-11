@@ -143,10 +143,10 @@ export class AuthHandler {
         return null;
       }
 
-      // Paid tiers require an active subscription
-      if ((user.tier === 'pro' || user.tier === 'basic') && user.subscription_status !== 'active') {
+      // All users require an active subscription
+      if (user.subscription_status !== 'active') {
         if (this.logger) {
-          this.logger.security('Paid user with inactive subscription attempted access', {
+          this.logger.security('User with inactive subscription attempted access', {
             userId: user.id,
             tier: user.tier,
             subscriptionStatus: user.subscription_status
@@ -234,9 +234,14 @@ export class AuthHandler {
 
       // Use paid subscription email for pro and basic tiers
       if (tier === 'pro' || tier === 'basic') {
-        const billingDate = nextBillingDate instanceof Date
-          ? nextBillingDate
-          : (() => { const d = new Date(); d.setMonth(d.getMonth() + 1); return d; })();
+        let billingDate;
+        if (nextBillingDate instanceof Date) {
+          billingDate = nextBillingDate;
+        } else {
+          const d = new Date();
+          d.setMonth(d.getMonth() + 1);
+          billingDate = d;
+        }
         const formattedDate = billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
         const htmlContent = this.generateProEmailHTML(licenseKey, billingDate, isNewUser, tierDisplay);
