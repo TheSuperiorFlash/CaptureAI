@@ -496,6 +496,130 @@ export class SubscriptionHandler {
   }
 
   /**
+   * Swap plan from Basic to Pro with proration
+   * POST /api/subscription/swap-plan
+   */
+  async swapPlan(request) {
+    try {
+      // Authenticate user
+      const user = await this.auth.authenticate(request);
+      if (!user) {
+        return jsonResponse({ error: 'Not authenticated' }, 401);
+      }
+
+      // Rate limit
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `swap:${clientId}`,
+        RateLimitPresets.CHECKOUT.limit,
+        RateLimitPresets.CHECKOUT.windowMs,
+        this.env,
+        RateLimitPresets.CHECKOUT.bindingName
+      );
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
+      // Get full user data from DB
+      const userData = await this.db
+        .prepare('SELECT tier, stripe_subscription_id, subscription_status FROM users WHERE id = ?')
+        .bind(user.userId)
+        .first();
+
+      if (!userData) {
+        return jsonResponse({ error: 'User not found' }, 404);
+      }
+
+      if (userData.tier !== 'basic') {
+        return jsonResponse({ error: 'Plan swap is only available for Basic tier users' }, 400);
+      }
+
+      if (!userData.stripe_subscription_id) {
+        return jsonResponse({ error: 'No active subscription found' }, 400);
+      }
+
+      if (userData.subscription_status !== 'active') {
+        return jsonResponse({ error: 'Subscription is not active' }, 400);
+      }
+
+      const proPriceId = this.env.STRIPE_PRICE_PRO;
+      if (!proPriceId) {
+        return jsonResponse({ error: 'Pro price not configured' }, 500);
+      }
+
+      // Fetch the current subscription from Stripe to get the item ID
+      const subResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
+        {
+          headers: { 'Authorization': `Bearer ${this.stripeKey}` }
+        },
+        5000
+      );
+
+      if (!subResponse.ok) {
+        const error = await subResponse.json();
+        console.error('Failed to fetch subscription from Stripe:', error);
+        return jsonResponse({ error: 'Failed to retrieve subscription' }, 500);
+      }
+
+      const subscription = await subResponse.json();
+      const subscriptionItemId = subscription.items?.data?.[0]?.id;
+
+      if (!subscriptionItemId) {
+        return jsonResponse({ error: 'No subscription item found' }, 500);
+      }
+
+      // Swap the price on the existing subscription with proration
+      const updateResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.stripeKey}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({
+            'items[0][id]': subscriptionItemId,
+            'items[0][price]': proPriceId,
+            'proration_behavior': 'create_prorations',
+            'metadata[tier]': 'pro'
+          })
+        },
+        5000
+      );
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json();
+        console.error('Stripe subscription update failed:', error);
+        return jsonResponse({ error: error.error?.message || 'Failed to upgrade subscription' }, 500);
+      }
+
+      // Update tier in DB immediately
+      await this.db
+        .prepare('UPDATE users SET tier = ? WHERE id = ?')
+        .bind('pro', user.userId)
+        .run();
+
+      if (this.logger) {
+        logSubscription(this.logger, 'plan_swapped', {
+          userId: user.userId,
+          fromTier: 'basic',
+          toTier: 'pro'
+        });
+      }
+
+      return jsonResponse({ success: true, tier: 'pro' });
+
+    } catch (error) {
+      if (this.logger) {
+        this.logger.error('Plan swap error', error);
+      }
+      console.error('Plan swap error:', error);
+      return jsonResponse({ error: 'Failed to swap plan' }, 500);
+    }
+  }
+
+  /**
    * Create Stripe customer
    */
   async createStripeCustomer(email) {

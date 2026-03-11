@@ -882,4 +882,202 @@ describe('SubscriptionHandler', () => {
       })).resolves.not.toThrow();
     });
   });
+
+  describe('swapPlan', () => {
+    function createAuthRequest() {
+      const headerMap = new Map([
+        ['Authorization', 'LicenseKey ABCD-EFGH-IJKL-MNOP-QRST'],
+        ['CF-Connecting-IP', '127.0.0.1']
+      ]);
+      return {
+        url: 'https://api.captureai.workers.dev/api/subscription/swap-plan',
+        method: 'POST',
+        headers: { get: (key) => headerMap.get(key) || null }
+      };
+    }
+
+    test('should return 401 when not authenticated', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce(null);
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(401);
+    });
+
+    test('should return 400 when user is already on Pro', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'pro'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'pro',
+        stripe_subscription_id: 'sub_123',
+        subscription_status: 'active'
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(400);
+
+      const body = JSON.parse(await response.text());
+      expect(body.error).toContain('Basic tier');
+    });
+
+    test('should return 400 when user has no Stripe subscription', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'basic',
+        stripe_subscription_id: null,
+        subscription_status: 'active'
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(400);
+
+      const body = JSON.parse(await response.text());
+      expect(body.error).toContain('No active subscription');
+    });
+
+    test('should return 400 when subscription is not active', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'basic',
+        stripe_subscription_id: 'sub_123',
+        subscription_status: 'past_due'
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(400);
+
+      const body = JSON.parse(await response.text());
+      expect(body.error).toContain('not active');
+    });
+
+    test('should return 500 when Stripe subscription fetch fails', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'basic',
+        stripe_subscription_id: 'sub_123',
+        subscription_status: 'active'
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ error: { message: 'Not found' } })
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(500);
+    });
+
+    test('should return 500 when Stripe subscription update fails', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'basic',
+        stripe_subscription_id: 'sub_123',
+        subscription_status: 'active'
+      });
+
+      // First fetch: get subscription (success)
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: { data: [{ id: 'si_123' }] }
+        })
+      });
+
+      // Second fetch: update subscription (fail)
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ error: { message: 'Cannot update' } })
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(500);
+
+      const body = JSON.parse(await response.text());
+      expect(body.error).toBe('Cannot update');
+    });
+
+    test('should successfully swap from Basic to Pro', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      env.DB._mockFirst.mockResolvedValueOnce({
+        tier: 'basic',
+        stripe_subscription_id: 'sub_123',
+        subscription_status: 'active'
+      });
+
+      // First fetch: get subscription
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: { data: [{ id: 'si_123' }] }
+        })
+      });
+
+      // Second fetch: update subscription
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          id: 'sub_123',
+          status: 'active',
+          items: { data: [{ id: 'si_123', price: { id: 'price_pro_123' } }] }
+        })
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      const body = JSON.parse(await response.text());
+
+      expect(response.status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.tier).toBe('pro');
+
+      // Verify DB was updated
+      expect(env.DB.prepare).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE users')
+      );
+    });
+
+    test('should return 429 when rate limited', async () => {
+      handler.auth.authenticate.mockResolvedValueOnce({
+        userId: 'user-1',
+        tier: 'basic'
+      });
+
+      checkRateLimit.mockResolvedValueOnce({
+        error: 'Rate limit exceeded',
+        message: 'Too many requests'
+      });
+
+      const request = createAuthRequest();
+      const response = await handler.swapPlan(request);
+      expect(response.status).toBe(429);
+    });
+  });
 });

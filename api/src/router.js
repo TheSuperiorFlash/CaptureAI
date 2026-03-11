@@ -129,6 +129,9 @@ export class Router {
     if (path === '/api/subscription/verify-payment' && method === 'POST') {
       return this.subscription.verifyPayment(request);
     }
+    if (path === '/api/subscription/swap-plan' && method === 'POST') {
+      return this.subscription.swapPlan(request);
+    }
 
     // 404 Not Found (don't leak path to prevent reconnaissance)
     return jsonResponse(

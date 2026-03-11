@@ -24,7 +24,8 @@ const mockSubscription = {
   handleWebhook: jest.fn().mockResolvedValue(new Response(JSON.stringify({ received: true }))),
   getPortal: jest.fn().mockResolvedValue(new Response(JSON.stringify({ url: 'https://portal.stripe.com' }))),
   getPlans: jest.fn().mockResolvedValue(new Response(JSON.stringify({ plans: [] }))),
-  verifyPayment: jest.fn().mockResolvedValue(new Response(JSON.stringify({ success: true })))
+  verifyPayment: jest.fn().mockResolvedValue(new Response(JSON.stringify({ success: true }))),
+  swapPlan: jest.fn().mockResolvedValue(new Response(JSON.stringify({ success: true, tier: 'pro' })))
 };
 
 jest.mock('../../src/auth.js', () => ({
@@ -293,6 +294,12 @@ describe('Router', () => {
       const request = createRequest('/api/subscription/verify-payment', 'POST');
       await router.route(request);
       expect(mockSubscription.verifyPayment).toHaveBeenCalledWith(request);
+    });
+
+    test('POST /api/subscription/swap-plan routes correctly', async () => {
+      const request = createRequest('/api/subscription/swap-plan', 'POST');
+      await router.route(request);
+      expect(mockSubscription.swapPlan).toHaveBeenCalledWith(request);
     });
   });
 

@@ -42,6 +42,7 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 | POST | `/api/subscription/verify-payment` | None | — | Verify checkout session |
 | GET | `/api/subscription/portal` | LicenseKey | — | Stripe billing portal |
 | GET | `/api/subscription/plans` | None | — | Available plans |
+| POST | `/api/subscription/swap-plan` | LicenseKey | 10/min | Upgrade Basic → Pro with proration |
 
 ## Authentication
 
