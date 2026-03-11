@@ -118,8 +118,8 @@ export default function HelpPage() {
                                 a: <>Visit the <Link href="/activate" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">activation page</Link> and enter your email. You&apos;ll receive a key via email.</>,
                             },
                             {
-                                q: 'What\'s the difference between Free and Pro?',
-                                a: 'Free gives you 10 requests per day. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
+                                q: 'What\'s the difference between Basic and Pro?',
+                                a: 'Basic gives you 50 requests per day. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
                             },
                             {
                                 q: 'Which browser is supported?',

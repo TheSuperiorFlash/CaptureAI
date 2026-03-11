@@ -33,14 +33,14 @@ export default function Pricing() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'basic'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'basic'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'basic'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('basic')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
                     >
-                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-colors ${selectedTier === 'basic' ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)]' : ''}`}>
+                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === 'basic' ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold font-inter text-[--color-text]">$1.49</span>
@@ -77,7 +77,7 @@ export default function Pricing() {
 
                             <Link
                                 href="/activate"
-                                className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-all hover:text-[--color-text] hover:bg-white/[0.05] pointer-events-auto"
+                                className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-colors hover:text-[--color-text] hover:!bg-white/[0.05] pointer-events-auto"
                             >
                                 Get Basic
                             </Link>
@@ -89,14 +89,14 @@ export default function Pricing() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center md:self-start ${selectedTier === 'pro'
-                            ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:-translate-y-1'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                            ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] p-[1px] ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                             <div className="relative flex flex-1 w-full flex-col rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
@@ -127,7 +127,7 @@ export default function Pricing() {
 
                                 <Link
                                     href="/activate"
-                                    className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500 hover:scale-105 hover:-translate-y-1 pointer-events-auto"
+                                    className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
                                     Get Pro
                                 </Link>

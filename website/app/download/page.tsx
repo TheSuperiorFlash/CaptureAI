@@ -134,7 +134,7 @@ export default function DownloadPage() {
                         {[
                             'Google Chrome 88 or later',
                             'Internet connection',
-                            'Free CaptureAI license key',
+                            'CaptureAI license key',
                         ].map((req) => (
                             <li key={req} className="flex items-center gap-3">
                                 <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
