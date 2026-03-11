@@ -223,13 +223,13 @@ export class AuthHandler {
         return false;
       }
 
-      const tierNames = { pro: 'Pro', basic: 'Basic Plan' };
+      const tierNames = { pro: 'Pro', basic: 'Basic' };
       const tierDisplay = tierNames[tier] || tier;
 
       const subject = tier === 'pro'
         ? 'Your CaptureAI Pro License Key'
         : tier === 'basic'
-          ? 'Your CaptureAI Basic Plan License Key'
+          ? 'Your CaptureAI Basic License Key'
           : 'Your CaptureAI License Key';
 
       // Use paid subscription email for pro and basic tiers
