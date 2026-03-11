@@ -63,7 +63,7 @@ export default function DownloadPage() {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-[--color-text]">Chrome Extension</h2>
-                                <p className="text-sm text-[--color-text-tertiary]">Free to install — works on Google Chrome</p>
+                                <p className="text-sm text-[--color-text-tertiary]">Easy to install — works on Google Chrome</p>
                             </div>
                         </div>
 
@@ -89,7 +89,7 @@ export default function DownloadPage() {
                             className="glow-btn flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
                         >
                             <Chrome className="h-4 w-4" />
-                            Add to Chrome — Free
+                            Add to Chrome — Start now
                         </a>
                     </div>
                 </div>

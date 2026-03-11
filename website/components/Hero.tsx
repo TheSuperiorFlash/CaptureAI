@@ -203,12 +203,12 @@ export default function Hero() {
                                 <ArrowRight className="h-5 w-5" />
                             </MotionLink>
                         </MagneticButton>
-                        <Link
-                            href="/#features"
+                        <a
+                            href="#features"
                             className="inline-flex items-center gap-2 text-[15px] font-semibold text-[--color-text-secondary] transition-colors hover:text-cyan-400"
                         >
                             Explore features
-                        </Link>
+                        </a>
                     </motion.div>
                 </motion.div>
 
