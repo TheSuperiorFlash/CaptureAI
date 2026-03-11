@@ -291,7 +291,7 @@ export default function ActivatePage() {
                 <div className="mx-auto mt-12 max-w-2xl">
                     <div className="glass-card rounded-2xl p-8 md:p-10">
                         <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
-                            {selectedTier === 'basic' ? 'Start your Basic plan' : 'Start your Pro subscription'}
+                            {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                         </h3>
                         <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
                             Enter your email to proceed to secure checkout via Stripe.

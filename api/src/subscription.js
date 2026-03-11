@@ -469,8 +469,12 @@ export class SubscriptionHandler {
 
       // Check if the session was completed successfully
       if (session.payment_status === 'paid' && session.status === 'complete') {
+        const tier = (session.metadata?.tier === 'basic' || session.metadata?.tier === 'pro')
+          ? session.metadata.tier
+          : 'pro';
         return jsonResponse({
           success: true,
+          tier,
           email: session.customer_details?.email || session.customer_email
         });
       } else {

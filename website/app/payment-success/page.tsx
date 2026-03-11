@@ -13,6 +13,7 @@ function PaymentSuccessContent() {
     const searchParams = useSearchParams()
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
     const [errorMessage, setErrorMessage] = useState('')
+    const [tier, setTier] = useState<'basic' | 'pro'>('pro')
 
     useEffect(() => {
         const verifyPayment = async (attempt: number): Promise<void> => {
@@ -59,7 +60,10 @@ function PaymentSuccessContent() {
                 }
 
                 if (contentType && contentType.includes('application/json')) {
-                    await response.json()
+                    const data = await response.json()
+                    if (data.tier === 'basic' || data.tier === 'pro') {
+                        setTier(data.tier)
+                    }
                 }
 
                 setStatus('success')
@@ -83,6 +87,8 @@ function PaymentSuccessContent() {
         verifyPayment(0)
     }, [searchParams])
 
+    const isBasic = tier === 'basic'
+
     return (
         <section className="relative flex min-h-screen items-center justify-center overflow-x-clip px-6 py-24 md:py-32">
             {/* Background effects */}
@@ -105,30 +111,32 @@ function PaymentSuccessContent() {
                     {/* Success */}
                     {status === 'success' && (
                         <>
-                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_30px_rgba(0,240,255,0.2)]">
-                                <Check className="h-8 w-8 text-cyan-400" />
+                            <div className={`mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border shadow-[0_0_30px_rgba(0,240,255,0.2)] ${isBasic ? 'bg-blue-500/10 border-blue-500/20' : 'bg-cyan-500/10 border-cyan-500/20'}`}>
+                                <Check className={`h-8 w-8 ${isBasic ? 'text-blue-400' : 'text-cyan-400'}`} />
                             </div>
 
                             <h1 className="mb-2 text-2xl font-bold text-[--color-text] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">Payment successful</h1>
                             <p className="mb-8 text-[15px] text-[--color-text-tertiary]">
-                                Check your email for your Pro license key.
+                                Check your email for your {isBasic ? 'Basic' : 'Pro'} license key.
                             </p>
 
                             <div className="mb-8 text-left rounded-2xl bg-white/[0.02] border border-white/[0.04] p-6 relative overflow-hidden">
                                 <div className="relative z-10">
-                                    <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1">
+                                    <div className={`mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 ${isBasic ? 'border-blue-500/30 bg-blue-500/10' : 'border-cyan-500/30 bg-cyan-500/10'}`}>
                                         <span className="relative flex h-2 w-2">
-                                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-                                            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+                                            <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${isBasic ? 'bg-blue-400' : 'bg-cyan-400'}`} />
+                                            <span className={`relative inline-flex h-2 w-2 rounded-full ${isBasic ? 'bg-blue-400' : 'bg-cyan-400'}`} />
                                         </span>
-                                        <span className="text-[11px] font-bold tracking-widest text-cyan-400">PRO UNLOCKED</span>
+                                        <span className={`text-[11px] font-bold tracking-widest ${isBasic ? 'text-blue-400' : 'text-cyan-400'}`}>
+                                            {isBasic ? 'BASIC UNLOCKED' : 'PRO UNLOCKED'}
+                                        </span>
                                     </div>
 
                                     <p className="mb-3 text-sm font-semibold text-[--color-text-secondary]">Next steps:</p>
                                     <ol className="list-decimal pl-4 space-y-2 text-sm text-[--color-text-tertiary] marker:text-cyan-600/50">
                                         <li>Check your email for the license key</li>
                                         <li>Open the CaptureAI extension popup</li>
-                                        <li>Enter your key to activate Pro</li>
+                                        <li>Enter your key to activate {isBasic ? 'Basic' : 'Pro'}</li>
                                     </ol>
                                 </div>
                             </div>
