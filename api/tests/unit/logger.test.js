@@ -469,12 +469,12 @@ describe('Specialized Loggers', () => {
 
   describe('logLicenseCreation', () => {
     test('should log license creation as audit', () => {
-      logLicenseCreation(logger, 'user-1', 'free');
+      logLicenseCreation(logger, 'user-1', 'basic');
       const parsed = JSON.parse(console.log.mock.calls[0][0]);
       expect(parsed.level).toBe('AUDIT');
       expect(parsed.message).toBe('license_created');
       expect(parsed.userId).toBe('user-1');
-      expect(parsed.tier).toBe('free');
+      expect(parsed.tier).toBe('basic');
       expect(parsed.action).toBe('create_license');
       expect(parsed.email).toBeUndefined();
     });
@@ -505,7 +505,7 @@ describe('Specialized Loggers', () => {
 
   describe('logRateLimit', () => {
     test('should log rate limit warning', () => {
-      logRateLimit(logger, 'user-1', 'free', 10, 8);
+      logRateLimit(logger, 'user-1', 'basic', 50, 8);
       const parsed = JSON.parse(console.warn.mock.calls[0][0]);
       expect(parsed.level).toBe('WARN');
       expect(parsed.message).toBe('rate_limit_approached');
@@ -521,7 +521,7 @@ describe('Specialized Loggers', () => {
 
   describe('logRateLimitExceeded', () => {
     test('should log rate limit exceeded as security event', () => {
-      logRateLimitExceeded(logger, 'user-1', 'free');
+      logRateLimitExceeded(logger, 'user-1', 'basic');
       const parsed = JSON.parse(console.error.mock.calls[0][0]);
       expect(parsed.level).toBe('SECURITY');
       expect(parsed.message).toBe('rate_limit_exceeded');

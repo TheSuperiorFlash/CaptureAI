@@ -19,7 +19,6 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 
 | Method | Path | Auth | Rate Limit | Description |
 |--------|------|------|------------|-------------|
-| POST | `/api/auth/create-free-key` | None | 3/min | Create free license key (email required) |
 | POST | `/api/auth/validate-key` | None | 10/min | Validate and activate license key |
 | GET | `/api/auth/me` | LicenseKey | — | Get current user info |
 
@@ -50,7 +49,7 @@ License key format: `XXXX-XXXX-XXXX-XXXX-XXXX` (chars: `ABCDEFGHJKLMNPQRSTUVWXYZ
 
 Header: `Authorization: LicenseKey YOUR-KEY`
 
-Generated with `crypto.getRandomValues()`. Pro users must have `subscription_status = 'active'`.
+Generated with `crypto.getRandomValues()`. Basic and Pro users must have `subscription_status = 'active'`.
 
 ## Rate Limiting
 
@@ -59,7 +58,6 @@ Uses **Cloudflare native Rate Limiting API** via bindings in `wrangler.toml`. In
 | Preset | Binding | Limit | Window | Scope |
 |--------|---------|-------|--------|-------|
 | AUTH | `RATE_LIMITER_AUTH` (1001) | 5/min | 60s | Per IP |
-| FREE_KEY_CREATION | `RATE_LIMITER_FREE_KEY` (1002) | 3/min | 60s | Per IP |
 | LICENSE_VALIDATION | `RATE_LIMITER_LICENSE` (1003) | 10/min | 60s | Per IP |
 | CHECKOUT | `RATE_LIMITER_CHECKOUT` (1004) | 10/min | 60s | Per IP |
 | GLOBAL | `RATE_LIMITER_GLOBAL` (1005) | 60/min | 60s | Per IP |

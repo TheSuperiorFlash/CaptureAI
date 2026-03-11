@@ -169,10 +169,10 @@ async function parseResponse(response) {
 /**
  * Sample user record as it would come from D1
  */
-const SAMPLE_FREE_USER = {
+const SAMPLE_BASIC_USER = {
   id: 'user-123',
   email: 'test@example.com',
-  tier: 'free',
+  tier: 'basic',
   license_key: 'ABCD-EFGH-IJKL-MNOP-QRST',
   subscription_status: 'inactive',
   created_at: '2024-01-01T00:00:00.000Z'
@@ -304,26 +304,26 @@ describe('AuthHandler', () => {
 
   describe('validateKey', () => {
     test('should return 200 with user data for a valid key', async () => {
-      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_FREE_USER.license_key });
-      validateLicenseKey.mockReturnValue(SAMPLE_FREE_USER.license_key);
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_BASIC_USER.license_key });
+      validateLicenseKey.mockReturnValue(SAMPLE_BASIC_USER.license_key);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
-      const request = mockRequest({ body: { licenseKey: SAMPLE_FREE_USER.license_key } });
+      const request = mockRequest({ body: { licenseKey: SAMPLE_BASIC_USER.license_key } });
       const response = await handler.validateKey(request);
       const body = await parseResponse(response);
 
       expect(response.status).toBe(200);
       expect(body.message).toBe('License key validated successfully');
-      expect(body.user.id).toBe(SAMPLE_FREE_USER.id);
-      expect(body.user.email).toBe(SAMPLE_FREE_USER.email);
-      expect(body.user.tier).toBe('free');
-      expect(body.user.licenseKey).toBe(SAMPLE_FREE_USER.license_key);
+      expect(body.user.id).toBe(SAMPLE_BASIC_USER.id);
+      expect(body.user.email).toBe(SAMPLE_BASIC_USER.email);
+      expect(body.user.tier).toBe('basic');
+      expect(body.user.licenseKey).toBe(SAMPLE_BASIC_USER.license_key);
     });
 
     test('should update last_validated_at on successful validation', async () => {
-      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_FREE_USER.license_key });
-      validateLicenseKey.mockReturnValue(SAMPLE_FREE_USER.license_key);
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_BASIC_USER.license_key });
+      validateLicenseKey.mockReturnValue(SAMPLE_BASIC_USER.license_key);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       const request = mockRequest();
       await handler.validateKey(request);
@@ -335,14 +335,14 @@ describe('AuthHandler', () => {
     });
 
     test('should log successful authentication', async () => {
-      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_FREE_USER.license_key });
-      validateLicenseKey.mockReturnValue(SAMPLE_FREE_USER.license_key);
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_BASIC_USER.license_key });
+      validateLicenseKey.mockReturnValue(SAMPLE_BASIC_USER.license_key);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       const request = mockRequest();
       await handler.validateKey(request);
 
-      expect(logAuth).toHaveBeenCalledWith(logger, true, SAMPLE_FREE_USER.id);
+      expect(logAuth).toHaveBeenCalledWith(logger, true, SAMPLE_BASIC_USER.id);
     });
 
     test('should return 401 for an invalid license key', async () => {
@@ -441,10 +441,10 @@ describe('AuthHandler', () => {
 
   describe('getUserByLicenseKey', () => {
     test('should return user when found', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       const user = await handler.getUserByLicenseKey('ABCD-EFGH-IJKL-MNOP-QRST');
-      expect(user).toEqual(SAMPLE_FREE_USER);
+      expect(user).toEqual(SAMPLE_BASIC_USER);
     });
 
     test('should return null when user not found', async () => {
@@ -454,7 +454,7 @@ describe('AuthHandler', () => {
     });
 
     test('should normalize key by trimming whitespace', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       await handler.getUserByLicenseKey('  ABCD-EFGH-IJKL-MNOP-QRST  ');
 
@@ -463,7 +463,7 @@ describe('AuthHandler', () => {
     });
 
     test('should normalize key to uppercase', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       await handler.getUserByLicenseKey('abcd-efgh-ijkl-mnop-qrst');
 
@@ -481,7 +481,7 @@ describe('AuthHandler', () => {
     });
 
     test('should strip internal whitespace from key', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       await handler.getUserByLicenseKey('ABCD - EFGH - IJKL - MNOP - QRST');
 
@@ -496,18 +496,18 @@ describe('AuthHandler', () => {
 
   describe('authenticate', () => {
     test('should return user data for valid Authorization header', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_FREE_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
       });
       const user = await handler.authenticate(request);
 
       expect(user).toEqual({
-        userId: SAMPLE_FREE_USER.id,
-        email: SAMPLE_FREE_USER.email,
-        tier: 'free',
-        licenseKey: SAMPLE_FREE_USER.license_key,
+        userId: SAMPLE_BASIC_USER.id,
+        email: SAMPLE_BASIC_USER.email,
+        tier: 'basic',
+        licenseKey: SAMPLE_BASIC_USER.license_key,
         subscriptionStatus: 'inactive'
       });
     });
@@ -588,7 +588,7 @@ describe('AuthHandler', () => {
     });
 
     test('should extract license key after "LicenseKey " prefix (11 chars)', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
 
       const key = 'ABCD-EFGH-IJKL-MNOP-QRST';
       const request = mockRequest({
@@ -620,21 +620,21 @@ describe('AuthHandler', () => {
 
   describe('getCurrentUser', () => {
     test('should return full user data for authenticated user', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
-      db.setResponse('SELECT id, email, tier, license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
+      db.setResponse('SELECT id, email, tier, license_key', SAMPLE_BASIC_USER);
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_FREE_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
       });
       const response = await handler.getCurrentUser(request);
       const body = await parseResponse(response);
 
       expect(response.status).toBe(200);
-      expect(body.id).toBe(SAMPLE_FREE_USER.id);
-      expect(body.email).toBe(SAMPLE_FREE_USER.email);
-      expect(body.tier).toBe('free');
-      expect(body.licenseKey).toBe(SAMPLE_FREE_USER.license_key);
-      expect(body.createdAt).toBe(SAMPLE_FREE_USER.created_at);
+      expect(body.id).toBe(SAMPLE_BASIC_USER.id);
+      expect(body.email).toBe(SAMPLE_BASIC_USER.email);
+      expect(body.tier).toBe('basic');
+      expect(body.licenseKey).toBe(SAMPLE_BASIC_USER.license_key);
+      expect(body.createdAt).toBe(SAMPLE_BASIC_USER.created_at);
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -648,11 +648,11 @@ describe('AuthHandler', () => {
 
     test('should return 404 when user not found in DB after authentication', async () => {
       // First query (authenticate) finds user, second query (full data) returns null
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_FREE_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
       // Do not set a response for the SELECT id query, so it returns null
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_FREE_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
       });
 
       // We need the second prepare call to return null. Override prepare to
@@ -665,7 +665,7 @@ describe('AuthHandler', () => {
           first: jest.fn(async () => {
             // First call: authenticate -> return user
             // Second call: full user data -> return null
-            if (callCount === 1) return SAMPLE_FREE_USER;
+            if (callCount === 1) return SAMPLE_BASIC_USER;
             return null;
           }),
           run: jest.fn(async () => ({ success: true }))
@@ -688,7 +688,7 @@ describe('AuthHandler', () => {
           // authenticate's getUserByLicenseKey
           return {
             bind: jest.fn().mockReturnThis(),
-            first: jest.fn(async () => SAMPLE_FREE_USER),
+            first: jest.fn(async () => SAMPLE_BASIC_USER),
             run: jest.fn(async () => ({ success: true }))
           };
         }
@@ -697,7 +697,7 @@ describe('AuthHandler', () => {
       });
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_FREE_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
       });
       const response = await handler.getCurrentUser(request);
       const body = await parseResponse(response);
@@ -722,234 +722,14 @@ describe('AuthHandler', () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // createFreeKey
-  // -------------------------------------------------------------------------
-
-  describe('createFreeKey', () => {
-    beforeEach(() => {
-      validateRequestBody.mockResolvedValue({ email: 'new@example.com' });
-      validateEmail.mockReturnValue('new@example.com');
-    });
-
-    test('should create new user and return 201', async () => {
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(201);
-      expect(body.message).toContain('Free license key created successfully');
-      expect(body.tier).toBe('free');
-    });
-
-    test('should insert user into DB with correct parameters', async () => {
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      await handler.createFreeKey(request);
-
-      // Find the INSERT call
-      const insertCall = db.prepare.mock.calls.find(([sql]) => sql.includes('INSERT INTO users'));
-      expect(insertCall).toBeDefined();
-    });
-
-    test('should use generateUUID for user ID', async () => {
-      generateUUID.mockReturnValue('custom-uuid-5678');
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      await handler.createFreeKey(request);
-
-      expect(generateUUID).toHaveBeenCalled();
-    });
-
-    test('should log license creation', async () => {
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      await handler.createFreeKey(request);
-
-      expect(logLicenseCreation).toHaveBeenCalledWith(
-        logger,
-        'test-uuid-1234',
-        'free'
-      );
-    });
-
-    test('should return same response for existing email (anti-enumeration)', async () => {
-      db.setResponse('SELECT license_key, tier FROM users WHERE LOWER(email)', {
-        license_key: 'EXIST-KEY1-KEY2-KEY3-KEY4',
-        tier: 'free'
-      });
-
-      const request = mockRequest({ body: { email: 'existing@example.com' } });
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(201);
-      expect(body.message).toContain('Free license key created successfully');
-      expect(body.tier).toBe('free');
-      // Should NOT contain the existing license key in response
-      expect(body.licenseKey).toBeUndefined();
-    });
-
-    test('should resend email for existing email when RESEND_API_KEY is configured', async () => {
-      db.setResponse('SELECT license_key, tier FROM users WHERE LOWER(email)', {
-        license_key: 'EXIST-KEY1-KEY2-KEY3-KEY4',
-        tier: 'free'
-      });
-
-      const request = mockRequest({ body: { email: 'existing@example.com' } });
-      await handler.createFreeKey(request);
-
-      expect(fetchWithTimeout).toHaveBeenCalled();
-    });
-
-    test('should handle key collision retry', async () => {
-      // First key check returns an existing user, second returns null
-      let keyCheckCount = 0;
-      db.prepare.mockImplementation((sql) => {
-        return {
-          bind: jest.fn().mockReturnThis(),
-          first: jest.fn(async () => {
-            if (sql.includes('LOWER(email)')) return null; // No existing user
-            if (sql.includes('SELECT id FROM users WHERE license_key')) {
-              keyCheckCount++;
-              return keyCheckCount === 1 ? { id: 'collision' } : null;
-            }
-            return null;
-          }),
-          run: jest.fn(async () => ({ success: true }))
-        };
-      });
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      const response = await handler.createFreeKey(request);
-
-      expect(response.status).toBe(201);
-      expect(keyCheckCount).toBe(2);
-    });
-
-    test('should return 500 after max key collision attempts', async () => {
-      // All key checks return existing user
-      db.prepare.mockImplementation((sql) => {
-        return {
-          bind: jest.fn().mockReturnThis(),
-          first: jest.fn(async () => {
-            if (sql.includes('LOWER(email)')) return null;
-            if (sql.includes('SELECT id FROM users WHERE license_key')) {
-              return { id: 'collision' };
-            }
-            return null;
-          }),
-          run: jest.fn(async () => ({ success: true }))
-        };
-      });
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(500);
-      expect(body.error).toBe('Failed to generate unique license key');
-    });
-
-    test('should send email when RESEND_API_KEY is configured', async () => {
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      await handler.createFreeKey(request);
-
-      expect(fetchWithTimeout).toHaveBeenCalledWith(
-        'https://api.resend.com/emails',
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-resend-key'
-          })
-        }),
-        5000
-      );
-    });
-
-    test('should include license key in response when RESEND_API_KEY is not configured', async () => {
-      env.RESEND_API_KEY = undefined;
-      handler = new AuthHandler(env, logger);
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(201);
-      expect(body.licenseKey).toBeDefined();
-      expect(body.message).toContain('Email service not configured');
-    });
-
-    test('should return emailFailed flag when email sending fails', async () => {
-      fetchWithTimeout.mockResolvedValue(
-        new Response('Internal Server Error', { status: 500 })
-      );
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(201);
-      expect(body.emailFailed).toBe(true);
-      expect(body.message).toContain('email delivery failed');
-    });
-
-    test('should return 400 for ValidationError', async () => {
-      validateRequestBody.mockResolvedValue({ email: '' });
-      validateEmail.mockImplementation(() => {
-        throw new ValidationError('Email is required', 'email');
-      });
-
-      const request = mockRequest();
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(400);
-      expect(body.error).toBe('Email is required');
-      expect(body.field).toBe('email');
-    });
-
-    test('should return 429 when rate limited', async () => {
-      checkRateLimit.mockResolvedValue({
-        error: 'Rate limit exceeded',
-        message: 'Too many requests.',
-        retryAfter: 3600
-      });
-
-      const request = mockRequest();
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(429);
-      expect(body.error).toBe('Rate limit exceeded');
-    });
-
-    test('should return 500 on unexpected errors', async () => {
-      validateRequestBody.mockRejectedValue(new Error('Unexpected parse error'));
-
-      const request = mockRequest();
-      const response = await handler.createFreeKey(request);
-      const body = await parseResponse(response);
-
-      expect(response.status).toBe(500);
-      expect(body.error).toBe('Failed to create license key');
-    });
-
-    test('should not log when no logger is provided', async () => {
-      const handlerNoLogger = new AuthHandler(env);
-
-      const request = mockRequest({ body: { email: 'new@example.com' } });
-      await handlerNoLogger.createFreeKey(request);
-
-      expect(logLicenseCreation).not.toHaveBeenCalled();
-    });
-  });
 
   // -------------------------------------------------------------------------
   // sendLicenseKeyEmail
   // -------------------------------------------------------------------------
 
   describe('sendLicenseKeyEmail', () => {
-    test('should send free tier email via Resend', async () => {
-      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+    test('should send basic tier email via Resend', async () => {
+      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       expect(result).toBe(true);
       expect(fetchWithTimeout).toHaveBeenCalledWith(
@@ -971,18 +751,18 @@ describe('AuthHandler', () => {
       expect(callBody.subject).toBe('Your CaptureAI Pro License Key');
     });
 
-    test('should send free tier email with correct subject', async () => {
-      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+    test('should send basic tier email with correct subject', async () => {
+      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
-      expect(callBody.subject).toBe('Your CaptureAI Free License Key');
+      expect(callBody.subject).toBe('Your CaptureAI Basic License Key');
     });
 
     test('should return false when RESEND_API_KEY is not configured', async () => {
       env.RESEND_API_KEY = undefined;
       handler = new AuthHandler(env, logger);
 
-      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
       expect(result).toBe(false);
     });
 
@@ -991,21 +771,21 @@ describe('AuthHandler', () => {
         new Response('Forbidden', { status: 403 })
       );
 
-      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
       expect(result).toBe(false);
     });
 
     test('should return false on network failure', async () => {
       fetchWithTimeout.mockRejectedValue(new Error('Network error'));
 
-      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      const result = await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
       expect(result).toBe(false);
     });
 
     test('should log error on failure when logger is present', async () => {
       fetchWithTimeout.mockRejectedValue(new Error('Timeout'));
 
-      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       // The error is caught inside sendEmailViaResend, which logs it
       expect(logger.error).toHaveBeenCalledWith(
@@ -1014,13 +794,13 @@ describe('AuthHandler', () => {
       );
     });
 
-    test('should include license key tag for free tier', async () => {
-      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+    test('should include license key tag for basic tier', async () => {
+      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
       expect(callBody.tags).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ name: 'category', value: 'license_free' })
+          expect.objectContaining({ name: 'category', value: 'license_basic' })
         ])
       );
     });
@@ -1036,9 +816,9 @@ describe('AuthHandler', () => {
       );
     });
 
-    test('should include license key in the email text content for free tier', async () => {
+    test('should include license key in the email text content for basic tier', async () => {
       const licenseKey = 'ABCD-1234-EFGH-5678-IJKL';
-      await handler.sendLicenseKeyEmail('user@test.com', licenseKey, 'free');
+      await handler.sendLicenseKeyEmail('user@test.com', licenseKey, 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
       expect(callBody.text).toContain(licenseKey);
@@ -1056,7 +836,7 @@ describe('AuthHandler', () => {
       env.FROM_EMAIL = 'Custom <custom@mail.captureai.dev>';
       handler = new AuthHandler(env, logger);
 
-      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
       expect(callBody.from).toBe('Custom <custom@mail.captureai.dev>');
@@ -1066,7 +846,7 @@ describe('AuthHandler', () => {
       env.FROM_EMAIL = undefined;
       handler = new AuthHandler(env, logger);
 
-      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'free');
+      await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
       expect(callBody.from).toBe('CaptureAI <no-reply@mail.captureai.dev>');
@@ -1127,14 +907,14 @@ describe('AuthHandler', () => {
       );
 
       const result = await handler.sendEmailViaResend(
-        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'free'
+        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'basic'
       );
       expect(result).toBe(true);
     });
 
     test('should call fetchWithTimeout with correct URL', async () => {
       await handler.sendEmailViaResend(
-        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'free'
+        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'basic'
       );
 
       expect(fetchWithTimeout).toHaveBeenCalledWith(
@@ -1146,7 +926,7 @@ describe('AuthHandler', () => {
 
     test('should include Authorization header with RESEND_API_KEY', async () => {
       await handler.sendEmailViaResend(
-        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'free'
+        'user@test.com', 'Test Subject', '<h1>HTML</h1>', 'Text content', 'basic'
       );
 
       const options = fetchWithTimeout.mock.calls[0][1];
@@ -1167,7 +947,7 @@ describe('AuthHandler', () => {
 
     test('should include X-Entity-Ref-ID header in email', async () => {
       await handler.sendEmailViaResend(
-        'user@test.com', 'Test', '<p>test</p>', 'test', 'free'
+        'user@test.com', 'Test', '<p>test</p>', 'test', 'basic'
       );
 
       const body = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
@@ -1243,7 +1023,7 @@ describe('AuthHandler', () => {
       );
     });
 
-    test('should default tier tag to free when not specified', async () => {
+    test('should default tier tag to basic when not specified', async () => {
       await handler.sendEmailViaResend(
         'user@test.com', 'Test', '<p>test</p>', 'test'
       );
@@ -1251,7 +1031,7 @@ describe('AuthHandler', () => {
       const body = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
       expect(body.tags).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ name: 'category', value: 'license_free' })
+          expect.objectContaining({ name: 'category', value: 'license_basic' })
         ])
       );
     });

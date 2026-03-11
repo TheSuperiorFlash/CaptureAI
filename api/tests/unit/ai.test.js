@@ -11,7 +11,7 @@ jest.mock('../../src/auth.js', () => ({
     authenticate: jest.fn().mockResolvedValue({
       userId: 'user-1',
       email: 'test@example.com',
-      tier: 'free',
+      tier: 'basic',
       licenseKey: 'ABCD-EFGH-IJKL-MNOP-QRST',
       subscriptionStatus: 'inactive'
     })
@@ -74,7 +74,7 @@ function createMockEnv(overrides = {}) {
     DB: createMockDB(),
     CLOUDFLARE_ACCOUNT_ID: 'test-account-id',
     CLOUDFLARE_GATEWAY_NAME: 'test-gateway',
-    FREE_TIER_DAILY_LIMIT: '10',
+    BASIC_TIER_DAILY_LIMIT: '50',
     PRO_TIER_RATE_LIMIT_PER_MINUTE: '20',
     RATE_LIMITER: {
       idFromName: jest.fn().mockReturnValue('mock-id'),
@@ -306,9 +306,9 @@ describe('AIHandler', () => {
   });
 
   describe('checkUsageLimit', () => {
-    test('should check free tier daily limit', async () => {
+    test('should check basic tier daily limit', async () => {
       env.DB._mockFirst.mockResolvedValueOnce({ count: 5 });
-      const result = await handler.checkUsageLimit('user-1', 'free');
+      const result = await handler.checkUsageLimit('user-1', 'basic');
 
       expect(result.allowed).toBe(true);
       expect(result.used).toBe(5);
@@ -316,9 +316,9 @@ describe('AIHandler', () => {
       expect(result.limitType).toBe('per_day');
     });
 
-    test('should block free tier when limit exceeded', async () => {
+    test('should block basic tier when limit exceeded', async () => {
       env.DB._mockFirst.mockResolvedValueOnce({ count: 10 });
-      const result = await handler.checkUsageLimit('user-1', 'free');
+      const result = await handler.checkUsageLimit('user-1', 'basic');
 
       expect(result.allowed).toBe(false);
       expect(result.used).toBe(10);
@@ -448,10 +448,10 @@ describe('AIHandler', () => {
   });
 
   describe('getUsage', () => {
-    test('should return free tier usage', async () => {
+    test('should return basic tier usage', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
-        tier: 'free'
+        tier: 'basic'
       });
       env.DB._mockFirst.mockResolvedValueOnce({ count: 3 });
 
@@ -459,7 +459,7 @@ describe('AIHandler', () => {
       const response = await handler.getUsage(request);
       const body = JSON.parse(await response.text());
 
-      expect(body.tier).toBe('free');
+      expect(body.tier).toBe('basic');
       expect(body.limitType).toBe('per_day');
       expect(body.today.used).toBe(3);
       expect(body.today.limit).toBe(10);
@@ -642,7 +642,7 @@ describe('AIHandler', () => {
     test('should handle empty analytics data', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
-        tier: 'free'
+        tier: 'basic'
       });
 
       env.DB._mockFirst.mockResolvedValueOnce({
@@ -770,16 +770,16 @@ describe('AIHandler', () => {
       expect(body.limitType).toBe('per_minute');
     });
 
-    test('should return per_day error for free tier limit', async () => {
+    test('should return per_day error for basic tier limit', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
-        tier: 'free'
+        tier: 'basic'
       });
 
       checkRateLimit.mockResolvedValueOnce({ allowed: true, count: 1 });
 
       handler.authenticateAndCheckUsage = jest.fn().mockResolvedValueOnce({
-        user: { userId: 'user-1', tier: 'free' },
+        user: { userId: 'user-1', tier: 'basic' },
         usageCheck: {
           allowed: false,
           limitType: 'per_day',

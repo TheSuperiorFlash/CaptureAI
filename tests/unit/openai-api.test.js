@@ -36,7 +36,7 @@ describe('sendToOpenAI', () => {
     global.AuthService = {
       getLicenseKey: jest.fn().mockResolvedValue('TEST-KEY1-KEY2-KEY3-KEY4'),
       getCachedOrFreshUser: jest.fn().mockResolvedValue({
-        user: { tier: 'free', subscription_status: 'inactive' }
+        user: { tier: 'basic', subscription_status: 'inactive' }
       }),
       sendAIRequest: jest.fn().mockResolvedValue({
         answer: 'The answer is 42',
@@ -265,7 +265,7 @@ describe('sendTextOnlyQuestion', () => {
     global.AuthService = {
       getLicenseKey: jest.fn().mockResolvedValue('TEST-KEY1-KEY2-KEY3-KEY4'),
       getCachedOrFreshUser: jest.fn().mockResolvedValue({
-        user: { tier: 'free', subscription_status: 'inactive' }
+        user: { tier: 'basic', subscription_status: 'inactive' }
       }),
       sendAIRequest: jest.fn().mockResolvedValue({
         answer: 'Paris is the capital of France',

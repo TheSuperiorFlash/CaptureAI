@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   license_key TEXT UNIQUE NOT NULL,
   email TEXT,
-  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro')),
+  tier TEXT DEFAULT 'basic' CHECK (tier IN ('basic', 'pro')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT,
   subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled', 'past_due')),
@@ -31,6 +31,6 @@ CREATE INDEX IF NOT EXISTS idx_users_license_key ON users(license_key);
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON users(stripe_customer_id);
 CREATE INDEX IF NOT EXISTS idx_usage_records_user_date ON usage_records(user_id, created_at);
 
--- Create a default free user (for testing)
+-- Create a default basic user (for testing)
 INSERT INTO users (id, license_key, email, tier)
-VALUES ('test-user-id', 'TEST-FREE-KEY-12345', 'test@example.com', 'free');
+VALUES ('test-user-id', 'TEST-BASIC-KEY-12345', 'test@example.com', 'basic');

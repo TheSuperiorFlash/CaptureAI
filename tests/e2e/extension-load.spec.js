@@ -79,7 +79,7 @@ test.describe('Extension Loading', () => {
     expect(state.isPanelVisible).toBe(false);
     expect(state.isAutoSolveMode).toBe(false);
     expect(state.isProcessing).toBe(false);
-    expect(state.userTier).toBe('free');
+    expect(state.userTier).toBe('basic');
   });
 });
 

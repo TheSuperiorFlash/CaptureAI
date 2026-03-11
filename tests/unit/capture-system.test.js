@@ -30,11 +30,10 @@ describe('Capture System Module', () => {
       currentPromptType: null
     };
 
+    const panel = document.createElement('div');
     window.CaptureAI = {
       STATE: mockState,
-      DOM_CACHE: {
-        panel: document.createElement('div')
-      },
+      DOM_CACHE: { panel },
       STORAGE_KEYS: {
         LAST_CAPTURE_AREA: 'captureai-last-capture-area'
       },
@@ -45,6 +44,12 @@ describe('Capture System Module', () => {
       StorageUtils: {
         getValue: jest.fn().mockResolvedValue(null),
         setValue: jest.fn().mockResolvedValue(undefined)
+      },
+      UICore: {
+        setPanelVisibility: jest.fn((visible) => {
+          panel.style.display = visible ? 'block' : 'none';
+          mockState.isPanelVisible = visible;
+        })
       }
     };
 
@@ -60,6 +65,9 @@ describe('Capture System Module', () => {
       cb();
       return 0;
     });
+
+    // Reset wasVisible state between tests
+    CaptureSystem.wasVisible = false;
   });
 
   afterEach(() => {
@@ -276,6 +284,7 @@ describe('Capture System Module', () => {
   describe('createOverlay', () => {
     test('should create overlay with crosshair cursor when panel visible', () => {
       mockState.isPanelVisible = true;
+      CaptureSystem.wasVisible = true;
       const overlay = CaptureSystem.createOverlay();
 
       expect(overlay.id).toBe('captureai-overlay');

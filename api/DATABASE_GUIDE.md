@@ -2,7 +2,7 @@
 
 > **Self-update rule:** When you add/change tables, columns, indexes, or views — update this file. When you add a migration, also update [api/migrations/README.md](migrations/README.md).
 
-Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migrations in `api/migrations/`.
+Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 8 migrations in `api/migrations/`.
 
 ## Quick Access
 
@@ -35,7 +35,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 7 migration
 | id | TEXT PK | UUID |
 | email | TEXT | User email |
 | license_key | TEXT UNIQUE | Format: XXXX-XXXX-XXXX-XXXX-XXXX |
-| tier | TEXT | `free` or `pro` |
+| tier | TEXT | `basic` or `pro` |
 | stripe_customer_id | TEXT UNIQUE | Stripe customer reference |
 | stripe_subscription_id | TEXT | Stripe subscription reference |
 | subscription_status | TEXT | `active`, `inactive`, `cancelled`, `past_due` |

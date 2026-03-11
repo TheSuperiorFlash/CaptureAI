@@ -40,8 +40,16 @@ export class SubscriptionHandler {
 
       const body = await validateRequestBody(request);
       const email = validateEmail(body.email, true);
+      let tier;
+      if (body.tier === undefined || body.tier === null) {
+        tier = 'pro';
+      } else if (body.tier === 'basic' || body.tier === 'pro') {
+        tier = body.tier;
+      } else {
+        return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
+      }
 
-      const priceId = this.env.STRIPE_PRICE_PRO;
+      const priceId = tier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
       if (!priceId) {
         return jsonResponse({ error: 'Price not configured' }, 500);
       }
@@ -60,8 +68,8 @@ export class SubscriptionHandler {
         customerId = customer.id;
       }
 
-      // Create checkout session
-      const session = await this.createStripeCheckout(customerId, priceId, email);
+      // Create checkout session, passing tier in metadata so webhooks can read it
+      const session = await this.createStripeCheckout(customerId, priceId, email, tier);
 
       if (this.logger) {
         logSubscription(this.logger, 'checkout_created', {
@@ -201,8 +209,13 @@ export class SubscriptionHandler {
         }
       }
 
+      // Determine purchased tier from checkout session metadata
+      const purchasedTier = (session.metadata?.tier === 'basic' || session.metadata?.tier === 'pro')
+        ? session.metadata.tier
+        : 'pro';
+
       if (user) {
-        // User exists - upgrade to pro
+        // User exists - set to purchased tier
         await this.db
           .prepare(`
             UPDATE users
@@ -212,14 +225,14 @@ export class SubscriptionHandler {
                 stripe_subscription_id = ?
             WHERE id = ?
           `)
-          .bind('pro', 'active', customerId, subscriptionId, user.id)
+          .bind(purchasedTier, 'active', customerId, subscriptionId, user.id)
           .run();
 
-        console.log(`Upgraded user ${customerEmail} to Pro tier`);
+        console.log(`Updated user ${customerEmail} to ${purchasedTier} tier`);
 
         // Send upgrade email with existing license key (not a new user)
         if (this.env.RESEND_API_KEY) {
-          await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, 'pro', nextBillingDate, false);
+          await this.auth.sendLicenseKeyEmail(customerEmail, user.license_key, purchasedTier, nextBillingDate, false);
         }
 
       } else {
@@ -247,14 +260,14 @@ export class SubscriptionHandler {
             INSERT INTO users (id, license_key, email, tier, stripe_customer_id, stripe_subscription_id, subscription_status)
             VALUES (?, ?, ?, ?, ?, ?, ?)
           `)
-          .bind(userId, licenseKey, customerEmail, 'pro', customerId, subscriptionId, 'active')
+          .bind(userId, licenseKey, customerEmail, purchasedTier, customerId, subscriptionId, 'active')
           .run();
 
-        console.log(`Created new Pro user ${customerEmail} with license key`);
+        console.log(`Created new ${purchasedTier} user ${customerEmail} with license key`);
 
         // Send welcome email with license key (new user)
         if (this.env.RESEND_API_KEY) {
-          await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, 'pro', nextBillingDate, true);
+          await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, purchasedTier, nextBillingDate, true);
         }
       }
 
@@ -272,8 +285,8 @@ export class SubscriptionHandler {
 
       if (customerEmail) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE LOWER(email) = LOWER(?)')
-          .bind('active', 'pro', customerEmail)
+          .prepare('UPDATE users SET subscription_status = ? WHERE LOWER(email) = LOWER(?)')
+          .bind('active', customerEmail)
           .run();
       }
     } catch (error) {
@@ -307,8 +320,8 @@ export class SubscriptionHandler {
       const subscriptionId = subscription.id;
 
       await this.db
-        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_subscription_id = ?')
-        .bind('free', 'cancelled', subscriptionId)
+        .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+        .bind('cancelled', null, subscriptionId)
         .run();
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
@@ -323,20 +336,26 @@ export class SubscriptionHandler {
       const subscriptionId = subscription.id;
       const status = subscription.status;
 
-      // Map Stripe subscription statuses to tier/status
-      // active, trialing = pro (user has access), subscription_status = 'active'
-      // past_due = pro (grace period, still has access), subscription_status = 'past_due'
-      // unpaid, canceled, incomplete_expired, paused = free (no access)
-      const accessStatuses = ['active', 'trialing', 'past_due'];
-      const newTier = accessStatuses.includes(status) ? 'pro' : 'free';
+      // Map Stripe subscription statuses to subscription_status — tier is not changed here
+      // active, trialing = access allowed, subscription_status = 'active'
+      // past_due = access denied, subscription_status = 'past_due'
+      // unpaid, canceled, incomplete_expired, paused = access denied, subscription_status = 'inactive'
       const subscriptionStatus = status === 'past_due' ? 'past_due'
-        : accessStatuses.includes(status) ? 'active'
+        : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
-      await this.db
-        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE stripe_subscription_id = ?')
-        .bind(newTier, subscriptionStatus, subscriptionId)
-        .run();
+      // Clear tier (set to NULL) when subscription access is fully revoked
+      if (subscriptionStatus === 'inactive') {
+        await this.db
+          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+          .bind(subscriptionStatus, null, subscriptionId)
+          .run();
+      } else {
+        await this.db
+          .prepare('UPDATE users SET subscription_status = ? WHERE stripe_subscription_id = ?')
+          .bind(subscriptionStatus, subscriptionId)
+          .run();
+      }
     } catch (error) {
       console.error('Subscription update handler error:', error);
     }
@@ -380,16 +399,18 @@ export class SubscriptionHandler {
     return jsonResponse({
       plans: [
         {
-          tier: 'free',
-          name: 'Free',
-          price: 0,
-          dailyLimit: parseInt(this.env.FREE_TIER_DAILY_LIMIT || '10'),
+          tier: 'basic',
+          name: 'Basic',
+          price: 1.49,
+          billingPeriod: 'week',
+          dailyLimit: parseInt(this.env.BASIC_TIER_DAILY_LIMIT || '50'),
           features: []
         },
         {
           tier: 'pro',
           name: 'Pro',
           price: 9.99,
+          billingPeriod: 'month',
           dailyLimit: null,
           rateLimit: '20 per minute',
           features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute'],
@@ -497,14 +518,15 @@ export class SubscriptionHandler {
   /**
    * Create Stripe checkout session
    */
-  async createStripeCheckout(customerId, priceId, email) {
+  async createStripeCheckout(customerId, priceId, email, tier = 'pro') {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const params = {
       'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       mode: 'subscription',
       success_url: `${extensionUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${extensionUrl}/activate`
+      cancel_url: `${extensionUrl}/activate`,
+      'metadata[tier]': tier
     };
 
     // Use customer ID if available, otherwise use email

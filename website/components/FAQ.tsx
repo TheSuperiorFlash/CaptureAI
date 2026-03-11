@@ -9,8 +9,8 @@ export const faqs = [
         answer: 'CaptureAI is built for Google Chrome only. It uses Chrome-specific extension APIs and has been tested exclusively on Chrome.',
     },
     {
-        question: 'What happens when I hit the free tier limit?',
-        answer: 'Free accounts get 10 requests per day. When you reach the limit, you can wait for the daily reset or upgrade to Pro for unlimited requests.',
+        question: 'What happens when I hit the daily limit?',
+        answer: 'Basic accounts get 50 requests per day. When you reach the limit, you can wait for the daily reset or upgrade to Pro for unlimited requests.',
     },
     {
         question: 'Can I upgrade or cancel anytime?',

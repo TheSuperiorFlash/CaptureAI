@@ -180,12 +180,6 @@ export const RateLimitPresets = {
     windowMs: 60000,
     bindingName: 'RATE_LIMITER_AUTH'
   },
-  // Unauthenticated resource creation — very conservative: 3 req/min per IP
-  FREE_KEY_CREATION: {
-    limit: 3,
-    windowMs: 60000,
-    bindingName: 'RATE_LIMITER_FREE_KEY'
-  },
   // Low-traffic/sensitive endpoint — 10 req/min per IP
   LICENSE_VALIDATION: {
     limit: 10,

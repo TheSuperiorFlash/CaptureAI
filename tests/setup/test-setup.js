@@ -32,7 +32,7 @@ global.importScripts = jest.fn((...scripts) => {
           fetchWithTimeout: jest.fn(),
           getLicenseKey: jest.fn().mockResolvedValue('TEST-KEY1-KEY2-KEY3-KEY4'),
           getCachedOrFreshUser: jest.fn().mockResolvedValue({
-            user: { tier: 'free', subscription_status: 'inactive' }
+            user: { tier: 'basic', subscription_status: 'inactive' }
           }),
           refreshUserCache: jest.fn().mockResolvedValue(undefined),
           sendAIRequest: jest.fn().mockResolvedValue({

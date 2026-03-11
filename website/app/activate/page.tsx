@@ -8,8 +8,8 @@ import { useSwipeTier } from '@/hooks/useSwipeTier'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const freeFeatures: Array<{ text: string; included: boolean; limited?: boolean }> = [
-    { text: '10 requests per day', included: true, limited: true },
+const basicFeatures: Array<{ text: string; included: boolean; limited?: boolean }> = [
+    { text: '50 requests per day', included: true, limited: true },
     { text: 'Screenshot capture', included: true },
     { text: 'Floating interface', included: true },
     { text: 'Stealth Mode', included: true },
@@ -82,21 +82,17 @@ export default function ActivatePage() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
     const [loading, setLoading] = useState(false)
-    const [result, setResult] = useState<{
-        type: 'success' | 'error'
-        message: string
-        existing?: boolean
-    } | null>(null)
+    const [result, setResult] = useState<{ message: string } | null>(null)
 
     const handleSignup = async () => {
         const trimmedEmail = email.trim()
         if (!trimmedEmail) {
-            setResult({ type: 'error', message: 'Please enter your email address' })
+            setResult({ message: 'Please enter your email address' })
             return
         }
 
         if (!EMAIL_REGEX.test(trimmedEmail)) {
-            setResult({ type: 'error', message: 'Please enter a valid email address' })
+            setResult({ message: 'Please enter a valid email address' })
             return
         }
 
@@ -106,14 +102,13 @@ export default function ActivatePage() {
         setResult(null)
 
         try {
-            if (selectedTier === 'free') {
-                await handleFreeSignup()
+            if (selectedTier === 'basic') {
+                await handleBasicSignup()
             } else {
                 await handleProSignup()
             }
         } catch (error) {
             setResult({
-                type: 'error',
                 message: error instanceof Error ? error.message : 'An error occurred',
             })
         } finally {
@@ -121,23 +116,26 @@ export default function ActivatePage() {
         }
     }
 
-    const handleFreeSignup = async () => {
-        const data = await apiPost(`${API_BASE_URL}/api/auth/create-free-key`, { email })
+    const handleBasicSignup = async () => {
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
 
-        // Validate data.existing with runtime type guard
-        const existingValue = typeof data.existing === 'boolean' ? data.existing : undefined
-
-        setResult({
-            type: 'success',
-            message: existingValue
-                ? `We've sent your existing license key to ${email}`
-                : `Your license key has been sent to ${email}`,
-            existing: existingValue,
-        })
+        if (data.url) {
+            const url = new URL(data.url as string)
+            if (url.protocol !== 'https:') {
+                throw new Error('Unexpected checkout URL protocol')
+            }
+            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com']
+            if (!trustedHosts.includes(url.hostname)) {
+                throw new Error('Unexpected checkout URL')
+            }
+            window.location.href = url.href
+        } else {
+            throw new Error('No checkout URL received')
+        }
     }
 
     const handleProSignup = async () => {
-        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email })
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
 
         if (data.url) {
             // Validate redirect URL points to a trusted domain (Stripe checkout)
@@ -173,7 +171,7 @@ export default function ActivatePage() {
                         <span className="text-gradient-static">plan</span>
                     </h1>
                     <p className="text-[--color-text-secondary]">
-                        Start free with 10 requests per day, or unlock everything with Pro.
+                        Start basic for 50 requests per day, or unlock everything with Pro.
                     </p>
                 </div>
 
@@ -184,38 +182,38 @@ export default function ActivatePage() {
                     onTouchEnd={handleTouchEnd}
                     onTouchCancel={handleTouchCancel}
                 >
-                    {/* Free plan */}
+                    {/* Basic plan */}
                     <div
                         role="button"
                         tabIndex={0}
-                        aria-pressed={selectedTier === 'free'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'free'
-                            ? 'border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100'
-                            : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
+                        aria-pressed={selectedTier === 'basic'}
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
+                            ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
+                            : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                             }`}
-                        onClick={() => setSelectedTier('free')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('free'); } }}
+                        onClick={() => setSelectedTier('basic')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
                     >
                         <div className="absolute right-6 top-6">
-                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'free'
+                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'basic'
                                 ? 'border-blue-500 bg-blue-500'
                                 : 'border-white/20'
                                 }`}>
-                                {selectedTier === 'free' && <Check className="h-4 w-4 text-white" />}
+                                {selectedTier === 'basic' && <Check className="h-4 w-4 text-white" />}
                             </div>
                         </div>
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-[--color-text]">Free</h2>
+                            <h2 className="text-xl font-bold text-[--color-text]">Basic</h2>
                             <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                         </div>
 
                         <div className="mb-7">
-                            <span className="text-4xl font-extrabold font-inter text-[--color-text]">$0</span>
-                            <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                            <span className="text-4xl font-extrabold font-inter text-[--color-text]">$1.49</span>
+                            <span className="text-sm text-[--color-text-tertiary]"> / week</span>
                         </div>
 
                         <ul className="space-y-3">
-                            {freeFeatures.map((f) => (
+                            {basicFeatures.map((f) => (
                                 <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
                                     {f.limited ? (
                                         <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
@@ -235,14 +233,15 @@ export default function ActivatePage() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue border transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
-                            ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] border-cyan-400/50 md:-translate-y-1 z-20 translate-x-0 scale-100 rotate-0 opacity-100'
-                            : 'border-cyan-500/20 md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)] z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                            ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
+                            : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                        <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
                             <div className="absolute right-6 top-6">
                                 <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                     ? 'border-cyan-400 bg-cyan-400'
@@ -285,18 +284,17 @@ export default function ActivatePage() {
                             </ul>
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 {/* Email + CTA section */}
                 <div className="mx-auto mt-12 max-w-2xl">
                     <div className="glass-card rounded-2xl p-8 md:p-10">
                         <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
-                            {selectedTier === 'free' ? 'Get your free license key' : 'Start your Pro subscription'}
+                            {selectedTier === 'basic' ? 'Start your Basic plan' : 'Start your Pro subscription'}
                         </h3>
                         <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                            {selectedTier === 'free'
-                                ? 'Enter your email and we\'ll send you a key instantly.'
-                                : 'Enter your email to proceed to secure checkout via Stripe.'}
+                            Enter your email to proceed to secure checkout via Stripe.
                         </p>
 
                         <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
@@ -328,7 +326,7 @@ export default function ActivatePage() {
                                     <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
                                 ) : (
                                     <>
-                                        {selectedTier === 'free' ? 'Get Key' : 'Continue'}
+                                        Continue
                                         <ArrowRight className="h-4 w-4" />
                                     </>
                                 )}
@@ -342,43 +340,15 @@ export default function ActivatePage() {
                                 role="status"
                                 aria-live="polite"
                                 aria-atomic="true"
-                                className={`mt-5 rounded-xl border p-5 ${result.type === 'success'
-                                    ? 'border-emerald-500/20 bg-emerald-500/[0.05]'
-                                    : 'border-red-500/20 bg-red-500/[0.05]'
-                                    }`}
+                                className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
                             >
-                                {result.type === 'success' ? (
-                                    <>
-                                        <div className="mb-2 flex items-center gap-2">
-                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15">
-                                                <Check className="h-3 w-3 text-emerald-400" />
-                                            </div>
-                                            <h3 className="text-sm font-semibold text-emerald-400">
-                                                {result.existing ? 'Welcome back!' : 'Check your email'}
-                                            </h3>
-                                        </div>
-                                        <p className="mb-3 text-sm text-[--color-text-tertiary]">
-                                            {result.message}
-                                        </p>
-                                        <div className="text-sm text-[--color-text-tertiary]">
-                                            <p className="mb-1 font-medium text-[--color-text-secondary]">Next steps:</p>
-                                            <ol className="list-inside list-decimal space-y-0.5">
-                                                <li>Check your inbox (and spam folder)</li>
-                                                <li>Copy the license key</li>
-                                                <li>Open the CaptureAI extension popup</li>
-                                                <li>Paste and activate</li>
-                                            </ol>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
-                                            <AlertCircle className="h-5 w-5 text-red-400" />
-                                        </div>
-                                        <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
-                                        <p className="text-sm text-red-200/70">{result.message}</p>
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
+                                        <AlertCircle className="h-5 w-5 text-red-400" />
                                     </div>
-                                )}
+                                    <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
+                                    <p className="text-sm text-red-200/70">{result.message}</p>
+                                </div>
                             </div>
                         )}
                     </div>

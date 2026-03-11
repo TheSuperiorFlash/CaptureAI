@@ -87,9 +87,6 @@ export class Router {
     }
 
     // License Key Authentication routes
-    if (path === '/api/auth/create-free-key' && method === 'POST') {
-      return this.auth.createFreeKey(request);
-    }
     if (path === '/api/auth/validate-key' && method === 'POST') {
       return this.auth.validateKey(request);
     }

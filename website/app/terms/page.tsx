@@ -45,7 +45,7 @@ export default function TermsPage() {
                             <li>Privacy Guard — prevents focus/visibility detection on supported sites (Pro only)</li>
                             <li>Ask Mode — custom question prompting (Pro only)</li>
                             <li>Auto-Solve Mode — automated question solving on supported platforms (Pro only)</li>
-                            <li>Free tier: 10 AI requests per day</li>
+                            <li>Basic tier: 50 AI requests per day at $1.49/week</li>
                             <li>Pro tier: Unlimited requests at $9.99/month</li>
                         </ul>
                     </section>

@@ -31,7 +31,7 @@ export default function Home() {
         applicationCategory: 'BrowserApplication',
         operatingSystem: 'Chrome',
         offers: [
-            { '@type': 'Offer', price: '0', priceCurrency: 'USD', name: 'Free' },
+            { '@type': 'Offer', price: '1.49', priceCurrency: 'USD', name: 'Basic' },
             { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
         ],
         description: 'Chrome extension that screenshots any question and gives you the answer instantly.',

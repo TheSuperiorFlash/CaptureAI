@@ -26,7 +26,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
-**Tiers:** Free (10 req/day) | Pro ($9.99/mo, 20 req/min unlimited)
+**Tiers:** Basic ($1.49/week, 50 req/day) | Pro ($9.99/mo, 20 req/min unlimited)
 
 ## Commands
 
@@ -51,7 +51,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Privacy Guard**: `inject.js` in `MAIN` world overrides `document.hasFocus()`, blocks visibility/focus/lifecycle events, blocks clipboard events, removes AI honeypots. Pro only, requires enabled in settings. Prevents `unload` policy violations.
 - **OCR Flow**: Capture -> Tesseract.js v7 -> if confidence >60% send text only (90% savings) -> else fallback to image
 - **Shortcuts**: `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle panel
-- **Rate Limiting**: Cloudflare native Rate Limiting API with 6 presets (AUTH: 5/min, FREE_KEY: 3/min, LICENSE: 10/min, CHECKOUT: 10/min, GLOBAL: 60/min, PRO_AI: 20/min)
+- **Rate Limiting**: Cloudflare native Rate Limiting API with 5 presets (AUTH: 5/min, LICENSE: 10/min, CHECKOUT: 10/min, GLOBAL: 60/min, PRO_AI: 20/min)
 - **Auth**: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), sent via `Authorization: LicenseKey YOUR-KEY` header
 - **Usage Tracking**: Two-table strategy — `usage_records` (per-request) + `usage_daily` (O(1) rate limit checks)
 
@@ -60,7 +60,7 @@ cd api && npm run db:migrate  # Run migrations
 ```
 captureai-license-key          # Current license key
 captureai-user-email           # User email
-captureai-user-tier            # 'free' or 'pro'
+captureai-user-tier            # 'basic' or 'pro'
 captureai-user-cache           # Cached user object with timestamp
 captureai-auto-solve-mode      # Boolean
 captureai-ask-mode             # Boolean
@@ -146,8 +146,8 @@ captureai-api-key              # Legacy API key (deprecated, migration fallback)
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `RESEND_API_KEY`, `FROM_EMAIL`
-**Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `FREE_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`
+**Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow
 
@@ -167,6 +167,6 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 - **Extension Architecture**: [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) — modules, storage keys, privacy guard
 - **Chrome Extension Config**: [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) — CORS extension ID management
 - **Database Guide**: [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) — schema, queries, maintenance
-- **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 7 migrations
+- **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 8 migrations
 - **Testing Guide**: [tests/README.md](tests/README.md) — 25 test files, setup, patterns
 - **Website Design System**: [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md) — tokens, components, patterns

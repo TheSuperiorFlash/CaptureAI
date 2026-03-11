@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT,
   license_key TEXT UNIQUE NOT NULL,
-  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro')),
+  tier TEXT DEFAULT 'basic' CHECK (tier IN ('basic', 'pro')),
   subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled', 'past_due')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT,

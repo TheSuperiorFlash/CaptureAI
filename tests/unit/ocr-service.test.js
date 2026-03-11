@@ -599,7 +599,7 @@ describe('OCRService', () => {
     test('should resolve with processed data URL on success', async () => {
       const result = await OCRService.preprocessImage('data:image/png;base64,test');
       expect(result).toBe('data:image/png;base64,processed');
-      expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/png');
+      expect(mockCanvas.toDataURL).toHaveBeenCalledWith('image/webp', 0.9);
     });
   });
 });

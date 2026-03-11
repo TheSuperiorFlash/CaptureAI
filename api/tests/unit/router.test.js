@@ -7,7 +7,6 @@ import { describe, test, expect, beforeEach, jest } from '@jest/globals';
 
 // Mock handlers
 const mockAuth = {
-  createFreeKey: jest.fn().mockResolvedValue(new Response(JSON.stringify({ tier: 'free' }), { status: 201 })),
   validateKey: jest.fn().mockResolvedValue(new Response(JSON.stringify({ message: 'validated' }))),
   getCurrentUser: jest.fn().mockResolvedValue(new Response(JSON.stringify({ id: '123' })))
 };
@@ -201,10 +200,10 @@ describe('Router', () => {
   });
 
   describe('Auth routes', () => {
-    test('POST /api/auth/create-free-key routes to auth.createFreeKey', async () => {
+    test('POST /api/auth/create-free-key returns 404 (route removed)', async () => {
       const request = createRequest('/api/auth/create-free-key', 'POST');
-      await router.route(request);
-      expect(mockAuth.createFreeKey).toHaveBeenCalledWith(request);
+      const response = await router.route(request);
+      expect(response.status).toBe(404);
     });
 
     test('POST /api/auth/validate-key routes to auth.validateKey', async () => {
@@ -219,11 +218,6 @@ describe('Router', () => {
       expect(mockAuth.getCurrentUser).toHaveBeenCalledWith(request);
     });
 
-    test('GET /api/auth/create-free-key returns 404 (wrong method)', async () => {
-      const request = createRequest('/api/auth/create-free-key', 'GET');
-      const response = await router.route(request);
-      expect(response.status).toBe(404);
-    });
 
     test('POST /api/auth/me returns 404 (wrong method)', async () => {
       const request = createRequest('/api/auth/me', 'POST');

@@ -18,10 +18,15 @@ export default function Navbar() {
     const [isSafari, setIsSafari] = useState(false)
     const [activePillIndex, setActivePillIndex] = useState<number | null>(null)
     const [isNavHovered, setIsNavHovered] = useState(false)
+    const [sessionKey, setSessionKey] = useState(0)
+    const [isFirstInSession, setIsFirstInSession] = useState(true)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
+    const resetTimeout = useRef<NodeJS.Timeout | null>(null)
 
     const handleMouseEnter = (index: number) => {
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+        if (resetTimeout.current) clearTimeout(resetTimeout.current)
+        setIsFirstInSession(activePillIndex === null)
         setActivePillIndex(index)
         setIsNavHovered(true)
     }
@@ -29,6 +34,10 @@ export default function Navbar() {
     const handleMouseLeave = () => {
         hoverTimeout.current = setTimeout(() => {
             setIsNavHovered(false)
+            resetTimeout.current = setTimeout(() => {
+                setActivePillIndex(null)
+                setSessionKey(k => k + 1)
+            }, 250)
         }, 25)
     }
 
@@ -121,6 +130,26 @@ export default function Navbar() {
         return pathname === href
     }
 
+    const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        if (href.startsWith('/#') && pathname === '/') {
+            e.preventDefault()
+            const targetId = href.split('#')[1]
+            const elem = document.getElementById(targetId)
+            if (elem) {
+                elem.scrollIntoView({ behavior: 'smooth' })
+                window.history.pushState(null, '', `/#${targetId}`)
+                setActiveHash(targetId)
+            }
+        } else if (href === pathname || (href === '/' && pathname === '/')) {
+            e.preventDefault()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            if (href === '/') {
+                window.history.pushState(null, '', '/')
+                setActiveHash('')
+            }
+        }
+    }
+
     const shouldUseSimpleGlass = isLowPerformance || isMobile || isSafari
 
     return (
@@ -153,22 +182,22 @@ export default function Navbar() {
                     transition={{ duration: isScrolled ? 0.15 : 0.3, ease: 'easeOut' }}
                 />
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity">
+                <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
                     <Image src="/logo.svg" alt="CaptureAI" width={28} height={28} />
                     <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
                 </Link>
 
                 {/* Desktop nav */}
-                <div className="hidden items-center gap-2 md:flex relative z-10" onMouseLeave={handleMouseLeave}>
+                <div className={`hidden items-center md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-500 ease-out ${isScrolled ? 'gap-2' : 'gap-4'}`} onMouseLeave={handleMouseLeave}>
                     {navigation.map((item, index) => (
                         <div
                             key={item.name}
-                            className="relative px-4 py-2 flex items-center justify-center cursor-pointer"
+                            className="relative flex items-center justify-center"
                             onMouseEnter={() => handleMouseEnter(index)}
                         >
                             {activePillIndex === index && !isReducedMotion && (
                                 <motion.div
-                                    layoutId="nav-hover-pill"
+                                    layoutId={`nav-hover-pill-${sessionKey}`}
                                     className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
                                         ? 'bg-white/[0.06] backdrop-blur-md'
                                         : 'border border-white/[0.02] bg-white/[0.02]'
@@ -178,13 +207,15 @@ export default function Navbar() {
                                         WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
                                         boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
                                     } : undefined}
+                                    initial={isFirstInSession ? { opacity: 0 } : false}
                                     animate={{ opacity: isNavHovered ? 1 : 0 }}
                                     transition={{ type: "spring", bounce: 0.15, duration: 0.5, opacity: { duration: 0.2 } }}
                                 />
                             )}
                             <Link
                                 href={item.href}
-                                className={`relative z-10 text-sm font-medium transition-colors duration-200 ${isActive(item.href)
+                                onClick={(e) => handleNavClick(e, item.href)}
+                                className={`relative z-10 px-4 py-2 block text-sm font-medium transition-colors duration-200 ${isActive(item.href)
                                     ? 'text-[--color-text]'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
@@ -200,16 +231,17 @@ export default function Navbar() {
                     <MagneticButton magneticRange={10}>
                         <motion.div
                             animate={{
-                                borderRadius: isScrolled ? "100px" : "12px"
+                                borderRadius: isScrolled ? "24px" : "12px"
                             }}
                             transition={{
-                                duration: 0.75,
+                                duration: 0.5,
                                 ease: [0.25, 1, 0.5, 1]
                             }}
                             className="overflow-hidden flex items-center justify-center"
                         >
                             <Link
                                 href="/activate"
+                                onClick={(e) => handleNavClick(e, '/activate')}
                                 className="glow-btn inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 whitespace-nowrap"
                             >
                                 Get Started
@@ -252,7 +284,10 @@ export default function Navbar() {
                                     ? 'text-[--color-text] font-medium'
                                     : 'text-[--color-text-tertiary] hover:text-[--color-text]'
                                     }`}
-                                onClick={() => setIsOpen(false)}
+                                onClick={(e) => {
+                                    handleNavClick(e, item.href)
+                                    setIsOpen(false)
+                                }}
                             >
                                 {item.name}
                             </Link>
@@ -261,7 +296,10 @@ export default function Navbar() {
                             <Link
                                 href="/activate"
                                 className="glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white text-[13px] px-2 h-9"
-                                onClick={() => setIsOpen(false)}
+                                onClick={(e) => {
+                                    handleNavClick(e, '/activate')
+                                    setIsOpen(false)
+                                }}
                             >
                                 Get Started
                                 <ArrowRight className="h-3.5 w-3.5" />

@@ -33,7 +33,7 @@ export default function PrivacyPage() {
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Account Information</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
                             <li>Email address — used for license key delivery and account management</li>
-                            <li>License key and subscription tier (Free or Pro)</li>
+                            <li>License key and subscription tier (Basic or Pro)</li>
                             <li>Payment information — processed securely by Stripe; we never store credit card details</li>
                         </ul>
 
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Usage Data</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
                             <li>Per-request metadata is recorded for each AI query: prompt type, model used, input/output/cached token counts, estimated cost, response time, and timestamp</li>
-                            <li>This data is used for: enforcing daily request limits (Free tier), per-minute rate limiting (Pro tier), internal cost monitoring and analytics, and service improvement</li>
+                            <li>This data is used for: enforcing daily request limits (Basic tier), per-minute rate limiting (Pro tier), internal cost monitoring and analytics, and service improvement</li>
                             <li>Usage records are linked to your account via your license key, which is stored together with your email address (see Data Storage section below). Usage data is therefore account-identifiable</li>
                             <li>Cloudflare AI Gateway also retains its own request logs per its standard data retention practices — review <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-[--color-accent-hover] underline underline-offset-2">Cloudflare&apos;s Privacy Policy</a></li>
                         </ul>

@@ -337,42 +337,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /**
    * Normalize tier to a safe, known value.
-   * Falls back to 'free' if the provided value is invalid.
+   * Falls back to 'basic' if the provided value is invalid.
    *
    * @param {*} tier - Raw tier value from storage or API.
-   * @returns {'free'|'pro'} Normalized tier string.
+   * @returns {'basic'|'pro'} Normalized tier string.
    */
   function normalizeTier(tier) {
     if (typeof tier === 'string') {
       const normalized = tier.trim().toLowerCase();
-      if (normalized === 'free' || normalized === 'pro') {
+      if (normalized === 'basic' || normalized === 'pro') {
         return normalized;
       }
     }
-    console.error('Invalid tier value, defaulting to free:', tier);
-    return 'free';
+    console.error('Invalid tier value, defaulting to basic:', tier);
+    return 'basic';
   }
 
   /**
    * Apply tier-specific UI updates: badge, upgrade button, and usage stats
-   * @param {string} tier - 'free' or 'pro'
+   * @param {string} tier - 'basic' or 'pro'
    */
   function applyTierUI(tier) {
     const normalizedTier = normalizeTier(tier);
     elements.userTier.textContent = normalizedTier.toUpperCase();
 
-    if (normalizedTier === 'free') {
+    if (normalizedTier === 'basic') {
       elements.upgradeBtn.classList.remove('hidden');
-      elements.userTier.classList.add('tier-free');
+      elements.userTier.classList.add('tier-basic');
       elements.userTier.classList.remove('tier-pro');
-      elements.settingsView.classList.add('free-tier-view');
+      elements.settingsView.classList.add('basic-tier-view');
       elements.usageSection.classList.remove('hidden');
       updateUsageStats(); // No await - load asynchronously
     } else {
       elements.upgradeBtn.classList.add('hidden');
       elements.userTier.classList.add('tier-pro');
-      elements.userTier.classList.remove('tier-free');
-      elements.settingsView.classList.remove('free-tier-view');
+      elements.userTier.classList.remove('tier-basic');
+      elements.settingsView.classList.remove('basic-tier-view');
       elements.usageSection.classList.add('hidden');
     }
   }
@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.usageContent.textContent = '';
 
       if (usage.limitType === 'per_day') {
-        // Free tier - show daily stats
+        // Basic tier - show daily stats
         const used = parseInt(usage.today.used, 10) || 0;
         const limit = parseInt(usage.today.limit, 10) || 0;
         const remaining = Math.max(0, limit - used);

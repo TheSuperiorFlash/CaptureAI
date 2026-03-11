@@ -82,7 +82,7 @@ describe('Migration → Auth Integration', () => {
       status: 200,
       headers: { get: () => 'application/json' },
       json: async () => ({
-        user: { email: 'new@user.com', tier: 'free' }
+        user: { email: 'new@user.com', tier: 'basic' }
       }),
       text: async () => '{}'
     });
