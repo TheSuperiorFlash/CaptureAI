@@ -239,7 +239,12 @@ export class AuthHandler {
           billingDate = nextBillingDate;
         } else {
           const d = new Date();
-          d.setMonth(d.getMonth() + 1);
+          // Basic is billed weekly; Pro is billed monthly
+          if (tier === 'basic') {
+            d.setDate(d.getDate() + 7);
+          } else {
+            d.setMonth(d.getMonth() + 1);
+          }
           billingDate = d;
         }
         const formattedDate = billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -458,12 +463,15 @@ Need help? Visit our help page: https://captureai.dev/help`;
   /**
    * Generate paid tier email HTML
    * @param {string} licenseKey
-   * @param {Date} nextBillingDate - Actual next billing date from Stripe
+   * @param {Date|null} nextBillingDate - Actual next billing date from Stripe
    * @param {boolean} isNewUser - Whether to include install instructions
-   * @param {string} tierName - Display name for the tier (e.g. 'Pro', 'Basic Plan')
+   * @param {string} tierName - Display name for the tier (e.g. 'Pro', 'Basic')
    */
   generateProEmailHTML(licenseKey, nextBillingDate, isNewUser = false, tierName = 'Pro') {
-    const formattedDate = nextBillingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const validDate = nextBillingDate instanceof Date ? nextBillingDate : null;
+    const formattedDate = validDate
+      ? validDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : 'TBD';
 
     return `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">

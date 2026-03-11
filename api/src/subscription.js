@@ -344,7 +344,7 @@ export class SubscriptionHandler {
         : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
-      // Downgrade tier to 'basic' when subscription access is revoked
+      // Clear tier (set to NULL) when subscription access is fully revoked
       if (subscriptionStatus === 'inactive') {
         await this.db
           .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
