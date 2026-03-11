@@ -54,22 +54,29 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'Price not configured' }, 500);
       }
 
-      // Create or get Stripe customer
+      // Look up the existing user so we can reuse their Stripe customer and detect upgrades
       let customerId;
+      let existingSubscriptionId = null;
       const existingUser = await this.db
-        .prepare('SELECT stripe_customer_id FROM users WHERE email = ?')
+        .prepare('SELECT stripe_customer_id, stripe_subscription_id, tier FROM users WHERE email = ?')
         .bind(email)
         .first();
 
       if (existingUser?.stripe_customer_id) {
         customerId = existingUser.stripe_customer_id;
+
+        // Detect upgrade: existing Basic user requesting Pro → pass their subscription
+        // so Stripe creates a proration-aware upgrade checkout session
+        if (tier === 'pro' && existingUser.tier === 'basic' && existingUser.stripe_subscription_id) {
+          existingSubscriptionId = existingUser.stripe_subscription_id;
+        }
       } else {
         const customer = await this.createStripeCustomer(email);
         customerId = customer.id;
       }
 
       // Create checkout session, passing tier in metadata so webhooks can read it
-      const session = await this.createStripeCheckout(customerId, priceId, email, tier);
+      const session = await this.createStripeCheckout(customerId, priceId, email, tier, existingSubscriptionId);
 
       if (this.logger) {
         logSubscription(this.logger, 'checkout_created', {
@@ -496,7 +503,9 @@ export class SubscriptionHandler {
   }
 
   /**
-   * Swap plan from Basic to Pro with proration
+   * Swap plan from Basic to Pro with proration via Stripe Checkout.
+   * Authenticates via license key, then creates a Checkout upgrade session.
+   * The existing checkout.session.completed webhook handles the tier update.
    * POST /api/subscription/swap-plan
    */
   async swapPlan(request) {
@@ -520,9 +529,14 @@ export class SubscriptionHandler {
         return jsonResponse(rateLimitError, 429);
       }
 
+      const proPriceId = this.env.STRIPE_PRICE_PRO;
+      if (!proPriceId) {
+        return jsonResponse({ error: 'Pro price not configured' }, 500);
+      }
+
       // Get full user data from DB
       const userData = await this.db
-        .prepare('SELECT tier, stripe_subscription_id, subscription_status FROM users WHERE id = ?')
+        .prepare('SELECT tier, stripe_subscription_id, stripe_customer_id, email FROM users WHERE id = ?')
         .bind(user.userId)
         .first();
 
@@ -538,84 +552,20 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'No active subscription found' }, 400);
       }
 
-      if (userData.subscription_status !== 'active') {
-        return jsonResponse({ error: 'Subscription is not active' }, 400);
-      }
-
-      const proPriceId = this.env.STRIPE_PRICE_PRO;
-      if (!proPriceId) {
-        return jsonResponse({ error: 'Pro price not configured' }, 500);
-      }
-
-      // Fetch the current subscription from Stripe to get the item ID
-      const subResponse = await fetchWithTimeout(
-        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
-        {
-          headers: { 'Authorization': `Bearer ${this.stripeKey}` }
-        },
-        5000
+      // Create an upgrade Checkout session — Stripe prorates across billing intervals
+      const session = await this.createStripeCheckout(
+        userData.stripe_customer_id,
+        proPriceId,
+        userData.email,
+        'pro',
+        userData.stripe_subscription_id
       );
 
-      if (!subResponse.ok) {
-        const error = await subResponse.json();
-        console.error('Failed to fetch subscription from Stripe:', error);
-        return jsonResponse({ error: 'Failed to retrieve subscription' }, 500);
-      }
-
-      const subscription = await subResponse.json();
-      const subscriptionItemId = subscription.items?.data?.[0]?.id;
-
-      if (!subscriptionItemId) {
-        return jsonResponse({ error: 'No subscription item found' }, 500);
-      }
-
-      // Swap the price on the existing subscription with proration
-      const updateResponse = await fetchWithTimeout(
-        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.stripeKey}`,
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: new URLSearchParams({
-            'items[0][id]': subscriptionItemId,
-            'items[0][price]': proPriceId,
-            'proration_behavior': 'create_prorations',
-            'metadata[tier]': 'pro'
-          })
-        },
-        5000
-      );
-
-      if (!updateResponse.ok) {
-        const error = await updateResponse.json();
-        console.error('Stripe subscription update failed:', error);
-        return jsonResponse({ error: error.error?.message || 'Failed to upgrade subscription' }, 500);
-      }
-
-      // Update tier in DB immediately
-      await this.db
-        .prepare('UPDATE users SET tier = ? WHERE id = ?')
-        .bind('pro', user.userId)
-        .run();
-
-      if (this.logger) {
-        logSubscription(this.logger, 'plan_swapped', {
-          userId: user.userId,
-          fromTier: 'basic',
-          toTier: 'pro'
-        });
-      }
-
-      return jsonResponse({ success: true, tier: 'pro' });
+      return jsonResponse({ url: session.url, sessionId: session.id });
 
     } catch (error) {
-      if (this.logger) {
-        this.logger.error('Plan swap error', error);
-      }
       console.error('Plan swap error:', error);
-      return jsonResponse({ error: 'Failed to swap plan' }, 500);
+      return jsonResponse({ error: 'Failed to initiate plan upgrade' }, 500);
     }
   }
 
@@ -644,9 +594,11 @@ export class SubscriptionHandler {
   }
 
   /**
-   * Create Stripe checkout session
+   * Create Stripe checkout session.
+   * When subscriptionId is provided the session upgrades that subscription
+   * (Stripe calculates proration automatically across billing intervals).
    */
-  async createStripeCheckout(customerId, priceId, email, tier = 'pro') {
+  async createStripeCheckout(customerId, priceId, email, tier = 'pro', subscriptionId = null) {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const params = {
       'line_items[0][price]': priceId,
@@ -662,6 +614,12 @@ export class SubscriptionHandler {
       params.customer = customerId;
     } else {
       params.customer_email = email;
+    }
+
+    // Upgrade mode: attaching an existing subscription lets Stripe prorate
+    // across intervals (e.g. weekly Basic → monthly Pro)
+    if (subscriptionId) {
+      params.subscription = subscriptionId;
     }
 
     const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {

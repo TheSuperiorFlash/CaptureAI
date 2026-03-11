@@ -913,7 +913,8 @@ describe('SubscriptionHandler', () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         tier: 'pro',
         stripe_subscription_id: 'sub_123',
-        subscription_status: 'active'
+        stripe_customer_id: 'cus_123',
+        email: 'test@example.com'
       });
 
       const request = createAuthRequest();
@@ -933,7 +934,8 @@ describe('SubscriptionHandler', () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         tier: 'basic',
         stripe_subscription_id: null,
-        subscription_status: 'active'
+        stripe_customer_id: 'cus_123',
+        email: 'test@example.com'
       });
 
       const request = createAuthRequest();
@@ -944,7 +946,7 @@ describe('SubscriptionHandler', () => {
       expect(body.error).toContain('No active subscription');
     });
 
-    test('should return 400 when subscription is not active', async () => {
+    test('should return 500 when Stripe Checkout session creation fails', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -953,32 +955,13 @@ describe('SubscriptionHandler', () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         tier: 'basic',
         stripe_subscription_id: 'sub_123',
-        subscription_status: 'past_due'
-      });
-
-      const request = createAuthRequest();
-      const response = await handler.swapPlan(request);
-      expect(response.status).toBe(400);
-
-      const body = JSON.parse(await response.text());
-      expect(body.error).toContain('not active');
-    });
-
-    test('should return 500 when Stripe subscription fetch fails', async () => {
-      handler.auth.authenticate.mockResolvedValueOnce({
-        userId: 'user-1',
-        tier: 'basic'
-      });
-
-      env.DB._mockFirst.mockResolvedValueOnce({
-        tier: 'basic',
-        stripe_subscription_id: 'sub_123',
-        subscription_status: 'active'
+        stripe_customer_id: 'cus_123',
+        email: 'test@example.com'
       });
 
       global.fetch.mockResolvedValueOnce({
         ok: false,
-        json: async () => ({ error: { message: 'Not found' } })
+        json: async () => ({ error: { message: 'Cannot create session' } })
       });
 
       const request = createAuthRequest();
@@ -986,7 +969,7 @@ describe('SubscriptionHandler', () => {
       expect(response.status).toBe(500);
     });
 
-    test('should return 500 when Stripe subscription update fails', async () => {
+    test('should successfully return a Stripe Checkout URL for the upgrade', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -995,58 +978,15 @@ describe('SubscriptionHandler', () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         tier: 'basic',
         stripe_subscription_id: 'sub_123',
-        subscription_status: 'active'
+        stripe_customer_id: 'cus_123',
+        email: 'test@example.com'
       });
 
-      // First fetch: get subscription (success)
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          items: { data: [{ id: 'si_123' }] }
-        })
-      });
-
-      // Second fetch: update subscription (fail)
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ error: { message: 'Cannot update' } })
-      });
-
-      const request = createAuthRequest();
-      const response = await handler.swapPlan(request);
-      expect(response.status).toBe(500);
-
-      const body = JSON.parse(await response.text());
-      expect(body.error).toBe('Cannot update');
-    });
-
-    test('should successfully swap from Basic to Pro', async () => {
-      handler.auth.authenticate.mockResolvedValueOnce({
-        userId: 'user-1',
-        tier: 'basic'
-      });
-
-      env.DB._mockFirst.mockResolvedValueOnce({
-        tier: 'basic',
-        stripe_subscription_id: 'sub_123',
-        subscription_status: 'active'
-      });
-
-      // First fetch: get subscription
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          items: { data: [{ id: 'si_123' }] }
-        })
-      });
-
-      // Second fetch: update subscription
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          id: 'sub_123',
-          status: 'active',
-          items: { data: [{ id: 'si_123', price: { id: 'price_pro_123' } }] }
+          id: 'cs_test_upgrade',
+          url: 'https://checkout.stripe.com/upgrade-session'
         })
       });
 
@@ -1055,13 +995,8 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.success).toBe(true);
-      expect(body.tier).toBe('pro');
-
-      // Verify DB was updated
-      expect(env.DB.prepare).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE users')
-      );
+      expect(body.url).toContain('stripe.com');
+      expect(body.sessionId).toBe('cs_test_upgrade');
     });
 
     test('should return 429 when rate limited', async () => {
