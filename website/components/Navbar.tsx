@@ -231,10 +231,10 @@ export default function Navbar() {
                     <MagneticButton magneticRange={10}>
                         <motion.div
                             animate={{
-                                borderRadius: isScrolled ? "100px" : "12px"
+                                borderRadius: isScrolled ? "24px" : "12px"
                             }}
                             transition={{
-                                duration: 0.75,
+                                duration: 0.5,
                                 ease: [0.25, 1, 0.5, 1]
                             }}
                             className="overflow-hidden flex items-center justify-center"
