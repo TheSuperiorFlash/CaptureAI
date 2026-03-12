@@ -62,50 +62,31 @@ export class SubscriptionHandler {
         .bind(email)
         .first();
 
-      // For active subscribers requesting a different tier:
-      // - Without confirmation (body.confirmed falsy): preview the prorated amount only — no charge
-      // - With confirmation (body.confirmed = true): apply the tier switch
+      // For active subscribers requesting a different tier, apply the switch immediately.
+      // Stripe creates a proration invoice; we return hosted_invoice_url so the user
+      // can review the itemised charge on Stripe's own page before payment is collected.
       if (
         existingUser?.stripe_subscription_id &&
         existingUser?.subscription_status === 'active' &&
         existingUser?.tier !== tier
       ) {
         existingSubscriptionId = existingUser.stripe_subscription_id;
-
-        if (!body.confirmed) {
-          // Step 1: Preview — call Stripe without creating any invoice
-          try {
-            const preview = await this.previewSubscriptionTierChange(existingSubscriptionId, tier);
-            return jsonResponse({ requiresConfirmation: true, tier, ...preview });
-          } catch (previewError) {
-            if (!this.isStripeMissingResourceError(previewError)) {
-              throw previewError;
-            }
-            // Stale subscription ID — clear and fall through to a fresh checkout
-            await this.db
-              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
-              .bind(null, 'inactive', existingUser.id)
-              .run();
+        try {
+          const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
+          return jsonResponse({
+            ...switchResult,
+            sessionId: 'tier_change_' + existingSubscriptionId,
+            changedTier: true
+          });
+        } catch (switchError) {
+          if (!this.isStripeMissingResourceError(switchError)) {
+            throw switchError;
           }
-        } else {
-          // Step 2: User confirmed — apply the tier switch
-          try {
-            const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
-            return jsonResponse({
-              ...switchResult,
-              sessionId: 'tier_change_' + existingSubscriptionId,
-              changedTier: true
-            });
-          } catch (switchError) {
-            if (!this.isStripeMissingResourceError(switchError)) {
-              throw switchError;
-            }
-            // Stale subscription ID — clear and fall through to a fresh checkout
-            await this.db
-              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
-              .bind(null, 'inactive', existingUser.id)
-              .run();
-          }
+          // Stale subscription ID — clear and fall through to a fresh checkout
+          await this.db
+            .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
+            .bind(null, 'inactive', existingUser.id)
+            .run();
         }
       }
 
@@ -991,6 +972,10 @@ export class SubscriptionHandler {
       throw new Error('Subscription item not found');
     }
 
+    // Capture proration date now so the amount Stripe calculates matches exactly
+    // what will be shown on the hosted invoice page.
+    const prorationDate = Math.floor(Date.now() / 1000);
+
     const updateResponse = await fetchWithTimeout(
       `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
       {
@@ -1004,6 +989,7 @@ export class SubscriptionHandler {
           'items[0][price]': newPriceId,
           'proration_behavior': 'always_invoice',
           'billing_cycle_anchor': 'now',
+          'proration_date': prorationDate.toString(),
           'metadata[tier]': newTier,
           'expand[]': 'latest_invoice'
         })
@@ -1022,7 +1008,13 @@ export class SubscriptionHandler {
     const updatedSubscription = await updateResponse.json();
     const invoice = updatedSubscription.latest_invoice;
 
-    // Update DB now if payment is already collected; webhook covers any deferred payment.
+    // If the invoice is still pending, redirect the user to Stripe's hosted invoice
+    // page so they can review the itemised proration charge before paying.
+    if (this.isInvoicePendingPayment(invoice) && invoice.hosted_invoice_url) {
+      return { url: invoice.hosted_invoice_url };
+    }
+
+    // Invoice already settled (auto-charged or zero amount) — update DB and show success.
     if (!invoice || this.isInvoiceSettled(invoice)) {
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
@@ -1031,73 +1023,6 @@ export class SubscriptionHandler {
     }
 
     return { url: `${extensionUrl}/payment-success?upgraded=1&tier=${newTier}` };
-  }
-
-  /**
-   * Preview the prorated amount for a subscription tier change without creating any invoice.
-   * Calls Stripe's invoice preview endpoint — safe to call multiple times, no side effects.
-   */
-  async previewSubscriptionTierChange(subscriptionId, newTier) {
-    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
-
-    if (!newPriceId) {
-      throw new Error('Price not configured');
-    }
-
-    // Fetch current subscription to get item ID and customer ID
-    const subResponse = await fetchWithTimeout(
-      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
-      { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
-      5000
-    );
-
-    if (!subResponse.ok) {
-      const error = await subResponse.json();
-      const stripeError = new Error(error.error?.message || 'Failed to fetch subscription for preview');
-      stripeError.stripeCode = error.error?.code;
-      stripeError.stripeType = error.error?.type;
-      throw stripeError;
-    }
-
-    const subscription = await subResponse.json();
-    const itemId = subscription.items?.data?.[0]?.id;
-    const customerId = subscription.customer;
-
-    if (!itemId) {
-      throw new Error('No subscription item found');
-    }
-
-    // Call Stripe invoice preview — creates no invoice, makes no charge
-    const previewResponse = await fetchWithTimeout(
-      'https://api.stripe.com/v1/invoices/create_preview',
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.stripeKey}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          'customer': customerId,
-          'subscription': subscriptionId,
-          'subscription_details[items][0][id]': itemId,
-          'subscription_details[items][0][price]': newPriceId,
-          'subscription_details[proration_behavior]': 'always_invoice',
-          'subscription_details[billing_cycle_anchor]': 'now'
-        })
-      },
-      5000
-    );
-
-    if (!previewResponse.ok) {
-      const error = await previewResponse.json();
-      const stripeError = new Error(error.error?.message || 'Failed to preview upgrade cost');
-      stripeError.stripeCode = error.error?.code;
-      stripeError.stripeType = error.error?.type;
-      throw stripeError;
-    }
-
-    const preview = await previewResponse.json();
-    return this.extractInvoicePreview(preview);
   }
 
   /**
