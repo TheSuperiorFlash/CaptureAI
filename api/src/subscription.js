@@ -62,12 +62,11 @@ export class SubscriptionHandler {
         .bind(email)
         .first();
 
-      // For active subscribers requesting a different tier:
-      // - Without confirmation (step 1): preview the prorated amount without charging
-      // - With confirmation (step 2): apply the tier switch and charge
+      // Any subscriber with an existing subscription requesting a different tier
+      // goes through the two-step preview+confirm flow regardless of subscription_status.
+      // This prevents bypassing the preview when status is e.g. 'trialing' or 'past_due'.
       if (
         existingUser?.stripe_subscription_id &&
-        existingUser?.subscription_status === 'active' &&
         existingUser?.tier !== tier
       ) {
         existingSubscriptionId = existingUser.stripe_subscription_id;
@@ -101,33 +100,6 @@ export class SubscriptionHandler {
 
       if (existingUser?.stripe_customer_id) {
         customerId = existingUser.stripe_customer_id;
-
-        // Detect upgrade: existing Basic user requesting Pro
-        if (tier === 'pro' && existingUser.tier === 'basic' && existingUser.stripe_subscription_id) {
-          existingSubscriptionId = existingUser.stripe_subscription_id;
-
-          try {
-            // Native Stripe proration via direct subscription update
-            const upgradeResult = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
-            return jsonResponse({ ...upgradeResult, sessionId: 'upgrade_' + existingSubscriptionId });
-          } catch (upgradeError) {
-            // Stripe sandbox migration can leave stale subscription IDs in DB.
-            // Fall back to normal checkout flow when Stripe reports missing resources.
-            if (!this.isStripeMissingResourceError(upgradeError)) {
-              throw upgradeError;
-            }
-
-            await this.db
-              .prepare(`
-                UPDATE users
-                SET stripe_subscription_id = ?,
-                    subscription_status = ?
-                WHERE id = ?
-              `)
-              .bind(null, 'inactive', existingUser.id)
-              .run();
-          }
-        }
       } else {
         const customer = await this.createStripeCustomer(email);
         customerId = customer.id;
