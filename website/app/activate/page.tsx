@@ -279,6 +279,7 @@ export default function ActivatePage() {
     }
 
     return (
+        <>
         <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
@@ -495,5 +496,6 @@ export default function ActivatePage() {
                 onCancel={hideConfirmModal}
             />
         )}
+        </>
     )
 }
