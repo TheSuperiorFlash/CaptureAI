@@ -196,7 +196,7 @@ describe('SubscriptionHandler', () => {
       expect(body.sessionId).toBeDefined();
     });
 
-    test('should auto-switch tier for active subscribers requesting a different plan', async () => {
+    test('should return confirmation preview for active subscribers requesting a different plan', async () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         id: 'user-123',
         tier: 'basic',
@@ -205,8 +205,7 @@ describe('SubscriptionHandler', () => {
         stripe_customer_id: 'cus_existing'
       });
 
-      jest.spyOn(handler, 'switchExistingSubscriptionTier').mockResolvedValue({
-        url: 'https://invoice.stripe.com/test-invoice',
+      jest.spyOn(handler, 'previewSubscriptionTierChange').mockResolvedValue({
         amountDueCents: 199,
         subtotalCents: 199,
         totalCents: 199,
@@ -218,10 +217,11 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.url).toBe('https://invoice.stripe.com/test-invoice');
-      expect(body.sessionId).toBe('tier_change_sub_existing');
-      expect(body.changedTier).toBe(true);
-      expect(handler.switchExistingSubscriptionTier).toHaveBeenCalledWith('sub_existing', 'pro', 'user-123');
+      expect(body.requiresConfirmation).toBe(true);
+      expect(body.tier).toBe('pro');
+      expect(body.amountDueCents).toBe(199);
+      expect(body.currency).toBe('usd');
+      expect(handler.previewSubscriptionTierChange).toHaveBeenCalledWith('sub_existing', 'pro');
     });
 
     test('should create new stripe customer when none exists', async () => {
@@ -1001,7 +1001,7 @@ describe('SubscriptionHandler', () => {
       expect(response.status).toBe(500);
     });
 
-    test('should return Stripe hosted invoice URL for the upgrade', async () => {
+    test('should return payment-success URL after upgrade', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -1041,9 +1041,7 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.url).toContain('invoice.stripe.com');
-      expect(body.amountDueCents).toBe(249);
-      expect(body.currency).toBe('usd');
+      expect(body.url).toContain('payment-success');
       expect(body.sessionId).toBe('upgrade_sub_123');
     });
 

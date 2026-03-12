@@ -62,36 +62,50 @@ export class SubscriptionHandler {
         .bind(email)
         .first();
 
-      // For active subscribers requesting a different tier, switch plans automatically.
+      // For active subscribers requesting a different tier:
+      // - Without confirmation (body.confirmed falsy): preview the prorated amount only — no charge
+      // - With confirmation (body.confirmed = true): apply the tier switch
       if (
         existingUser?.stripe_subscription_id &&
         existingUser?.subscription_status === 'active' &&
         existingUser?.tier !== tier
       ) {
         existingSubscriptionId = existingUser.stripe_subscription_id;
-        try {
-          const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
-          return jsonResponse({
-            ...switchResult,
-            sessionId: 'tier_change_' + existingSubscriptionId,
-            changedTier: true
-          });
-        } catch (switchError) {
-          // Stripe sandbox migration can leave stale subscription IDs in DB.
-          // Fall back to normal checkout flow when Stripe reports missing resources.
-          if (!this.isStripeMissingResourceError(switchError)) {
-            throw switchError;
-          }
 
-          await this.db
-            .prepare(`
-              UPDATE users
-              SET stripe_subscription_id = ?,
-                  subscription_status = ?
-              WHERE id = ?
-            `)
-            .bind(null, 'inactive', existingUser.id)
-            .run();
+        if (!body.confirmed) {
+          // Step 1: Preview — call Stripe without creating any invoice
+          try {
+            const preview = await this.previewSubscriptionTierChange(existingSubscriptionId, tier);
+            return jsonResponse({ requiresConfirmation: true, tier, ...preview });
+          } catch (previewError) {
+            if (!this.isStripeMissingResourceError(previewError)) {
+              throw previewError;
+            }
+            // Stale subscription ID — clear and fall through to a fresh checkout
+            await this.db
+              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
+              .bind(null, 'inactive', existingUser.id)
+              .run();
+          }
+        } else {
+          // Step 2: User confirmed — apply the tier switch
+          try {
+            const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
+            return jsonResponse({
+              ...switchResult,
+              sessionId: 'tier_change_' + existingSubscriptionId,
+              changedTier: true
+            });
+          } catch (switchError) {
+            if (!this.isStripeMissingResourceError(switchError)) {
+              throw switchError;
+            }
+            // Stale subscription ID — clear and fall through to a fresh checkout
+            await this.db
+              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
+              .bind(null, 'inactive', existingUser.id)
+              .run();
+          }
         }
       }
 
@@ -929,36 +943,7 @@ export class SubscriptionHandler {
     
     // 3. Check if invoice needs payment first
     const invoice = updatedSub.latest_invoice;
-    if (this.isInvoicePendingPayment(invoice)) {
-      // Return the Stripe Hosted Invoice URL so user can complete 3D Secure or pay manually.
-      // DO NOT update DB to pro yet. The webhook will handle it upon payment_succeeded.
-      if (invoice.hosted_invoice_url) {
-        return {
-          url: invoice.hosted_invoice_url,
-          ...this.extractInvoicePreview(invoice)
-        };
-      }
-      throw new Error('Payment is pending for this subscription update');
-    }
-
-    // Even when auto-paid, prefer Stripe-hosted invoice page so users can see exact billed amount.
-    if (invoice?.hosted_invoice_url) {
-      await this.db
-        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
-        .bind('pro', 'active', userId)
-        .run();
-
-      if (this.logger) {
-        logSubscription(this.logger, 'plan_swapped', { userId, oldTier: 'basic', newTier: 'pro' });
-      }
-
-      return {
-        url: invoice.hosted_invoice_url,
-        ...this.extractInvoicePreview(invoice)
-      };
-    }
-
-    // Update tier immediately only when there is no pending payment requirement.
+    // Update DB if invoice already collected; the webhook handles any deferred payment.
     if (updatedSub.status === 'active' || !invoice || this.isInvoiceSettled(invoice)) {
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
@@ -970,8 +955,7 @@ export class SubscriptionHandler {
       }
     }
 
-    // Fallback if Stripe does not provide hosted invoice URL.
-    return { url: `${extensionUrl}/activate?plan_updated=1&tier=pro` };
+    return { url: `${extensionUrl}/payment-success?upgraded=1&tier=pro` };
   }
 
   /**
@@ -1038,31 +1022,7 @@ export class SubscriptionHandler {
     const updatedSubscription = await updateResponse.json();
     const invoice = updatedSubscription.latest_invoice;
 
-    if (this.isInvoicePendingPayment(invoice)) {
-      if (invoice.hosted_invoice_url) {
-        return {
-          url: invoice.hosted_invoice_url,
-          ...this.extractInvoicePreview(invoice)
-        };
-      }
-      throw new Error('Payment is pending for this subscription update');
-    }
-
-    // Even when auto-paid, prefer Stripe-hosted invoice page so users can see exact billed amount.
-    if (invoice?.hosted_invoice_url) {
-      if (!invoice || this.isInvoiceSettled(invoice)) {
-        await this.db
-          .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
-          .bind(newTier, 'active', userId)
-          .run();
-      }
-
-      return {
-        url: invoice.hosted_invoice_url,
-        ...this.extractInvoicePreview(invoice)
-      };
-    }
-
+    // Update DB now if payment is already collected; webhook covers any deferred payment.
     if (!invoice || this.isInvoiceSettled(invoice)) {
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
@@ -1070,7 +1030,74 @@ export class SubscriptionHandler {
         .run();
     }
 
-    return { url: `${extensionUrl}/activate?plan_updated=1&tier=${newTier}` };
+    return { url: `${extensionUrl}/payment-success?upgraded=1&tier=${newTier}` };
+  }
+
+  /**
+   * Preview the prorated amount for a subscription tier change without creating any invoice.
+   * Calls Stripe's invoice preview endpoint — safe to call multiple times, no side effects.
+   */
+  async previewSubscriptionTierChange(subscriptionId, newTier) {
+    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+
+    if (!newPriceId) {
+      throw new Error('Price not configured');
+    }
+
+    // Fetch current subscription to get item ID and customer ID
+    const subResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+      5000
+    );
+
+    if (!subResponse.ok) {
+      const error = await subResponse.json();
+      const stripeError = new Error(error.error?.message || 'Failed to fetch subscription for preview');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
+    }
+
+    const subscription = await subResponse.json();
+    const itemId = subscription.items?.data?.[0]?.id;
+    const customerId = subscription.customer;
+
+    if (!itemId) {
+      throw new Error('No subscription item found');
+    }
+
+    // Call Stripe invoice preview — creates no invoice, makes no charge
+    const previewResponse = await fetchWithTimeout(
+      'https://api.stripe.com/v1/invoices/create_preview',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.stripeKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          'customer': customerId,
+          'subscription': subscriptionId,
+          'subscription_details[items][0][id]': itemId,
+          'subscription_details[items][0][price]': newPriceId,
+          'subscription_details[proration_behavior]': 'always_invoice',
+          'subscription_details[billing_cycle_anchor]': 'now'
+        })
+      },
+      5000
+    );
+
+    if (!previewResponse.ok) {
+      const error = await previewResponse.json();
+      const stripeError = new Error(error.error?.message || 'Failed to preview upgrade cost');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
+    }
+
+    const preview = await previewResponse.json();
+    return this.extractInvoicePreview(preview);
   }
 
   /**

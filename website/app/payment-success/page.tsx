@@ -17,6 +17,14 @@ function PaymentSuccessContent() {
 
     useEffect(() => {
         const verifyPayment = async (attempt: number): Promise<void> => {
+            const upgraded = searchParams.get('upgraded')
+            const tierParam = searchParams.get('tier')
+            if (upgraded === '1') {
+                if (tierParam === 'basic' || tierParam === 'pro') setTier(tierParam)
+                setStatus('success')
+                return
+            }
+
             const sessionId = searchParams.get('session_id')
 
             if (!sessionId) {
