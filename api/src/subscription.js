@@ -161,6 +161,14 @@ export class SubscriptionHandler {
         }
         return jsonResponse({ error: error.message, field: error.field }, 400);
       }
+
+      if (error?.stripeCode || error?.stripeType) {
+        return jsonResponse({
+          error: error.message || 'Stripe checkout failed',
+          code: error.stripeCode || 'stripe_error'
+        }, 400);
+      }
+
       return jsonResponse({ error: 'Failed to create checkout' }, 500);
     }
   }
