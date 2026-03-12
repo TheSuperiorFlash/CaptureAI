@@ -37,7 +37,8 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 
 | Method | Path | Auth | Rate Limit | Description |
 |--------|------|------|------------|-------------|
-| POST | `/api/subscription/create-checkout` | None | 10/min | Stripe checkout session |
+| POST | `/api/subscription/create-checkout` | None | 10/min | Stripe checkout session (new subscribers only) |
+| POST | `/api/subscription/change-tier` | LicenseKey | — | Upgrade/downgrade active subscription with proration |
 | POST | `/api/subscription/webhook` | Stripe signature | — | Stripe webhook handler |
 | POST | `/api/subscription/verify-payment` | None | — | Verify checkout session |
 | GET | `/api/subscription/portal` | LicenseKey | — | Stripe billing portal |

@@ -57,9 +57,22 @@ export class SubscriptionHandler {
       // Create or get Stripe customer
       let customerId;
       const existingUser = await this.db
-        .prepare('SELECT stripe_customer_id FROM users WHERE email = ?')
+        .prepare('SELECT stripe_customer_id, stripe_subscription_id, subscription_status, tier FROM users WHERE email = ?')
         .bind(email)
         .first();
+
+      // Prevent creating a second subscription for users who already have one active.
+      // Active subscribers must use the change-tier endpoint so Stripe can apply proration.
+      if (
+        existingUser?.stripe_subscription_id &&
+        existingUser?.subscription_status === 'active' &&
+        existingUser?.tier !== tier
+      ) {
+        return jsonResponse({
+          error: 'Subscription already active. Use the change-tier endpoint to switch plans.',
+          code: 'SUBSCRIPTION_EXISTS'
+        }, 409);
+      }
 
       if (existingUser?.stripe_customer_id) {
         customerId = existingUser.stripe_customer_id;
@@ -336,19 +349,37 @@ export class SubscriptionHandler {
       const subscriptionId = subscription.id;
       const status = subscription.status;
 
-      // Map Stripe subscription statuses to subscription_status — tier is not changed here
-      // active, trialing = access allowed, subscription_status = 'active'
-      // past_due = access denied, subscription_status = 'past_due'
-      // unpaid, canceled, incomplete_expired, paused = access denied, subscription_status = 'inactive'
+      // Map Stripe subscription statuses to subscription_status
+      // active, trialing = access allowed
+      // past_due = access allowed but flagged
+      // unpaid, canceled, incomplete_expired, paused = access denied
       const subscriptionStatus = status === 'past_due' ? 'past_due'
         : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
-      // Clear tier (set to NULL) when subscription access is fully revoked
       if (subscriptionStatus === 'inactive') {
+        // Revoke tier access when subscription lapses
         await this.db
           .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
           .bind(subscriptionStatus, null, subscriptionId)
+          .run();
+        return;
+      }
+
+      // Detect plan changes so the tier column stays in sync with Stripe.
+      // This handles changes made via the billing portal or the change-tier endpoint.
+      const newPriceId = subscription.items?.data?.[0]?.price?.id;
+      let newTier = null;
+      if (newPriceId === this.env.STRIPE_PRICE_BASIC) {
+        newTier = 'basic';
+      } else if (newPriceId === this.env.STRIPE_PRICE_PRO) {
+        newTier = 'pro';
+      }
+
+      if (newTier) {
+        await this.db
+          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+          .bind(subscriptionStatus, newTier, subscriptionId)
           .run();
       } else {
         await this.db
@@ -358,6 +389,133 @@ export class SubscriptionHandler {
       }
     } catch (error) {
       console.error('Subscription update handler error:', error);
+    }
+  }
+
+  /**
+   * Change subscription tier (upgrade/downgrade) with proration
+   * POST /api/subscription/change-tier
+   *
+   * Uses Stripe's proration_behavior=always_invoice so the customer is
+   * immediately billed (upgrade) or credited (downgrade) for the partial period.
+   */
+  async changeTier(request) {
+    try {
+      const user = await this.auth.authenticate(request);
+      if (!user) {
+        return jsonResponse({ error: 'Not authenticated' }, 401);
+      }
+
+      const body = await validateRequestBody(request);
+      const newTier = body.tier;
+
+      if (newTier !== 'basic' && newTier !== 'pro') {
+        return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
+      }
+
+      const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+      if (!newPriceId) {
+        return jsonResponse({ error: 'Price not configured' }, 500);
+      }
+
+      const userData = await this.db
+        .prepare('SELECT id, tier, stripe_subscription_id FROM users WHERE id = ?')
+        .bind(user.userId)
+        .first();
+
+      if (!userData) {
+        return jsonResponse({ error: 'User not found' }, 404);
+      }
+
+      if (userData.tier === newTier) {
+        return jsonResponse({ error: 'Already on this tier' }, 400);
+      }
+
+      if (!userData.stripe_subscription_id) {
+        return jsonResponse({ error: 'No active subscription found' }, 400);
+      }
+
+      // Fetch current subscription from Stripe to get the subscription item ID
+      const subResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
+        { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+        5000
+      );
+
+      if (!subResponse.ok) {
+        const stripeError = await subResponse.json();
+        console.error('Failed to fetch subscription:', stripeError);
+        return jsonResponse({ error: 'Failed to fetch current subscription' }, 400);
+      }
+
+      const subscription = await subResponse.json();
+
+      if (subscription.status !== 'active' && subscription.status !== 'trialing') {
+        return jsonResponse({ error: 'Subscription is not active' }, 400);
+      }
+
+      const subscriptionItemId = subscription.items?.data?.[0]?.id;
+      if (!subscriptionItemId) {
+        return jsonResponse({ error: 'Subscription item not found' }, 400);
+      }
+
+      // Update the subscription with proration_behavior=always_invoice:
+      // - Upgrade (basic→pro): Stripe immediately invoices the prorated difference
+      // - Downgrade (pro→basic): Stripe credits the unused amount and invoices immediately
+      const updateResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/subscriptions/${userData.stripe_subscription_id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.stripeKey}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: new URLSearchParams({
+            'items[0][id]': subscriptionItemId,
+            'items[0][price]': newPriceId,
+            'proration_behavior': 'always_invoice',
+            'metadata[tier]': newTier
+          })
+        },
+        5000
+      );
+
+      if (!updateResponse.ok) {
+        const stripeError = await updateResponse.json();
+        console.error('Failed to update subscription:', stripeError);
+        return jsonResponse({ error: stripeError.error?.message || 'Failed to update subscription' }, 400);
+      }
+
+      const updatedSubscription = await updateResponse.json();
+
+      // Sync the new tier to the database immediately — the webhook will also
+      // fire a customer.subscription.updated which will confirm this update
+      await this.db
+        .prepare('UPDATE users SET tier = ? WHERE id = ?')
+        .bind(newTier, userData.id)
+        .run();
+
+      const nextBillingDate = updatedSubscription.current_period_end
+        ? new Date(updatedSubscription.current_period_end * 1000).toISOString()
+        : null;
+
+      if (this.logger) {
+        logSubscription(this.logger, 'tier_changed', {
+          userId: userData.id,
+          oldTier: userData.tier,
+          newTier,
+          subscriptionId: userData.stripe_subscription_id
+        });
+      }
+
+      return jsonResponse({ success: true, tier: newTier, nextBillingDate });
+
+    } catch (error) {
+      console.error('Change tier error:', error);
+      if (error instanceof ValidationError) {
+        return jsonResponse({ error: error.message, field: error.field }, 400);
+      }
+      return jsonResponse({ error: 'Failed to change tier' }, 500);
     }
   }
 
