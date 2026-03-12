@@ -62,17 +62,37 @@ export class SubscriptionHandler {
         .bind(email)
         .first();
 
-      // Prevent creating a second subscription for users who already have one active.
-      // Active subscribers must use the change-tier endpoint so Stripe can apply proration.
+      // For active subscribers requesting a different tier, switch plans automatically.
       if (
         existingUser?.stripe_subscription_id &&
         existingUser?.subscription_status === 'active' &&
         existingUser?.tier !== tier
       ) {
-        return jsonResponse({
-          error: 'Subscription already active. Use the change-tier endpoint to switch plans.',
-          code: 'SUBSCRIPTION_EXISTS'
-        }, 409);
+        existingSubscriptionId = existingUser.stripe_subscription_id;
+        try {
+          const url = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
+          return jsonResponse({
+            url,
+            sessionId: 'tier_change_' + existingSubscriptionId,
+            changedTier: true
+          });
+        } catch (switchError) {
+          // Stripe sandbox migration can leave stale subscription IDs in DB.
+          // Fall back to normal checkout flow when Stripe reports missing resources.
+          if (!this.isStripeMissingResourceError(switchError)) {
+            throw switchError;
+          }
+
+          await this.db
+            .prepare(`
+              UPDATE users
+              SET stripe_subscription_id = ?,
+                  subscription_status = ?
+              WHERE id = ?
+            `)
+            .bind(null, 'inactive', existingUser.id)
+            .run();
+        }
       }
 
       if (existingUser?.stripe_customer_id) {
@@ -929,6 +949,82 @@ export class SubscriptionHandler {
 
     // If paid automatically via card on file, deep-link them to the success page!
     return `${extensionUrl}/payment-success?session_id=upgrade_${subscriptionId}`;
+  }
+
+  /**
+   * Switch an active subscription to a different tier with Stripe native proration.
+   * Returns hosted invoice URL when payment action is required, otherwise success URL.
+   */
+  async switchExistingSubscriptionTier(subscriptionId, newTier, userId) {
+    const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
+    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+
+    if (!newPriceId) {
+      throw new Error('Price not configured');
+    }
+
+    const subResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+      5000
+    );
+
+    if (!subResponse.ok) {
+      const error = await subResponse.json();
+      const stripeError = new Error(error.error?.message || 'Failed to fetch current subscription');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
+    }
+
+    const subscription = await subResponse.json();
+    const subscriptionItemId = subscription.items?.data?.[0]?.id;
+
+    if (!subscriptionItemId) {
+      throw new Error('Subscription item not found');
+    }
+
+    const updateResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.stripeKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          'items[0][id]': subscriptionItemId,
+          'items[0][price]': newPriceId,
+          'proration_behavior': 'always_invoice',
+          'billing_cycle_anchor': 'now',
+          'metadata[tier]': newTier,
+          'expand[]': 'latest_invoice'
+        })
+      },
+      5000
+    );
+
+    if (!updateResponse.ok) {
+      const error = await updateResponse.json();
+      const stripeError = new Error(error.error?.message || 'Failed to update subscription');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
+    }
+
+    const updatedSubscription = await updateResponse.json();
+    const invoice = updatedSubscription.latest_invoice;
+
+    if (invoice && invoice.hosted_invoice_url && invoice.status !== 'paid') {
+      return invoice.hosted_invoice_url;
+    }
+
+    await this.db
+      .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+      .bind(newTier, 'active', userId)
+      .run();
+
+    return `${extensionUrl}/payment-success?session_id=tier_change_${subscriptionId}`;
   }
 
   /**

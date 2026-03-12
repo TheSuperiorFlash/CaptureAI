@@ -196,6 +196,28 @@ describe('SubscriptionHandler', () => {
       expect(body.sessionId).toBeDefined();
     });
 
+    test('should auto-switch tier for active subscribers requesting a different plan', async () => {
+      env.DB._mockFirst.mockResolvedValueOnce({
+        id: 'user-123',
+        tier: 'basic',
+        subscription_status: 'active',
+        stripe_subscription_id: 'sub_existing',
+        stripe_customer_id: 'cus_existing'
+      });
+
+      jest.spyOn(handler, 'switchExistingSubscriptionTier').mockResolvedValue('https://invoice.stripe.com/test-invoice');
+
+      const request = createMockRequest();
+      const response = await handler.createCheckout(request);
+      const body = JSON.parse(await response.text());
+
+      expect(response.status).toBe(200);
+      expect(body.url).toBe('https://invoice.stripe.com/test-invoice');
+      expect(body.sessionId).toBe('tier_change_sub_existing');
+      expect(body.changedTier).toBe(true);
+      expect(handler.switchExistingSubscriptionTier).toHaveBeenCalledWith('sub_existing', 'pro', 'user-123');
+    });
+
     test('should create new stripe customer when none exists', async () => {
       env.DB._mockFirst.mockResolvedValueOnce(null); // No existing user
 

@@ -57,6 +57,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Auth**: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), sent via `Authorization: LicenseKey YOUR-KEY` header
 - **Usage Tracking**: Two-table strategy — `usage_records` (per-request) + `usage_daily` (O(1) rate limit checks)
 - **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
+- **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier (instead of requiring a separate manual change-tier call).
 
 ## Storage Keys
 
