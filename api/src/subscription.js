@@ -58,7 +58,7 @@ export class SubscriptionHandler {
       let customerId;
       let existingSubscriptionId = null;
       const existingUser = await this.db
-        .prepare('SELECT stripe_customer_id, stripe_subscription_id, tier FROM users WHERE email = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, tier FROM users WHERE email = ?')
         .bind(email)
         .first();
 
@@ -66,17 +66,19 @@ export class SubscriptionHandler {
         customerId = existingUser.stripe_customer_id;
 
         // Detect upgrade: existing Basic user requesting Pro
-        // Apply a prorated credit to their customer balance so Stripe deducts it on the first Pro invoice
         if (tier === 'pro' && existingUser.tier === 'basic' && existingUser.stripe_subscription_id) {
           existingSubscriptionId = existingUser.stripe_subscription_id;
-          await this.applyUpgradeCredit(customerId, existingSubscriptionId);
+          
+          // Native Stripe proration via direct subscription update
+          const url = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
+          return jsonResponse({ url, sessionId: 'upgrade_' + existingSubscriptionId });
         }
       } else {
         const customer = await this.createStripeCustomer(email);
         customerId = customer.id;
       }
 
-      // Create checkout session, passing tier in metadata so webhooks can read it
+      // Create checkout session for normal flow
       const session = await this.createStripeCheckout(customerId, priceId, email, tier);
 
       if (this.logger) {
@@ -223,9 +225,6 @@ export class SubscriptionHandler {
         : 'pro';
 
       if (user) {
-        const previousSubscriptionId = user.stripe_subscription_id;
-        const wasBasicUpgrade = user.tier === 'basic' && purchasedTier === 'pro';
-
         // User exists - set to purchased tier
         await this.db
           .prepare(`
@@ -240,11 +239,6 @@ export class SubscriptionHandler {
           .run();
 
         console.log(`Updated user ${customerEmail} to ${purchasedTier} tier`);
-
-        // Cancel the old Basic subscription so the user is not double-billed
-        if (wasBasicUpgrade && previousSubscriptionId && previousSubscriptionId !== subscriptionId) {
-          await this.cancelStripeSubscription(previousSubscriptionId);
-        }
 
         // Send upgrade email with existing license key (not a new user)
         if (this.env.RESEND_API_KEY) {
@@ -561,18 +555,15 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'No active subscription found' }, 400);
       }
 
-      // Apply a prorated credit for the remaining Basic period, then create a standard Pro checkout.
-      // Stripe automatically deducts the credit from the first Pro invoice.
-      await this.applyUpgradeCredit(userData.stripe_customer_id, userData.stripe_subscription_id);
-
-      const session = await this.createStripeCheckout(
-        userData.stripe_customer_id,
+      // Upgrade natively generating a prorated invoice.
+      const url = await this.upgradeStripeSubscription(
+        userData.stripe_subscription_id,
         proPriceId,
-        userData.email,
-        'pro'
+        user.userId,
+        userData.email
       );
 
-      return jsonResponse({ url: session.url, sessionId: session.id });
+      return jsonResponse({ url, sessionId: 'upgrade_' + userData.stripe_subscription_id });
 
     } catch (error) {
       console.error('Plan swap error:', error);
@@ -644,82 +635,83 @@ export class SubscriptionHandler {
   }
 
   /**
-   * Apply a prorated credit to a Stripe customer's balance when upgrading from Basic to Pro.
-   * Fetches the current subscription, calculates remaining value, and posts a negative
-   * balance transaction. Stripe automatically applies this credit to the next invoice.
-   * Errors are swallowed so a credit calculation failure never blocks checkout.
+   * Upgrade an existing Stripe subscription directly.
+   * Uses native proration (always_invoice) + billing cycle reset to handle interval changes.
+   * Returns the hosted invoice URL for payment, or success URL if already paid.
    */
-  async applyUpgradeCredit(customerId, subscriptionId) {
-    try {
-      const subResponse = await fetchWithTimeout(
-        `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
-        { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
-        5000
-      );
+  async upgradeStripeSubscription(subscriptionId, newPriceId, userId, email) {
+    const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
+    
+    // 1. Fetch current subscription to get the old item ID
+    const subResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+      5000
+    );
 
-      if (!subResponse.ok) return;
-
-      const sub = await subResponse.json();
-      const item = sub.items?.data?.[0];
-      const unitAmount = item?.price?.unit_amount; // amount in cents
-      const periodStart = sub.current_period_start;
-      const periodEnd = sub.current_period_end;
-
-      if (!unitAmount || !periodStart || !periodEnd) return;
-
-      const nowSeconds = Math.floor(Date.now() / 1000);
-      const totalPeriod = periodEnd - periodStart;
-      const remaining = periodEnd - nowSeconds;
-
-      if (remaining <= 0) return; // already at end of period, no credit to give
-
-      const creditCents = Math.floor(unitAmount * (remaining / totalPeriod));
-      if (creditCents <= 0) return;
-
-      // Apply negative balance = credit. Stripe deducts it from the next invoice automatically.
-      await fetchWithTimeout(
-        `https://api.stripe.com/v1/customers/${customerId}/balance_transactions`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.stripeKey}`,
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: new URLSearchParams({
-            amount: String(-creditCents),
-            currency: 'usd',
-            description: 'Proration credit for Basic to Pro upgrade'
-          })
-        },
-        5000
-      );
-
-      console.log(`Applied $${(creditCents / 100).toFixed(2)} upgrade credit to customer ${customerId}`);
-    } catch (error) {
-      // Non-fatal: log and continue checkout without the credit
-      console.error('Failed to apply upgrade credit:', error);
+    if (!subResponse.ok) {
+      throw new Error('Failed to retrieve existing subscription for upgrade');
     }
-  }
 
-  /**
-   * Cancel a Stripe subscription immediately.
-   * Used after a Basic-to-Pro upgrade to avoid double-billing.
-   * Errors are swallowed so a cancellation failure never blocks the upgrade flow.
-   */
-  async cancelStripeSubscription(subscriptionId) {
-    try {
-      await fetchWithTimeout(
-        `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
-        {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${this.stripeKey}` }
-        },
-        5000
-      );
-      console.log(`Cancelled subscription ${subscriptionId} after Pro upgrade`);
-    } catch (error) {
-      console.error('Failed to cancel old subscription:', error);
+    const sub = await subResponse.json();
+    const itemId = sub.items?.data?.[0]?.id;
+    if (!itemId) {
+      throw new Error('No subscription item found to upgrade');
     }
+
+    // 2. Update subscription changing price, generating invoice immediately
+    const params = new URLSearchParams({
+      'items[0][id]': itemId,
+      'items[0][price]': newPriceId,
+      'proration_behavior': 'always_invoice',  // Invoice immediately for the difference
+      'billing_cycle_anchor': 'now',           // Required when changing intervals (weekly->monthly)
+      'metadata[tier]': 'pro',
+      'expand[]': 'latest_invoice'             // Get the generated invoice
+    });
+
+    const updateResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.stripeKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params
+      },
+      5000
+    );
+
+    if (!updateResponse.ok) {
+      const error = await updateResponse.json();
+      console.error('Subscription update failed:', error);
+      throw new Error(error.error?.message || 'Failed to update subscription');
+    }
+
+    const updatedSub = await updateResponse.json();
+    
+    // 3. Check if invoice needs payment first
+    const invoice = updatedSub.latest_invoice;
+    if (invoice && invoice.hosted_invoice_url && invoice.status !== 'paid') {
+      // Return the Stripe Hosted Invoice URL so user can complete 3D Secure or pay manually
+      // DO NOT update DB to pro yet. The webhook will handle it upon payment_succeeded.
+      return invoice.hosted_invoice_url;
+    }
+
+    // Only update tier in DB immediately if it was automatically paid
+    if (updatedSub.status === 'active' || invoice?.status === 'paid') {
+      await this.db
+        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+        .bind('pro', 'active', userId)
+        .run();
+
+      if (this.logger) {
+        logSubscription(this.logger, 'plan_swapped', { userId, oldTier: 'basic', newTier: 'pro' });
+      }
+    }
+
+    // If paid automatically via card on file, deep-link them to the success page!
+    return `${extensionUrl}/payment-success?session_id=upgrade_${subscriptionId}`;
   }
 
   /**

@@ -142,7 +142,7 @@ describe('SubscriptionHandler', () => {
 
       expect(body.plans).toHaveLength(2);
       expect(body.plans[0].tier).toBe('basic');
-      expect(body.plans[0].price).toBe(0);
+      expect(body.plans[0].price).toBe(1.49);
       expect(body.plans[1].tier).toBe('pro');
       expect(body.plans[1].price).toBe(9.99);
       expect(body.plans[1].recommended).toBe(true);
@@ -816,7 +816,9 @@ describe('SubscriptionHandler', () => {
       expect(handler.auth.sendLicenseKeyEmail).toHaveBeenCalledWith(
         'new@example.com',
         expect.any(String),
-        'pro'
+        'pro',
+        null,
+        true
       );
     });
 
@@ -837,7 +839,9 @@ describe('SubscriptionHandler', () => {
       expect(handler.auth.sendLicenseKeyEmail).toHaveBeenCalledWith(
         'test@example.com',
         'EXIST-KEY1-KEY2-KEY3-KEY4',
-        'pro'
+        'pro',
+        null,
+        false
       );
     });
   });
@@ -969,7 +973,7 @@ describe('SubscriptionHandler', () => {
       expect(response.status).toBe(500);
     });
 
-    test('should successfully return a Stripe Checkout URL for the upgrade', async () => {
+    test('should successfully return a Success URL for the upgrade', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -982,11 +986,18 @@ describe('SubscriptionHandler', () => {
         email: 'test@example.com'
       });
 
+      // 1. Fetch existing subscription
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ items: { data: [{ id: 'si_test' }] } })
+      });
+      
+      // 2. Update subscription
       global.fetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          id: 'cs_test_upgrade',
-          url: 'https://checkout.stripe.com/upgrade-session'
+          status: 'active',
+          latest_invoice: { status: 'paid' }
         })
       });
 
@@ -995,8 +1006,8 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.url).toContain('stripe.com');
-      expect(body.sessionId).toBe('cs_test_upgrade');
+      expect(body.url).toContain('payment-success');
+      expect(body.sessionId).toBe('upgrade_sub_123');
     });
 
     test('should return 429 when rate limited', async () => {

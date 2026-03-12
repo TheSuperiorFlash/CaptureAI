@@ -124,8 +124,8 @@ export default function ActivatePage() {
             if (url.protocol !== 'https:') {
                 throw new Error('Unexpected checkout URL protocol')
             }
-            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com']
-            if (!trustedHosts.includes(url.hostname)) {
+            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com', 'invoice.stripe.com']
+            if (!trustedHosts.includes(url.hostname) && url.hostname !== window.location.hostname) {
                 throw new Error('Unexpected checkout URL')
             }
             window.location.href = url.href
@@ -143,8 +143,8 @@ export default function ActivatePage() {
             if (url.protocol !== 'https:') {
                 throw new Error('Unexpected checkout URL protocol')
             }
-            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com']
-            if (!trustedHosts.includes(url.hostname)) {
+            const trustedHosts = ['checkout.stripe.com', 'billing.stripe.com', 'invoice.stripe.com']
+            if (!trustedHosts.includes(url.hostname) && url.hostname !== window.location.hostname) {
                 throw new Error('Unexpected checkout URL')
             }
             window.location.href = url.href
