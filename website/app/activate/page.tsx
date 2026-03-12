@@ -99,11 +99,16 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
         minimumFractionDigits: 2,
     }).format(data.amountDueCents / 100)
 
-    const features = [
+    const features = data.tier === 'pro' ? [
         'Unlimited AI requests — no daily cap',
         'Privacy Guard — stay undetected',
         'Ask Mode — follow-up questions',
         'Auto-Solve — hands-free answers',
+    ] : [
+        '50 AI requests per day',
+        'Screenshot capture',
+        'Floating interface',
+        'Stealth Mode',
     ]
 
     return (
@@ -134,7 +139,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
 
                     <p className="mb-1 text-center text-xs font-medium uppercase tracking-wider text-[--color-text-tertiary]">Amount due today</p>
                     <p className="mb-2 text-center font-inter text-[3.25rem] font-extrabold leading-none text-gradient-static">{formattedAmount}</p>
-                    <p className="mb-7 text-center text-sm text-[--color-text-tertiary]">prorated upgrade · your existing plan is credited</p>
+                    <p className="mb-7 text-center text-sm text-[--color-text-tertiary]">Includes credit for any unused time on your current plan</p>
 
                     <div className="divider-gradient mb-7" />
 
@@ -155,7 +160,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
-                            : 'Confirm Upgrade'
+                            : data.tier === 'pro' ? 'Confirm Upgrade' : 'Confirm Change'
                         }
                     </button>
 
