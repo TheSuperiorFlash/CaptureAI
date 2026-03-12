@@ -117,6 +117,9 @@ export class Router {
     if (path === '/api/subscription/create-checkout' && method === 'POST') {
       return this.subscription.createCheckout(request);
     }
+    if (path === '/api/subscription/change-tier' && method === 'POST') {
+      return this.subscription.changeTier(request);
+    }
     if (path === '/api/subscription/webhook' && method === 'POST') {
       return this.subscription.handleWebhook(request);
     }
