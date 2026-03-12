@@ -995,7 +995,7 @@ describe('SubscriptionHandler', () => {
       expect(response.status).toBe(500);
     });
 
-    test('should successfully return a Success URL for the upgrade', async () => {
+    test('should return Stripe hosted invoice URL for the upgrade', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -1019,7 +1019,10 @@ describe('SubscriptionHandler', () => {
         ok: true,
         json: async () => ({
           status: 'active',
-          latest_invoice: { status: 'paid' }
+          latest_invoice: {
+            status: 'paid',
+            hosted_invoice_url: 'https://invoice.stripe.com/i/acct_test/invst_123'
+          }
         })
       });
 
@@ -1028,7 +1031,7 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.url).toContain('payment-success');
+      expect(body.url).toContain('invoice.stripe.com');
       expect(body.sessionId).toBe('upgrade_sub_123');
     });
 

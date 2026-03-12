@@ -929,14 +929,31 @@ export class SubscriptionHandler {
     
     // 3. Check if invoice needs payment first
     const invoice = updatedSub.latest_invoice;
-    if (invoice && invoice.hosted_invoice_url && invoice.status !== 'paid') {
-      // Return the Stripe Hosted Invoice URL so user can complete 3D Secure or pay manually
+    if (this.isInvoicePendingPayment(invoice)) {
+      // Return the Stripe Hosted Invoice URL so user can complete 3D Secure or pay manually.
       // DO NOT update DB to pro yet. The webhook will handle it upon payment_succeeded.
+      if (invoice.hosted_invoice_url) {
+        return invoice.hosted_invoice_url;
+      }
+      throw new Error('Payment is pending for this subscription update');
+    }
+
+    // Even when auto-paid, prefer Stripe-hosted invoice page so users can see exact billed amount.
+    if (invoice?.hosted_invoice_url) {
+      await this.db
+        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+        .bind('pro', 'active', userId)
+        .run();
+
+      if (this.logger) {
+        logSubscription(this.logger, 'plan_swapped', { userId, oldTier: 'basic', newTier: 'pro' });
+      }
+
       return invoice.hosted_invoice_url;
     }
 
-    // Only update tier in DB immediately if it was automatically paid
-    if (updatedSub.status === 'active' || invoice?.status === 'paid') {
+    // Update tier immediately only when there is no pending payment requirement.
+    if (updatedSub.status === 'active' || !invoice || this.isInvoiceSettled(invoice)) {
       await this.db
         .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
         .bind('pro', 'active', userId)
@@ -947,8 +964,8 @@ export class SubscriptionHandler {
       }
     }
 
-    // If paid automatically via card on file, deep-link them to the success page!
-    return `${extensionUrl}/payment-success?session_id=upgrade_${subscriptionId}`;
+    // Fallback if Stripe does not provide hosted invoice URL.
+    return `${extensionUrl}/activate?plan_updated=1&tier=pro`;
   }
 
   /**
@@ -1015,16 +1032,33 @@ export class SubscriptionHandler {
     const updatedSubscription = await updateResponse.json();
     const invoice = updatedSubscription.latest_invoice;
 
-    if (invoice && invoice.hosted_invoice_url && invoice.status !== 'paid') {
+    if (this.isInvoicePendingPayment(invoice)) {
+      if (invoice.hosted_invoice_url) {
+        return invoice.hosted_invoice_url;
+      }
+      throw new Error('Payment is pending for this subscription update');
+    }
+
+    // Even when auto-paid, prefer Stripe-hosted invoice page so users can see exact billed amount.
+    if (invoice?.hosted_invoice_url) {
+      if (!invoice || this.isInvoiceSettled(invoice)) {
+        await this.db
+          .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+          .bind(newTier, 'active', userId)
+          .run();
+      }
+
       return invoice.hosted_invoice_url;
     }
 
-    await this.db
-      .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
-      .bind(newTier, 'active', userId)
-      .run();
+    if (!invoice || this.isInvoiceSettled(invoice)) {
+      await this.db
+        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+        .bind(newTier, 'active', userId)
+        .run();
+    }
 
-    return `${extensionUrl}/payment-success?session_id=tier_change_${subscriptionId}`;
+    return `${extensionUrl}/activate?plan_updated=1&tier=${newTier}`;
   }
 
   /**
@@ -1064,6 +1098,38 @@ export class SubscriptionHandler {
     }
 
     return typeof error.message === 'string' && error.message.includes('No such');
+  }
+
+  /**
+   * Determine if the invoice still requires customer payment action.
+   */
+  isInvoicePendingPayment(invoice) {
+    if (!invoice) {
+      return false;
+    }
+
+    if (invoice.status === 'paid' || invoice.paid === true) {
+      return false;
+    }
+
+    const amountDue = Number(invoice.amount_due ?? invoice.amount_remaining ?? 0);
+    return amountDue > 0;
+  }
+
+  /**
+   * Determine if an invoice is settled (paid or zero due).
+   */
+  isInvoiceSettled(invoice) {
+    if (!invoice) {
+      return true;
+    }
+
+    if (invoice.status === 'paid' || invoice.paid === true) {
+      return true;
+    }
+
+    const amountDue = Number(invoice.amount_due ?? invoice.amount_remaining ?? 0);
+    return amountDue === 0;
   }
 
   /**
