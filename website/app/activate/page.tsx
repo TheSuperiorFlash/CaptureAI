@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
@@ -77,12 +77,116 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
     }
 }
 
+interface ConfirmationData {
+    amountDueCents: number
+    subtotalCents: number
+    totalCents: number
+    currency: string
+    tier: string
+    email: string
+}
+
+function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
+    data: ConfirmationData
+    visible: boolean
+    loading: boolean
+    onConfirm: () => void
+    onCancel: () => void
+}) {
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: data.currency.toUpperCase(),
+        minimumFractionDigits: 2,
+    }).format(data.amountDueCents / 100)
+
+    const features = [
+        'Unlimited AI requests — no daily cap',
+        'Privacy Guard — stay undetected',
+        'Ask Mode — follow-up questions',
+        'Auto-Solve — hands-free answers',
+    ]
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onCancel} />
+            <div className={`relative w-full max-w-md transition-all duration-300 ease-out ${
+                visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+            }`}>
+                <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-48 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+                <div className="relative rounded-[28px] border border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
+                    <button type="button" onClick={onCancel}
+                        className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white/80"
+                        aria-label="Cancel upgrade">
+                        <XIcon className="h-4 w-4" />
+                    </button>
+
+                    <div className="mb-6 flex justify-center">
+                        <div className="flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-1.5">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
+                            </span>
+                            <span className="text-xs font-semibold tracking-wider text-cyan-400 uppercase">
+                                {data.tier === 'pro' ? 'Upgrade to Pro' : `Switch to ${data.tier}`}
+                            </span>
+                        </div>
+                    </div>
+
+                    <p className="mb-1 text-center text-xs font-medium uppercase tracking-wider text-[--color-text-tertiary]">Amount due today</p>
+                    <p className="mb-2 text-center font-inter text-[3.25rem] font-extrabold leading-none text-gradient-static">{formattedAmount}</p>
+                    <p className="mb-7 text-center text-sm text-[--color-text-tertiary]">prorated upgrade · your existing plan is credited</p>
+
+                    <div className="divider-gradient mb-7" />
+
+                    <ul className="mb-8 space-y-3">
+                        {features.map((feature) => (
+                            <li key={feature} className="flex items-center gap-3">
+                                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15">
+                                    <Check className="h-3 w-3 text-cyan-400" />
+                                </div>
+                                <span className="text-sm text-[--color-text-secondary]">{feature}</span>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <button type="button" onClick={onConfirm} disabled={loading}
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${
+                            loading ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
+                        }`}>
+                        {loading
+                            ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
+                            : 'Confirm Upgrade'
+                        }
+                    </button>
+
+                    <button type="button" onClick={onCancel}
+                        className="mt-4 w-full text-sm text-[--color-text-tertiary] transition-colors hover:text-[--color-text-secondary]">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{ message: string } | null>(null)
+    const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null)
+    const [modalVisible, setModalVisible] = useState(false)
+    const [confirmLoading, setConfirmLoading] = useState(false)
+
+    useEffect(() => {
+        if (confirmationData) {
+            const id = requestAnimationFrame(() => setModalVisible(true))
+            return () => cancelAnimationFrame(id)
+        } else {
+            setModalVisible(false)
+        }
+    }, [confirmationData])
 
     const handleSignup = async () => {
         const trimmedEmail = email.trim()
@@ -116,6 +220,34 @@ export default function ActivatePage() {
         }
     }
 
+    const showConfirmModal = (data: ConfirmationData) => setConfirmationData(data)
+    const hideConfirmModal = () => {
+        setModalVisible(false)
+        setTimeout(() => setConfirmationData(null), 300)
+    }
+
+    const handleConfirmUpgrade = async () => {
+        if (!confirmationData) return
+        setConfirmLoading(true)
+        try {
+            const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, {
+                email: confirmationData.email,
+                tier: confirmationData.tier,
+                confirmed: true,
+            })
+            if (data.url) {
+                redirectToCheckout(data.url as string)
+            } else {
+                throw new Error('No checkout URL received')
+            }
+        } catch (error) {
+            hideConfirmModal()
+            setResult({ message: error instanceof Error ? error.message : 'An error occurred' })
+        } finally {
+            setConfirmLoading(false)
+        }
+    }
+
     const redirectToCheckout = (rawUrl: string) => {
         const url = new URL(rawUrl)
         if (url.protocol !== 'https:') {
@@ -130,20 +262,20 @@ export default function ActivatePage() {
 
     const handleBasicSignup = async () => {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
-        if (data.url) {
-            redirectToCheckout(data.url as string)
-        } else {
-            throw new Error('No checkout URL received')
+        if (data.requiresConfirmation) {
+            showConfirmModal({ amountDueCents: data.amountDueCents as number, subtotalCents: data.subtotalCents as number, totalCents: data.totalCents as number, currency: data.currency as string, tier: data.tier as string, email })
+            return
         }
+        if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
     }
 
     const handleProSignup = async () => {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
-        if (data.url) {
-            redirectToCheckout(data.url as string)
-        } else {
-            throw new Error('No checkout URL received')
+        if (data.requiresConfirmation) {
+            showConfirmModal({ amountDueCents: data.amountDueCents as number, subtotalCents: data.subtotalCents as number, totalCents: data.totalCents as number, currency: data.currency as string, tier: data.tier as string, email })
+            return
         }
+        if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
     }
 
     return (
@@ -353,5 +485,15 @@ export default function ActivatePage() {
                 </div>
             </div>
         </div >
+
+        {confirmationData && (
+            <UpgradeConfirmModal
+                data={confirmationData}
+                visible={modalVisible}
+                loading={confirmLoading}
+                onConfirm={handleConfirmUpgrade}
+                onCancel={hideConfirmModal}
+            />
+        )}
     )
 }

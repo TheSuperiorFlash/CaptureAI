@@ -196,7 +196,7 @@ describe('SubscriptionHandler', () => {
       expect(body.sessionId).toBeDefined();
     });
 
-    test('should redirect to Stripe hosted invoice for active subscribers requesting a different plan', async () => {
+    test('should return confirmation preview for active subscribers requesting a different plan', async () => {
       env.DB._mockFirst.mockResolvedValueOnce({
         id: 'user-123',
         tier: 'basic',
@@ -205,8 +205,11 @@ describe('SubscriptionHandler', () => {
         stripe_customer_id: 'cus_existing'
       });
 
-      jest.spyOn(handler, 'switchExistingSubscriptionTier').mockResolvedValue({
-        url: 'https://invoice.stripe.com/i/acct_test/invst_123'
+      jest.spyOn(handler, 'previewSubscriptionTierChange').mockResolvedValue({
+        amountDueCents: 199,
+        subtotalCents: 199,
+        totalCents: 199,
+        currency: 'usd'
       });
 
       const request = createMockRequest();
@@ -214,10 +217,11 @@ describe('SubscriptionHandler', () => {
       const body = JSON.parse(await response.text());
 
       expect(response.status).toBe(200);
-      expect(body.url).toBe('https://invoice.stripe.com/i/acct_test/invst_123');
-      expect(body.changedTier).toBe(true);
-      expect(body.sessionId).toBe('tier_change_sub_existing');
-      expect(handler.switchExistingSubscriptionTier).toHaveBeenCalledWith('sub_existing', 'pro', 'user-123');
+      expect(body.requiresConfirmation).toBe(true);
+      expect(body.tier).toBe('pro');
+      expect(body.amountDueCents).toBe(199);
+      expect(body.currency).toBe('usd');
+      expect(handler.previewSubscriptionTierChange).toHaveBeenCalledWith('sub_existing', 'pro');
     });
 
     test('should create new stripe customer when none exists', async () => {
