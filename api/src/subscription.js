@@ -972,10 +972,6 @@ export class SubscriptionHandler {
       throw new Error('Subscription item not found');
     }
 
-    // Capture proration date now so the amount Stripe calculates matches exactly
-    // what will be shown on the hosted invoice page.
-    const prorationDate = Math.floor(Date.now() / 1000);
-
     const updateResponse = await fetchWithTimeout(
       `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
       {
@@ -989,7 +985,6 @@ export class SubscriptionHandler {
           'items[0][price]': newPriceId,
           'proration_behavior': 'always_invoice',
           'billing_cycle_anchor': 'now',
-          'proration_date': prorationDate.toString(),
           'metadata[tier]': newTier,
           'expand[]': 'latest_invoice'
         })
