@@ -81,10 +81,28 @@ export class SubscriptionHandler {
         // Detect upgrade: existing Basic user requesting Pro
         if (tier === 'pro' && existingUser.tier === 'basic' && existingUser.stripe_subscription_id) {
           existingSubscriptionId = existingUser.stripe_subscription_id;
-          
-          // Native Stripe proration via direct subscription update
-          const url = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
-          return jsonResponse({ url, sessionId: 'upgrade_' + existingSubscriptionId });
+
+          try {
+            // Native Stripe proration via direct subscription update
+            const url = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
+            return jsonResponse({ url, sessionId: 'upgrade_' + existingSubscriptionId });
+          } catch (upgradeError) {
+            // Stripe sandbox migration can leave stale subscription IDs in DB.
+            // Fall back to normal checkout flow when Stripe reports missing resources.
+            if (!this.isStripeMissingResourceError(upgradeError)) {
+              throw upgradeError;
+            }
+
+            await this.db
+              .prepare(`
+                UPDATE users
+                SET stripe_subscription_id = ?,
+                    subscription_status = ?
+                WHERE id = ?
+              `)
+              .bind(null, 'inactive', existingUser.id)
+              .run();
+          }
         }
       } else {
         const customer = await this.createStripeCustomer(email);
@@ -92,7 +110,34 @@ export class SubscriptionHandler {
       }
 
       // Create checkout session for normal flow
-      const session = await this.createStripeCheckout(customerId, priceId, email, tier);
+      let session;
+      try {
+        session = await this.createStripeCheckout(customerId, priceId, email, tier);
+      } catch (checkoutError) {
+        // Stripe sandbox migration can leave stale customer IDs in DB.
+        // Create a fresh customer and retry checkout once.
+        if (!customerId || !this.isStripeMissingResourceError(checkoutError)) {
+          throw checkoutError;
+        }
+
+        const customer = await this.createStripeCustomer(email);
+        customerId = customer.id;
+
+        if (existingUser?.id) {
+          await this.db
+            .prepare(`
+              UPDATE users
+              SET stripe_customer_id = ?,
+                  stripe_subscription_id = ?,
+                  subscription_status = ?
+              WHERE id = ?
+            `)
+            .bind(customerId, null, 'inactive', existingUser.id)
+            .run();
+        }
+
+        session = await this.createStripeCheckout(customerId, priceId, email, tier);
+      }
 
       if (this.logger) {
         logSubscription(this.logger, 'checkout_created', {
@@ -747,7 +792,10 @@ export class SubscriptionHandler {
     if (!response.ok) {
       const error = await response.json();
       console.error('Stripe customer creation failed:', error);
-      throw new Error(error.error?.message || 'Failed to create Stripe customer');
+      const stripeError = new Error(error.error?.message || 'Failed to create Stripe customer');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
     }
 
     return await response.json();
@@ -786,7 +834,10 @@ export class SubscriptionHandler {
     if (!response.ok) {
       const error = await response.json();
       console.error('Stripe checkout creation failed:', error);
-      throw new Error(error.error?.message || 'Failed to create checkout session');
+      const stripeError = new Error(error.error?.message || 'Failed to create checkout session');
+      stripeError.stripeCode = error.error?.code;
+      stripeError.stripeType = error.error?.type;
+      throw stripeError;
     }
 
     return await response.json();
@@ -894,6 +945,21 @@ export class SubscriptionHandler {
     }
 
     return await response.json();
+  }
+
+  /**
+   * Detect Stripe resource-missing errors (e.g. stale customer/subscription IDs)
+   */
+  isStripeMissingResourceError(error) {
+    if (!error) {
+      return false;
+    }
+
+    if (error.stripeCode === 'resource_missing') {
+      return true;
+    }
+
+    return typeof error.message === 'string' && error.message.includes('No such');
   }
 
   /**
