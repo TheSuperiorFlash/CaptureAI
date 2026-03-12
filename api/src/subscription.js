@@ -70,9 +70,9 @@ export class SubscriptionHandler {
       ) {
         existingSubscriptionId = existingUser.stripe_subscription_id;
         try {
-          const url = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
+          const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
           return jsonResponse({
-            url,
+            ...switchResult,
             sessionId: 'tier_change_' + existingSubscriptionId,
             changedTier: true
           });
@@ -104,8 +104,8 @@ export class SubscriptionHandler {
 
           try {
             // Native Stripe proration via direct subscription update
-            const url = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
-            return jsonResponse({ url, sessionId: 'upgrade_' + existingSubscriptionId });
+            const upgradeResult = await this.upgradeStripeSubscription(existingSubscriptionId, priceId, existingUser.id, email);
+            return jsonResponse({ ...upgradeResult, sessionId: 'upgrade_' + existingSubscriptionId });
           } catch (upgradeError) {
             // Stripe sandbox migration can leave stale subscription IDs in DB.
             // Fall back to normal checkout flow when Stripe reports missing resources.
@@ -787,14 +787,14 @@ export class SubscriptionHandler {
       }
 
       // Upgrade natively generating a prorated invoice.
-      const url = await this.upgradeStripeSubscription(
+      const upgradeResult = await this.upgradeStripeSubscription(
         userData.stripe_subscription_id,
         proPriceId,
         user.userId,
         userData.email
       );
 
-      return jsonResponse({ url, sessionId: 'upgrade_' + userData.stripe_subscription_id });
+      return jsonResponse({ ...upgradeResult, sessionId: 'upgrade_' + userData.stripe_subscription_id });
 
     } catch (error) {
       console.error('Plan swap error:', error);
@@ -933,7 +933,10 @@ export class SubscriptionHandler {
       // Return the Stripe Hosted Invoice URL so user can complete 3D Secure or pay manually.
       // DO NOT update DB to pro yet. The webhook will handle it upon payment_succeeded.
       if (invoice.hosted_invoice_url) {
-        return invoice.hosted_invoice_url;
+        return {
+          url: invoice.hosted_invoice_url,
+          ...this.extractInvoicePreview(invoice)
+        };
       }
       throw new Error('Payment is pending for this subscription update');
     }
@@ -949,7 +952,10 @@ export class SubscriptionHandler {
         logSubscription(this.logger, 'plan_swapped', { userId, oldTier: 'basic', newTier: 'pro' });
       }
 
-      return invoice.hosted_invoice_url;
+      return {
+        url: invoice.hosted_invoice_url,
+        ...this.extractInvoicePreview(invoice)
+      };
     }
 
     // Update tier immediately only when there is no pending payment requirement.
@@ -965,7 +971,7 @@ export class SubscriptionHandler {
     }
 
     // Fallback if Stripe does not provide hosted invoice URL.
-    return `${extensionUrl}/activate?plan_updated=1&tier=pro`;
+    return { url: `${extensionUrl}/activate?plan_updated=1&tier=pro` };
   }
 
   /**
@@ -1034,7 +1040,10 @@ export class SubscriptionHandler {
 
     if (this.isInvoicePendingPayment(invoice)) {
       if (invoice.hosted_invoice_url) {
-        return invoice.hosted_invoice_url;
+        return {
+          url: invoice.hosted_invoice_url,
+          ...this.extractInvoicePreview(invoice)
+        };
       }
       throw new Error('Payment is pending for this subscription update');
     }
@@ -1048,7 +1057,10 @@ export class SubscriptionHandler {
           .run();
       }
 
-      return invoice.hosted_invoice_url;
+      return {
+        url: invoice.hosted_invoice_url,
+        ...this.extractInvoicePreview(invoice)
+      };
     }
 
     if (!invoice || this.isInvoiceSettled(invoice)) {
@@ -1058,7 +1070,7 @@ export class SubscriptionHandler {
         .run();
     }
 
-    return `${extensionUrl}/activate?plan_updated=1&tier=${newTier}`;
+    return { url: `${extensionUrl}/activate?plan_updated=1&tier=${newTier}` };
   }
 
   /**
@@ -1130,6 +1142,18 @@ export class SubscriptionHandler {
 
     const amountDue = Number(invoice.amount_due ?? invoice.amount_remaining ?? 0);
     return amountDue === 0;
+  }
+
+  /**
+   * Extract preview pricing fields from Stripe invoice for UI display before payment.
+   */
+  extractInvoicePreview(invoice) {
+    return {
+      amountDueCents: Number(invoice.amount_due ?? invoice.amount_remaining ?? 0),
+      subtotalCents: Number(invoice.subtotal ?? 0),
+      totalCents: Number(invoice.total ?? 0),
+      currency: typeof invoice.currency === 'string' ? invoice.currency : 'usd'
+    };
   }
 
   /**

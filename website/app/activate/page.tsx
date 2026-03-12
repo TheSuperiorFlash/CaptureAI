@@ -77,6 +77,21 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
     }
 }
 
+function getInvoicePreviewMessage(data: Record<string, unknown>): string | null {
+    const amountDueCents = typeof data.amountDueCents === 'number' ? data.amountDueCents : null
+    if (amountDueCents === null) {
+        return null
+    }
+
+    const currency = typeof data.currency === 'string' ? data.currency : 'usd'
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency.toUpperCase(),
+    }).format(amountDueCents / 100)
+
+    return `Your prorated amount due is ${formattedAmount}. You will now be redirected to Stripe to review the invoice and complete payment.`
+}
+
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
@@ -120,6 +135,11 @@ export default function ActivatePage() {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
 
         if (data.url) {
+            const previewMessage = getInvoicePreviewMessage(data)
+            if (previewMessage && !window.confirm(previewMessage)) {
+                return
+            }
+
             const url = new URL(data.url as string)
             if (url.protocol !== 'https:') {
                 throw new Error('Unexpected checkout URL protocol')
@@ -138,6 +158,11 @@ export default function ActivatePage() {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
 
         if (data.url) {
+            const previewMessage = getInvoicePreviewMessage(data)
+            if (previewMessage && !window.confirm(previewMessage)) {
+                return
+            }
+
             // Validate redirect URL points to a trusted domain (Stripe checkout)
             const url = new URL(data.url as string)
             if (url.protocol !== 'https:') {

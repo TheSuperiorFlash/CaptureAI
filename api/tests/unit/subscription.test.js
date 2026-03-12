@@ -205,7 +205,13 @@ describe('SubscriptionHandler', () => {
         stripe_customer_id: 'cus_existing'
       });
 
-      jest.spyOn(handler, 'switchExistingSubscriptionTier').mockResolvedValue('https://invoice.stripe.com/test-invoice');
+      jest.spyOn(handler, 'switchExistingSubscriptionTier').mockResolvedValue({
+        url: 'https://invoice.stripe.com/test-invoice',
+        amountDueCents: 199,
+        subtotalCents: 199,
+        totalCents: 199,
+        currency: 'usd'
+      });
 
       const request = createMockRequest();
       const response = await handler.createCheckout(request);
@@ -1021,7 +1027,11 @@ describe('SubscriptionHandler', () => {
           status: 'active',
           latest_invoice: {
             status: 'paid',
-            hosted_invoice_url: 'https://invoice.stripe.com/i/acct_test/invst_123'
+            hosted_invoice_url: 'https://invoice.stripe.com/i/acct_test/invst_123',
+            amount_due: 249,
+            subtotal: 249,
+            total: 249,
+            currency: 'usd'
           }
         })
       });
@@ -1032,6 +1042,8 @@ describe('SubscriptionHandler', () => {
 
       expect(response.status).toBe(200);
       expect(body.url).toContain('invoice.stripe.com');
+      expect(body.amountDueCents).toBe(249);
+      expect(body.currency).toBe('usd');
       expect(body.sessionId).toBe('upgrade_sub_123');
     });
 

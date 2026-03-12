@@ -58,6 +58,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Usage Tracking**: Two-table strategy — `usage_records` (per-request) + `usage_daily` (O(1) rate limit checks)
 - **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
+- **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
 
 ## Storage Keys
 
