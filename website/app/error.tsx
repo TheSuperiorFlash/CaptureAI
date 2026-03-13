@@ -14,7 +14,7 @@ export default function Error({
     }, [error])
 
     return (
-        <div className="relative overflow-x-hidden py-20 md:py-28">
+        <div className="relative min-h-screen overflow-x-hidden py-20 md:py-28">
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
 
             <div className="relative z-10 mx-auto max-w-md px-6 text-center">

@@ -138,7 +138,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative overflow-x-hidden py-20 md:py-28">
+    <div className="relative min-h-screen overflow-x-hidden py-20 md:py-28">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 gradient-mesh" />
       <div className="pointer-events-none absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
