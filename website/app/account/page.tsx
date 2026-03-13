@@ -15,6 +15,8 @@ import {
   Zap,
   Shield,
   ArrowUpRight,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -189,9 +191,8 @@ export default function AccountPage() {
   }
 
   const maskKey = (key: string) => {
-    const parts = key.split('-')
-    if (parts.length < 3) return key
-    return parts.slice(0, 2).join('-') + '-' + parts.slice(2).map(() => '••••').join('-')
+    if (key.length <= 4) return key
+    return '••••' + key.slice(-4)
   }
 
   const handleSignOut = () => {
@@ -345,15 +346,23 @@ export default function AccountPage() {
                 </div>
               )}
 
-              <Separator className="bg-white/[0.06]" />
-
-              <Link
-                href="/activate"
-                className="inline-flex w-fit items-center gap-1 text-sm text-[--color-text-secondary] transition-colors hover:text-white"
-              >
-                Change plan
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
+              <div className="space-y-3">
+                <div className="text-xs text-[--color-text-tertiary]">
+                  {isPro ? (
+                    <p>Monthly subscription • Auto-renews</p>
+                  ) : (
+                    <p>Weekly subscription • Auto-renews</p>
+                  )}
+                </div>
+                <Separator className="bg-white/[0.06]" />
+                <Link
+                  href="/activate"
+                  className="inline-flex w-fit items-center gap-1 text-sm text-[--color-text-secondary] transition-colors hover:text-white"
+                >
+                  Change plan
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -377,29 +386,37 @@ export default function AccountPage() {
               <div>
                 <p className="mb-2 text-xs text-[--color-text-tertiary]">License key</p>
                 <div className="flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setKeyRevealed(!keyRevealed)}
-                    className="font-mono text-[13px] text-[--color-text-secondary] transition-colors hover:text-white"
-                    title={keyRevealed ? 'Hide' : 'Reveal'}
-                  >
+                  <span className="font-mono text-[13px] text-[--color-text-secondary]">
                     {licenseKey ? (keyRevealed ? licenseKey : maskKey(licenseKey)) : '—'}
-                  </button>
-                  <Tooltip>
-                    <TooltipTrigger
-                      type="button"
-                      onClick={copyLicenseKey}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
-                      aria-label="Copy license key"
-                    >
-                      {copied ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3.5 w-3.5" />
-                      )}
-                    </TooltipTrigger>
-                    <TooltipContent>{copied ? 'Copied!' : 'Copy to clipboard'}</TooltipContent>
-                  </Tooltip>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Tooltip>
+                      <TooltipTrigger
+                        type="button"
+                        onClick={() => setKeyRevealed(!keyRevealed)}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
+                        aria-label={keyRevealed ? 'Hide license key' : 'Reveal license key'}
+                      >
+                        {keyRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </TooltipTrigger>
+                      <TooltipContent>{keyRevealed ? 'Hide' : 'Reveal'}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger
+                        type="button"
+                        onClick={copyLicenseKey}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
+                        aria-label="Copy license key"
+                      >
+                        {copied ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>{copied ? 'Copied!' : 'Copy to clipboard'}</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
             </div>
