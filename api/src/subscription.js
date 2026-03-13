@@ -62,6 +62,21 @@ export class SubscriptionHandler {
         .bind(email)
         .first();
 
+      // Block same-tier re-subscription when the user already has a live subscription.
+      // 'inactive' is CaptureAI's sentinel for a canceled/cleared subscription.
+      if (
+        existingUser?.stripe_subscription_id &&
+        existingUser?.tier === tier &&
+        existingUser?.subscription_status !== 'inactive'
+      ) {
+        const tierLabel = tier === 'pro' ? 'Pro' : 'Basic';
+        return jsonResponse({
+          error: `You already have an active ${tierLabel} subscription. To switch plans, select the other plan.`,
+          alreadySubscribed: true,
+          currentTier: existingUser.tier,
+        }, 409);
+      }
+
       // Any subscriber with an existing subscription requesting a different tier
       // goes through the two-step preview+confirm flow regardless of subscription_status.
       // This prevents bypassing the preview when status is e.g. 'trialing' or 'past_due'.

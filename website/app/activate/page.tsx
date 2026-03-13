@@ -57,7 +57,9 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
                 const errorText = await response.text()
                 errorMessage = errorText || `Server error: ${response.status}`
             }
-            throw new Error(errorMessage)
+            const fetchErr = new Error(errorMessage) as Error & { status: number }
+            fetchErr.status = response.status
+            throw fetchErr
         }
 
         // Parse JSON only when content-type includes 'application/json'
@@ -75,6 +77,15 @@ async function apiPost(url: string, body: Record<string, unknown>): Promise<Reco
         }
         throw error
     }
+}
+
+interface AppError extends Error {
+    status?: number
+}
+
+interface ResultState {
+    message: string
+    type?: 'error' | 'info'
 }
 
 interface ConfirmationData {
@@ -259,7 +270,7 @@ export default function ActivatePage() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
     const [loading, setLoading] = useState(false)
-    const [result, setResult] = useState<{ message: string } | null>(null)
+    const [result, setResult] = useState<ResultState | null>(null)
     const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null)
     const [modalVisible, setModalVisible] = useState(false)
     const [confirmLoading, setConfirmLoading] = useState(false)
@@ -297,8 +308,10 @@ export default function ActivatePage() {
                 await handleProSignup()
             }
         } catch (error) {
+            const appError = error as AppError
             setResult({
-                message: error instanceof Error ? error.message : 'An error occurred',
+                message: appError instanceof Error ? appError.message : 'An error occurred',
+                type: appError.status === 409 ? 'info' : 'error',
             })
         } finally {
             setLoading(false)
@@ -548,20 +561,37 @@ export default function ActivatePage() {
 
                         {/* Result message */}
                         {result && (
-                            <div
-                                role="status"
-                                aria-live="polite"
-                                aria-atomic="true"
-                                className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
-                            >
-                                <div className="flex flex-col items-center text-center">
-                                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
-                                        <AlertCircle className="h-5 w-5 text-red-400" />
+                            result.type === 'info' ? (
+                                <div
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                    className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5"
+                                >
+                                    <div className="flex flex-col items-center text-center">
+                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15">
+                                            <AlertCircle className="h-5 w-5 text-amber-400" />
+                                        </div>
+                                        <h3 className="mb-1.5 text-sm font-semibold text-amber-400">Already subscribed</h3>
+                                        <p className="text-sm text-amber-200/70">{result.message}</p>
                                     </div>
-                                    <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
-                                    <p className="text-sm text-red-200/70">{result.message}</p>
                                 </div>
-                            </div>
+                            ) : (
+                                <div
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-atomic="true"
+                                    className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
+                                >
+                                    <div className="flex flex-col items-center text-center">
+                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
+                                            <AlertCircle className="h-5 w-5 text-red-400" />
+                                        </div>
+                                        <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
+                                        <p className="text-sm text-red-200/70">{result.message}</p>
+                                    </div>
+                                </div>
+                            )
                         )}
                     </div>
 
