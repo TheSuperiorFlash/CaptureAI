@@ -2,7 +2,7 @@
 
 > **Self-update rule:** When you add/change tables, columns, indexes, or views — update this file. When you add a migration, also update [api/migrations/README.md](migrations/README.md).
 
-Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 8 migrations in `api/migrations/`.
+Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, 9 migrations in `api/migrations/`.
 
 ## Quick Access
 
@@ -83,6 +83,23 @@ Stripe event deduplication for replay attack prevention.
 | event_id | TEXT UNIQUE NOT NULL | Stripe event ID |
 | processed_at | TEXT | Set to datetime('now') on insert |
 | webhook_timestamp | TEXT | Timestamp from Stripe event payload |
+
+### verification_codes
+
+Email OTP codes for tier-switch verification. Cleaned up daily by cron.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | INTEGER PK | Auto-increment |
+| email | TEXT NOT NULL | User email |
+| code | TEXT NOT NULL | 6-digit OTP |
+| action | TEXT NOT NULL | Default 'tier_switch' |
+| tier | TEXT | Target tier for the switch |
+| created_at | TEXT | datetime('now') |
+| expires_at | TEXT NOT NULL | 10-minute TTL |
+| used | INTEGER NOT NULL | Default 0 |
+
+Indexes: `idx_verification_codes_email_code` (email, code), `idx_verification_codes_expires_at` (expires_at)
 
 ### Views
 

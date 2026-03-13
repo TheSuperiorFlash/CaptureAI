@@ -27,8 +27,9 @@ wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_t
 | 006 | `006_create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
 | 007 | `007_add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
 | 008 | `008_rename_free_to_basic.sql` | Recreate `users` table with `tier DEFAULT 'basic' CHECK (tier IN ('basic', 'pro'))`; auto-migrates existing `tier='free'` rows to `'basic'` |
+| 009 | `009_add_verification_codes.sql` | `verification_codes` table for email OTP verification on tier switches |
 
-Migrations 001, 002, 005, and 007 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite), and 008 (table recreation/rename) are **not idempotent** and will fail if re-run.
+Migrations 001, 002, 005, 007, and 009 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite), and 008 (table recreation/rename) are **not idempotent** and will fail if re-run.
 
 ## Maintenance
 

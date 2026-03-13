@@ -78,6 +78,10 @@ EXTENSION_URL = "https://captureai.dev"
 # Second ID: Development/unpacked extension for testing
 CHROME_EXTENSION_IDS = "idpdleplccjjbmdmjkpmmkecmoeomnjd,pnlbkbjpefcjfaidkmickcaicecbkdio"
 
+# Cron triggers — daily cleanup of expired verification codes
+[triggers]
+crons = ["0 3 * * *"]
+
 # Secrets - Set with: wrangler secret put SECRET_NAME
 # Required secrets:
 #   wrangler secret put STRIPE_SECRET_KEY

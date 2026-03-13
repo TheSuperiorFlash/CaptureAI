@@ -93,7 +93,13 @@ export class AIHandler {
       }
 
       // Parse and validate request body with size limit (30MB for multi-image)
-      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel, images } = await validateRequestBody(request, 30 * 1024 * 1024);
+      const { question, imageData, ocrText, ocrConfidence, promptType, reasoningLevel: rawReasoningLevel, images } = await validateRequestBody(request, 30 * 1024 * 1024);
+
+      // Enforce tier-based reasoning level: Basic users are capped at level 1
+      let reasoningLevel = rawReasoningLevel;
+      if (user.tier !== 'pro' && reasoningLevel !== undefined && reasoningLevel > 1) {
+        reasoningLevel = 1;
+      }
 
       // Validate images array size
       if (images && images.length > 3) {

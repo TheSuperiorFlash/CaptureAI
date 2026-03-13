@@ -5,7 +5,7 @@
 
 import { jsonResponse, parseJSON, generateUUID, constantTimeCompare, fetchWithTimeout } from './utils';
 import { AuthHandler } from './auth';
-import { validateRequestBody, validateEmail, validateStripeSignature, ValidationError } from './validation';
+import { validateRequestBody, validateEmail, validateStripeSignature, validateVerificationCode, ValidationError } from './validation';
 import { logSubscription, logWebhook, logValidationError } from './logger';
 import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
@@ -84,7 +84,13 @@ export class SubscriptionHandler {
               .bind(null, 'inactive', existingUser.id).run();
           }
         } else {
-          // Step 2: confirmed — apply the tier switch
+          // Step 2: confirmed — verify email ownership via OTP before applying the tier switch
+          const verificationCode = validateVerificationCode(body.verificationCode, true);
+          const codeValid = await this.consumeVerificationCode(email, verificationCode, 'tier_switch', tier);
+          if (!codeValid) {
+            return jsonResponse({ error: 'Invalid or expired verification code' }, 403);
+          }
+
           try {
             const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
             return jsonResponse({ ...switchResult, sessionId: 'tier_change_' + existingSubscriptionId, changedTier: true });
@@ -167,6 +173,134 @@ export class SubscriptionHandler {
 
       return jsonResponse({ error: 'Failed to create checkout' }, 500);
     }
+  }
+
+  /**
+   * Generate a cryptographically secure 6-digit verification code
+   */
+  generateVerificationCode() {
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return String(array[0] % 1000000).padStart(6, '0');
+  }
+
+  /**
+   * Send email verification code for tier switch confirmation
+   * POST /api/subscription/send-verification
+   */
+  async sendVerification(request) {
+    try {
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `verify:${clientId}`,
+        RateLimitPresets.AUTH.limit,
+        RateLimitPresets.AUTH.windowMs,
+        this.env,
+        RateLimitPresets.AUTH.bindingName
+      );
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
+      const body = await validateRequestBody(request);
+      const email = validateEmail(body.email, true);
+      const tier = body.tier;
+
+      if (tier !== 'basic' && tier !== 'pro') {
+        return jsonResponse({ error: 'Invalid tier' }, 400);
+      }
+
+      // Verify user exists with an active subscription requesting a different tier
+      const existingUser = await this.db
+        .prepare('SELECT id, tier, stripe_subscription_id FROM users WHERE email = ?')
+        .bind(email)
+        .first();
+
+      if (!existingUser?.stripe_subscription_id || existingUser.tier === tier) {
+        // Don't reveal whether the email exists — return generic success
+        return jsonResponse({ success: true, message: 'If an account exists, a verification code has been sent' });
+      }
+
+      // Invalidate previous unused codes for this email+action
+      await this.db
+        .prepare('UPDATE verification_codes SET used = 1 WHERE email = ? AND action = ? AND used = 0')
+        .bind(email, 'tier_switch')
+        .run();
+
+      // Generate and store code with 10-minute TTL
+      const code = this.generateVerificationCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+      await this.db
+        .prepare('INSERT INTO verification_codes (email, code, action, tier, expires_at) VALUES (?, ?, ?, ?, ?)')
+        .bind(email, code, 'tier_switch', tier, expiresAt)
+        .run();
+
+      // Send code via email
+      if (this.env.RESEND_API_KEY) {
+        const tierLabel = tier === 'pro' ? 'Pro' : 'Basic';
+        const subject = `CaptureAI — Verify your plan change to ${tierLabel}`;
+        const htmlContent = `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
+            <h2 style="color: #0ea5e9; margin: 0 0 16px;">Verify Your Plan Change</h2>
+            <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">You requested to switch to the <strong>${tierLabel}</strong> plan. Enter this code to confirm:</p>
+            <div style="background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 24px;">
+              <span style="font-family: 'SF Mono', Monaco, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #fff;">${code}</span>
+            </div>
+            <p style="color: #94a3b8; font-size: 13px; margin: 0;">This code expires in 10 minutes. If you did not request this change, you can safely ignore this email.</p>
+          </div>`;
+        const textContent = `CaptureAI Verification Code: ${code}\n\nEnter this code to confirm your plan change to ${tierLabel}.\nThis code expires in 10 minutes.\n\nIf you did not request this change, ignore this email.`;
+
+        await this.auth.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
+      }
+
+      if (this.logger) {
+        logSubscription(this.logger, 'verification_sent', { email, tier });
+      }
+
+      return jsonResponse({ success: true, message: 'If an account exists, a verification code has been sent' });
+
+    } catch (error) {
+      console.error('Send verification error:', error);
+      if (error instanceof ValidationError) {
+        return jsonResponse({ error: error.message, field: error.field }, 400);
+      }
+      return jsonResponse({ error: 'Failed to send verification code' }, 500);
+    }
+  }
+
+  /**
+   * Validate a verification code from the database
+   * @returns {boolean} True if code is valid and has been consumed
+   */
+  async consumeVerificationCode(email, code, action, tier) {
+    const row = await this.db
+      .prepare(
+        'SELECT id FROM verification_codes WHERE email = ? AND code = ? AND action = ? AND tier = ? AND used = 0 AND expires_at > datetime(\'now\')'
+      )
+      .bind(email, code, action, tier)
+      .first();
+
+    if (!row) {
+      return false;
+    }
+
+    // Mark as used (single-use)
+    await this.db
+      .prepare('UPDATE verification_codes SET used = 1 WHERE id = ?')
+      .bind(row.id)
+      .run();
+
+    return true;
+  }
+
+  /**
+   * Clean up expired or used verification codes
+   */
+  async cleanupVerificationCodes() {
+    await this.db
+      .prepare("DELETE FROM verification_codes WHERE expires_at < datetime('now') OR used = 1")
+      .run();
   }
 
   /**
@@ -465,6 +599,19 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'Not authenticated' }, 401);
       }
 
+      // Rate limit to prevent abuse with compromised license keys
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `change-tier:${clientId}`,
+        RateLimitPresets.CHECKOUT.limit,
+        RateLimitPresets.CHECKOUT.windowMs,
+        this.env,
+        RateLimitPresets.CHECKOUT.bindingName
+      );
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
       const body = await validateRequestBody(request);
       const newTier = body.tier;
 
@@ -533,7 +680,8 @@ export class SubscriptionHandler {
             'items[0][id]': subscriptionItemId,
             'items[0][price]': newPriceId,
             'proration_behavior': 'always_invoice',
-            'metadata[tier]': newTier
+            'metadata[tier]': newTier,
+            'expand[]': 'latest_invoice'
           })
         },
         5000
@@ -547,12 +695,16 @@ export class SubscriptionHandler {
 
       const updatedSubscription = await updateResponse.json();
 
-      // Sync the new tier to the database immediately — the webhook will also
-      // fire a customer.subscription.updated which will confirm this update
-      await this.db
-        .prepare('UPDATE users SET tier = ? WHERE id = ?')
-        .bind(newTier, userData.id)
-        .run();
+      // Only update DB tier when the invoice is settled (paid or zero-due).
+      // If the invoice requires payment action, the webhook will update the tier
+      // once payment succeeds — prevents brief tier escalation on card decline.
+      const invoice = updatedSubscription.latest_invoice;
+      if (!invoice || this.isInvoiceSettled(invoice)) {
+        await this.db
+          .prepare('UPDATE users SET tier = ? WHERE id = ?')
+          .bind(newTier, userData.id)
+          .run();
+      }
 
       const nextBillingDate = updatedSubscription.current_period_end
         ? new Date(updatedSubscription.current_period_end * 1000).toISOString()

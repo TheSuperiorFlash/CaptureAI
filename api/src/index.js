@@ -95,6 +95,14 @@ export default {
         }
       );
     }
+  },
+
+  async scheduled(event, env, ctx) {
+    const db = env.DB;
+    ctx.waitUntil(
+      db.prepare('DELETE FROM verification_codes WHERE expires_at < datetime(\'now\') OR used = 1').run()
+        .catch(err => console.error('Verification cleanup failed:', err))
+    );
   }
 };
 

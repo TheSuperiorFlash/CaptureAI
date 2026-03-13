@@ -459,3 +459,27 @@ export function validateBase64Image(base64String, fieldName = 'image') {
 
   return base64String;
 }
+
+/**
+ * Validate verification code format (6 digits)
+ */
+export function validateVerificationCode(code, required = true) {
+  if (code === null || code === undefined || code === '') {
+    if (required) {
+      throw new ValidationError('Verification code is required', 'verificationCode');
+    }
+    return null;
+  }
+
+  if (typeof code !== 'string') {
+    throw new ValidationError('Verification code must be a string', 'verificationCode');
+  }
+
+  const trimmed = code.trim();
+
+  if (!/^\d{6}$/.test(trimmed)) {
+    throw new ValidationError('Verification code must be 6 digits', 'verificationCode');
+  }
+
+  return trimmed;
+}

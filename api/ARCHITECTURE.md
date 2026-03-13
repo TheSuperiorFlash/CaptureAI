@@ -38,7 +38,8 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 | Method | Path | Auth | Rate Limit | Description |
 |--------|------|------|------------|-------------|
 | POST | `/api/subscription/create-checkout` | None | 10/min | Stripe checkout session; auto-switches active subscribers and returns Stripe-hosted invoice page plus prorated amount preview fields |
-| POST | `/api/subscription/change-tier` | LicenseKey | — | Upgrade/downgrade active subscription with proration |
+| POST | `/api/subscription/send-verification` | None | 5/min (AUTH) | Send 6-digit OTP email for tier-switch confirmation |
+| POST | `/api/subscription/change-tier` | LicenseKey | 10/min (CHECKOUT) | Upgrade/downgrade active subscription with proration |
 | POST | `/api/subscription/webhook` | Stripe signature | — | Stripe webhook handler |
 | POST | `/api/subscription/verify-payment` | None | — | Verify checkout session |
 | GET | `/api/subscription/portal` | LicenseKey | — | Stripe billing portal |
@@ -74,7 +75,7 @@ Requests go through **Cloudflare AI Gateway** (provider-agnostic OpenAI endpoint
 **Models:**
 - Level 0: `gpt-4.1-nano` — fastest, no reasoning, legacy params (`max_tokens`)
 - Level 1: `gpt-5-nano` + `reasoningEffort: 'low'` — default
-- Level 2: `gpt-5-nano` + `reasoningEffort: 'medium'` — Pro only
+- Level 2: `gpt-5-nano` + `reasoningEffort: 'medium'` — Pro only (server-side enforced; non-Pro requests are clamped to level 1)
 
 **Prompt types:** `answer`, `answer_image`, `ask`, `ask_image`, `auto_solve`, `auto_solve_image`
 
@@ -112,4 +113,8 @@ Applied to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: D
 | `src/utils.js` | JSON responses, fetchWithTimeout, PBKDF2 hashing, JWT, preflight CORS, constant-time comparison |
 | `src/logger.js` | Structured logging with PII redaction, CORS rejection logging |
 | `wrangler.toml` | Worker config, D1 binding, rate limit bindings, env vars |
-| `schema.sql` | Complete database schema (users, usage_records, usage_daily, webhook_events, views) |
+| `schema.sql` | Complete database schema (users, usage_records, usage_daily, webhook_events, verification_codes, views) |
+
+## Scheduled Jobs
+
+A daily cron trigger (`0 3 * * *`, defined in `wrangler.toml`) calls the `scheduled` handler in `src/index.js`, which deletes expired and used rows from the `verification_codes` table.

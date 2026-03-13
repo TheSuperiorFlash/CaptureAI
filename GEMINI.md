@@ -59,6 +59,8 @@ cd api && npm run db:migrate  # Run migrations
 - **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
+- **Tier-Switch OTP Verification**: Tier switches via `create-checkout` (confirmed flow) require a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification`, stored in `verification_codes` table (10-min TTL), and cleaned up by a daily cron trigger.
+- **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
 
 ## Storage Keys
 
@@ -172,6 +174,6 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 - **Extension Architecture**: [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) — modules, storage keys, privacy guard
 - **Chrome Extension Config**: [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) — CORS extension ID management
 - **Database Guide**: [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) — schema, queries, maintenance
-- **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 8 migrations
+- **Migration Scripts**: [api/migrations/README.md](api/migrations/README.md) — all 9 migrations
 - **Testing Guide**: [tests/README.md](tests/README.md) — 25 test files, setup, patterns
 - **Website Design System**: [website/DESIGN_SYSTEM.md](website/DESIGN_SYSTEM.md) — tokens, components, patterns

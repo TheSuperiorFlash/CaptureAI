@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 
@@ -90,9 +90,15 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     data: ConfirmationData
     visible: boolean
     loading: boolean
-    onConfirm: () => void
+    onConfirm: (verificationCode: string) => void
     onCancel: () => void
 }) {
+    const [verificationCode, setVerificationCode] = useState('')
+    const [codeSent, setCodeSent] = useState(false)
+    const [codeSending, setCodeSending] = useState(false)
+    const [codeError, setCodeError] = useState<string | null>(null)
+    const [resendCooldown, setResendCooldown] = useState(0)
+
     const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: data.currency.toUpperCase(),
@@ -110,6 +116,46 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
         'Floating interface',
         'Stealth Mode',
     ]
+
+    const sendCode = async () => {
+        setCodeSending(true)
+        setCodeError(null)
+        try {
+            await apiPost(`${API_BASE_URL}/api/subscription/send-verification`, {
+                email: data.email,
+                tier: data.tier,
+            })
+            setCodeSent(true)
+            setResendCooldown(60)
+        } catch (error) {
+            setCodeError(error instanceof Error ? error.message : 'Failed to send code')
+        } finally {
+            setCodeSending(false)
+        }
+    }
+
+    // Auto-send verification code when modal opens
+    useEffect(() => {
+        if (visible && !codeSent && !codeSending) {
+            sendCode()
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [visible])
+
+    // Resend cooldown timer
+    useEffect(() => {
+        if (resendCooldown <= 0) return
+        const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
+        return () => clearTimeout(timer)
+    }, [resendCooldown])
+
+    const handleCodeInput = (value: string) => {
+        const digits = value.replace(/\D/g, '').slice(0, 6)
+        setVerificationCode(digits)
+        setCodeError(null)
+    }
+
+    const canConfirm = verificationCode.length === 6 && !loading
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -143,7 +189,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
 
                     <div className="divider-gradient mb-7" />
 
-                    <ul className="mb-8 space-y-3">
+                    <ul className="mb-6 space-y-3">
                         {features.map((feature) => (
                             <li key={feature} className="flex items-center gap-3">
                                 <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15">
@@ -154,9 +200,43 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         ))}
                     </ul>
 
-                    <button type="button" onClick={onConfirm} disabled={loading}
+                    {/* Verification code section */}
+                    <div className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                        <div className="mb-3 flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-cyan-400" />
+                            <span className="text-xs font-medium text-[--color-text-secondary]">
+                                {codeSent ? `Code sent to ${data.email}` : 'Sending verification code...'}
+                            </span>
+                        </div>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            placeholder="Enter 6-digit code"
+                            value={verificationCode}
+                            onChange={(e) => handleCodeInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
+                            maxLength={6}
+                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-lg tracking-[0.3em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
+                        />
+                        {codeError && (
+                            <p className="mt-2 text-xs text-red-400">{codeError}</p>
+                        )}
+                        <div className="mt-2 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={sendCode}
+                                disabled={codeSending || resendCooldown > 0}
+                                className="text-xs text-[--color-text-tertiary] transition-colors hover:text-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {codeSending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
                         className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${
-                            loading ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
+                            !canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
                         }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
@@ -231,7 +311,7 @@ export default function ActivatePage() {
         setTimeout(() => setConfirmationData(null), 300)
     }
 
-    const handleConfirmUpgrade = async () => {
+    const handleConfirmUpgrade = async (verificationCode: string) => {
         if (!confirmationData) return
         setConfirmLoading(true)
         try {
@@ -239,6 +319,7 @@ export default function ActivatePage() {
                 email: confirmationData.email,
                 tier: confirmationData.tier,
                 confirmed: true,
+                verificationCode,
             })
             if (data.url) {
                 redirectToCheckout(data.url as string)
