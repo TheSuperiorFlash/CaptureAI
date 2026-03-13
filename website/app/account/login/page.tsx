@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Mail, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Mail, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { API_BASE_URL } from '@/lib/api'
 import { useSession } from '@/hooks/useSession'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -131,8 +136,17 @@ export default function LoginPage() {
 
   if (sessionLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+      <div className="relative overflow-x-hidden py-20 md:py-28">
+        <div className="pointer-events-none absolute inset-0 gradient-mesh" />
+        <div className="relative z-10 mx-auto flex max-w-md flex-col items-center px-6">
+          <Skeleton className="mb-3 h-10 w-72" />
+          <Skeleton className="mb-10 h-5 w-56" />
+          <div className="w-full rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-8 backdrop-blur-xl">
+            <Skeleton className="mb-2 h-4 w-24" />
+            <Skeleton className="mb-4 h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -161,10 +175,10 @@ export default function LoginPage() {
           {step === 'email' ? (
             <>
               {/* Email step */}
-              <label htmlFor="login-email" className="mb-2 block text-sm font-medium text-[--color-text-secondary]">
+              <Label htmlFor="login-email" className="mb-2 block">
                 Email address
-              </label>
-              <input
+              </Label>
+              <Input
                 id="login-email"
                 type="email"
                 autoComplete="email"
@@ -172,11 +186,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(null) }}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSendCode() }}
-                className="mb-4 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/40 focus:outline-none focus:ring-2 focus:ring-blue-500/15 transition-all"
+                className="mb-4 h-12"
               />
 
               {error && (
-                <p className="mb-4 text-sm text-red-400">{error}</p>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
 
               <button
@@ -205,21 +222,33 @@ export default function LoginPage() {
                 </span>
               </div>
 
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                placeholder="Enter 6-digit code"
-                value={code}
-                onChange={(e) => handleCodeInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && code.length === 6) handleVerifyCode() }}
-                maxLength={6}
-                autoFocus
-                className="mb-4 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3.5 text-center font-mono text-xl tracking-[0.3em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
-              />
+              <div className="mb-6 flex justify-center">
+                <InputOTP
+                  maxLength={6}
+                  value={code}
+                  onChange={(value) => { setCode(value); setError(null) }}
+                  onComplete={() => { if (code.length === 5) setTimeout(handleVerifyCode, 0) }}
+                  autoFocus
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <span className="mx-2 text-[--color-text-tertiary]">-</span>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
 
               {error && (
-                <p className="mb-4 text-sm text-red-400">{error}</p>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
 
               <button

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Chrome, Check, Download, ArrowRight, Shield, Zap } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = {
     title: 'Download',
@@ -55,8 +56,8 @@ export default function DownloadPage() {
                 </div>
 
                 {/* Download card */}
-                <div className="gradient-border mb-10 rounded-2xl">
-                    <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8">
+                <Card className="gradient-border mb-10 rounded-2xl border-0 py-0">
+                    <CardContent className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8">
                         <div className="mb-8 flex items-center gap-4">
                             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
                                 <Chrome className="h-7 w-7 text-blue-400" />
@@ -91,11 +92,12 @@ export default function DownloadPage() {
                             <Chrome className="h-4 w-4" />
                             Add to Chrome — Start now
                         </a>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
                 {/* Setup steps */}
-                <div className="glass-card mb-10 rounded-2xl p-8">
+                <Card className="glass-card mb-10 rounded-2xl border-0 py-0">
+                    <CardContent className="p-8">
                     <h3 className="mb-8 text-lg font-semibold text-[--color-text]">Setup in 4 steps</h3>
                     <ol className="space-y-6">
                         {steps.map((step, i) => (
@@ -125,10 +127,12 @@ export default function DownloadPage() {
                             </li>
                         ))}
                     </ol>
-                </div>
+                    </CardContent>
+                </Card>
 
                 {/* System requirements */}
-                <div className="glass-card rounded-2xl p-8">
+                <Card className="glass-card rounded-2xl border-0 py-0">
+                    <CardContent className="p-8">
                     <h4 className="mb-5 text-sm font-medium text-[--color-text-secondary]">System requirements</h4>
                     <ul className="space-y-3">
                         {[
@@ -142,7 +146,8 @@ export default function DownloadPage() {
                             </li>
                         ))}
                     </ul>
-                </div>
+                    </CardContent>
+                </Card>
 
                 {/* CTA */}
                 <div className="mt-10 text-center">

@@ -3,9 +3,17 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { Menu, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import MagneticButton from './MagneticButton'
+import {
+    Sheet,
+    SheetTrigger,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetClose,
+} from '@/components/ui/sheet'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -250,64 +258,62 @@ export default function Navbar() {
                     </MagneticButton>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setIsOpen(!isOpen)}
-                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
-                    aria-hidden={!isScrolled && isOpen}
-                    tabIndex={!isScrolled && isOpen ? -1 : undefined}
-                    aria-label="Toggle menu"
-                >
-                    {isOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            </div>
+                <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                    <SheetTrigger
+                        className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
+                        aria-label="Toggle menu"
+                    >
+                        <Menu size={24} />
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-[280px] sm:max-w-[280px] pt-12 px-6 pb-8 flex flex-col md:hidden">
+                        <SheetHeader className="px-0 mb-4">
+                            <SheetTitle className="flex items-center gap-2.5">
+                                <Image src="/logo.svg" alt="CaptureAI" width={24} height={24} />
+                                <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
+                            </SheetTitle>
+                        </SheetHeader>
 
-            {/* Mobile menu */}
-            {isOpen && (
-                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
-                    <div className="flex justify-end pr-2 pt-[10px] pb-2">
-                        <button
-                            type="button"
-                            onClick={() => setIsOpen(false)}
-                            className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
-                            aria-label="Close menu"
-                        >
-                            <X size={24} />
-                        </button>
-                    </div>
-                    <div className="flex flex-col space-y-1 px-3 pb-3">
-                        {navigation.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-center ${isActive(item.href)
-                                    ? 'text-[--color-text] font-medium'
-                                    : 'text-[--color-text-tertiary] hover:text-[--color-text]'
-                                    }`}
-                                onClick={(e) => {
-                                    handleNavClick(e, item.href)
-                                    setIsOpen(false)
-                                }}
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
-                        <div className="w-full pt-1 pb-1">
-                            <Link
-                                href="/activate"
-                                className="glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white text-[13px] px-2 h-9"
-                                onClick={(e) => {
-                                    handleNavClick(e, '/activate')
-                                    setIsOpen(false)
-                                }}
-                            >
-                                Get Started
-                                <ArrowRight className="h-3.5 w-3.5" />
-                            </Link>
+                        <div className="divider-gradient mb-4" />
+
+                        <nav className="flex flex-col space-y-1">
+                            {navigation.map((item) => (
+                                <SheetClose key={item.name} render={<span />}>
+                                    <Link
+                                        href={item.href}
+                                        className={`block w-full rounded-xl px-4 py-3 text-[15px] transition-colors ${isActive(item.href)
+                                            ? 'text-[--color-text] font-medium bg-white/[0.04]'
+                                            : 'text-[--color-text-secondary] hover:text-[--color-text] hover:bg-white/[0.02]'
+                                            }`}
+                                        onClick={(e) => {
+                                            handleNavClick(e, item.href)
+                                            setIsOpen(false)
+                                        }}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </SheetClose>
+                            ))}
+                        </nav>
+
+                        <div className="mt-auto pt-6">
+                            <div className="divider-gradient mb-6" />
+                            <SheetClose render={<span />}>
+                                <Link
+                                    href="/activate"
+                                    className="glow-btn flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3 font-semibold text-white text-sm transition-all hover:from-blue-500 hover:to-cyan-500"
+                                    onClick={(e) => {
+                                        handleNavClick(e, '/activate')
+                                        setIsOpen(false)
+                                    }}
+                                >
+                                    Get Started
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </SheetClose>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </SheetContent>
+                </Sheet>
+            </div>
         </nav>
     )
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Keyboard, HelpCircle, MessageSquare } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 
 export const metadata: Metadata = {
     title: 'Help',
@@ -30,7 +32,8 @@ export default function HelpPage() {
                 </div>
 
                 {/* Getting Started */}
-                <section className="glass-card mb-8 rounded-2xl p-8">
+                <Card className="glass-card mb-8 rounded-2xl border-0 py-0">
+                    <CardContent className="p-8">
                     <div className="mb-6 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
                             <BookOpen className="h-5 w-5 text-blue-400" />
@@ -77,10 +80,12 @@ export default function HelpPage() {
                             ))}
                         </ol>
                     </div>
-                </section>
+                    </CardContent>
+                </Card>
 
                 {/* Keyboard Shortcuts */}
-                <section className="glass-card mb-8 rounded-2xl p-8">
+                <Card className="glass-card mb-8 rounded-2xl border-0 py-0">
+                    <CardContent className="p-8">
                     <div className="mb-6 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
                             <Keyboard className="h-5 w-5 text-violet-400" />
@@ -101,17 +106,19 @@ export default function HelpPage() {
                             </div>
                         ))}
                     </div>
-                </section>
+                    </CardContent>
+                </Card>
 
                 {/* FAQ */}
-                <section className="glass-card mb-8 rounded-2xl p-8">
+                <Card className="glass-card mb-8 rounded-2xl border-0 py-0">
+                    <CardContent className="p-8">
                     <div className="mb-6 flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/10">
                             <HelpCircle className="h-5 w-5 text-amber-400" />
                         </div>
                         <h2 className="text-lg font-semibold text-[--color-text]">FAQ</h2>
                     </div>
-                    <div className="space-y-6">
+                    <Accordion>
                         {[
                             {
                                 q: 'How do I get a license key?',
@@ -130,17 +137,20 @@ export default function HelpPage() {
                                 a: <>Visit the <Link href="/activate" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">activation page</Link> and select the Pro tier. You&apos;ll be redirected to Stripe for payment.</>,
                             },
                         ].map((item, i) => (
-                            <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
-                                <h3 className="mb-2 text-sm font-medium text-[--color-text]">{item.q}</h3>
-                                <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
-                            </div>
+                            <AccordionItem key={i} value={`faq-${i}`}>
+                                <AccordionTrigger>{item.q}</AccordionTrigger>
+                                <AccordionContent>
+                                    <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
+                                </AccordionContent>
+                            </AccordionItem>
                         ))}
-                    </div>
-                </section>
+                    </Accordion>
+                    </CardContent>
+                </Card>
 
                 {/* Contact CTA */}
-                <section className="gradient-border rounded-2xl">
-                    <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8 text-center">
+                <Card className="gradient-border rounded-2xl border-0 py-0">
+                    <CardContent className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8 text-center">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
                             <MessageSquare className="h-6 w-6 text-emerald-400" />
                         </div>
@@ -155,8 +165,8 @@ export default function HelpPage() {
                             Contact Support
                             <ArrowRight className="h-4 w-4" />
                         </Link>
-                    </div>
-                </section>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

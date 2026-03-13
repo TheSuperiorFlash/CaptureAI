@@ -442,3 +442,157 @@ p {
     font-size: 15px;
   }
 }
+
+/* ---- shadcn Component Overrides ---- */
+
+/* Input — dark glass styling */
+[data-slot="input"] {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+  border-radius: 12px;
+  height: 2.75rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+}
+
+[data-slot="input"]::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+[data-slot="input"]:focus-visible {
+  border-color: rgba(0, 71, 255, 0.4);
+  --tw-ring-color: rgba(0, 71, 255, 0.15);
+}
+
+/* InputOTP — individual digit slots with glass aesthetic */
+.cn-input-otp {
+  gap: 0.5rem;
+}
+
+[data-slot="input-otp-slot"] {
+  width: 2.75rem;
+  height: 3rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: 'Inter', monospace;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--color-text);
+}
+
+[data-slot="input-otp-slot"][data-active="true"] {
+  border-color: rgba(0, 240, 255, 0.5);
+  --tw-ring-color: rgba(0, 240, 255, 0.15);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.1);
+}
+
+/* Accordion — glass aesthetic */
+[data-slot="accordion"] {
+  gap: 0;
+}
+
+[data-slot="accordion-item"] {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+[data-slot="accordion-trigger"] {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: 0;
+}
+
+[data-slot="accordion-trigger"]:hover {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+}
+
+[data-slot="accordion-trigger"][aria-expanded="true"] {
+  color: var(--color-text);
+}
+
+[data-slot="accordion-trigger-icon"] {
+  color: var(--color-text-tertiary);
+  transition: color 0.2s;
+}
+
+[data-slot="accordion-trigger"][aria-expanded="true"] [data-slot="accordion-trigger-icon"] {
+  color: var(--color-cyan);
+}
+
+[data-slot="accordion-content"] {
+  color: var(--color-text-tertiary);
+}
+
+[data-slot="accordion-content"] > div {
+  padding: 0 1.5rem 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+/* Sheet — dark glass drawer */
+[data-slot="sheet-overlay"] {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-slot="sheet-content"] {
+  background: linear-gradient(180deg, #0c1125 0%, #060913 100%);
+  border-color: rgba(255, 255, 255, 0.06);
+  padding: 0;
+}
+
+/* Dialog — dark glass modal */
+[data-slot="dialog-overlay"] {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-slot="dialog-content"] {
+  background: linear-gradient(145deg, rgba(12, 17, 37, 0.95) 0%, rgba(6, 9, 19, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 80px rgba(0, 71, 255, 0.06), 0 40px 80px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Alert — themed variants */
+[data-slot="alert"] {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-secondary);
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+}
+
+[data-slot="alert"][data-variant="destructive"] {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+/* Card — transparent override for composing with glass-card */
+[data-slot="card"] {
+  background: transparent;
+  --tw-ring-opacity: 0;
+  border-radius: 1.25rem;
+}
+
+/* Skeleton — dark shimmer */
+[data-slot="skeleton"] {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+}
+
+/* Label */
+[data-slot="label"] {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

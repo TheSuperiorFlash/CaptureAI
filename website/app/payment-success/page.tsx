@@ -3,8 +3,11 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Check, X } from 'lucide-react'
+import { Check, X, AlertCircle } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent } from '@/components/ui/card'
 
 const MAX_RETRIES = 5
 const INITIAL_DELAY_MS = 1000
@@ -107,12 +110,14 @@ function PaymentSuccessContent() {
             </div>
 
             <div className="relative z-10 w-full max-w-md reveal-up">
-                <div className="glass-card rounded-3xl p-8 text-center sm:p-10">
+                <Card className="glass-card rounded-3xl border-0 py-0">
+                    <CardContent className="p-8 text-center sm:p-10">
                     {/* Loading */}
                     {status === 'loading' && (
                         <div className="flex flex-col items-center justify-center gap-5 py-12">
-                            <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/[0.1] border-t-cyan-400" />
-                            <span className="text-[15px] font-medium text-[--color-text-secondary]">Verifying your payment...</span>
+                            <Skeleton className="h-16 w-16 rounded-full" />
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-4 w-36" />
                         </div>
                     )}
 
@@ -170,9 +175,10 @@ function PaymentSuccessContent() {
                                 We couldn&apos;t verify your payment.
                             </p>
 
-                            <div className="mb-8 rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-[14px] leading-relaxed text-[--color-text-secondary]">
-                                {errorMessage}
-                            </div>
+                            <Alert variant="destructive" className="mb-8 rounded-2xl text-left">
+                                <AlertCircle className="h-5 w-5" />
+                                <AlertDescription>{errorMessage}</AlertDescription>
+                            </Alert>
 
                             <Link
                                 href="/activate"
@@ -182,7 +188,8 @@ function PaymentSuccessContent() {
                             </Link>
                         </>
                     )}
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </section>
     )

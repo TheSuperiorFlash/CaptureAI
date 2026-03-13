@@ -1,3 +1,5 @@
+import { Card, CardContent } from '@/components/ui/card'
+
 const steps = [
     {
         number: '1',
@@ -43,18 +45,22 @@ export default function HowItWorks() {
 
                     {steps.map((step) => {
                         return (
-                            <li key={step.number} className="relative flex flex-col items-center rounded-3xl p-6 text-center">
-                                {/* Glowing step number */}
-                                <div className="relative mx-auto mb-8 flex h-12 w-12 items-center justify-center">
-                                    <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white">
-                                        {step.number}
-                                    </div>
-                                </div>
+                            <li key={step.number} className="relative">
+                                <Card className="glass-card py-0 border-0 h-full transition-all duration-300 hover:border-[--color-border-glow]">
+                                    <CardContent className="flex flex-col items-center p-6 text-center">
+                                        {/* Glowing step number */}
+                                        <div className="relative mx-auto mb-8 flex h-12 w-12 items-center justify-center">
+                                            <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0047ff] to-[#00f0ff] text-[15px] font-bold tracking-tight text-white">
+                                                {step.number}
+                                            </div>
+                                        </div>
 
-                                <h3 className="mb-3 text-[19px] font-semibold text-[--color-text]">{step.title}</h3>
-                                <p className="mx-auto max-w-sm text-[15px] leading-relaxed text-[--color-text-tertiary]">
-                                    {step.description}
-                                </p>
+                                        <h3 className="mb-3 text-[19px] font-semibold text-[--color-text]">{step.title}</h3>
+                                        <p className="mx-auto max-w-sm text-[15px] leading-relaxed text-[--color-text-tertiary]">
+                                            {step.description}
+                                        </p>
+                                    </CardContent>
+                                </Card>
                             </li>
                         )
                     })}

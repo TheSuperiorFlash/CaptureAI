@@ -5,6 +5,10 @@ import Image from 'next/image'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -169,20 +173,12 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     const canConfirm = verificationCode.length === 6 && !loading
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onCancel} />
-            <div className={`relative w-full max-w-md transition-all duration-300 ease-out ${
-                visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
-            }`}>
+        <Dialog open={visible} onOpenChange={(open) => { if (!open) onCancel() }}>
+            <DialogContent className="max-w-md rounded-[28px] border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
                 <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-48 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
-                <div className="relative rounded-[28px] border border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
-                    <button type="button" onClick={onCancel}
-                        className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white/80"
-                        aria-label="Cancel upgrade">
-                        <XIcon className="h-4 w-4" />
-                    </button>
 
-                    <div className="mb-6 flex justify-center">
+                <DialogHeader className="items-center">
+                    <div className="mb-4 flex justify-center">
                         <div className="flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-1.5">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
@@ -193,75 +189,90 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                             </span>
                         </div>
                     </div>
+                    <DialogDescription className="text-xs font-medium uppercase tracking-wider text-[--color-text-tertiary]">
+                        Amount due today
+                    </DialogDescription>
+                    <DialogTitle className="font-inter text-[3.25rem] font-extrabold leading-none text-gradient-static">
+                        {formattedAmount}
+                    </DialogTitle>
+                    <p className="text-sm text-[--color-text-tertiary]">Includes credit for any unused time on your current plan</p>
+                </DialogHeader>
 
-                    <p className="mb-1 text-center text-xs font-medium uppercase tracking-wider text-[--color-text-tertiary]">Amount due today</p>
-                    <p className="mb-2 text-center font-inter text-[3.25rem] font-extrabold leading-none text-gradient-static">{formattedAmount}</p>
-                    <p className="mb-7 text-center text-sm text-[--color-text-tertiary]">Includes credit for any unused time on your current plan</p>
+                <div className="divider-gradient my-5" />
 
-                    <div className="divider-gradient mb-7" />
+                <ul className="mb-6 space-y-3">
+                    {features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-3">
+                            <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15">
+                                <Check className="h-3 w-3 text-cyan-400" />
+                            </div>
+                            <span className="text-sm text-[--color-text-secondary]">{feature}</span>
+                        </li>
+                    ))}
+                </ul>
 
-                    <ul className="mb-6 space-y-3">
-                        {features.map((feature) => (
-                            <li key={feature} className="flex items-center gap-3">
-                                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15">
-                                    <Check className="h-3 w-3 text-cyan-400" />
-                                </div>
-                                <span className="text-sm text-[--color-text-secondary]">{feature}</span>
-                            </li>
-                        ))}
-                    </ul>
-
-                    {/* Verification code section */}
-                    <div className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                        <div className="mb-3 flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-cyan-400" />
-                            <span className="text-xs font-medium text-[--color-text-secondary]">
-                                {codeSent ? `Code sent to ${data.email}` : 'Sending verification code...'}
-                            </span>
-                        </div>
-                        <input
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            placeholder="Enter 6-digit code"
-                            value={verificationCode}
-                            onChange={(e) => handleCodeInput(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
-                            maxLength={6}
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-lg tracking-[0.3em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
-                        />
-                        {codeError && (
-                            <p className="mt-2 text-xs text-red-400">{codeError}</p>
-                        )}
-                        <div className="mt-2 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={sendCode}
-                                disabled={codeSending || resendCooldown > 0}
-                                className="text-xs text-[--color-text-tertiary] transition-colors hover:text-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                                {codeSending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
-                            </button>
-                        </div>
+                {/* Verification code section */}
+                <div className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-cyan-400" />
+                        <span className="text-xs font-medium text-[--color-text-secondary]">
+                            {codeSent ? `Code sent to ${data.email}` : 'Sending verification code...'}
+                        </span>
                     </div>
-
-                    <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
-                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${
-                            !canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
-                        }`}>
-                        {loading
-                            ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
-                            : data.tier === 'pro' ? 'Confirm Upgrade' : 'Confirm Change'
-                        }
-                    </button>
-
-                    <button type="button" onClick={onCancel}
-                        className="mt-4 w-full text-sm text-[--color-text-tertiary] transition-colors hover:text-[--color-text-secondary]">
-                        Cancel
-                    </button>
+                    <div className="flex justify-center">
+                        <InputOTP
+                            maxLength={6}
+                            value={verificationCode}
+                            onChange={(value) => handleCodeInput(value)}
+                            onComplete={() => { if (canConfirm) onConfirm(verificationCode) }}
+                        >
+                            <InputOTPGroup>
+                                <InputOTPSlot index={0} />
+                                <InputOTPSlot index={1} />
+                                <InputOTPSlot index={2} />
+                            </InputOTPGroup>
+                            <InputOTPSeparator />
+                            <InputOTPGroup>
+                                <InputOTPSlot index={3} />
+                                <InputOTPSlot index={4} />
+                                <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                        </InputOTP>
+                    </div>
+                    {codeError && (
+                        <Alert variant="destructive" className="mt-3">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{codeError}</AlertDescription>
+                        </Alert>
+                    )}
+                    <div className="mt-2 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={sendCode}
+                            disabled={codeSending || resendCooldown > 0}
+                            className="text-xs text-[--color-text-tertiary] transition-colors hover:text-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            {codeSending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
+                    className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${
+                        !canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
+                    }`}>
+                    {loading
+                        ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
+                        : data.tier === 'pro' ? 'Confirm Upgrade' : 'Confirm Change'
+                    }
+                </button>
+
+                <button type="button" onClick={onCancel}
+                    className="mt-4 w-full text-sm text-[--color-text-tertiary] transition-colors hover:text-[--color-text-secondary]">
+                    Cancel
+                </button>
+            </DialogContent>
+        </Dialog>
     )
 }
 
@@ -520,7 +531,7 @@ export default function ActivatePage() {
                         </p>
 
                         <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
-                            <input
+                            <Input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -533,7 +544,7 @@ export default function ActivatePage() {
                                 placeholder="your@email.com"
                                 aria-label="Email address"
                                 autoComplete="email"
-                                className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-3.5 text-base text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                className="min-w-0 flex-1 h-12 rounded-xl"
                             />
                             <button
                                 type="button"
@@ -558,37 +569,22 @@ export default function ActivatePage() {
 
                         {/* Result message */}
                         {result && (
-                            result.type === 'info' ? (
-                                <div
-                                    role="status"
-                                    aria-live="polite"
-                                    aria-atomic="true"
-                                    className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5"
-                                >
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15">
-                                            <AlertCircle className="h-5 w-5 text-amber-400" />
-                                        </div>
-                                        <h3 className="mb-1.5 text-sm font-semibold text-amber-400">Already subscribed</h3>
-                                        <p className="text-sm text-amber-200/70">{result.message}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    role="status"
-                                    aria-live="polite"
-                                    aria-atomic="true"
-                                    className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
-                                >
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
-                                            <AlertCircle className="h-5 w-5 text-red-400" />
-                                        </div>
-                                        <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
-                                        <p className="text-sm text-red-200/70">{result.message}</p>
-                                    </div>
-                                </div>
-                            )
+                            <Alert
+                                variant={result.type === 'info' ? 'default' : 'destructive'}
+                                className={`mt-5 rounded-xl ${
+                                    result.type === 'info'
+                                        ? 'border-amber-500/20 bg-amber-500/[0.05] text-amber-400 [&>svg]:text-amber-400'
+                                        : ''
+                                }`}
+                            >
+                                <AlertCircle className="h-5 w-5" />
+                                <AlertDescription className={result.type === 'info' ? 'text-amber-200/70' : ''}>
+                                    <span className={`block mb-1 text-sm font-semibold ${result.type === 'info' ? 'text-amber-400' : 'text-red-400'}`}>
+                                        {result.type === 'info' ? 'Already subscribed' : 'Something went wrong'}
+                                    </span>
+                                    {result.message}
+                                </AlertDescription>
+                            </Alert>
                         )}
                     </div>
 

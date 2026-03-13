@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Mail, MessageCircle, ArrowRight, BookOpen } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata: Metadata = {
     title: 'Contact',
@@ -32,7 +33,8 @@ export default function ContactPage() {
                 {/* Contact cards */}
                 <div className="mb-8 grid gap-6 sm:grid-cols-2">
                     {/* Email Support */}
-                    <div className="glass-card rounded-2xl p-7">
+                    <Card className="glass-card rounded-2xl border-0 py-0 transition-all duration-300 hover:border-[--color-border-glow]">
+                        <CardContent className="p-7">
                         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
                             <Mail className="h-6 w-6 text-blue-400" />
                         </div>
@@ -47,10 +49,12 @@ export default function ContactPage() {
                             <Mail className="h-4 w-4" />
                             support@captureai.dev
                         </a>
-                    </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Feature Requests */}
-                    <div className="glass-card rounded-2xl p-7">
+                    <Card className="glass-card rounded-2xl border-0 py-0 transition-all duration-300 hover:border-[--color-border-glow]">
+                        <CardContent className="p-7">
                         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
                             <MessageCircle className="h-6 w-6 text-violet-400" />
                         </div>
@@ -65,12 +69,13 @@ export default function ContactPage() {
                             <MessageCircle className="h-4 w-4" />
                             feedback@captureai.dev
                         </a>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {/* Help link */}
-                <div className="gradient-border rounded-2xl">
-                    <div className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8 text-center">
+                <Card className="gradient-border rounded-2xl border-0 py-0">
+                    <CardContent className="rounded-2xl bg-gradient-to-b from-blue-500/[0.06] to-cyan-500/[0.02] p-8 text-center">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-cyan-500/10">
                             <BookOpen className="h-6 w-6 text-emerald-400" />
                         </div>
@@ -85,8 +90,8 @@ export default function ContactPage() {
                             Help Center
                             <ArrowRight className="h-4 w-4" />
                         </Link>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

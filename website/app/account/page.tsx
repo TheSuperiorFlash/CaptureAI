@@ -21,6 +21,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
 import { API_BASE_URL } from '@/lib/api'
 import { useSession } from '@/hooks/useSession'
 
@@ -202,8 +204,37 @@ export default function AccountPage() {
 
   if (sessionLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
+      <div className="relative min-h-screen overflow-x-hidden py-20 md:py-28">
+        <div className="pointer-events-none absolute inset-0 gradient-mesh" />
+        <div className="relative z-10 mx-auto max-w-3xl px-5 sm:px-6">
+          {/* Profile header skeleton */}
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-2xl" />
+              <div>
+                <Skeleton className="h-4 w-40 mb-2" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+            <Skeleton className="h-7 w-16 rounded-full" />
+          </div>
+          {/* Main card skeleton */}
+          <div className="mb-4 rounded-[24px] border border-white/[0.07] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-6 backdrop-blur-xl md:p-8">
+            <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
+              <Skeleton className="h-[156px] w-[156px] rounded-full" />
+              <div className="flex flex-1 flex-col gap-4 w-full">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-1.5 w-full rounded-full" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            </div>
+          </div>
+          {/* Bottom row skeleton */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-52 rounded-[20px]" />
+            <Skeleton className="h-52 rounded-[20px]" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -233,15 +264,15 @@ export default function AccountPage() {
         {/* ─── Profile header ─── */}
         <div className="mb-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-inter text-lg font-bold text-white shadow-lg ${
+            <Avatar className={`h-12 w-12 rounded-2xl shadow-lg ${
                 isPro
                   ? 'bg-gradient-to-br from-cyan-400 to-blue-600 shadow-cyan-500/20'
                   : 'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-600/20'
-              }`}
-            >
-              {user.email[0].toUpperCase()}
-            </div>
+              }`}>
+              <AvatarFallback className="bg-transparent font-inter text-lg font-bold text-white rounded-2xl">
+                {user.email[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <p className="text-sm font-semibold text-white leading-tight">{user.email}</p>
               <p className="mt-0.5 text-xs text-[--color-text-tertiary]">Member since {formattedDate}</p>
@@ -269,12 +300,10 @@ export default function AccountPage() {
             {/* Usage ring */}
             <div className="flex flex-col items-center gap-3">
               {usageLoading ? (
-                <div
-                  className="flex items-center justify-center"
+                <Skeleton
+                  className="rounded-full"
                   style={{ width: 156, height: 156 }}
-                >
-                  <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
-                </div>
+                />
               ) : (
                 <UsageRing
                   used={usage?.today.used ?? 0}

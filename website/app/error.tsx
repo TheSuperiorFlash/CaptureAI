@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
+import { AlertCircle } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function Error({
     error,
@@ -25,6 +27,12 @@ export default function Error({
                 <p className="mb-8 text-[--color-text-secondary]">
                     An unexpected error occurred. Please try again.
                 </p>
+                {error.message && (
+                    <Alert variant="destructive" className="mb-8 text-left">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error.message}</AlertDescription>
+                    </Alert>
+                )}
                 <button
                     type="button"
                     onClick={reset}
