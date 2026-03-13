@@ -15,6 +15,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { SITE_URL } from '@/lib/constants'
 import SmoothScroll from '@/components/SmoothScroll'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
@@ -77,6 +78,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="noise antialiased">
+                <TooltipProvider>
                 <SmoothScroll>
                     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
                         Skip to main content
@@ -88,6 +90,7 @@ export default function RootLayout({
                     </main>
                     <Footer />
                 </SmoothScroll>
+                </TooltipProvider>
             </body>
         </html>
     )
