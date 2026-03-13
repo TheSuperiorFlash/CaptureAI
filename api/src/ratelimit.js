@@ -79,7 +79,7 @@ export async function checkRateLimit(identifier, limit, windowMs, env = null, bi
             resetTime = limitResult.reset;
           }
 
-          if (resetTime != null) {
+          if (resetTime !== null) {
             retryAfter = Math.max(
               0,
               Math.ceil((resetTime - Date.now()) / 1000)
