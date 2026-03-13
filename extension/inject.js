@@ -14,7 +14,7 @@
  * so no runtime settings check is needed here.
  */
 
-(function () {
+(function() {
   'use strict';
 
   // Guard against double-injection using a non-writable Symbol (prevents page script tampering)
@@ -51,7 +51,7 @@
   }
 
   // Create a safe logging function that can't be overridden
-  const safeLog = function (...args) {
+  const safeLog = function(...args) {
     try {
       if (originalConsoleLog) {
         originalConsoleLog(...args);
@@ -71,7 +71,7 @@
    */
   Object.defineProperty(Document.prototype, 'visibilityState', {
     configurable: false,
-    get: function () {
+    get: function() {
       return 'visible';
     }
   });
@@ -82,7 +82,7 @@
    */
   Object.defineProperty(Document.prototype, 'hidden', {
     configurable: false,
-    get: function () {
+    get: function() {
       return false;
     }
   });
@@ -93,7 +93,7 @@
   if ('webkitVisibilityState' in Document.prototype) {
     Object.defineProperty(Document.prototype, 'webkitVisibilityState', {
       configurable: false,
-      get: function () {
+      get: function() {
         return 'visible';
       }
     });
@@ -102,7 +102,7 @@
   if ('webkitHidden' in Document.prototype) {
     Object.defineProperty(Document.prototype, 'webkitHidden', {
       configurable: false,
-      get: function () {
+      get: function() {
         return false;
       }
     });
@@ -112,7 +112,7 @@
    * Override document.hasFocus() to always return true
    * Prevents detection of window/tab losing focus
    */
-  Document.prototype.hasFocus = function () {
+  Document.prototype.hasFocus = function() {
     return true;
   };
 
@@ -158,7 +158,7 @@
    * Override addEventListener to silently drop blocked events
    * Website tries to listen for focus/blur but we don't register it
    */
-  EventTarget.prototype.addEventListener = function (type, listener, options) {
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
     // Check if this event type should be blocked
     if (BLOCKED_EVENTS.has(type)) {
       // Debug logging (optional)
@@ -195,7 +195,7 @@
    * Override removeEventListener to handle blocked events
    * If website tries to remove a listener we blocked, pretend it worked
    */
-  EventTarget.prototype.removeEventListener = function (type, listener, options) {
+  EventTarget.prototype.removeEventListener = function(type, listener, options) {
     // Check if this is a blocked event type
     if (BLOCKED_EVENTS.has(type)) {
       // Debug logging (optional)
@@ -259,10 +259,10 @@
     Object.defineProperty(window, prop, {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return value;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog(`[Privacy Guard] Blocked direct property assignment: window.${prop}`);
         }
@@ -278,10 +278,10 @@
     Object.defineProperty(document, prop, {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return value;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog(`[Privacy Guard] Blocked direct property assignment: document.${prop}`);
         }
@@ -305,7 +305,7 @@
 
     // Intercept clipboard events in capture phase (before page handlers)
     clipboardEvents.forEach(eventType => {
-      document.addEventListener(eventType, function (e) {
+      document.addEventListener(eventType, function(e) {
         // Stop the event from reaching page handlers that might block it
         e.stopImmediatePropagation();
 
@@ -321,10 +321,10 @@
       Object.defineProperty(document, prop, {
         configurable: true,
         enumerable: true,
-        get: function () {
+        get: function() {
           return value;
         },
-        set: function (newValue) {
+        set: function(newValue) {
           if (DEBUG_PRIVACY_GUARD) {
             safeLog(`[Privacy Guard] Blocked clipboard blocker: ${prop}`);
           }
@@ -337,10 +337,10 @@
       Object.defineProperty(window, prop, {
         configurable: true,
         enumerable: true,
-        get: function () {
+        get: function() {
           return value;
         },
-        set: function (newValue) {
+        set: function(newValue) {
           if (DEBUG_PRIVACY_GUARD) {
             safeLog(`[Privacy Guard] Blocked clipboard blocker: window.${prop}`);
           }
@@ -353,10 +353,10 @@
     Object.defineProperty(document, 'onselectstart', {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return null;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog('[Privacy Guard] Blocked text selection blocker: document.onselectstart');
         }
@@ -367,10 +367,10 @@
     Object.defineProperty(window, 'onselectstart', {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return null;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog('[Privacy Guard] Blocked text selection blocker: window.onselectstart');
         }
@@ -381,10 +381,10 @@
     Object.defineProperty(document, 'oncontextmenu', {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return null;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog('[Privacy Guard] Blocked context menu blocker: document.oncontextmenu');
         }
@@ -394,10 +394,10 @@
     Object.defineProperty(window, 'oncontextmenu', {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         return null;
       },
-      set: function (newValue) {
+      set: function(newValue) {
         if (DEBUG_PRIVACY_GUARD) {
           safeLog('[Privacy Guard] Blocked context menu blocker: window.oncontextmenu');
         }
@@ -412,7 +412,7 @@
     const originalGetPropertyValueDesc = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'getPropertyValue');
     const originalGetPropertyValue = originalGetPropertyValueDesc?.value ?? CSSStyleDeclaration.prototype.getPropertyValue;
 
-    CSSStyleDeclaration.prototype.getPropertyValue = function (property) {
+    CSSStyleDeclaration.prototype.getPropertyValue = function(property) {
       if (userSelectProps.has(property)) {
         return 'text';
       }

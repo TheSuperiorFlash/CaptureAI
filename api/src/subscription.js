@@ -73,7 +73,7 @@ export class SubscriptionHandler {
         return jsonResponse({
           error: `You already have an active ${tierLabel} subscription. To switch plans, select the other plan.`,
           alreadySubscribed: true,
-          currentTier: existingUser.tier,
+          currentTier: existingUser.tier
         }, 409);
       }
 
@@ -92,7 +92,9 @@ export class SubscriptionHandler {
             const preview = await this.previewSubscriptionTierChange(existingSubscriptionId, tier);
             return jsonResponse({ requiresConfirmation: true, tier, ...preview });
           } catch (previewError) {
-            if (!this.isStripeMissingResourceError(previewError)) { throw previewError; }
+            if (!this.isStripeMissingResourceError(previewError)) {
+              throw previewError;
+            }
             // Stale subscription ID — clear and fall through to fresh checkout
             await this.db
               .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
@@ -110,7 +112,9 @@ export class SubscriptionHandler {
             const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
             return jsonResponse({ ...switchResult, sessionId: 'tier_change_' + existingSubscriptionId, changedTier: true });
           } catch (switchError) {
-            if (!this.isStripeMissingResourceError(switchError)) { throw switchError; }
+            if (!this.isStripeMissingResourceError(switchError)) {
+              throw switchError;
+            }
             // Stale subscription ID — clear and fall through to fresh checkout
             await this.db
               .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
@@ -255,16 +259,135 @@ export class SubscriptionHandler {
       if (this.env.RESEND_API_KEY) {
         const tierLabel = tier === 'pro' ? 'Pro' : 'Basic';
         const subject = `CaptureAI — Verify your plan change to ${tierLabel}`;
-        const htmlContent = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
-            <h2 style="color: #0ea5e9; margin: 0 0 16px;">Verify Your Plan Change</h2>
-            <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0 0 24px;">You requested to switch to the <strong>${tierLabel}</strong> plan. Enter this code to confirm:</p>
-            <div style="background: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin: 0 0 24px;">
-              <span style="font-family: 'SF Mono', Monaco, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #fff;">${code}</span>
-            </div>
-            <p style="color: #94a3b8; font-size: 13px; margin: 0;">This code expires in 10 minutes. If you did not request this change, you can safely ignore this email.</p>
-          </div>`;
         const textContent = `CaptureAI Verification Code: ${code}\n\nEnter this code to confirm your plan change to ${tierLabel}.\nThis code expires in 10 minutes.\n\nIf you did not request this change, ignore this email.`;
+
+        const htmlContent = `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+<head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: inherit !important; }
+  </style>
+</head>
+<body style="background-color: #fafaf8; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
+  <table class="nl-container" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #fafaf8;">
+    <tbody>
+      <tr>
+        <td>
+          <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+            <tbody>
+              <tr>
+                <td style="padding: 40px 30px 0 30px;">
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; border-radius: 8px; box-shadow: 0 2px 5px 0 rgb(50 50 93 / 10%), 0 1px 1px 0 rgb(0 0 0 / 7%); width: 540px; margin: 0 auto;" width="540">
+                    <tbody>
+                      <tr>
+                        <td style="border-radius: 8px; background-color: #e3e8ee; padding: 1px;">
+                          <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #ffffff; border-radius: 8px; color: #000; width: 100%;" width="100%">
+                            <tbody>
+                              <tr>
+                                <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: left; padding: 40px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
+                                  <table class="logo_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                                    <tr>
+                                      <td class="pad" style="width: 100%; padding: 0 0 12px 0;">
+                                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+                                          <tr>
+                                            <td style="padding-right: 6px; vertical-align: middle;">
+                                              <img src="https://captureai.dev/logo.png" style="display: block; height: auto; border: 0; width: 32px; height: 32px;" width="32" height="32" alt="CaptureAI" title="CaptureAI">
+                                            </td>
+                                            <td style="vertical-align: middle;">
+                                              <h2 style="margin: 0; color: #29261b; direction: ltr; font-family: 'Helvetica Now', Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 400; letter-spacing: normal; line-height: 120%;">CaptureAI</h2>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </table>
+
+                                  <table class="text_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 0 0 16px 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 16px; color: #29261b; line-height: 1.5;">
+                                            <p style="margin: 0;">You requested to switch to the <strong>${tierLabel}</strong> plan. Enter this code to confirm your plan change:</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+
+                                  <table class="text_block block-3" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 16px 0 24px 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 32px; font-family: 'SF Mono', Monaco, monospace; color: #218aff; letter-spacing: 8px; font-weight: 600; line-height: 1.2;">
+                                            <p style="margin: 0;">${code}</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+
+                                  <table class="text_block block-4" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                                    <tr>
+                                      <td class="pad" style="padding: 0;">
+                                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                          <div style="font-size: 14px; color: #666666; line-height: 1.5;">
+                                            <p style="margin: 0;">This code expires in 10 minutes. If you did not request this change, you can safely ignore this email.</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0;">
+            <tbody>
+              <tr>
+                <td>
+                  <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; background-color: #fafaf8; border-radius: 0; color: #000; width: 600px; margin: 0 auto;" width="600">
+                    <tbody>
+                      <tr>
+                        <td class="column column-1" width="100%" style="mso-table-lspace: 0; mso-table-rspace: 0; font-weight: 400; text-align: center; padding-bottom: 40px; padding-top: 20px; vertical-align: top; border-top: 0; border-right: 0; border-bottom: 0; border-left: 0;">
+                          <table class="text_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0; mso-table-rspace: 0; word-break: break-word;">
+                            <tr>
+                              <td class="pad" style="padding: 0 30px;">
+                                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+                                  <div style="font-size: 13px; color: #a3a299; line-height: 1.6;">
+                                    <p style="margin: 0; text-align: center;">Need help? Visit our <a href="https://captureai.dev/help" style="color: #218aff; text-decoration: none;">help page</a>.</p>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>`;
 
         await this.auth.sendEmailViaResend(email, subject, htmlContent, textContent, tier);
       }
@@ -307,6 +430,212 @@ export class SubscriptionHandler {
       .run();
 
     return true;
+  }
+
+  /**
+   * Validate a login verification code (tier is NULL for login codes)
+   * @returns {boolean} True if code is valid and has been consumed
+   */
+  async consumeLoginCode(email, code) {
+    const row = await this.db
+      .prepare(
+        'SELECT id FROM verification_codes WHERE email = ? AND code = ? AND action = \'login\' AND tier IS NULL AND used = 0 AND expires_at > datetime(\'now\')'
+      )
+      .bind(email, code)
+      .first();
+
+    if (!row) {
+      return false;
+    }
+
+    await this.db
+      .prepare('UPDATE verification_codes SET used = 1 WHERE id = ?')
+      .bind(row.id)
+      .run();
+
+    return true;
+  }
+
+  /**
+   * Send a login verification code via email
+   * POST /api/auth/send-login-code
+   */
+  async sendLoginCode(request) {
+    try {
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `login:${clientId}`,
+        RateLimitPresets.AUTH.limit,
+        RateLimitPresets.AUTH.windowMs,
+        this.env,
+        RateLimitPresets.AUTH.bindingName
+      );
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
+      const body = await validateRequestBody(request);
+      const email = validateEmail(body.email, true);
+
+      // Check user exists (any subscription status)
+      const existingUser = await this.db
+        .prepare('SELECT id FROM users WHERE email = ?')
+        .bind(email)
+        .first();
+
+      if (!existingUser) {
+        // Don't reveal whether the email exists
+        return jsonResponse({ success: true, message: 'If an account exists, a login code has been sent' });
+      }
+
+      // Invalidate previous unused login codes for this email
+      await this.db
+        .prepare('UPDATE verification_codes SET used = 1 WHERE email = ? AND action = ? AND used = 0')
+        .bind(email, 'login')
+        .run();
+
+      // Generate and store code with 10-minute TTL
+      const code = this.generateVerificationCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+      await this.db
+        .prepare('INSERT INTO verification_codes (email, code, action, tier, expires_at) VALUES (?, ?, ?, ?, ?)')
+        .bind(email, code, 'login', null, expiresAt)
+        .run();
+
+      // Send code via email
+      if (this.env.RESEND_API_KEY) {
+        const subject = 'CaptureAI — Sign in to your account';
+        const textContent = `Your CaptureAI sign-in code: ${code}\n\nEnter this code to access your account.\nThis code expires in 10 minutes.\n\nIf you did not request this, ignore this email.`;
+
+        const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>* { box-sizing: border-box; } body { margin: 0; padding: 0; }</style>
+</head>
+<body style="background-color: #fafaf8; margin: 0; padding: 0;">
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #fafaf8;">
+    <tbody><tr><td>
+      <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+        <tbody><tr><td style="padding: 40px 30px 0 30px;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border-radius: 8px; box-shadow: 0 2px 5px 0 rgb(50 50 93 / 10%), 0 1px 1px 0 rgb(0 0 0 / 7%); width: 540px; margin: 0 auto;" width="540">
+            <tbody><tr><td style="border-radius: 8px; background-color: #e3e8ee; padding: 1px;">
+              <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #ffffff; border-radius: 8px; color: #000; width: 100%;" width="100%">
+                <tbody><tr><td style="padding: 40px;">
+                  <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                    <tr><td style="padding: 0 0 12px 0;">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td style="padding-right: 6px; vertical-align: middle;">
+                            <img src="https://captureai.dev/logo.png" style="display: block; width: 32px; height: 32px;" width="32" height="32" alt="CaptureAI">
+                          </td>
+                          <td style="vertical-align: middle;">
+                            <span style="color: #303030; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -0.2px;">CaptureAI</span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; padding-top: 8px;">
+                    <p style="font-size: 15px; color: #303030; font-weight: 600; margin: 0 0 16px 0;">Sign in to your account</p>
+                    <p style="font-size: 14px; color: #525f7f; line-height: 1.6; margin: 0 0 24px 0;">Use the code below to sign in to your CaptureAI account. This code expires in 10 minutes.</p>
+                    <div style="background-color: #f6f9fc; border: 1px solid #e3e8ee; border-radius: 8px; padding: 20px; text-align: center; margin: 0 0 24px 0;">
+                      <span style="font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #303030;">${code}</span>
+                    </div>
+                    <p style="font-size: 13px; color: #a3a299; line-height: 1.6; margin: 0;">If you didn't request this code, you can safely ignore this email.</p>
+                  </div>
+                </td></tr>
+              </table>
+            </td></tr></tbody>
+          </table>
+        </td></tr></tbody>
+      </table>
+      <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+        <tbody><tr><td style="padding: 20px 30px 40px 30px;">
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; text-align: center;">
+            <p style="font-size: 13px; color: #a3a299; line-height: 1.6; margin: 0;">Need help? Visit our <a href="https://captureai.dev/help" style="color: #218aff; text-decoration: none;">help page</a>.</p>
+          </div>
+        </td></tr></tbody>
+      </table>
+    </td></tr></tbody>
+  </table>
+</body>
+</html>`;
+
+        await this.auth.sendEmailViaResend(email, subject, htmlContent, textContent);
+      }
+
+      if (this.logger) {
+        logSubscription(this.logger, 'login_code_sent', { email });
+      }
+
+      return jsonResponse({ success: true, message: 'If an account exists, a login code has been sent' });
+
+    } catch (error) {
+      console.error('Send login code error:', error);
+      if (error instanceof ValidationError) {
+        return jsonResponse({ error: error.message, field: error.field }, 400);
+      }
+      return jsonResponse({ error: 'Failed to send login code' }, 500);
+    }
+  }
+
+  /**
+   * Verify a login code and return user data + license key
+   * POST /api/auth/verify-login
+   */
+  async verifyLogin(request) {
+    try {
+      const clientId = getClientIdentifier(request);
+      const rateLimitError = await checkRateLimit(
+        `login-verify:${clientId}`,
+        RateLimitPresets.AUTH.limit,
+        RateLimitPresets.AUTH.windowMs,
+        this.env,
+        RateLimitPresets.AUTH.bindingName
+      );
+      if (rateLimitError && rateLimitError.error) {
+        return jsonResponse(rateLimitError, 429);
+      }
+
+      const body = await validateRequestBody(request);
+      const email = validateEmail(body.email, true);
+      const code = validateVerificationCode(body.code, true);
+
+      const codeValid = await this.consumeLoginCode(email, code);
+      if (!codeValid) {
+        return jsonResponse({ error: 'Invalid or expired verification code' }, 401);
+      }
+
+      // Get user by email
+      const user = await this.auth.getUserByEmail(email);
+      if (!user) {
+        return jsonResponse({ error: 'Account not found' }, 404);
+      }
+
+      if (this.logger) {
+        logSubscription(this.logger, 'login_verified', { email });
+      }
+
+      return jsonResponse({
+        user: {
+          email: user.email,
+          tier: user.tier,
+          subscriptionStatus: user.subscription_status,
+          createdAt: user.created_at
+        },
+        licenseKey: user.license_key
+      });
+
+    } catch (error) {
+      console.error('Verify login error:', error);
+      if (error instanceof ValidationError) {
+        return jsonResponse({ error: error.message, field: error.field }, 400);
+      }
+      return jsonResponse({ error: 'Login verification failed' }, 500);
+    }
   }
 
   /**
@@ -1021,7 +1350,7 @@ export class SubscriptionHandler {
    */
   async upgradeStripeSubscription(subscriptionId, newPriceId, userId, email) {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
-    
+
     // 1. Fetch current subscription to get the old item ID
     const subResponse = await fetchWithTimeout(
       `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
@@ -1069,7 +1398,7 @@ export class SubscriptionHandler {
     }
 
     const updatedSub = await updateResponse.json();
-    
+
     // 3. Check if invoice needs payment first
     const invoice = updatedSub.latest_invoice;
     // Update DB if invoice already collected; the webhook handles any deferred payment.
@@ -1168,7 +1497,9 @@ export class SubscriptionHandler {
    */
   async previewSubscriptionTierChange(subscriptionId, newTier) {
     const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
-    if (!newPriceId) { throw new Error('Price not configured'); }
+    if (!newPriceId) {
+      throw new Error('Price not configured');
+    }
 
     const subResponse = await fetchWithTimeout(
       `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
@@ -1184,7 +1515,9 @@ export class SubscriptionHandler {
     const itemId = subscription.items?.data?.[0]?.id;
     const customerId = subscription.customer;
 
-    if (!itemId) { throw new Error('No subscription item found'); }
+    if (!itemId) {
+      throw new Error('No subscription item found');
+    }
 
     const previewResponse = await fetchWithTimeout(
       'https://api.stripe.com/v1/invoices/create_preview',
@@ -1197,7 +1530,7 @@ export class SubscriptionHandler {
           'subscription_details[items][0][id]': itemId,
           'subscription_details[items][0][price]': newPriceId,
           'subscription_details[proration_behavior]': 'always_invoice',
-          'subscription_details[billing_cycle_anchor]': 'now',
+          'subscription_details[billing_cycle_anchor]': 'now'
         })
       }, 5000
     );

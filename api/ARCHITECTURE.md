@@ -21,6 +21,8 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 |--------|------|------|------------|-------------|
 | POST | `/api/auth/validate-key` | None | 10/min | Validate and activate license key |
 | GET | `/api/auth/me` | LicenseKey | — | Get current user info |
+| POST | `/api/auth/send-login-code` | None | 5/min (AUTH) | Send 6-digit OTP for website login |
+| POST | `/api/auth/verify-login` | None | 5/min (AUTH) | Verify OTP and return license key + user info |
 
 ### AI (`src/ai.js`)
 
@@ -53,6 +55,8 @@ License key format: `XXXX-XXXX-XXXX-XXXX-XXXX` (chars: `ABCDEFGHJKLMNPQRSTUVWXYZ
 Header: `Authorization: LicenseKey YOUR-KEY`
 
 Generated with `crypto.getRandomValues()`. Basic and Pro users must have `subscription_status = 'active'`.
+
+`authenticateAccount()` variant skips the active-status check, allowing cancelled/inactive users to access read-only account endpoints.
 
 ## Rate Limiting
 

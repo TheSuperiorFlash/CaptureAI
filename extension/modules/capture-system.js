@@ -179,7 +179,9 @@ export const CaptureSystem = {
     const isStealthMode = !this.wasVisible;
     if (!isStealthMode) {
       const overlay = document.getElementById('captureai-overlay');
-      if (overlay) overlay.style.backgroundColor = 'transparent';
+      if (overlay) {
+        overlay.style.backgroundColor = 'transparent';
+      }
     }
 
     this.createSelectionBox();
@@ -361,8 +363,12 @@ export const CaptureSystem = {
 
     // Final removal after animation
     setTimeout(() => {
-      if (overlay) overlay.remove();
-      if (selection) selection.remove();
+      if (overlay) {
+        overlay.remove();
+      }
+      if (selection) {
+        selection.remove();
+      }
       if (STATE.selectionBox === selection) {
         STATE.selectionBox = null;
       }

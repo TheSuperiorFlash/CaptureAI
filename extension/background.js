@@ -944,7 +944,9 @@ function formatError(message) {
  * @returns {boolean} true if a wrong-answer prompt is detected
  */
 function isWrongAnswerPrompt(text) {
-  if (!text) return false;
+  if (!text) {
+    return false;
+  }
   const lower = text.toLowerCase();
   const patterns = [
     /\btry\s+again\b/,
@@ -955,7 +957,7 @@ function isWrongAnswerPrompt(text) {
     /\bplease\s+try\s+again\b/,
     /\btry\s+once\s+more\b/,
     /\banswer\s+(is\s+)?(wrong|incorrect)\b/,
-    /\bprogress\s*:\s*0\s+points\b/,
+    /\bprogress\s*:\s*0\s+points\b/
   ];
   return patterns.some(pattern => pattern.test(lower));
 }
@@ -967,7 +969,9 @@ function isWrongAnswerPrompt(text) {
  * @returns {boolean} true if question requires image analysis
  */
 function isImageSelectionQuestion(text) {
-  if (!text) return false;
+  if (!text) {
+    return false;
+  }
   const lower = text.toLowerCase();
   // If OCR text contains references to images/pictures, AI needs to see them
   return /\b(image|picture|photo|diagram|graph|chart|figure|table|map|illustration|drawing)s?\b/.test(lower);

@@ -93,7 +93,7 @@ export const UIComponents = {
 
   createCaptureButton() {
     const captureButton = document.createElement('div');
-    captureButton.style.cssText = `display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-primary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid transparent; box-shadow: var(--shadow-button-primary); box-sizing: border-box !important; padding: 0 15px;`;
+    captureButton.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-primary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid transparent; box-shadow: var(--shadow-button-primary); box-sizing: border-box !important; padding: 0 15px;';
     captureButton.innerHTML = `<img src="${window.CaptureAI?.ICONS?.CAMERA || ''}" style="width: 20px; height: 20px; margin-right: 10px;"><span style="font-weight: bold; color: var(--color-button-primary-text) !important; font-size: 14px;">Capture a Question</span>`;
 
     captureButton.addEventListener('click', () => {
@@ -107,8 +107,8 @@ export const UIComponents = {
 
   createQuickCaptureButton() {
     const quickCaptureButton = document.createElement('div');
-    quickCaptureButton.style.cssText = `display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-secondary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid var(--color-button-secondary-border); box-sizing: border-box !important; padding: 0 15px;`;
-    quickCaptureButton.innerHTML = `<span style="font-weight: bold; color: var(--color-button-secondary-text) !important; font-size: 14px;">Quick Capture</span>`;
+    quickCaptureButton.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 48px; width: 100% !important; background-color: var(--color-button-secondary-background) !important; border-radius: var(--border-radius-button-pill); cursor: pointer; border: 1px solid var(--color-button-secondary-border); box-sizing: border-box !important; padding: 0 15px;';
+    quickCaptureButton.innerHTML = '<span style="font-weight: bold; color: var(--color-button-secondary-text) !important; font-size: 14px;">Quick Capture</span>';
 
     quickCaptureButton.addEventListener('click', () => {
       if (window.CaptureAI.CaptureSystem?.quickCapture) {
@@ -124,7 +124,7 @@ export const UIComponents = {
   createAutoSolveToggle() {
     const autoSolveContainer = document.createElement('div');
     autoSolveContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 4px 5px 0px 5px; width: 100% !important; box-sizing: border-box !important;';
-    autoSolveContainer.innerHTML = `<span style="font-size: 14px; color: var(--color-text-secondary-default) !important; font-weight: 500;">Auto-solve:</span>`;
+    autoSolveContainer.innerHTML = '<span style="font-size: 14px; color: var(--color-text-secondary-default) !important; font-weight: 500;">Auto-solve:</span>';
     const toggleLabel = autoSolveContainer.querySelector('span');
 
     const toggleSwitch = this.createToggleSwitch();

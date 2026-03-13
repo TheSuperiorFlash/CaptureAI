@@ -1,0 +1,227 @@
+
+> captureai@1.0.0 lint
+> eslint . --config config/eslint.config.mjs
+
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\ai.js
+   73:3   warning  Async method 'complete' has too many lines (102). Maximum allowed is 50                                        max-lines-per-function
+   96:1   warning  This line has a length of 170. Maximum allowed is 100                                                          max-len
+  141:13  warning  'reasoningTokens' is assigned a value but never used. Allowed unused vars must match /^_/u                     no-unused-vars
+  157:41  error    Missing semicolon                                                                                              semi
+  211:3   warning  Async method 'getUsage' has too many lines (58). Maximum allowed is 50                                         max-lines-per-function
+  221:18  error    Strings must use singlequote                                                                                   quotes
+  307:45  error    Statement inside of curly braces should be on next line                                                        brace-style
+  307:74  error    Closing curly brace should be on the same line as opening curly brace or on the line after the previous block  brace-style
+  321:18  error    Strings must use singlequote                                                                                   quotes
+  335:19  warning  'request' is defined but never used. Allowed unused args must match /^_/u                                      no-unused-vars
+  352:3   warning  Async method 'getAnalytics' has too many lines (154). Maximum allowed is 50                                    max-lines-per-function
+  563:16  error    Strings must use singlequote                                                                                   quotes
+  642:1   warning  This line has a length of 122. Maximum allowed is 100                                                          max-len
+  659:1   warning  File has too many lines (644). Maximum allowed is 500                                                          max-lines
+  677:1   warning  This line has a length of 147. Maximum allowed is 100                                                          max-len
+  678:1   warning  This line has a length of 112. Maximum allowed is 100                                                          max-len
+  683:1   warning  This line has a length of 127. Maximum allowed is 100                                                          max-len
+  695:3   warning  Method 'buildPayload' has too many lines (99). Maximum allowed is 50                                           max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\auth.js
+    7:31  warning  'validateEmail' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+   48:3   warning  Async method 'validateKey' has too many lines (51). Maximum allowed is 50           max-lines-per-function
+  218:3   warning  Async method 'sendLicenseKeyEmail' has too many lines (212). Maximum allowed is 50  max-lines-per-function
+  252:1   warning  This line has a length of 103. Maximum allowed is 100                               max-len
+  470:3   warning  Method 'generateProEmailHTML' has too many lines (164). Maximum allowed is 50       max-lines-per-function
+  616:1   warning  File has too many lines (576). Maximum allowed is 500                               max-lines
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\index.js
+   8:31  warning  'logCorsRejection' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  32:3   warning  Async method 'fetch' has too many lines (51). Maximum allowed is 50                 max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\logger.js
+  67:23  warning  'data' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\ratelimit.js
+  58:1   warning  This line has a length of 165. Maximum allowed is 100                           max-len
+  61:8   warning  Async function 'checkRateLimit' has too many lines (63). Maximum allowed is 50  max-lines-per-function
+  82:25  error    Expected '!==' and instead saw '!='                                             eqeqeq
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\router.js
+  23:3  warning  Async method 'route' has too many lines (106). Maximum allowed is 50  max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\subscription.js
+     6:24  warning  'parseJSON' is defined but never used. Allowed unused vars must match /^_/u                                    no-unused-vars
+     9:27  warning  'logWebhook' is defined but never used. Allowed unused vars must match /^_/u                                   no-unused-vars
+    26:3   warning  Async method 'createCheckout' has too many lines (135). Maximum allowed is 50                                  max-lines-per-function
+    76:41  error    Unexpected trailing comma                                                                                      comma-dangle
+    95:67  error    Statement inside of curly braces should be on next line                                                        brace-style
+    95:89  error    Closing curly brace should be on the same line as opening curly brace or on the line after the previous block  brace-style
+   110:1   warning  This line has a length of 122. Maximum allowed is 100                                                          max-len
+   113:66  error    Statement inside of curly braces should be on next line                                                        brace-style
+   113:87  error    Closing curly brace should be on the same line as opening curly brace or on the line after the previous block  brace-style
+   206:3   warning  Async method 'sendVerification' has too many lines (177). Maximum allowed is 50                                max-lines-per-function
+   501:3   warning  Async method 'handleCheckoutCompleted' has too many lines (92). Maximum allowed is 50                          max-lines-per-function
+   575:1   warning  This line has a length of 118. Maximum allowed is 100                                                          max-len
+   610:1   warning  This line has a length of 111. Maximum allowed is 100                                                          max-len
+   644:1   warning  File has too many lines (1183). Maximum allowed is 500                                                         max-lines
+   729:3   warning  Async method 'changeTier' has too many lines (108). Maximum allowed is 50                                      max-lines-per-function
+   901:18  warning  'request' is defined but never used. Allowed unused args must match /^_/u                                      no-unused-vars
+   930:3   warning  Async method 'verifyPayment' has too many lines (57). Maximum allowed is 50                                    max-lines-per-function
+  1141:3   warning  Async method 'upgradeStripeSubscription' has too many lines (53). Maximum allowed is 50                        max-lines-per-function
+  1141:71  warning  'email' is defined but never used. Allowed unused args must match /^_/u                                        no-unused-vars
+  1143:1   error    Trailing spaces not allowed                                                                                    no-trailing-spaces
+  1191:1   error    Trailing spaces not allowed                                                                                    no-trailing-spaces
+  1213:3   warning  Async method 'switchExistingSubscriptionTier' has too many lines (59). Maximum allowed is 50                   max-lines-per-function
+  1290:22  error    Statement inside of curly braces should be on next line                                                        brace-style
+  1290:65  error    Closing curly brace should be on the same line as opening curly brace or on the line after the previous block  brace-style
+  1306:18  error    Statement inside of curly braces should be on next line                                                        brace-style
+  1306:67  error    Closing curly brace should be on the same line as opening curly brace or on the line after the previous block  brace-style
+  1319:62  error    Unexpected trailing comma                                                                                      comma-dangle
+  1420:3   warning  Async method 'verifyWebhookSignature' has too many lines (72). Maximum allowed is 50                           max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\utils.js
+  110:12  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\api\src\validation.js
+  46:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\background.js
+  419:1   warning  Async function 'handleCaptureArea' has too many lines (59). Maximum allowed is 50  max-lines-per-function
+  645:12  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u   no-unused-vars
+  737:47  warning  'apiKey' is defined but never used. Allowed unused args must match /^_/u           no-unused-vars
+  885:1   warning  File has too many lines (565). Maximum allowed is 500                              max-lines
+  947:14  error    Expected { after 'if' condition                                                    curly
+  958:36  error    Unexpected trailing comma                                                          comma-dangle
+  970:14  error    Expected { after 'if' condition                                                    curly
+
+C:\Users\SuperiorFlash\CaptureAI\extension\content.js
+   56:5  warning  Async method 'loadModules' has too many lines (60). Maximum allowed is 50  max-lines-per-function
+  137:1  warning  This line has a length of 104. Maximum allowed is 100                      max-len
+
+C:\Users\SuperiorFlash\CaptureAI\extension\inject.js
+   17:10  error    Unexpected space before function parentheses                                                         space-before-function-paren
+   44:7   warning  'originalConsoleWarn' is assigned a value but never used. Allowed unused vars must match /^_/u       no-unused-vars
+   47:7   warning  'originalConsoleError' is assigned a value but never used. Allowed unused vars must match /^_/u      no-unused-vars
+   49:12  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                         no-unused-vars
+   54:27  error    Unexpected space before function parentheses                                                         space-before-function-paren
+   59:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                         no-unused-vars
+   74:18  error    Unexpected space before function parentheses                                                         space-before-function-paren
+   85:18  error    Unexpected space before function parentheses                                                         space-before-function-paren
+   96:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  105:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  115:41  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  161:52  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  181:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                         no-unused-vars
+  198:55  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  217:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                         no-unused-vars
+  262:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  265:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  265:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  281:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  284:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  284:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  302:3   warning  Function 'protectClipboard' has too many lines (107). Maximum allowed is 50                          max-lines-per-function
+  308:52  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  324:22  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  327:22  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  327:24  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  340:22  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  343:22  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  343:24  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  356:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  359:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  359:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  370:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  373:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  373:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  384:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  387:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  387:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  397:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  400:20  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  400:22  warning  'newValue' is defined but never used. Allowed unused args must match /^_/u                           no-unused-vars
+  408:11  warning  'originalGetComputedStyle' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  413:1   warning  This line has a length of 123. Maximum allowed is 100                                                max-len
+  415:62  error    Unexpected space before function parentheses                                                         space-before-function-paren
+  513:1   warning  This line has a length of 104. Maximum allowed is 100                                                max-len
+  520:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                         no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\auth-service.js
+  214:1   warning  This line has a length of 106. Maximum allowed is 100                                  max-len
+  217:1   warning  This line has a length of 108. Maximum allowed is 100                                  max-len
+  217:3   warning  Async method 'sendAIRequest' has too many lines (70). Maximum allowed is 50            max-lines-per-function
+  248:18  warning  'parseError' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\auto-solve.js
+   23:1  warning  This line has a length of 107. Maximum allowed is 100                          max-len
+  181:1  warning  This line has a length of 122. Maximum allowed is 100                          max-len
+  328:3  warning  Method '_simulateKeypressImpl' has too many lines (84). Maximum allowed is 50  max-lines-per-function
+  445:1  warning  This line has a length of 110. Maximum allowed is 100                          max-len
+  449:1  warning  This line has a length of 107. Maximum allowed is 100                          max-len
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\capture-system.js
+   30:1   warning  This line has a length of 136. Maximum allowed is 100                             max-len
+   59:1   warning  This line has a length of 134. Maximum allowed is 100                             max-len
+  102:13  warning  'STATE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  136:13  warning  'STATE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  182:20  error    Expected { after 'if' condition                                                   curly
+  310:1   warning  This line has a length of 134. Maximum allowed is 100                             max-len
+  364:20  error    Expected { after 'if' condition                                                   curly
+  365:22  error    Expected { after 'if' condition                                                   curly
+  383:13  warning  'STATE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\config.js
+  12:27  error  Unexpected trailing comma  comma-dangle
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\image-processing.js
+  154:1  warning  This line has a length of 109. Maximum allowed is 100  max-len
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\keyboard.js
+  79:20  warning  'DOM_CACHE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\messaging.js
+   94:1  warning  This line has a length of 115. Maximum allowed is 100  max-len
+  162:1  warning  This line has a length of 103. Maximum allowed is 100  max-len
+  337:1  warning  This line has a length of 103. Maximum allowed is 100  max-len
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\migration.js
+  55:1  warning  This line has a length of 113. Maximum allowed is 100  max-len
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\ocr-service.js
+  126:1   warning  This line has a length of 107. Maximum allowed is 100                          max-len
+  128:3   warning  Async method 'extractText' has too many lines (51). Maximum allowed is 50      max-lines-per-function
+  170:1   warning  This line has a length of 109. Maximum allowed is 100                          max-len
+  243:3   warning  Async method 'preprocessImage' has too many lines (83). Maximum allowed is 50  max-lines-per-function
+  247:24  warning  Arrow function has too many lines (80). Maximum allowed is 50                  max-lines-per-function
+  250:22  warning  Arrow function has too many lines (71). Maximum allowed is 50                  max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\privacy-guard.js
+  127:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\ui-components.js
+   62:1   warning  This line has a length of 112. Maximum allowed is 100                             max-len
+   96:35  error    Strings must use singlequote                                                      quotes
+  110:40  error    Strings must use singlequote                                                      quotes
+  111:36  error    Strings must use singlequote                                                      quotes
+  127:36  error    Strings must use singlequote                                                      quotes
+  185:1   warning  This line has a length of 112. Maximum allowed is 100                             max-len
+  201:3   warning  Method 'createAskModeComponents' has too many lines (104). Maximum allowed is 50  max-lines-per-function
+
+C:\Users\SuperiorFlash\CaptureAI\extension\modules\ui-core.js
+   20:83  warning  'e' is defined but never used. Allowed unused args must match /^_/u               no-unused-vars
+  243:37  error    Strings must use singlequote                                                      quotes
+  252:3   warning  Method 'createModeToggle' has too many lines (107). Maximum allowed is 50         max-lines-per-function
+  370:1   warning  This line has a length of 104. Maximum allowed is 100                             max-len
+  466:27  error    Expected { after 'if' condition                                                   curly
+  610:13  warning  'STATE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  628:1   warning  File has too many lines (515). Maximum allowed is 500                             max-lines
+
+C:\Users\SuperiorFlash\CaptureAI\extension\popup.js
+    6:47  warning  Async arrow function has too many lines (799). Maximum allowed is 50              max-lines-per-function
+  383:3   warning  Async function 'updateUsageStats' has too many lines (93). Maximum allowed is 50  max-lines-per-function
+  645:1   warning  This line has a length of 109. Maximum allowed is 100                             max-len
+  688:1   warning  File has too many lines (799). Maximum allowed is 500                             max-lines
+
+C:\Users\SuperiorFlash\CaptureAI\playwright.config.js
+  9:7  warning  'path' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+鉁?167 problems (59 errors, 108 warnings)
+  58 errors and 0 warnings potentially fixable with the `--fix` option.
+

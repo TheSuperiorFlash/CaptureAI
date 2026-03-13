@@ -240,7 +240,7 @@ export const UICore = {
 
     if (!STATE.apiKey) {
       responseContent.textContent = 'Extension is not activated';
-      responseContent.style.color = `var(--color-text-danger-default) !important`;
+      responseContent.style.color = 'var(--color-text-danger-default) !important';
     }
 
     responseContainer.appendChild(responseTitle);
@@ -463,7 +463,9 @@ export const UICore = {
 
   setPanelVisibility(visible) {
     const { STATE, DOM_CACHE } = window.CaptureAI;
-    if (!DOM_CACHE.panel) return;
+    if (!DOM_CACHE.panel) {
+      return;
+    }
 
     if (visible) {
       DOM_CACHE.panel.style.opacity = '1';

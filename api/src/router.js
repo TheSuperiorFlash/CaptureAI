@@ -93,6 +93,12 @@ export class Router {
     if (path === '/api/auth/me' && method === 'GET') {
       return this.auth.getCurrentUser(request);
     }
+    if (path === '/api/auth/send-login-code' && method === 'POST') {
+      return this.subscription.sendLoginCode(request);
+    }
+    if (path === '/api/auth/verify-login' && method === 'POST') {
+      return this.subscription.verifyLogin(request);
+    }
     // AI routes
     if (path === '/api/ai/solve' && method === 'POST') {
       return this.ai.solve(request);

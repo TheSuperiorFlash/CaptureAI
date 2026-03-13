@@ -154,7 +154,7 @@ export class AIHandler {
       );
 
       // Check if response was cached
-      const isCached = aiResponse.cached
+      const isCached = aiResponse.cached;
 
       // Record usage with ctx.waitUntil to ensure D1 write completes
       const parsed = parseInt(reasoningLevel);
@@ -218,7 +218,7 @@ export class AIHandler {
       // Get today's usage
       const today = new Date().toISOString().split('T')[0];
       const usageToday = await this.db
-        .prepare(`SELECT request_count FROM usage_daily WHERE email = ? AND date = ?`)
+        .prepare('SELECT request_count FROM usage_daily WHERE email = ? AND date = ?')
         .bind(user.email, today)
         .first();
 
@@ -304,7 +304,9 @@ export class AIHandler {
       const arrA = new Uint8Array(sigA);
       const arrB = new Uint8Array(sigB);
       let diff = 0;
-      for (let i = 0; i < arrA.length; i++) { diff |= arrA[i] ^ arrB[i]; }
+      for (let i = 0; i < arrA.length; i++) {
+        diff |= arrA[i] ^ arrB[i];
+      }
       if (diff !== 0) {
         return jsonResponse({ error: 'Unauthorized' }, 401);
       }
@@ -318,7 +320,7 @@ export class AIHandler {
         .all();
 
       const dailySummary = await this.db
-        .prepare(`SELECT requests, input_tokens, output_tokens, total_cost FROM total_usage_daily`)
+        .prepare('SELECT requests, input_tokens, output_tokens, total_cost FROM total_usage_daily')
         .first();
 
       return jsonResponse({ rows: rows.results || [], dailySummary: dailySummary || null });
@@ -560,7 +562,7 @@ export class AIHandler {
     // Point-lookup by primary key (email, date) — O(1) instead of COUNT(*) scan
     const today = new Date().toISOString().split('T')[0];
     const result = await this.db
-      .prepare(`SELECT request_count FROM usage_daily WHERE email = ? AND date = ?`)
+      .prepare('SELECT request_count FROM usage_daily WHERE email = ? AND date = ?')
       .bind(email, today)
       .first();
 

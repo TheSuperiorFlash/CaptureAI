@@ -9,7 +9,7 @@ export const CONFIG = {
   RESULT_ID: 'captureai-result',
   STEALTHY_RESULT_ID: 'captureai-stealthy-result',
   ESC_KEY_CODE: 'Escape',
-  MAX_INVALID_QUESTIONS: 2,
+  MAX_INVALID_QUESTIONS: 2
 };
 
 // Timing Constants (all values in milliseconds)

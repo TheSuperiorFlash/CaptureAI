@@ -126,6 +126,24 @@ export class AuthHandler {
   }
 
   /**
+   * Get user info by email
+   * Used internally for login verification
+   */
+  async getUserByEmail(email) {
+    try {
+      const user = await this.db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .bind(email)
+        .first();
+
+      return user;
+    } catch (error) {
+      console.error('Get user by email error:', error);
+      return null;
+    }
+  }
+
+  /**
    * Authenticate request using license key in header
    * Header: Authorization: LicenseKey YOUR-KEY-HERE
    */
@@ -166,6 +184,39 @@ export class AuthHandler {
 
     } catch (error) {
       console.error('Authentication error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Authenticate request allowing inactive/cancelled subscriptions.
+   * Used for account management endpoints where cancelled users need access.
+   * Header: Authorization: LicenseKey YOUR-KEY-HERE
+   */
+  async authenticateAccount(request) {
+    try {
+      const authHeader = request.headers.get('Authorization');
+      if (!authHeader || !authHeader.startsWith('LicenseKey ')) {
+        return null;
+      }
+
+      const licenseKey = authHeader.substring(11);
+      const user = await this.getUserByLicenseKey(licenseKey);
+
+      if (!user) {
+        return null;
+      }
+
+      return {
+        userId: user.id,
+        email: user.email,
+        tier: user.tier,
+        licenseKey: user.license_key,
+        subscriptionStatus: user.subscription_status
+      };
+
+    } catch (error) {
+      console.error('Account authentication error:', error);
       return null;
     }
   }

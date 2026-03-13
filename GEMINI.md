@@ -61,6 +61,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
 - **Tier-Switch OTP Verification**: Tier switches via `create-checkout` (confirmed flow) require a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification`, stored in `verification_codes` table (10-min TTL), and cleaned up by a daily cron trigger.
 - **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
+- **Website Account System**: Email + 6-digit OTP login at `/account/login`. Dashboard at `/account` shows subscription, usage, billing portal, and account details. Session stored in `localStorage` using the license key as token (`captureai-web-session`, `captureai-web-user`). Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
 
 ## Storage Keys
 

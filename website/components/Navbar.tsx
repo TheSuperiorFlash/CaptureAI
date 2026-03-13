@@ -120,6 +120,7 @@ export default function Navbar() {
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
         { name: 'Help', href: '/help' },
+        { name: 'Account', href: '/account' },
     ]
 
     const isActive = (href: string) => {
