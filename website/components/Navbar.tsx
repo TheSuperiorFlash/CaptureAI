@@ -119,7 +119,6 @@ export default function Navbar() {
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
-        { name: 'Help', href: '/help' },
         { name: 'Account', href: '/account' },
     ]
 
