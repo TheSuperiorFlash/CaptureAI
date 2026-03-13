@@ -387,10 +387,7 @@ export default function ActivatePage() {
 
             <div className="relative z-10 mx-auto max-w-5xl px-6">
                 {/* Header */}
-                <div className="mx-auto mb-14 max-w-xl text-center">
-                    <div className="mb-5 flex justify-center">
-                        <Image src="/logo.svg" alt="CaptureAI" width={48} height={48} />
-                    </div>
+                <div className="mx-auto mb-8 max-w-xl text-center">
                     <h1 className="mb-3">
                         <span className="text-[--color-text]">Choose your </span>
                         <span className="text-gradient-static">plan</span>
