@@ -24,7 +24,6 @@ export class AIHandler {
     this.logger = logger;
     this.ctx = ctx;
     this.auth = new AuthHandler(env, logger);
-    this._userCol = null; // cached: 'email' or 'user_id'
     this.gatewayName = env.CLOUDFLARE_GATEWAY_NAME || 'captureai-gateway';
 
     // Get account ID from env or extract from worker URL
@@ -40,22 +39,6 @@ export class AIHandler {
     // Account ID should be set in wrangler.toml
     // This is a fallback
     return env.CLOUDFLARE_ACCOUNT_ID || 'YOUR_ACCOUNT_ID';
-  }
-
-  /**
-   * Detect whether usage_records uses 'email' or 'user_id' column.
-   * Caches result for the lifetime of this handler instance.
-   */
-  async getUserCol() {
-    if (this._userCol) {
-      return this._userCol;
-    }
-    const info = await this.db
-      .prepare("SELECT name FROM pragma_table_info('usage_records') WHERE name = 'email'")
-      .bind()
-      .first();
-    this._userCol = info ? 'email' : 'user_id';
-    return this._userCol;
   }
 
   /**
@@ -228,12 +211,11 @@ export class AIHandler {
       if (user.tier === 'pro') {
         // For Pro users, show per-minute usage
         const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
-        const col = await this.getUserCol();
         const usageLastMinute = await this.db
           .prepare(`
             SELECT COUNT(*) as count
             FROM usage_records
-            WHERE ${col} = ? AND created_at > ?
+            WHERE email = ? AND created_at > ?
           `)
           .bind(user.email, oneMinuteAgo)
           .first();
@@ -364,13 +346,12 @@ export class AIHandler {
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
       // Optimized: Single query with CTEs to get all analytics in one DB call
-      const col = await this.getUserCol();
       const analytics = await this.db
         .prepare(`
           WITH filtered_records AS (
             SELECT *
             FROM usage_records
-            WHERE ${col} = ? AND created_at >= ?
+            WHERE email = ? AND created_at >= ?
           ),
           overall_stats AS (
             SELECT
@@ -641,15 +622,15 @@ export class AIHandler {
   /**
    * Insert a usage record into the database
    */
-  async insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime }) {
+  async insertUsageRecord({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime }) {
     await this.db
       .prepare(`
         INSERT INTO usage_records (
-          ${col}, prompt_type, model, input_tokens, output_tokens,
+          email, prompt_type, model, input_tokens, output_tokens,
           total_cost, cached, response_time
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `)
-      .bind(email, promptType, model, inputTokens, outputTokens, totalCost, cached ? 'yes' : 'no', responseTime)
+      .bind(email, promptType, model, inputTokens, outputTokens, totalCost, cached ? 1 : 0, responseTime)
       .run();
   }
 
@@ -657,19 +638,21 @@ export class AIHandler {
    * Upsert daily aggregated usage into usage_daily table.
    * Uses SQLite INSERT ... ON CONFLICT DO UPDATE for atomic increment.
    */
-  async upsertUsageDaily({ email, inputTokens, outputTokens, totalCost }) {
+  async upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached }) {
     const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    const cachedIncrement = cached ? 1 : 0;
     await this.db
       .prepare(`
-        INSERT INTO usage_daily (email, date, request_count, input_tokens, output_tokens, total_cost)
-        VALUES (?, ?, 1, ?, ?, ?)
+        INSERT INTO usage_daily (email, date, request_count, cached_request_count, input_tokens, output_tokens, total_cost)
+        VALUES (?, ?, 1, ?, ?, ?, ?)
         ON CONFLICT(email, date) DO UPDATE SET
-          request_count = request_count + 1,
-          input_tokens  = input_tokens  + excluded.input_tokens,
-          output_tokens = output_tokens + excluded.output_tokens,
-          total_cost    = total_cost    + excluded.total_cost
+          request_count        = request_count        + 1,
+          cached_request_count = cached_request_count + excluded.cached_request_count,
+          input_tokens         = input_tokens         + excluded.input_tokens,
+          output_tokens        = output_tokens        + excluded.output_tokens,
+          total_cost           = total_cost           + excluded.total_cost
       `)
-      .bind(email, today, inputTokens, outputTokens, totalCost)
+      .bind(email, today, cachedIncrement, inputTokens, outputTokens, totalCost)
       .run();
   }
 
@@ -678,17 +661,16 @@ export class AIHandler {
    */
   async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
     const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
-    const col = await this.getUserCol();
 
-    // Write to usage_records (kept for per-request analytics: prompt_type, model breakdowns)
-    // TODO: remove once usage_records is fully retired
-    await this.insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime })
+    // Write to usage_records for per-request analytics (prompt_type, model breakdowns).
+    // Best-effort: failures are logged but do not block the response.
+    await this.insertUsageRecord({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime })
       .catch(err => {
         console.error('usage_records insert failed (best-effort):', err);
       });
 
     // Upsert daily aggregate — primary write for rate-limit checks and daily stats
-    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost });
+    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
   }
 
   /**

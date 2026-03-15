@@ -97,7 +97,7 @@ export class SubscriptionHandler {
             }
             // Stale subscription ID — clear and fall through to fresh checkout
             await this.db
-              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
+              .prepare("UPDATE users SET stripe_subscription_id = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
               .bind(null, 'inactive', existingUser.id).run();
           }
         } else {
@@ -109,7 +109,7 @@ export class SubscriptionHandler {
           }
 
           try {
-            const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id);
+            const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id, email);
             return jsonResponse({ ...switchResult, sessionId: 'tier_change_' + existingSubscriptionId, changedTier: true });
           } catch (switchError) {
             if (!this.isStripeMissingResourceError(switchError)) {
@@ -117,7 +117,7 @@ export class SubscriptionHandler {
             }
             // Stale subscription ID — clear and fall through to fresh checkout
             await this.db
-              .prepare('UPDATE users SET stripe_subscription_id = ?, subscription_status = ? WHERE id = ?')
+              .prepare("UPDATE users SET stripe_subscription_id = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
               .bind(null, 'inactive', existingUser.id).run();
           }
         }
@@ -150,7 +150,8 @@ export class SubscriptionHandler {
               UPDATE users
               SET stripe_customer_id = ?,
                   stripe_subscription_id = ?,
-                  subscription_status = ?
+                  subscription_status = ?,
+                  updated_at = datetime('now')
               WHERE id = ?
             `)
             .bind(customerId, null, 'inactive', existingUser.id)
@@ -648,6 +649,25 @@ export class SubscriptionHandler {
   }
 
   /**
+   * Write one row to subscription_events (fire-and-forget audit log).
+   * Never throws — audit failure must not break the caller.
+   */
+  async logSubscriptionEvent({ email, eventType, fromTier = null, toTier = null, fromStatus = null, toStatus = null, stripeEventId = null, metadata = null }) {
+    await this.db
+      .prepare(`
+        INSERT INTO subscription_events
+          (email, event_type, from_tier, to_tier, from_status, to_status, stripe_event_id, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      .bind(
+        email, eventType, fromTier, toTier, fromStatus, toStatus,
+        stripeEventId,
+        metadata ? JSON.stringify(metadata) : null
+      )
+      .run();
+  }
+
+  /**
    * Handle Stripe webhook events
    * POST /api/subscription/webhook
    */
@@ -766,17 +786,30 @@ export class SubscriptionHandler {
 
       if (user) {
         // User exists - set to purchased tier
+        const prevTier = user.tier;
+        const prevStatus = user.subscription_status;
         await this.db
           .prepare(`
             UPDATE users
             SET tier = ?,
                 subscription_status = ?,
                 stripe_customer_id = ?,
-                stripe_subscription_id = ?
+                stripe_subscription_id = ?,
+                updated_at = datetime('now')
             WHERE id = ?
           `)
           .bind(purchasedTier, 'active', customerId, subscriptionId, user.id)
           .run();
+
+        await this.logSubscriptionEvent({
+          email: customerEmail,
+          eventType: 'checkout_completed',
+          fromTier: prevTier,
+          toTier: purchasedTier,
+          fromStatus: prevStatus,
+          toStatus: 'active',
+          stripeEventId: session.id,
+        }).catch(err => console.error('Audit log failed:', err));
 
         console.log(`Updated user ${customerEmail} to ${purchasedTier} tier`);
 
@@ -813,6 +846,14 @@ export class SubscriptionHandler {
           .bind(userId, licenseKey, customerEmail, purchasedTier, customerId, subscriptionId, 'active')
           .run();
 
+        await this.logSubscriptionEvent({
+          email: customerEmail,
+          eventType: 'signup',
+          toTier: purchasedTier,
+          toStatus: 'active',
+          stripeEventId: session.id,
+        }).catch(err => console.error('Audit log failed:', err));
+
         console.log(`Created new ${purchasedTier} user ${customerEmail} with license key`);
 
         // Send welcome email with license key (new user)
@@ -835,9 +876,16 @@ export class SubscriptionHandler {
 
       if (customerEmail) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ? WHERE LOWER(email) = LOWER(?)')
+          .prepare("UPDATE users SET subscription_status = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
           .bind('active', customerEmail)
           .run();
+
+        await this.logSubscriptionEvent({
+          email: customerEmail,
+          eventType: 'payment_succeeded',
+          toStatus: 'active',
+          stripeEventId: invoice.id,
+        }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
       console.error('Payment succeeded handler error:', error);
@@ -853,9 +901,16 @@ export class SubscriptionHandler {
 
       if (customerEmail) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ? WHERE LOWER(email) = LOWER(?)')
+          .prepare("UPDATE users SET subscription_status = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
           .bind('past_due', customerEmail)
           .run();
+
+        await this.logSubscriptionEvent({
+          email: customerEmail,
+          eventType: 'payment_failed',
+          toStatus: 'past_due',
+          stripeEventId: invoice.id,
+        }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
       console.error('Payment failed handler error:', error);
@@ -869,10 +924,26 @@ export class SubscriptionHandler {
     try {
       const subscriptionId = subscription.id;
 
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_subscription_id = ?')
+        .bind(subscriptionId)
+        .first();
+
       await this.db
-        .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+        .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
         .bind('cancelled', null, subscriptionId)
         .run();
+
+      if (user) {
+        await this.logSubscriptionEvent({
+          email: user.email,
+          eventType: 'cancelled',
+          fromTier: user.tier,
+          fromStatus: user.subscription_status,
+          toStatus: 'cancelled',
+          stripeEventId: subscription.id,
+        }).catch(err => console.error('Audit log failed:', err));
+      }
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
     }
@@ -894,12 +965,28 @@ export class SubscriptionHandler {
         : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_subscription_id = ?')
+        .bind(subscriptionId)
+        .first();
+
       if (subscriptionStatus === 'inactive') {
         // Revoke tier access when subscription lapses
         await this.db
-          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+          .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
           .bind(subscriptionStatus, null, subscriptionId)
           .run();
+
+        if (user) {
+          await this.logSubscriptionEvent({
+            email: user.email,
+            eventType: 'subscription_lapsed',
+            fromTier: user.tier,
+            fromStatus: user.subscription_status,
+            toStatus: subscriptionStatus,
+            stripeEventId: subscription.id,
+          }).catch(err => console.error('Audit log failed:', err));
+        }
         return;
       }
 
@@ -915,14 +1002,26 @@ export class SubscriptionHandler {
 
       if (newTier) {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ?, tier = ? WHERE stripe_subscription_id = ?')
+          .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
           .bind(subscriptionStatus, newTier, subscriptionId)
           .run();
       } else {
         await this.db
-          .prepare('UPDATE users SET subscription_status = ? WHERE stripe_subscription_id = ?')
+          .prepare("UPDATE users SET subscription_status = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
           .bind(subscriptionStatus, subscriptionId)
           .run();
+      }
+
+      if (user && (user.tier !== newTier || user.subscription_status !== subscriptionStatus)) {
+        await this.logSubscriptionEvent({
+          email: user.email,
+          eventType: 'subscription_updated',
+          fromTier: user.tier,
+          toTier: newTier,
+          fromStatus: user.subscription_status,
+          toStatus: subscriptionStatus,
+          stripeEventId: subscription.id,
+        }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
       console.error('Subscription update handler error:', error);
@@ -1045,9 +1144,18 @@ export class SubscriptionHandler {
       const invoice = updatedSubscription.latest_invoice;
       if (!invoice || this.isInvoiceSettled(invoice)) {
         await this.db
-          .prepare('UPDATE users SET tier = ? WHERE id = ?')
+          .prepare("UPDATE users SET tier = ?, updated_at = datetime('now') WHERE id = ?")
           .bind(newTier, userData.id)
           .run();
+
+        await this.logSubscriptionEvent({
+          email: user.email,
+          eventType: 'tier_changed',
+          fromTier: userData.tier,
+          toTier: newTier,
+          toStatus: 'active',
+          stripeEventId: userData.stripe_subscription_id,
+        }).catch(err => console.error('Audit log failed:', err));
       }
 
       const nextBillingDate = updatedSubscription.current_period_end
@@ -1404,9 +1512,18 @@ export class SubscriptionHandler {
     // Update DB if invoice already collected; the webhook handles any deferred payment.
     if (updatedSub.status === 'active' || !invoice || this.isInvoiceSettled(invoice)) {
       await this.db
-        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+        .prepare("UPDATE users SET tier = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
         .bind('pro', 'active', userId)
         .run();
+
+      await this.logSubscriptionEvent({
+        email,
+        eventType: 'tier_changed',
+        fromTier: 'basic',
+        toTier: 'pro',
+        toStatus: 'active',
+        stripeEventId: subscriptionId,
+      }).catch(err => console.error('Audit log failed:', err));
 
       if (this.logger) {
         logSubscription(this.logger, 'plan_swapped', { userId, oldTier: 'basic', newTier: 'pro' });
@@ -1420,7 +1537,7 @@ export class SubscriptionHandler {
    * Switch an active subscription to a different tier with Stripe native proration.
    * Returns hosted invoice URL when payment action is required, otherwise success URL.
    */
-  async switchExistingSubscriptionTier(subscriptionId, newTier, userId) {
+  async switchExistingSubscriptionTier(subscriptionId, newTier, userId, email) {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
 
@@ -1483,9 +1600,19 @@ export class SubscriptionHandler {
     // Update DB now if payment is already collected; webhook covers any deferred payment.
     if (!invoice || this.isInvoiceSettled(invoice)) {
       await this.db
-        .prepare('UPDATE users SET tier = ?, subscription_status = ? WHERE id = ?')
+        .prepare("UPDATE users SET tier = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
         .bind(newTier, 'active', userId)
         .run();
+
+      if (email) {
+        await this.logSubscriptionEvent({
+          email,
+          eventType: 'tier_changed',
+          toTier: newTier,
+          toStatus: 'active',
+          stripeEventId: subscriptionId,
+        }).catch(err => console.error('Audit log failed:', err));
+      }
     }
 
     return { url: `${extensionUrl}/payment-success?upgraded=1&tier=${newTier}` };
