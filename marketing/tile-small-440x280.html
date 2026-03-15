@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 440px;
+    height: 280px;
+    overflow: hidden;
+    background: #08090b;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .tile {
+    width: 440px;
+    height: 280px;
+    background: #08090b;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 40px;
+  }
+
+  /* Ambient glow orbs */
+  .orb-blue {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,71,255,0.22) 0%, transparent 70%);
+    top: -80px;
+    right: -60px;
+    pointer-events: none;
+  }
+  .orb-cyan {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,240,255,0.12) 0%, transparent 70%);
+    bottom: -40px;
+    left: 160px;
+    pointer-events: none;
+  }
+
+  /* Subtle grid overlay */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,71,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,71,255,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
+
+  .content {
+    position: relative;
+    z-index: 10;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(0,71,255,0.15), rgba(0,240,255,0.1));
+    border: 1px solid rgba(0,240,255,0.18);
+    border-radius: 100px;
+    padding: 4px 12px;
+    margin-bottom: 16px;
+    width: fit-content;
+  }
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00f0ff;
+    box-shadow: 0 0 6px rgba(0,240,255,0.8);
+  }
+  .badge-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #00f0ff;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .gradient-word {
+    background: linear-gradient(90deg, #3388ff, #00f0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    font-weight: 400;
+    color: #a3b1c6;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    max-width: 260px;
+  }
+
+  .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #0047ff, #1a5cff);
+    border-radius: 100px;
+    padding: 8px 18px;
+    width: fit-content;
+    box-shadow: 0 0 20px rgba(0,71,255,0.35);
+  }
+  .cta-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .cta-arrow {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Right-side UI mockup */
+  .ui-mock {
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 148px;
+  }
+
+  .mock-card {
+    background: linear-gradient(145deg, rgba(11,17,32,0.95), rgba(6,9,19,0.9));
+    border: 1px solid rgba(0,71,255,0.25);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 30px rgba(0,71,255,0.15), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .mock-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #67748e;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .mock-question {
+    font-size: 10px;
+    color: #a3b1c6;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    padding: 7px 9px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .mock-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,71,255,0.3), rgba(0,240,255,0.15), transparent);
+    margin-bottom: 10px;
+  }
+
+  .mock-answer-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #00f0ff;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .answer-dot {
+    width: 5px;
+    height: 5px;
+    background: #00f0ff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,240,255,0.8);
+  }
+
+  .mock-answer {
+    font-size: 10px;
+    color: #e2e8f0;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .logo-area {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .logo-icon {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #0047ff, #00f0ff);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+  .logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+  }
+</style>
+</head>
+<body>
+<div class="tile">
+  <div class="orb-blue"></div>
+  <div class="orb-cyan"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="content">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span class="badge-text">AI Chrome Extension</span>
+    </div>
+
+    <h1>Screenshot it.<br><span class="gradient-word">Get the answer.</span></h1>
+
+    <p class="subtitle">AI-powered answers from any question on your screen. Instant.</p>
+
+    <div class="cta-pill">
+      <span class="cta-text">captureai.dev</span>
+      <span class="cta-arrow">→</span>
+    </div>
+  </div>
+
+  <!-- Right UI Mockup -->
+  <div class="ui-mock">
+    <div class="mock-card">
+      <div class="mock-label">Question</div>
+      <div class="mock-question">What is the powerhouse of the cell?</div>
+      <div class="mock-divider"></div>
+      <div class="mock-answer-label">
+        <div class="answer-dot"></div>
+        Answer
+      </div>
+      <div class="mock-answer">The mitochondria — responsible for ATP production via cellular respiration.</div>
+    </div>
+  </div>
+
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.9"/>
+        <rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/>
+        <rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.3"/>
+      </svg>
+    </div>
+    <span class="logo-text">CaptureAI</span>
+  </div>
+</div>
+</body>
+</html>
