@@ -8,15 +8,15 @@
    ============================================ */
 
 @theme inline {
-  --color-background: #111214;
-  /* Deepest Discord gray background */
+  --color-background: #08090b;
+  /* Near-black background */
   --color-foreground: #fafafa;
   --color-surface: #0a0b0c;
-  /* Even darker gray surface for sections */
+  /* Slightly lighter surface for sections */
   --color-surface-raised: #050505;
-  --color-surface-glass: rgba(17, 18, 20, 0.85);
+  --color-surface-glass: rgba(8, 9, 11, 0.85);
   --color-border: rgba(255, 255, 255, 0.07);
-  --color-border-subtle: #111214;
+  --color-border-subtle: #08090b;
   --color-border-glow: rgba(0, 240, 255, 0.08);
   /* Electric cyan glow */
 
