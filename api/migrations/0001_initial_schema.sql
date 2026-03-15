@@ -6,12 +6,12 @@
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL COLLATE NOCASE UNIQUE,
   license_key TEXT UNIQUE NOT NULL,
   tier TEXT DEFAULT 'basic' CHECK (tier IN ('basic', 'pro')),
   subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled', 'past_due')),
   stripe_customer_id TEXT UNIQUE,
-  stripe_subscription_id TEXT,
+  stripe_subscription_id TEXT UNIQUE,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS verification_codes (
   used INTEGER NOT NULL DEFAULT 0 CHECK (used IN (0, 1))
 );
 
-CREATE INDEX IF NOT EXISTS idx_verification_codes_lookup ON verification_codes(email, action, used, expires_at);
+CREATE INDEX IF NOT EXISTS idx_verification_codes_lookup ON verification_codes(email, action, code, used, expires_at);
 
 CREATE TABLE IF NOT EXISTS subscription_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,9 +131,9 @@ GROUP BY email;
 
 CREATE VIEW IF NOT EXISTS total_usage_daily AS
 SELECT
-  SUM(request_count) AS requests,
-  SUM(cached_request_count) AS cached_requests,
-  SUM(input_tokens) AS input_tokens,
-  SUM(output_tokens) AS output_tokens,
-  ROUND(SUM(total_cost), 8) AS total_cost
+  COALESCE(SUM(request_count), 0) AS requests,
+  COALESCE(SUM(cached_request_count), 0) AS cached_requests,
+  COALESCE(SUM(input_tokens), 0) AS input_tokens,
+  COALESCE(SUM(output_tokens), 0) AS output_tokens,
+  ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
 FROM usage_daily;

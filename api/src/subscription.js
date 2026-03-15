@@ -649,22 +649,26 @@ export class SubscriptionHandler {
   }
 
   /**
-   * Write one row to subscription_events (fire-and-forget audit log).
-   * Never throws — audit failure must not break the caller.
+   * Append an immutable row to the subscription_events audit log.
+   * Never throws — failures are logged and swallowed so callers are not disrupted.
    */
   async logSubscriptionEvent({ email, eventType, fromTier = null, toTier = null, fromStatus = null, toStatus = null, stripeEventId = null, metadata = null }) {
-    await this.db
-      .prepare(`
-        INSERT INTO subscription_events
-          (email, event_type, from_tier, to_tier, from_status, to_status, stripe_event_id, metadata)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `)
-      .bind(
-        email, eventType, fromTier, toTier, fromStatus, toStatus,
-        stripeEventId,
-        metadata ? JSON.stringify(metadata) : null
-      )
-      .run();
+    try {
+      await this.db
+        .prepare(`
+          INSERT INTO subscription_events
+            (email, event_type, from_tier, to_tier, from_status, to_status, stripe_event_id, metadata)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `)
+        .bind(
+          email, eventType, fromTier, toTier, fromStatus, toStatus,
+          stripeEventId,
+          metadata ? JSON.stringify(metadata) : null
+        )
+        .run();
+    } catch (error) {
+      console.error('Audit log write failed (non-fatal):', error);
+    }
   }
 
   /**
@@ -1015,16 +1019,20 @@ export class SubscriptionHandler {
           .run();
       }
 
-      if (user && (user.tier !== newTier || user.subscription_status !== subscriptionStatus)) {
+      // When no recognized price ID is present, newTier is null and the DB tier is unchanged.
+      // Compare against the effective resulting tier to avoid false audit entries.
+      const effectiveTier = newTier ?? user?.tier;
+
+      if (user && (user.tier !== effectiveTier || user.subscription_status !== subscriptionStatus)) {
         await this.logSubscriptionEvent({
           email: user.email,
           eventType: 'subscription_updated',
           fromTier: user.tier,
-          toTier: newTier,
+          toTier: effectiveTier,
           fromStatus: user.subscription_status,
           toStatus: subscriptionStatus,
           stripeEventId: subscription.id,
-        }).catch(err => console.error('Audit log failed:', err));
+        });
       }
     } catch (error) {
       console.error('Subscription update handler error:', error);
@@ -1849,7 +1857,7 @@ export class SubscriptionHandler {
       }
 
       // Mark event as processed
-      await this.markWebhookProcessed(eventId, timestamp);
+      await this.markWebhookProcessed(eventId, event.type, timestamp);
     }
 
     return event;
@@ -1878,11 +1886,11 @@ export class SubscriptionHandler {
   /**
    * Mark webhook event as processed
    */
-  async markWebhookProcessed(eventId, timestamp) {
+  async markWebhookProcessed(eventId, eventType, timestamp) {
     try {
       await this.db
-        .prepare('INSERT INTO webhook_events (event_id, processed_at, webhook_timestamp) VALUES (?, datetime(\'now\'), ?)')
-        .bind(eventId, timestamp)
+        .prepare('INSERT INTO webhook_events (event_id, event_type, processed_at, webhook_timestamp) VALUES (?, ?, datetime(\'now\'), ?)')
+        .bind(eventId, eventType, timestamp)
         .run();
     } catch (error) {
       if (this.logger) {

@@ -161,10 +161,11 @@ export class AuthHandler {
         return null;
       }
 
-      // cancelled (tier=NULL) or inactive: full access denied
-      if (user.subscription_status === 'cancelled' || user.subscription_status === 'inactive') {
+      // Only active and past_due subscriptions are permitted; deny everything else
+      // (including cancelled, inactive, and any unexpected/stale status values).
+      if (user.subscription_status !== 'active' && user.subscription_status !== 'past_due') {
         if (this.logger) {
-          this.logger.security('User with cancelled/inactive subscription attempted access', {
+          this.logger.security('User with non-active subscription attempted access', {
             userId: user.id,
             subscriptionStatus: user.subscription_status
           });

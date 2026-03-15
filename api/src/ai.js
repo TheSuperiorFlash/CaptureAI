@@ -338,7 +338,7 @@ export class AIHandler {
           WITH filtered AS (
             SELECT *
             FROM usage_breakdown
-            WHERE email = ? AND date >= ?
+            WHERE email = ? AND date >= DATE(?)
           ),
           overall_stats AS (
             SELECT
@@ -382,7 +382,6 @@ export class AIHandler {
               SUM(output_tokens)  AS output_tokens,
               SUM(total_cost)     AS cost
             FROM filtered
-            WHERE date >= DATE('now', '-7 days')
             GROUP BY date
             ORDER BY date DESC
           )
@@ -661,11 +660,17 @@ export class AIHandler {
   async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
     const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
 
-    // Both writes are reliable (not fire-and-forget).
-    // usage_daily  → authoritative daily totals for rate-limit checks
-    // usage_breakdown → analytics breakdowns by prompt_type and model
-    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
-    await this.upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
+    // Both writes are wrapped in a transaction so they succeed or fail together,
+    // preventing divergence between rate-limit counters (usage_daily) and analytics (usage_breakdown).
+    await this.db.exec('BEGIN');
+    try {
+      await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
+      await this.upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
+      await this.db.exec('COMMIT');
+    } catch (error) {
+      await this.db.exec('ROLLBACK');
+      throw error;
+    }
   }
 
   /**
