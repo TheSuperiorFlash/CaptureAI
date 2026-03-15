@@ -21,21 +21,6 @@ CREATE INDEX IF NOT EXISTS idx_users_stripe_subscription ON users(stripe_subscri
 CREATE INDEX IF NOT EXISTS idx_users_tier ON users(tier);
 CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status);
 
-CREATE TABLE IF NOT EXISTS usage_records (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT NOT NULL,
-  prompt_type TEXT,
-  model TEXT,
-  input_tokens INTEGER DEFAULT 0,
-  output_tokens INTEGER DEFAULT 0,
-  total_cost REAL DEFAULT 0.0,
-  cached INTEGER NOT NULL DEFAULT 0 CHECK (cached IN (0, 1)),
-  response_time INTEGER DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE INDEX IF NOT EXISTS idx_usage_records_email_date ON usage_records(email, created_at);
-
 CREATE TABLE IF NOT EXISTS usage_daily (
   email TEXT NOT NULL,
   date TEXT NOT NULL,
@@ -45,6 +30,20 @@ CREATE TABLE IF NOT EXISTS usage_daily (
   output_tokens INTEGER DEFAULT 0,
   total_cost REAL DEFAULT 0.0,
   PRIMARY KEY (email, date)
+);
+
+CREATE TABLE IF NOT EXISTS usage_breakdown (
+  email TEXT NOT NULL,
+  date TEXT NOT NULL,
+  prompt_type TEXT NOT NULL,
+  model TEXT NOT NULL,
+  request_count INTEGER DEFAULT 0,
+  cached_count INTEGER DEFAULT 0,
+  input_tokens INTEGER DEFAULT 0,
+  output_tokens INTEGER DEFAULT 0,
+  total_cost REAL DEFAULT 0.0,
+  total_response_time INTEGER DEFAULT 0,
+  PRIMARY KEY (email, date, prompt_type, model)
 );
 
 CREATE TABLE IF NOT EXISTS webhook_events (
@@ -88,11 +87,11 @@ SELECT
   1 AS sort_order,
   'ALL' AS prompt_type,
   'ALL' AS model,
-  COUNT(*) AS requests,
+  COALESCE(SUM(request_count), 0) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
   ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
-FROM usage_records
+FROM usage_breakdown
 
 UNION ALL
 
@@ -100,11 +99,11 @@ SELECT
   2 AS sort_order,
   prompt_type,
   'ALL' AS model,
-  COUNT(*) AS requests,
+  COALESCE(SUM(request_count), 0) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
   ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
-FROM usage_records
+FROM usage_breakdown
 GROUP BY prompt_type
 
 UNION ALL
@@ -113,21 +112,21 @@ SELECT
   3 AS sort_order,
   'ALL' AS prompt_type,
   model,
-  COUNT(*) AS requests,
+  COALESCE(SUM(request_count), 0) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
   ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
-FROM usage_records
+FROM usage_breakdown
 GROUP BY model;
 
 CREATE VIEW IF NOT EXISTS user_usage AS
 SELECT
   email,
-  COUNT(*) AS requests,
+  COALESCE(SUM(request_count), 0) AS requests,
   COALESCE(SUM(input_tokens), 0) AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
   ROUND(COALESCE(SUM(total_cost), 0.0), 8) AS total_cost
-FROM usage_records
+FROM usage_breakdown
 GROUP BY email;
 
 CREATE VIEW IF NOT EXISTS total_usage_daily AS

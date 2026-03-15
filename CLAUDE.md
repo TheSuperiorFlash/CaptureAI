@@ -53,8 +53,9 @@ cd api && npm run db:migrate  # Run migrations
 - **Shortcuts**: `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle panel
 - **Rate Limiting**: Cloudflare native Rate Limiting API with 5 presets (AUTH: 5/min, LICENSE: 10/min, CHECKOUT: 10/min, GLOBAL: 60/min, PRO_AI: 20/min)
 - **Auth**: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), sent via `Authorization: LicenseKey YOUR-KEY` header
-- **Usage Tracking**: Two-table strategy — `usage_records` (per-request analytics, 90-day TTL) + `usage_daily` (O(1) rate limit checks, authoritative totals)
+- **Usage Tracking**: Two-table strategy — `usage_breakdown` (per-day analytics by prompt_type + model, reliable writes) + `usage_daily` (O(1) rate limit checks, authoritative daily totals)
 - **Subscription Audit Log**: Every tier/status change is written to `subscription_events` (immutable, never deleted). Query it to answer billing disputes.
+- **Past-Due Auth**: Users with `subscription_status = 'past_due'` are granted Basic-tier access (Pro features blocked) until payment resolves. Cancelled/inactive users get no access.
 - **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.

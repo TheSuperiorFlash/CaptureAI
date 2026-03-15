@@ -44,24 +44,6 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, single migr
 
 **Indexes:** email, stripe_subscription_id, tier, subscription_status (all explicit); license_key, stripe_customer_id (implicit via UNIQUE)
 
-### usage_records
-
-Per-request analytics. Writes are best-effort (logged but non-blocking). Rows older than 90 days are purged by the daily cron.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | INTEGER PK | Auto-increment |
-| email | TEXT NOT NULL | User email |
-| prompt_type | TEXT | `answer`, `ask`, `auto_solve`, etc. |
-| model | TEXT | `low`, `medium`, `high` |
-| input_tokens, output_tokens | INTEGER | Token counts |
-| total_cost | REAL | Cost in USD |
-| cached | INTEGER | `1` = cache hit, `0` = miss |
-| response_time | INTEGER | Milliseconds |
-| created_at | TEXT NOT NULL | ISO timestamp |
-
-**Indexes:** `idx_usage_records_email_date` (email, created_at)
-
 ### usage_daily
 
 Authoritative daily aggregates. Primary source for rate-limit checks (O(1) composite PK point-lookup). The composite PK `(email, date)` creates its own index.
@@ -74,6 +56,22 @@ Authoritative daily aggregates. Primary source for rate-limit checks (O(1) compo
 | cached_request_count | INTEGER | Requests that were cache hits |
 | input_tokens, output_tokens | INTEGER | Daily token totals |
 | total_cost | REAL | Daily cost |
+
+### usage_breakdown
+
+Per-day analytics broken down by prompt_type and model. Replaces `usage_records`. Writes are reliable (not fire-and-forget). Composite PK `(email, date, prompt_type, model)` creates its own index.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| email | TEXT | Composite PK part 1 |
+| date | TEXT | YYYY-MM-DD — composite PK part 2 |
+| prompt_type | TEXT NOT NULL | `answer`, `ask`, `auto_solve`, etc. — composite PK part 3 |
+| model | TEXT NOT NULL | `low`, `medium`, `high` — composite PK part 4 |
+| request_count | INTEGER | Requests for this combination |
+| cached_count | INTEGER | Cache hits for this combination |
+| input_tokens, output_tokens | INTEGER | Aggregated token counts |
+| total_cost | REAL | Aggregated cost |
+| total_response_time | INTEGER | Sum of ms (divide by request_count for average) |
 
 ### webhook_events
 
@@ -125,8 +123,8 @@ Immutable audit log. One row per subscription state change. Never updated or del
 
 ### Views
 
-- **total_usage** — Grand totals plus per-prompt_type and per-model breakdowns (reads usage_records)
-- **user_usage** — Per-user aggregate statistics (reads usage_records)
+- **total_usage** — Grand totals plus per-prompt_type and per-model breakdowns (reads usage_breakdown)
+- **user_usage** — Per-user aggregate statistics (reads usage_breakdown)
 - **total_usage_daily** — All-time totals including cache hit count (reads usage_daily; authoritative)
 
 ## Common Queries
@@ -142,8 +140,8 @@ wrangler d1 execute captureai-db --command "
 
 # Cost by model
 wrangler d1 execute captureai-db --command "
-  SELECT model, COUNT(*) as requests, SUM(total_cost) as total_cost
-  FROM usage_records GROUP BY model;"
+  SELECT model, SUM(request_count) as requests, SUM(total_cost) as total_cost
+  FROM usage_breakdown GROUP BY model;"
 
 # Active Pro subscriptions
 wrangler d1 execute captureai-db --command "
@@ -166,7 +164,6 @@ wrangler d1 export captureai-db --output=./backup-$(date +%Y%m%d).sql
 wrangler d1 execute captureai-db --file=./migrations/0001_initial_schema.sql
 
 # Manual cleanup (also runs automatically via daily cron)
-wrangler d1 execute captureai-db --command "DELETE FROM usage_records WHERE created_at < datetime('now', '-90 days');"
 wrangler d1 execute captureai-db --command "DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours');"
 wrangler d1 execute captureai-db --command "DELETE FROM verification_codes WHERE expires_at < datetime('now') OR used = 1;"
 ```

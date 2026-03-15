@@ -910,6 +910,9 @@ export class SubscriptionHandler {
           eventType: 'payment_failed',
           toStatus: 'past_due',
           stripeEventId: invoice.id,
+          // billing_reason distinguishes upgrade failures from renewal failures:
+          // 'subscription_update' = proration on tier change; 'subscription_cycle' = renewal
+          metadata: invoice.billing_reason ? { billing_reason: invoice.billing_reason } : null,
         }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {

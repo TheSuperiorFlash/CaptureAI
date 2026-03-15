@@ -161,19 +161,32 @@ export class AuthHandler {
         return null;
       }
 
-      // All users require an active subscription
-      if (user.subscription_status !== 'active') {
+      // cancelled (tier=NULL) or inactive: full access denied
+      if (user.subscription_status === 'cancelled' || user.subscription_status === 'inactive') {
         if (this.logger) {
-          this.logger.security('User with inactive subscription attempted access', {
+          this.logger.security('User with cancelled/inactive subscription attempted access', {
             userId: user.id,
-            tier: user.tier,
             subscriptionStatus: user.subscription_status
           });
         }
-        return null; // Treat as unauthorized
+        return null;
       }
 
-      // Return user data in JWT-like format for compatibility
+      // past_due: grant access but clamp to Basic regardless of stored tier.
+      // This handles the case where a tier-switch payment fails after the DB
+      // was already written to 'pro' — the user retains Basic-level access
+      // until payment resolves (subscription.updated webhook restores state).
+      if (user.subscription_status === 'past_due') {
+        return {
+          userId: user.id,
+          email: user.email,
+          tier: 'basic',
+          licenseKey: user.license_key,
+          subscriptionStatus: user.subscription_status
+        };
+      }
+
+      // active: return stored tier as-is
       return {
         userId: user.id,
         email: user.email,
