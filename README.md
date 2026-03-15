@@ -43,9 +43,9 @@ CaptureAI is a Chrome extension that captures questions from any webpage and del
 
 ### Getting a License Key
 
-**Free (10 requests/day):** Click extension icon -> [activation page](https://captureai.dev/activate) -> enter email
+**Basic ($1.49/week, 50 requests/day):** Click extension icon -> [activation page](https://captureai.dev/activate) -> choose plan
 
-**Pro ($9.99/month, unlimited):** Click "Buy Pro Key" in popup -> Stripe checkout -> key delivered via email
+**Pro ($9.99/month, unlimited):** Click extension icon -> [activation page](https://captureai.dev/activate) -> choose Pro -> Stripe checkout -> key delivered via email
 
 ---
 
@@ -102,9 +102,9 @@ User Action -> Content Script -> Background Script -> Cloudflare Workers -> Open
 
 ## Pricing
 
-| Feature | Free | Pro ($9.99/mo) |
-|---------|------|----------------|
-| Daily Requests | 10 | Unlimited (20/min) |
+| Feature | Basic ($1.49/week) | Pro ($9.99/mo) |
+|---------|-------|----------------|
+| Daily Requests | 50 | Unlimited (20/min rate limit) |
 | Screenshot Capture + OCR | Yes | Yes |
 | Stealth Mode | Yes | Yes |
 | Auto-Solve / Ask Mode | — | Yes |
