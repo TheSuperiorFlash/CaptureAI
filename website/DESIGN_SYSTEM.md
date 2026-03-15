@@ -16,13 +16,13 @@ Defined in `globals.css` under `@theme inline`:
 
 | Token | Value | Usage |
 |---|---|---|
-| `--color-background` | `#111214` | Page background (deepest Discord gray) |
+| `--color-background` | `#08090b` | Page background (near-black) |
 | `--color-foreground` | `#fafafa` | Foreground fallback |
-| `--color-surface` | `#0a0b0c` | Card/panel fills (even darker gray) |
+| `--color-surface` | `#0a0b0c` | Card/panel fills (slightly lighter than background) |
 | `--color-surface-raised` | `#050505` | Elevated surfaces |
-| `--color-surface-glass` | `rgba(17,18,20,0.85)` | Glassmorphic panels |
+| `--color-surface-glass` | `rgba(8,9,11,0.85)` | Glassmorphic panels |
 | `--color-border` | `#0a0b0c` | Standard borders |
-| `--color-border-subtle` | `#111214` | Subtle borders |
+| `--color-border-subtle` | `#08090b` | Subtle borders |
 | `--color-border-glow` | `rgba(0,240,255,0.08)` | Electric cyan glow border |
 | `--color-text` | `#ffffff` | Primary text |
 | `--color-text-secondary` | `#a3b1c6` | Secondary text |
