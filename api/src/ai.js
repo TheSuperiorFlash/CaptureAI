@@ -24,7 +24,6 @@ export class AIHandler {
     this.logger = logger;
     this.ctx = ctx;
     this.auth = new AuthHandler(env, logger);
-    this._userCol = null; // cached: 'email' or 'user_id'
     this.gatewayName = env.CLOUDFLARE_GATEWAY_NAME || 'captureai-gateway';
 
     // Get account ID from env or extract from worker URL
@@ -40,22 +39,6 @@ export class AIHandler {
     // Account ID should be set in wrangler.toml
     // This is a fallback
     return env.CLOUDFLARE_ACCOUNT_ID || 'YOUR_ACCOUNT_ID';
-  }
-
-  /**
-   * Detect whether usage_records uses 'email' or 'user_id' column.
-   * Caches result for the lifetime of this handler instance.
-   */
-  async getUserCol() {
-    if (this._userCol) {
-      return this._userCol;
-    }
-    const info = await this.db
-      .prepare("SELECT name FROM pragma_table_info('usage_records') WHERE name = 'email'")
-      .bind()
-      .first();
-    this._userCol = info ? 'email' : 'user_id';
-    return this._userCol;
   }
 
   /**
@@ -226,19 +209,8 @@ export class AIHandler {
 
       // Basic tier: 50/day, Pro tier: unlimited daily (rate limited per minute)
       if (user.tier === 'pro') {
-        // For Pro users, show per-minute usage
-        const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
-        const col = await this.getUserCol();
-        const usageLastMinute = await this.db
-          .prepare(`
-            SELECT COUNT(*) as count
-            FROM usage_records
-            WHERE ${col} = ? AND created_at > ?
-          `)
-          .bind(user.email, oneMinuteAgo)
-          .first();
-
-        const usedLastMinute = usageLastMinute?.count || 0;
+        // For Pro users: per-minute enforcement uses the Cloudflare Durable Object;
+        // display today's total from usage_daily (no usage_records needed).
         const rateLimit = parseInt(this.env.PRO_TIER_RATE_LIMIT_PER_MINUTE || '20');
 
         return jsonResponse({
@@ -248,11 +220,8 @@ export class AIHandler {
             remaining: null,
             percentage: 0
           },
-          lastMinute: {
-            used: usedLastMinute,
-            limit: rateLimit,
-            remaining: Math.max(0, rateLimit - usedLastMinute),
-            percentage: Math.round((usedLastMinute / rateLimit) * 100)
+          rateLimit: {
+            perMinute: rateLimit
           },
           tier: user.tier,
           limitType: 'per_minute'
@@ -363,58 +332,57 @@ export class AIHandler {
       const days = parseInt(url.searchParams.get('days') || '30'); // Default 30 days
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-      // Optimized: Single query with CTEs to get all analytics in one DB call
-      const col = await this.getUserCol();
+      // Single query with CTEs — all data from usage_breakdown (reliable writes).
       const analytics = await this.db
         .prepare(`
-          WITH filtered_records AS (
+          WITH filtered AS (
             SELECT *
-            FROM usage_records
-            WHERE ${col} = ? AND created_at >= ?
+            FROM usage_breakdown
+            WHERE email = ? AND date >= DATE(?)
           ),
           overall_stats AS (
             SELECT
-              COUNT(*) as total_requests,
-              SUM(input_tokens) as total_input_tokens,
-              SUM(output_tokens) as total_output_tokens,
-              SUM(total_cost) as total_cost,
-              AVG(input_tokens) as avg_input_tokens,
-              AVG(output_tokens) as avg_output_tokens,
-              AVG(total_cost) as avg_cost_per_request,
-              AVG(response_time) as avg_response_time
-            FROM filtered_records
+              SUM(request_count)                                           AS total_requests,
+              SUM(input_tokens)                                            AS total_input_tokens,
+              SUM(output_tokens)                                           AS total_output_tokens,
+              SUM(total_cost)                                              AS total_cost,
+              CAST(SUM(input_tokens) AS REAL) / MAX(SUM(request_count),1) AS avg_input_tokens,
+              CAST(SUM(output_tokens) AS REAL) / MAX(SUM(request_count),1) AS avg_output_tokens,
+              SUM(total_cost) / MAX(SUM(request_count),1)                 AS avg_cost_per_request,
+              CAST(SUM(total_response_time) AS REAL) / MAX(SUM(request_count),1) AS avg_response_time
+            FROM filtered
           ),
           by_prompt AS (
             SELECT
               prompt_type,
-              COUNT(*) as requests,
-              AVG(input_tokens) as avg_input_tokens,
-              AVG(output_tokens) as avg_output_tokens,
-              AVG(total_cost) as avg_cost,
-              SUM(total_cost) as total_cost
-            FROM filtered_records
+              SUM(request_count)                                              AS requests,
+              CAST(SUM(input_tokens) AS REAL)  / MAX(SUM(request_count),1)   AS avg_input_tokens,
+              CAST(SUM(output_tokens) AS REAL) / MAX(SUM(request_count),1)   AS avg_output_tokens,
+              SUM(total_cost) / MAX(SUM(request_count),1)                    AS avg_cost,
+              SUM(total_cost)                                                 AS total_cost
+            FROM filtered
             GROUP BY prompt_type
           ),
           by_model_stats AS (
             SELECT
               model,
-              COUNT(*) as requests,
-              AVG(input_tokens) as avg_input_tokens,
-              AVG(output_tokens) as avg_output_tokens,
-              AVG(total_cost) as avg_cost,
-              SUM(total_cost) as total_cost
-            FROM filtered_records
+              SUM(request_count)                                              AS requests,
+              CAST(SUM(input_tokens) AS REAL)  / MAX(SUM(request_count),1)   AS avg_input_tokens,
+              CAST(SUM(output_tokens) AS REAL) / MAX(SUM(request_count),1)   AS avg_output_tokens,
+              SUM(total_cost) / MAX(SUM(request_count),1)                    AS avg_cost,
+              SUM(total_cost)                                                 AS total_cost
+            FROM filtered
             GROUP BY model
           ),
           daily_breakdown AS (
             SELECT
               date,
-              request_count AS requests,
-              input_tokens,
-              output_tokens,
-              total_cost AS cost
-            FROM usage_daily
-            WHERE email = ? AND date >= DATE('now', '-7 days')
+              SUM(request_count)  AS requests,
+              SUM(input_tokens)   AS input_tokens,
+              SUM(output_tokens)  AS output_tokens,
+              SUM(total_cost)     AS cost
+            FROM filtered
+            GROUP BY date
             ORDER BY date DESC
           )
           SELECT
@@ -452,7 +420,7 @@ export class AIHandler {
               'cost', cost
             )) FROM daily_breakdown) as daily
         `)
-        .bind(user.email, startDate, user.email)
+        .bind(user.email, startDate)
         .first();
 
       // Parse JSON results
@@ -641,15 +609,26 @@ export class AIHandler {
   /**
    * Insert a usage record into the database
    */
-  async insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime }) {
+  /**
+   * Upsert per-breakdown aggregated usage into usage_breakdown table.
+   * Keyed on (email, date, prompt_type, model) for analytics queries.
+   */
+  async upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime }) {
+    const today = new Date().toISOString().split('T')[0];
     await this.db
       .prepare(`
-        INSERT INTO usage_records (
-          ${col}, prompt_type, model, input_tokens, output_tokens,
-          total_cost, cached, response_time
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO usage_breakdown
+          (email, date, prompt_type, model, request_count, cached_count, input_tokens, output_tokens, total_cost, total_response_time)
+        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+        ON CONFLICT(email, date, prompt_type, model) DO UPDATE SET
+          request_count       = request_count       + 1,
+          cached_count        = cached_count        + excluded.cached_count,
+          input_tokens        = input_tokens        + excluded.input_tokens,
+          output_tokens       = output_tokens       + excluded.output_tokens,
+          total_cost          = total_cost          + excluded.total_cost,
+          total_response_time = total_response_time + excluded.total_response_time
       `)
-      .bind(email, promptType, model, inputTokens, outputTokens, totalCost, cached ? 'yes' : 'no', responseTime)
+      .bind(email, today, promptType, model, cached ? 1 : 0, inputTokens, outputTokens, totalCost, responseTime)
       .run();
   }
 
@@ -657,19 +636,21 @@ export class AIHandler {
    * Upsert daily aggregated usage into usage_daily table.
    * Uses SQLite INSERT ... ON CONFLICT DO UPDATE for atomic increment.
    */
-  async upsertUsageDaily({ email, inputTokens, outputTokens, totalCost }) {
+  async upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached }) {
     const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    const cachedIncrement = cached ? 1 : 0;
     await this.db
       .prepare(`
-        INSERT INTO usage_daily (email, date, request_count, input_tokens, output_tokens, total_cost)
-        VALUES (?, ?, 1, ?, ?, ?)
+        INSERT INTO usage_daily (email, date, request_count, cached_request_count, input_tokens, output_tokens, total_cost)
+        VALUES (?, ?, 1, ?, ?, ?, ?)
         ON CONFLICT(email, date) DO UPDATE SET
-          request_count = request_count + 1,
-          input_tokens  = input_tokens  + excluded.input_tokens,
-          output_tokens = output_tokens + excluded.output_tokens,
-          total_cost    = total_cost    + excluded.total_cost
+          request_count        = request_count        + 1,
+          cached_request_count = cached_request_count + excluded.cached_request_count,
+          input_tokens         = input_tokens         + excluded.input_tokens,
+          output_tokens        = output_tokens        + excluded.output_tokens,
+          total_cost           = total_cost           + excluded.total_cost
       `)
-      .bind(email, today, inputTokens, outputTokens, totalCost)
+      .bind(email, today, cachedIncrement, inputTokens, outputTokens, totalCost)
       .run();
   }
 
@@ -678,17 +659,18 @@ export class AIHandler {
    */
   async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
     const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
-    const col = await this.getUserCol();
 
-    // Write to usage_records (kept for per-request analytics: prompt_type, model breakdowns)
-    // TODO: remove once usage_records is fully retired
-    await this.insertUsageRecord({ col, email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime })
-      .catch(err => {
-        console.error('usage_records insert failed (best-effort):', err);
-      });
-
-    // Upsert daily aggregate — primary write for rate-limit checks and daily stats
-    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost });
+    // Both writes are wrapped in a transaction so they succeed or fail together,
+    // preventing divergence between rate-limit counters (usage_daily) and analytics (usage_breakdown).
+    await this.db.exec('BEGIN');
+    try {
+      await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
+      await this.upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
+      await this.db.exec('COMMIT');
+    } catch (error) {
+      await this.db.exec('ROLLBACK');
+      throw error;
+    }
   }
 
   /**

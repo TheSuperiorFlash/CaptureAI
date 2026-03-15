@@ -1,59 +1,42 @@
 # Database Migrations
 
-> **Self-update rule:** When you add a new migration file, add it to the Migration List table below and update the migration count in [api/DATABASE_GUIDE.md](../DATABASE_GUIDE.md) and [CLAUDE.md](../../CLAUDE.md).
+> **Self-update rule:** When you add a new migration file, add it to the Migration List table below and update [api/DATABASE_GUIDE.md](../DATABASE_GUIDE.md).
 
 ## Running Migrations
 
-**Fresh database:** Use the main schema file (includes all optimizations):
+**Fresh database (first setup):**
 ```bash
-wrangler d1 execute captureai-db --file=schema.sql
+wrangler d1 execute captureai-db --file=migrations/0001_initial_schema.sql
 ```
 
-**Existing database:** Run migrations sequentially:
+**Or apply schema directly (includes DROP TABLE guards for a clean reset):**
 ```bash
-wrangler d1 execute captureai-db --file=migrations/001_add_indexes_and_webhook_tracking.sql
-# ... through 008
+wrangler d1 execute captureai-db --file=schema.sql
 ```
 
 ## Migration List
 
 | # | File | Description |
 |---|------|-------------|
-| 001 | `001_add_indexes_and_webhook_tracking.sql` | `webhook_events` table, performance indexes for users/usage_records |
-| 002 | `002_add_token_breakdown.sql` | Token breakdown columns (input, output, reasoning, cached tokens) |
-| 003 | `003_remove_unused_columns.sql` | Cleanup of deprecated columns |
-| 004 | `004_usage_records_user_id_to_email.sql` | Schema refactor: `user_id` -> `email` in usage_records |
-| 005 | `005_add_cached_column.sql` | `cached` (yes/no) tracking on usage_records |
-| 006 | `006_create_total_usage_view.sql` | SQL views: `total_usage`, `user_usage`, `total_usage_daily` |
-| 007 | `007_add_usage_daily.sql` | `usage_daily` table for O(1) daily rate limit checks |
-| 008 | `008_rename_free_to_basic.sql` | Recreate `users` table with `tier DEFAULT 'basic' CHECK (tier IN ('basic', 'pro'))`; auto-migrates existing `tier='free'` rows to `'basic'` |
-| 009 | `009_add_verification_codes.sql` | `verification_codes` table for email OTP verification on tier switches |
+| 0001 | `0001_initial_schema.sql` | Complete initial schema — all tables, indexes, and views |
 
-Migrations 001, 002, 005, 007, and 009 use `IF NOT EXISTS` guards for idempotency. Migrations 003 (bare `ALTER TABLE DROP COLUMN`), 004 (schema refactor), 006 (`CREATE VIEW` without `IF NOT EXISTS` — unsupported in SQLite), and 008 (table recreation/rename) are **not idempotent** and will fail if re-run.
+All statements use `IF NOT EXISTS` guards and are idempotent.
 
-## Maintenance
+## Historical Note
 
-```sql
--- Clean old webhook events (run periodically)
-DELETE FROM webhook_events WHERE processed_at < datetime('now', '-30 days');
-```
-
-```bash
-# Verify indexes
-wrangler d1 execute captureai-db --command="SELECT name, tbl_name FROM sqlite_master WHERE type='index';"
-```
+Migrations 001–009 (pre-launch schema evolution) were collapsed into `0001_initial_schema.sql` before any production data existed. The changes they represented:
+- Added webhook_events, usage tracking, indexes (001, 002)
+- Cleaned up deprecated columns (003)
+- Renamed user_id → email in usage_records (004)
+- Added cached column (005)
+- Created SQL views (006)
+- Added usage_daily for O(1) rate limits (007)
+- Renamed tier 'free' → 'basic' (008)
+- Added verification_codes for OTP (009)
 
 ## Rollback
 
-```sql
--- Rollback migration 001
-DROP TABLE IF EXISTS webhook_events;
-DROP INDEX IF EXISTS idx_users_email;
-DROP INDEX IF EXISTS idx_users_stripe_subscription;
-DROP INDEX IF EXISTS idx_users_tier;
-DROP INDEX IF EXISTS idx_users_created_at;
-DROP INDEX IF EXISTS idx_usage_records_user_id;
-DROP INDEX IF EXISTS idx_usage_records_model;
+To reset to a clean state (destroys all data):
+```bash
+wrangler d1 execute captureai-db --file=schema.sql
 ```
-
-See individual migration files for specific rollback instructions.

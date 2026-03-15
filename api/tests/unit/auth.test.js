@@ -178,6 +178,11 @@ const SAMPLE_BASIC_USER = {
   created_at: '2024-01-01T00:00:00.000Z'
 };
 
+const SAMPLE_ACTIVE_BASIC_USER = {
+  ...SAMPLE_BASIC_USER,
+  subscription_status: 'active'
+};
+
 const SAMPLE_PRO_USER = {
   id: 'user-456',
   email: 'pro@example.com',
@@ -496,19 +501,19 @@ describe('AuthHandler', () => {
 
   describe('authenticate', () => {
     test('should return user data for valid Authorization header', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_ACTIVE_BASIC_USER);
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_ACTIVE_BASIC_USER.license_key}` }
       });
       const user = await handler.authenticate(request);
 
       expect(user).toEqual({
-        userId: SAMPLE_BASIC_USER.id,
-        email: SAMPLE_BASIC_USER.email,
+        userId: SAMPLE_ACTIVE_BASIC_USER.id,
+        email: SAMPLE_ACTIVE_BASIC_USER.email,
         tier: 'basic',
-        licenseKey: SAMPLE_BASIC_USER.license_key,
-        subscriptionStatus: 'inactive'
+        licenseKey: SAMPLE_ACTIVE_BASIC_USER.license_key,
+        subscriptionStatus: 'active'
       });
     });
 
@@ -545,7 +550,7 @@ describe('AuthHandler', () => {
       expect(user).toBeNull();
     });
 
-    test('should log security event for pro user with inactive subscription', async () => {
+    test('should log security event for user with non-active subscription', async () => {
       db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_PRO_USER_INACTIVE);
 
       const request = mockRequest({
@@ -554,12 +559,38 @@ describe('AuthHandler', () => {
       await handler.authenticate(request);
 
       expect(logger.security).toHaveBeenCalledWith(
-        'Pro user with inactive subscription attempted access',
+        'User with non-active subscription attempted access',
         expect.objectContaining({
           userId: SAMPLE_PRO_USER_INACTIVE.id,
           subscriptionStatus: 'canceled'
         })
       );
+    });
+
+    test('should clamp past_due user to basic tier regardless of stored tier', async () => {
+      const pastDueProUser = { ...SAMPLE_PRO_USER, subscription_status: 'past_due' };
+      db.setResponse('SELECT * FROM users WHERE license_key', pastDueProUser);
+
+      const request = mockRequest({
+        headers: { Authorization: `LicenseKey ${pastDueProUser.license_key}` }
+      });
+      const user = await handler.authenticate(request);
+
+      expect(user).not.toBeNull();
+      expect(user.tier).toBe('basic');
+      expect(user.subscriptionStatus).toBe('past_due');
+    });
+
+    test('should deny access for any unexpected subscription status', async () => {
+      const unknownStatusUser = { ...SAMPLE_PRO_USER, subscription_status: 'trialing' };
+      db.setResponse('SELECT * FROM users WHERE license_key', unknownStatusUser);
+
+      const request = mockRequest({
+        headers: { Authorization: `LicenseKey ${unknownStatusUser.license_key}` }
+      });
+      const user = await handler.authenticate(request);
+
+      expect(user).toBeNull();
     });
 
     test('should return user data for pro user with active subscription', async () => {

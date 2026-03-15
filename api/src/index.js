@@ -99,10 +99,20 @@ export default {
 
   async scheduled(event, env, ctx) {
     const db = env.DB;
-    ctx.waitUntil(
-      db.prepare('DELETE FROM verification_codes WHERE expires_at < datetime(\'now\') OR used = 1').run()
-        .catch(err => console.error('Verification cleanup failed:', err))
-    );
+    ctx.waitUntil(Promise.all([
+      db.prepare("DELETE FROM verification_codes WHERE expires_at < datetime('now') OR used = 1")
+        .run()
+        .catch(err => console.error('Verification cleanup failed:', err)),
+      db.prepare("DELETE FROM webhook_events WHERE processed_at < datetime('now', '-24 hours')")
+        .run()
+        .catch(err => console.error('Webhook events cleanup failed:', err)),
+      db.prepare("DELETE FROM usage_breakdown WHERE date < DATE('now', '-90 days')")
+        .run()
+        .catch(err => console.error('Usage breakdown cleanup failed:', err)),
+      db.prepare("DELETE FROM usage_daily WHERE date < DATE('now', '-90 days')")
+        .run()
+        .catch(err => console.error('Usage daily cleanup failed:', err)),
+    ]));
   }
 };
 
