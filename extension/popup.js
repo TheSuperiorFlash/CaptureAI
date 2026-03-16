@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusMessage: document.getElementById('status-message'),
     responseSection: document.getElementById('response-section'),
     responseContent: document.getElementById('response-content'),
-    migrationNotice: document.getElementById('migration-notice'),
-    migrationNoticeText: document.getElementById('migration-notice-text'),
     licenseKeySection: document.getElementById('license-key-section'),
     licenseKeyInput: document.getElementById('license-key-input'),
     activateBtn: document.getElementById('activate-btn'),
@@ -36,18 +34,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     privacyGuardToggle: document.getElementById('privacy-guard-toggle'),
     privacyGuardItem: document.getElementById('privacy-guard-item'),
     reasoningLevelItem: document.getElementById('reasoning-level-item'),
-    domainInput: document.getElementById('domain-input'),
-    addDomainBtn: document.getElementById('add-domain-btn'),
+    addCurrentSiteBtn: document.getElementById('add-current-site-btn'),
     domainList: document.getElementById('domain-list'),
     settingsReasoningSlider: document.getElementById('settings-reasoning-slider'),
     settingsReasoningToggleTrack: document.getElementById('settings-reasoning-toggle-track'),
     settingsReasoningToggleSlider: document.getElementById('settings-reasoning-toggle-slider'),
     settingsReasoningToggleProgress: document.getElementById('settings-reasoning-toggle-progress'),
-    ocrToggle: document.getElementById('ocr-toggle'),
     advancedToggle: document.getElementById('advanced-toggle'),
     advancedContent: document.getElementById('advanced-content'),
     advancedArrow: document.getElementById('advanced-arrow'),
-    themeSelector: document.getElementById('theme-selector')
+    themeSelector: document.getElementById('theme-selector'),
+    privacyGuardBanner: document.getElementById('privacy-guard-banner'),
+    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss')
   };
 
   // State variables
@@ -90,16 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.settingsBtn.addEventListener('click', showSettings);
   elements.backToMainBtn.addEventListener('click', showMainView);
 
+  // Banner event listeners
+  elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
-  elements.addDomainBtn.addEventListener('click', addDomain);
-  elements.domainInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addDomain();
-    }
-  });
-  elements.ocrToggle.addEventListener('click', toggleOCR);
+  elements.addCurrentSiteBtn.addEventListener('click', addCurrentSite);
   elements.advancedToggle.addEventListener('click', toggleAdvanced);
   if (elements.themeSelector) {
     elements.themeSelector.addEventListener('change', async (e) => {
@@ -122,18 +116,6 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function initializePopup() {
     try {
-      // Check for migration notice
-      const migrationNotice = await Migration.getMigrationNotice();
-      if (migrationNotice) {
-        elements.migrationNoticeText.textContent = migrationNotice;
-        elements.migrationNotice.classList.remove('hidden');
-        // Clear the notice after showing it
-        setTimeout(() => {
-          Migration.clearMigrationNotice();
-          elements.migrationNotice.classList.add('hidden');
-        }, 10000); // Hide after 10 seconds
-      }
-
       // Load and display custom keybinds
       await updateKeybindsDisplay();
 
@@ -325,6 +307,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       applyTierUI(user.tier);
+
+      // Check if one-time PrivacyGuard banner should be shown
+      await checkPrivacyGuardBanner();
 
       // Get current state from content script
       await updateStateFromContentScript();
@@ -740,18 +725,11 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function applyTheme(themeValue) {
     let isDark = false;
-    let isPilled = false;
 
     if (themeValue === 'dark') {
       isDark = true;
     } else if (themeValue === 'light') {
       isDark = false;
-    } else if (themeValue === 'dark-pilled') {
-      isDark = true;
-      isPilled = true;
-    } else if (themeValue === 'light-pilled') {
-      isDark = false;
-      isPilled = true;
     } else {
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
@@ -760,13 +738,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
-    }
-
-    // Apply pill style based on theme
-    if (isPilled) {
-      document.documentElement.setAttribute('data-pill-style', 'true');
-    } else {
-      document.documentElement.removeAttribute('data-pill-style');
     }
   }
 
@@ -788,19 +759,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.settingsReasoningSlider.value = settings.reasoningLevel;
     updateSettingsReasoningToggleUI(settings.reasoningLevel);
 
-    // OCR toggle (inverted - toggle shows disabled state)
-    if (settings.ocr.disabled) {
-      elements.ocrToggle.classList.add('active');
-    } else {
-      elements.ocrToggle.classList.remove('active');
-    }
-
     // Setup reasoning toggle for settings page
     setupSettingsReasoningToggle();
 
     if (elements.themeSelector) {
       elements.themeSelector.value = settings.theme || 'auto';
     }
+  }
+
+  /**
+   * Show the one-time PrivacyGuard auto-enable banner if applicable.
+   * Only shown while PrivacyGuard is actually active — avoids stale
+   * "PrivacyGuard is now on" messages after it has been disabled.
+   */
+  async function checkPrivacyGuardBanner() {
+    const result = await chrome.storage.local.get([
+      'captureai-privacy-guard-defaulted',
+      'captureai-privacy-guard-notice-seen',
+      'captureai-settings'
+    ]);
+    const savedSettings = result['captureai-settings'] || {};
+    const isPrivacyGuardEnabled = savedSettings.privacyGuard?.enabled === true;
+    const shouldShow = result['captureai-privacy-guard-defaulted'] === true
+      && result['captureai-privacy-guard-notice-seen'] !== true
+      && isPrivacyGuardEnabled;
+
+    elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+  }
+
+  /**
+   * Dismiss the PrivacyGuard auto-enable banner and persist the decision.
+   */
+  async function dismissPrivacyGuardBanner() {
+    await chrome.storage.local.set({ 'captureai-privacy-guard-notice-seen': true });
+    elements.privacyGuardBanner.classList.add('hidden');
   }
 
   /**
@@ -820,42 +812,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save settings
     await saveSettings();
 
-    // Show message
+    // Show banner on the active webpage when enabling
     if (settings.privacyGuard.enabled) {
-      alert('PrivacyGuard enabled. Reload pages for protection to take effect.');
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+          await ensureContentScriptLoaded(tab.id);
+          chrome.tabs.sendMessage(tab.id, { action: 'showPrivacyGuardBanner' })
+            .catch(err => console.warn('CaptureAI: Banner delivery failed:', err));
+        }
+      } catch (bannerError) {
+        console.warn('CaptureAI: Could not send PrivacyGuard banner:', bannerError);
+      }
     }
   }
 
   /**
-   * Add domain to blacklist
+   * Add the current tab's hostname to the blacklist
    */
-  async function addDomain() {
-    const domain = elements.domainInput.value.trim().toLowerCase();
-
-    if (!domain) {
+  async function addCurrentSite() {
+    let hostname;
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.url) {
+        return;
+      }
+      hostname = new URL(tab.url).hostname.toLowerCase();
+    } catch (tabError) {
+      console.warn('CaptureAI: Could not get current tab URL:', tabError);
       return;
     }
 
-    // Basic domain validation
-    const domainPattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
-    if (!domainPattern.test(domain)) {
-      alert('Please enter a valid domain (e.g., example.com)');
+    if (!hostname || hostname.startsWith('chrome') || hostname === 'newtab') {
       return;
     }
 
-    // Check if already in blacklist
-    if (settings.domainBlacklist.includes(domain)) {
-      alert('Domain already in blacklist');
+    if (settings.domainBlacklist.includes(hostname)) {
       return;
     }
 
-    // Add to blacklist
-    settings.domainBlacklist.push(domain);
-
-    // Save and update UI
+    settings.domainBlacklist.push(hostname);
     await saveSettings();
     renderDomainList();
-    elements.domainInput.value = '';
   }
 
   /**
@@ -876,7 +874,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settings.domainBlacklist.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'domain-list-empty';
-      empty.textContent = 'No domains in blacklist';
+      empty.textContent = 'No websites added';
       elements.domainList.appendChild(empty);
       return;
     }
@@ -898,23 +896,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.appendChild(btn);
       elements.domainList.appendChild(item);
     });
-  }
-
-  /**
-   * Toggle OCR on/off (inverted logic - toggle controls disabled state)
-   */
-  async function toggleOCR() {
-    settings.ocr.disabled = !settings.ocr.disabled;
-
-    // Update UI
-    if (settings.ocr.disabled) {
-      elements.ocrToggle.classList.add('active');
-    } else {
-      elements.ocrToggle.classList.remove('active');
-    }
-
-    // Save settings
-    await saveSettings();
   }
 
   /**
@@ -1070,10 +1051,47 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentState.currentResponse = request.message;
       currentState.isError = request.isError || false;
 
-      elements.responseContent.textContent = request.message;
-      elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+      const isDailyLimit = request.isError && request.message.includes('Daily limit reached');
+      const isMinuteLimit = request.isError && request.message.includes('Rate limit reached');
+
+      if (isDailyLimit || isMinuteLimit) {
+        renderRateLimitError(isDailyLimit);
+      } else {
+        elements.responseContent.textContent = request.message;
+        elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+      }
     }
   });
+
+  /**
+   * Render a user-friendly rate limit error in the response area.
+   * For daily limit errors on Basic tier, adds an inline Upgrade CTA.
+   * @param {boolean} isDailyLimit - true for daily limit, false for per-minute
+   */
+  function renderRateLimitError(isDailyLimit) {
+    elements.responseContent.className = 'response-content error';
+    elements.responseContent.textContent = '';
+
+    const msgEl = document.createElement('span');
+
+    if (isDailyLimit) {
+      msgEl.textContent = 'Daily limit reached. Upgrade to Pro for unlimited requests.';
+    } else {
+      msgEl.textContent = 'Rate limit reached. Please wait a moment and try again.';
+    }
+
+    elements.responseContent.appendChild(msgEl);
+
+    // Show upgrade CTA inline for Basic tier users who hit the daily cap
+    const isBasicTier = currentState.user?.tier === 'basic' || currentState.user?.tier === 'Basic';
+    if (isDailyLimit && isBasicTier) {
+      const upgradeBtn = document.createElement('button');
+      upgradeBtn.textContent = 'Upgrade to Pro →';
+      upgradeBtn.className = 'inline-upgrade-btn';
+      upgradeBtn.addEventListener('click', handleUpgrade);
+      elements.responseContent.appendChild(upgradeBtn);
+    }
+  }
 
   /**
    * Listen for storage changes to update tier UI in real time

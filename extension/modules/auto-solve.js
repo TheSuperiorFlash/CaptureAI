@@ -306,9 +306,8 @@ export const AutoSolve = {
       if (challengeContainer) {
         try {
           challengeContainer.focus();
-          console.log('CaptureAI: Focused element:', challengeContainer.className || challengeContainer.tagName);
-        } catch (e) {
-          console.log('CaptureAI: Failed to focus element:', e);
+        } catch (focusError) {
+          console.error('CaptureAI: Failed to focus element:', focusError);
         }
         // Small delay to ensure focus completes
         setTimeout(() => this._simulateKeypressImpl(key, pressEnter), 100);

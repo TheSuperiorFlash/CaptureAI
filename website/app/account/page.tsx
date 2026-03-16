@@ -419,6 +419,18 @@ export default function AccountPage() {
                   </div>
                 </div>
               </div>
+
+              <div className="divider-gradient" />
+
+              <div>
+                <p className="mb-1 text-xs text-[--color-text-tertiary]">Privacy</p>
+                <a
+                  href={`mailto:support@captureai.dev?subject=${encodeURIComponent('Data Export Request')}&body=${encodeURIComponent(`Please export all data associated with my account: ${user.email}`)}`}
+                  className="text-xs text-[--color-text-tertiary] transition-colors hover:text-[--color-text-secondary] underline underline-offset-2"
+                >
+                  Request data export
+                </a>
+              </div>
             </div>
           </div>
 

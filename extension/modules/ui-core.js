@@ -52,30 +52,16 @@ export const UICore = {
     }
 
     let isDark = false;
-    let isPilled = false;
 
     if (themeValue === 'dark') {
       isDark = true;
     } else if (themeValue === 'light') {
       isDark = false;
-    } else if (themeValue === 'dark-pilled') {
-      isDark = true;
-      isPilled = true;
-    } else if (themeValue === 'light-pilled') {
-      isDark = false;
-      isPilled = true;
     } else {
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
     this.updateThemeMode(isDark);
-
-    // Apply pill style based on theme
-    if (isPilled) {
-      document.documentElement.setAttribute('data-pill-style', 'true');
-    } else {
-      document.documentElement.removeAttribute('data-pill-style');
-    }
   },
 
   loadFont() {
@@ -630,6 +616,107 @@ export const UICore = {
         window.CaptureAI.UIStealthyResult.hide();
       }
     }
+  },
+
+  /**
+   * Show a centered 30%-wide banner at the top of the page when PrivacyGuard is enabled.
+   * Auto-dismisses after 8 seconds; can also be dismissed with the X button.
+   */
+  showPrivacyGuardBanner() {
+    const BANNER_ID = 'captureai-pg-banner';
+
+    // Only one banner at a time
+    if (document.getElementById(BANNER_ID)) {
+      return;
+    }
+
+    // Ensure theme CSS vars are available on the page
+    this.injectThemeCSS();
+
+    // Resolve dark mode: use already-detected state, fall back to system preference
+    const isDark = this.isDarkMode !== undefined
+      ? this.isDarkMode
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const banner = document.createElement('div');
+    banner.id = BANNER_ID;
+    if (isDark) {
+      banner.setAttribute('data-theme', 'dark');
+    }
+
+    banner.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+      left: 50% !important;
+      width: 30% !important;
+      z-index: 2147483647 !important;
+      background: var(--color-floating-panel-background, rgba(30,30,30,0.97)) !important;
+      color: var(--color-text-primary-default, #f0f0f0) !important;
+      font-family: var(--font-family-base, system-ui, sans-serif) !important;
+      font-size: 15px !important;
+      padding: 12px 16px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      box-sizing: border-box !important;
+      border-left: 3px solid var(--color-border-brand-default, #06b6d4) !important;
+      border-bottom: 1px solid var(--color-border-subtle-default, rgba(255,255,255,0.12)) !important;
+      border-right: 1px solid var(--color-border-subtle-default, rgba(255,255,255,0.12)) !important;
+      border-radius: 0 0 var(--border-radius-base-lg, 8px) var(--border-radius-base-lg, 8px) !important;
+      box-shadow: var(--shadow-floating-panel, 0 4px 24px rgba(0,0,0,0.4)) !important;
+      backdrop-filter: var(--backdrop-floating-panel, blur(12px)) !important;
+      -webkit-backdrop-filter: var(--backdrop-floating-panel, blur(12px)) !important;
+      transform: translateX(-50%) translateY(-100%) !important;
+      transition: transform 0.25s ease !important;
+      pointer-events: auto !important;
+    `;
+
+    const text = document.createElement('span');
+    text.appendChild(document.createTextNode('✦ PrivacyGuard enabled'));
+    text.appendChild(document.createElement('br'));
+    text.appendChild(document.createTextNode('Reload this page to activate protection.'));
+    text.style.cssText = 'flex: 1 !important; line-height: 1.5 !important;';
+
+    const dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.setAttribute('aria-label', 'Dismiss PrivacyGuard banner');
+    dismiss.title = 'Dismiss PrivacyGuard banner';
+    dismiss.textContent = '✕';
+    dismiss.style.cssText = `
+      background: none !important;
+      border: none !important;
+      color: var(--color-text-tertiary-default, #888) !important;
+      font-size: 15px !important;
+      cursor: pointer !important;
+      padding: 0 !important;
+      margin-left: 16px !important;
+      flex-shrink: 0 !important;
+      line-height: 1 !important;
+      width: 24px !important;
+      height: 24px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    `;
+
+    const removeBanner = () => {
+      banner.style.transform = 'translateX(-50%) translateY(-100%)';
+      setTimeout(() => banner.remove(), 300);
+    };
+
+    dismiss.addEventListener('click', removeBanner);
+    banner.append(text, dismiss);
+    document.body.appendChild(banner);
+
+    // Slide in (two rAF frames to guarantee transition fires after paint)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      });
+    });
+
+    // Auto-dismiss after 8 seconds
+    setTimeout(removeBanner, 8000);
   },
 
   handleAskQuestion(question, attachedImages = []) {

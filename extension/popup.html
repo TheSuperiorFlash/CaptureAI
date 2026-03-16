@@ -36,12 +36,6 @@
                 <div id="status-message" class="status"></div>
             </div>
 
-            <!-- Migration Notice Section -->
-            <div id="migration-notice" class="section hidden migration-notice">
-                <div class="migration-notice-title">Important Update</div>
-                <div id="migration-notice-text" class="migration-notice-text"></div>
-            </div>
-
             <!-- License Key Section -->
             <div id="license-key-section" class="section hidden">
                 <div class="activation-header">
@@ -63,6 +57,18 @@
                 <div id="usage-stats" class="usage-stats">
                     <div class="usage-stats-label">Usage</div>
                     <div id="usage-content"></div>
+                </div>
+
+                <!-- PrivacyGuard auto-enable notice (shown once after first Pro upgrade) -->
+                <div id="privacy-guard-banner" class="privacy-guard-banner hidden">
+                    <button type="button" id="privacy-guard-banner-dismiss" class="privacy-guard-banner-dismiss">✕</button>
+                    <div class="privacy-guard-banner-content">
+                        <span class="privacy-guard-banner-icon">✦</span>
+                        <div class="privacy-guard-banner-text">
+                            <strong>PrivacyGuard is now on</strong>
+                            <p>Keeps your activity private while using the extension — websites won't know when you switch tabs or copy text. Reload open pages to start protection.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="capture-btn" class="button button-primary button-with-icon">
@@ -132,8 +138,6 @@
                             <option value="auto">Automatic (System)</option>
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
-                            <option value="light-pilled">Light (Pilled UI)</option>
-                            <option value="dark-pilled">Dark (Pilled UI)</option>
                         </select>
                     </div>
                 </div>
@@ -145,7 +149,7 @@
                         <div>
                             <div class="settings-item-title">PrivacyGuard</div>
                             <div class="settings-item-description">
-                                Prevents websites from detecting extension usage and tab switching
+                                Prevents websites from detecting when you switch tabs, copy text, or use the extension.
                             </div>
                         </div>
                         <div class="toggle-switch" id="privacy-guard-toggle">
@@ -153,16 +157,15 @@
                         </div>
                     </div>
 
+                    <!-- Shown whenever PrivacyGuard is enabled -->
+
                     <div class="domain-blacklist-section">
-                        <div class="domain-blacklist-label">
-                            Disable on specific websites:
-                        </div>
-                        <div class="domain-input-group">
-                            <input type="text" id="domain-input" placeholder="example.com">
-                            <button id="add-domain-btn">Add</button>
+                        <div class="domain-blacklist-header">
+                            <div class="domain-blacklist-label">Website blacklist:</div>
+                            <button id="add-current-site-btn" class="add-current-site-btn">+ Add website</button>
                         </div>
                         <div id="domain-list">
-                            <div class="domain-list-empty">No domains in blacklist</div>
+                            <div class="domain-list-empty">No websites added</div>
                         </div>
                     </div>
                 </div>
@@ -179,8 +182,7 @@
                     <div id="reasoning-level-item" class="settings-card">
                         <div class="reasoning-level-title">Reasoning Level</div>
                         <div class="reasoning-level-description">
-                            Control how deeply the AI analyzes questions. Higher levels provide better answers but
-                            increase response time
+                            Control how deeply the AI analyzes questions. Higher levels are more thorough but slower to respond.
                         </div>
                         <div class="reasoning-toggle-container reasoning-toggle-wrapper">
                             <input type="range" id="settings-reasoning-slider" min="0" max="2" value="1" step="1">
@@ -193,26 +195,12 @@
                             </div>
                         </div>
                     </div>
-                    <div id="ocr-item" class="settings-card">
-                        <div class="settings-item-header">
-                            <div>
-                                <div class="settings-item-title">Disable OCR Extraction</div>
-                                <div class="settings-item-description">
-                                    Send image data instead of extracting text (not recommended)
-                                </div>
-                            </div>
-                            <div class="toggle-switch" id="ocr-toggle">
-                                <div class="toggle-slider"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="modules/auth-service.js"></script>
-    <script src="modules/migration.js"></script>
     <script src="popup.js"></script>
 </body>
 

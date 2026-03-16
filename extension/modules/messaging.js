@@ -46,6 +46,9 @@ export const Messaging = {
       case 'processCapturedImage':
         return this.handleProcessCapturedImage(request, sendResponse);
 
+      case 'showPrivacyGuardBanner':
+        return this.handleShowPrivacyGuardBanner(sendResponse);
+
       case 'showCapturingMessage':
         return this.handleShowCapturingMessage(sendResponse);
 
@@ -234,6 +237,21 @@ export const Messaging = {
     }
 
     return true; // Keep message channel open for async response
+  },
+
+  /**
+   * Handle show PrivacyGuard enabled banner request
+   * @param {Function} sendResponse - Response callback
+   * @returns {boolean}
+   */
+  handleShowPrivacyGuardBanner(sendResponse) {
+    if (!window.CaptureAI?.UICore?.showPrivacyGuardBanner) {
+      sendResponse({ success: false });
+      return false;
+    }
+    window.CaptureAI.UICore.showPrivacyGuardBanner();
+    sendResponse({ success: true });
+    return false;
   },
 
   /**

@@ -714,6 +714,16 @@ export class SubscriptionHandler {
           await this.handleSubscriptionUpdated(event.data.object);
           break;
         }
+
+        case 'charge.refunded': {
+          await this.handleChargeRefunded(event.data.object);
+          break;
+        }
+
+        case 'charge.dispute.created': {
+          await this.handleDisputeCreated(event.data.object);
+          break;
+        }
       }
 
       return jsonResponse({ received: true });
@@ -812,7 +822,7 @@ export class SubscriptionHandler {
           toTier: purchasedTier,
           fromStatus: prevStatus,
           toStatus: 'active',
-          stripeEventId: session.id,
+          stripeEventId: session.id
         }).catch(err => console.error('Audit log failed:', err));
 
         console.log(`Updated user ${customerEmail} to ${purchasedTier} tier`);
@@ -855,7 +865,7 @@ export class SubscriptionHandler {
           eventType: 'signup',
           toTier: purchasedTier,
           toStatus: 'active',
-          stripeEventId: session.id,
+          stripeEventId: session.id
         }).catch(err => console.error('Audit log failed:', err));
 
         console.log(`Created new ${purchasedTier} user ${customerEmail} with license key`);
@@ -888,7 +898,7 @@ export class SubscriptionHandler {
           email: customerEmail,
           eventType: 'payment_succeeded',
           toStatus: 'active',
-          stripeEventId: invoice.id,
+          stripeEventId: invoice.id
         }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
@@ -916,7 +926,7 @@ export class SubscriptionHandler {
           stripeEventId: invoice.id,
           // billing_reason distinguishes upgrade failures from renewal failures:
           // 'subscription_update' = proration on tier change; 'subscription_cycle' = renewal
-          metadata: invoice.billing_reason ? { billing_reason: invoice.billing_reason } : null,
+          metadata: invoice.billing_reason ? { billing_reason: invoice.billing_reason } : null
         }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
@@ -948,11 +958,115 @@ export class SubscriptionHandler {
           fromTier: user.tier,
           fromStatus: user.subscription_status,
           toStatus: 'cancelled',
-          stripeEventId: subscription.id,
+          stripeEventId: subscription.id
         }).catch(err => console.error('Audit log failed:', err));
       }
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
+    }
+  }
+
+  /**
+   * Handle charge refund — revoke access only for full refunds. Partial refunds
+   * (e.g. goodwill credits) leave the subscription intact.
+   */
+  async handleChargeRefunded(charge) {
+    try {
+      const customerId = charge.customer;
+      if (!customerId) {
+        return;
+      }
+
+      // Only revoke access when the entire charge amount has been refunded.
+      // charge.amount_refunded < charge.amount means a partial refund.
+      if (charge.amount_refunded < charge.amount) {
+        return;
+      }
+
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status, stripe_subscription_id FROM users WHERE stripe_customer_id = ?')
+        .bind(customerId)
+        .first();
+
+      if (!user) {
+        return;
+      }
+
+      await this.db
+        .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE stripe_customer_id = ?")
+        .bind('cancelled', null, null, customerId)
+        .run();
+
+      await this.logSubscriptionEvent({
+        email: user.email,
+        eventType: 'refund',
+        fromTier: user.tier,
+        fromStatus: user.subscription_status,
+        toStatus: 'cancelled',
+        stripeEventId: charge.id,
+        metadata: { amount_refunded: charge.amount_refunded, currency: charge.currency }
+      }).catch(err => console.error('Audit log failed:', err));
+    } catch (error) {
+      console.error('Charge refund handler error:', error);
+    }
+  }
+
+  /**
+   * Handle payment dispute (chargeback) — revoke access immediately and log
+   * the event. Chargebacks are a strong fraud signal and continuing to provide
+   * service during an active dispute creates financial risk.
+   */
+  async handleDisputeCreated(dispute) {
+    try {
+      const chargeId = dispute.charge;
+      if (!chargeId) {
+        return;
+      }
+
+      // Fetch the charge to get the customer ID
+      const chargeResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/charges/${chargeId}`,
+        { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+        5000
+      );
+
+      if (!chargeResponse.ok) {
+        console.error('Dispute handler: failed to fetch charge', chargeId);
+        return;
+      }
+
+      const charge = await chargeResponse.json();
+      const customerId = charge.customer;
+      if (!customerId) {
+        return;
+      }
+
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_customer_id = ?')
+        .bind(customerId)
+        .first();
+
+      if (!user) {
+        return;
+      }
+
+      // Revoke access on chargeback — mirrors the refund handler behaviour.
+      await this.db
+        .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE stripe_customer_id = ?")
+        .bind('cancelled', null, null, customerId)
+        .run();
+
+      await this.logSubscriptionEvent({
+        email: user.email,
+        eventType: 'chargeback',
+        fromTier: user.tier,
+        fromStatus: user.subscription_status,
+        toStatus: 'cancelled',
+        stripeEventId: dispute.id,
+        metadata: { amount: dispute.amount, currency: dispute.currency, reason: dispute.reason }
+      }).catch(err => console.error('Audit log failed:', err));
+    } catch (error) {
+      console.error('Dispute handler error:', error);
     }
   }
 
@@ -991,7 +1105,7 @@ export class SubscriptionHandler {
             fromTier: user.tier,
             fromStatus: user.subscription_status,
             toStatus: subscriptionStatus,
-            stripeEventId: subscription.id,
+            stripeEventId: subscription.id
           }).catch(err => console.error('Audit log failed:', err));
         }
         return;
@@ -1031,7 +1145,7 @@ export class SubscriptionHandler {
           toTier: effectiveTier,
           fromStatus: user.subscription_status,
           toStatus: subscriptionStatus,
-          stripeEventId: subscription.id,
+          stripeEventId: subscription.id
         });
       }
     } catch (error) {
@@ -1165,7 +1279,7 @@ export class SubscriptionHandler {
           fromTier: userData.tier,
           toTier: newTier,
           toStatus: 'active',
-          stripeEventId: userData.stripe_subscription_id,
+          stripeEventId: userData.stripe_subscription_id
         }).catch(err => console.error('Audit log failed:', err));
       }
 
@@ -1533,7 +1647,7 @@ export class SubscriptionHandler {
         fromTier: 'basic',
         toTier: 'pro',
         toStatus: 'active',
-        stripeEventId: subscriptionId,
+        stripeEventId: subscriptionId
       }).catch(err => console.error('Audit log failed:', err));
 
       if (this.logger) {
@@ -1621,7 +1735,7 @@ export class SubscriptionHandler {
           eventType: 'tier_changed',
           toTier: newTier,
           toStatus: 'active',
-          stripeEventId: subscriptionId,
+          stripeEventId: subscriptionId
         }).catch(err => console.error('Audit log failed:', err));
       }
     }
