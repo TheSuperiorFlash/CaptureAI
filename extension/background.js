@@ -17,14 +17,14 @@
  */
 
 // ============================================================================
-// SECTION 0: MODULE IMPORTS & MIGRATION
+// SECTION 0: MODULE IMPORTS
 // ============================================================================
 
 /**
- * Import auth service and migration modules (License Key System)
- * Note: These modules are loaded dynamically in service worker environment
+ * Import auth service (License Key System)
+ * Note: This module is loaded dynamically in service worker environment
  */
-importScripts('modules/auth-service.js', 'modules/migration.js');
+importScripts('modules/auth-service.js');
 
 // ============================================================================
 // SECTION 1: CONSTANTS & CONFIGURATION
@@ -282,20 +282,11 @@ if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
 }
 
 /**
- * Create context menu on extension installation and run migration
+ * Create context menu on extension installation
  * Only runs in browser environment (not in tests)
  */
 if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
-  chrome.runtime.onInstalled.addListener(async () => {
-    // Run migration from API key to backend authentication
-    if (typeof Migration !== 'undefined') {
-      try {
-        await Migration.runMigration();
-      } catch (error) {
-        console.error('Migration error:', error);
-      }
-    }
-
+  chrome.runtime.onInstalled.addListener(() => {
     // Create context menu
     chrome.contextMenus.create({
       id: 'captureai-ask-text',

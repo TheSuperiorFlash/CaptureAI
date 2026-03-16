@@ -93,7 +93,6 @@
                 "modules/event-manager.js",
                 "modules/privacy-guard.js",
                 "modules/auth-service.js",
-                "modules/migration.js",
                 "libs/tesseract/tesseract.min.js",
                 "libs/tesseract/worker.min.js",
                 "libs/tesseract/lang-data/eng.traineddata.gz"
