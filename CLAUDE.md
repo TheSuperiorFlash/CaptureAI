@@ -80,6 +80,7 @@ captureai-privacy-guard-defaulted  # Auto-enable flag on first Pro upgrade
 captureai-privacy-guard-notice-seen   # True once user dismisses the auto-enable banner
 captureai-backend-url          # Backend URL (default: https://api.captureai.workers.dev)
 captureai-api-key              # Legacy API key (deprecated, kept for reference only)
+captureai-web-session-ts       # Timestamp of last successful /api/auth/me validation (ISO string)
 ```
 
 ## Coding Standards

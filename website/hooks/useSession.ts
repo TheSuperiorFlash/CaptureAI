@@ -5,6 +5,8 @@ import { API_BASE_URL } from '@/lib/api'
 
 const SESSION_KEY = 'captureai-web-session'
 const USER_KEY = 'captureai-web-user'
+const SESSION_TS_KEY = 'captureai-web-session-ts'
+const REVALIDATION_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 hours
 
 export interface SessionUser {
   email: string
@@ -41,10 +43,22 @@ export function useSession() {
         mode: 'cors',
       })
       if (!res.ok) {
-        // Invalid key — clear session
-        localStorage.removeItem(SESSION_KEY)
-        localStorage.removeItem(USER_KEY)
-        setState({ licenseKey: null, user: null, isLoading: false, isAuthenticated: false })
+        if (res.status === 401 || res.status === 404) {
+          // Definitive auth failure — clear session
+          localStorage.removeItem(SESSION_KEY)
+          localStorage.removeItem(USER_KEY)
+          localStorage.removeItem(SESSION_TS_KEY)
+          setState({ licenseKey: null, user: null, isLoading: false, isAuthenticated: false })
+        } else {
+          // Transient error (5xx, 429, etc.) — fall back to cached user
+          const cached = localStorage.getItem(USER_KEY)
+          if (cached) {
+            const user = JSON.parse(cached) as SessionUser
+            setState({ licenseKey: key, user, isLoading: false, isAuthenticated: true })
+          } else {
+            setState({ licenseKey: key, user: null, isLoading: false, isAuthenticated: true })
+          }
+        }
         return
       }
       const data = await res.json()
@@ -55,6 +69,7 @@ export function useSession() {
         createdAt: data.createdAt,
       }
       localStorage.setItem(USER_KEY, JSON.stringify(user))
+      localStorage.setItem(SESSION_TS_KEY, new Date().toISOString())
       setState({ licenseKey: key, user, isLoading: false, isAuthenticated: true })
     } catch {
       // Network error — use cached user if available
@@ -83,8 +98,11 @@ export function useSession() {
       setState({ licenseKey: key, user, isLoading: false, isAuthenticated: true })
     }
 
-    // Fetch fresh data (once)
-    if (!didFetch.current) {
+    // Skip API call if last validation was within the cooldown window
+    const lastTs = localStorage.getItem(SESSION_TS_KEY)
+    const isRecent = lastTs && Date.now() - new Date(lastTs).getTime() < REVALIDATION_INTERVAL_MS
+
+    if (!isRecent && !didFetch.current) {
       didFetch.current = true
       fetchUser(key)
     }
@@ -93,12 +111,14 @@ export function useSession() {
   const login = useCallback((licenseKey: string, user: SessionUser) => {
     localStorage.setItem(SESSION_KEY, licenseKey)
     localStorage.setItem(USER_KEY, JSON.stringify(user))
+    localStorage.setItem(SESSION_TS_KEY, new Date().toISOString())
     setState({ licenseKey, user, isLoading: false, isAuthenticated: true })
   }, [])
 
   const logout = useCallback(() => {
     localStorage.removeItem(SESSION_KEY)
     localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(SESSION_TS_KEY)
     setState({ licenseKey: null, user: null, isLoading: false, isAuthenticated: false })
   }, [])
 
