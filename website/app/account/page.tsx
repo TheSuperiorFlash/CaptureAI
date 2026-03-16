@@ -371,6 +371,65 @@ export default function AccountPage() {
                 </Link>
               </div>
             </div>
+
+            {/* Vertical divider 2 (desktop) */}
+            <div
+              className="hidden h-28 w-px shrink-0 md:block"
+              style={{
+                background:
+                  'linear-gradient(to bottom, transparent, rgba(255,255,255,0.07) 30%, rgba(255,255,255,0.07) 70%, transparent)',
+              }}
+            />
+
+            {/* Horizontal divider 2 (mobile) */}
+            <div
+              className="h-px w-full md:hidden"
+              style={{
+                background:
+                  'linear-gradient(to right, transparent, rgba(255,255,255,0.07) 30%, rgba(255,255,255,0.07) 70%, transparent)',
+              }}
+            />
+
+            {/* Current Perks */}
+            <div className="flex flex-1 flex-col justify-center gap-3">
+              <h3 className="text-sm font-semibold text-white">Your Plan Features</h3>
+              {isPro ? (
+                <ul className="space-y-2 text-[13px] text-[--color-text-secondary]">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-cyan-400" /> 
+                    <span>Unlimited total usage</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-cyan-400" /> 
+                    <span>Up to 20 requests/minute</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-cyan-400" /> 
+                    <span>Advanced AI models</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-cyan-400" /> 
+                    <span>Privacy Guard included</span>
+                  </li>
+                </ul>
+              ) : (
+                <ul className="space-y-2 text-[13px] text-[--color-text-secondary]">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-blue-400" /> 
+                    <span>50 requests per day</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="h-3.5 w-3.5 text-blue-400" /> 
+                    <span>Standard response time</span>
+                  </li>
+                  <li className="flex items-center gap-2.5 mt-3 pt-2">
+                    <Link href="/activate" className="inline-flex w-fit items-center gap-1 text-[13px] font-medium text-cyan-400 transition-colors hover:text-cyan-300">
+                      Upgrade to Pro <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </li>
+                </ul>
+              )}
+            </div>
           </div>
             </div>
           </div>
