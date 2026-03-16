@@ -119,7 +119,7 @@ export default function Navbar() {
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
-        { name: 'Account', href: '/account' },
+        { name: 'Help', href: '/help' },
     ]
 
     const isActive = (href: string) => {
@@ -147,6 +147,12 @@ export default function Navbar() {
                 window.history.pushState(null, '', '/')
                 setActiveHash('')
             }
+        } else if (href === '/download' || href === '/help') {
+            e.preventDefault()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            setTimeout(() => {
+                window.location.href = href
+            }, 100)
         }
     }
 

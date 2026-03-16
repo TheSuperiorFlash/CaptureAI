@@ -295,8 +295,6 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 | `app/contact/page.tsx` | Contact cards (Support email + Feedback email) |
 | `app/privacy/page.tsx` | Privacy Policy (legal page, minimal styling) |
 | `app/terms/page.tsx` | Terms of Service (legal page, minimal styling) |
-| `app/account/login/page.tsx` | Email + 6-digit OTP login (two-step form with ScrollReveal staggered entrance) |
-| `app/account/page.tsx` | Account dashboard: masonry grid layout with glass cards for subscription, usage, billing portal, account details |
 | `app/payment-success/page.tsx` | Post-payment verification with retry logic (max 5 retries, exponential backoff) |
 | `app/error.tsx` | Error boundary page |
 | `app/not-found.tsx` | 404 page |
@@ -308,7 +306,6 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 
 | File | Purpose |
 |---|---|
-| `hooks/useSession.ts` | Website auth session hook (localStorage-based, license key as token) |
 | `hooks/useSwipeTier.ts` | Mobile swipe gesture hook for Basic/Pro tier card switching (40px threshold) |
 | `lib/constants.ts` | `SITE_URL` = `https://captureai.dev` |
 | `lib/api.ts` | `API_BASE_URL` from `NEXT_PUBLIC_API_URL` env or `https://api.captureai.workers.dev` |

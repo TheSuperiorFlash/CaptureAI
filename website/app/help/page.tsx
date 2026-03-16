@@ -30,7 +30,7 @@ const FAQ_ITEMS: QaItem[] = [
     },
     {
         q: 'How do I cancel my subscription?',
-        a: <>Log in to your <Link href="/account" className={INLINE_LINK_CLASS}>account dashboard</Link> and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal, where you can cancel anytime. Your access continues until the end of the billing period.</>,
+        a: <>Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.</>,
     },
     {
         q: 'What is Privacy Guard?',
@@ -69,7 +69,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     },
     {
         q: 'My license key says "Invalid or expired"',
-        a: <>Your subscription may have lapsed due to a failed payment. Log in to your <Link href="/account" className={INLINE_LINK_CLASS}>account dashboard</Link> to check your subscription status and update your payment method.</>,
+        a: <>Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can check your subscription status and update your payment method.</>,
     },
 ];
 

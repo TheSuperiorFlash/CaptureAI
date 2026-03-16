@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     usageSection: document.getElementById('usage-stats'),
     usageContent: document.getElementById('usage-content'),
     upgradeBtn: document.getElementById('upgrade-btn'),
+    manageBillingBtn: document.getElementById('manage-billing-btn'),
     logoutBtn: document.getElementById('logout-btn'),
     captureBtn: document.getElementById('capture-btn'),
     quickCaptureBtn: document.getElementById('quick-capture-btn'),
@@ -79,6 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.activateBtn.addEventListener('click', handleActivate);
   elements.logoutBtn.addEventListener('click', handleDeactivate);
   elements.upgradeBtn.addEventListener('click', handleUpgrade);
+  elements.manageBillingBtn.addEventListener('click', handleManageBilling);
 
   // Main control event listeners
   elements.captureBtn.addEventListener('click', startCapture);
@@ -247,6 +249,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       showResponseMessage(error.message || 'Failed to start upgrade', 'error');
       elements.upgradeBtn.disabled = false;
       elements.upgradeBtn.textContent = 'Upgrade to Pro';
+    }
+  }
+
+  /**
+   * Handle manage billing button click
+   */
+  async function handleManageBilling() {
+    try {
+      const data = await AuthService.getPortalUrl();
+      chrome.tabs.create({ url: data.url });
+    } catch (err) {
+      console.error('Failed to open billing portal:', err);
+      showResponseMessage('Failed to open billing portal', 'error');
     }
   }
 

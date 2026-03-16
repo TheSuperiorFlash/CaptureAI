@@ -630,6 +630,36 @@ body {
     transform: scale(0.96);
 }
 
+.settings-header #upgrade-btn {
+    margin-left: auto;
+    margin-top: 2px;
+    padding: 4px 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+#manage-billing-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-primary-default);
+    font-size: 11px;
+    padding: 3px 6px 3px 10px;
+    border-radius: var(--border-radius-button-pill);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#manage-billing-btn:hover {
+    color: #218aff;
+}
+
+#manage-billing-btn:active {
+    transform: scale(0.96);
+}
+
 .settings-button-container {
     margin-top: 12px;
 }
@@ -666,6 +696,7 @@ body {
 .settings-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
     margin-bottom: 20px;
 }
