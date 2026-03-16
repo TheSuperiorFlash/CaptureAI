@@ -672,11 +672,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.mainView.classList.add('hidden');
     elements.settingsView.classList.remove('hidden');
 
-    // Ensure upgrade button is in correct state for current tier
-    if (currentState.user) {
-      applyTierUI(currentState.user.tier);
-    }
-
     // Load settings
     await loadSettings();
   }
