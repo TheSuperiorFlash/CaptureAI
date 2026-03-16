@@ -34,18 +34,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     privacyGuardToggle: document.getElementById('privacy-guard-toggle'),
     privacyGuardItem: document.getElementById('privacy-guard-item'),
     reasoningLevelItem: document.getElementById('reasoning-level-item'),
-    domainInput: document.getElementById('domain-input'),
-    addDomainBtn: document.getElementById('add-domain-btn'),
+    addCurrentSiteBtn: document.getElementById('add-current-site-btn'),
     domainList: document.getElementById('domain-list'),
     settingsReasoningSlider: document.getElementById('settings-reasoning-slider'),
     settingsReasoningToggleTrack: document.getElementById('settings-reasoning-toggle-track'),
     settingsReasoningToggleSlider: document.getElementById('settings-reasoning-toggle-slider'),
     settingsReasoningToggleProgress: document.getElementById('settings-reasoning-toggle-progress'),
-    ocrToggle: document.getElementById('ocr-toggle'),
     advancedToggle: document.getElementById('advanced-toggle'),
     advancedContent: document.getElementById('advanced-content'),
     advancedArrow: document.getElementById('advanced-arrow'),
-    themeSelector: document.getElementById('theme-selector')
+    themeSelector: document.getElementById('theme-selector'),
+    privacyGuardBanner: document.getElementById('privacy-guard-banner'),
+    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss')
   };
 
   // State variables
@@ -88,16 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.settingsBtn.addEventListener('click', showSettings);
   elements.backToMainBtn.addEventListener('click', showMainView);
 
+  // Banner event listeners
+  elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
-  elements.addDomainBtn.addEventListener('click', addDomain);
-  elements.domainInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addDomain();
-    }
-  });
-  elements.ocrToggle.addEventListener('click', toggleOCR);
+  elements.addCurrentSiteBtn.addEventListener('click', addCurrentSite);
   elements.advancedToggle.addEventListener('click', toggleAdvanced);
   if (elements.themeSelector) {
     elements.themeSelector.addEventListener('change', async (e) => {
@@ -311,6 +307,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       applyTierUI(user.tier);
+
+      // Check if one-time PrivacyGuard banner should be shown
+      await checkPrivacyGuardBanner();
 
       // Get current state from content script
       await updateStateFromContentScript();
@@ -774,19 +773,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.settingsReasoningSlider.value = settings.reasoningLevel;
     updateSettingsReasoningToggleUI(settings.reasoningLevel);
 
-    // OCR toggle (inverted - toggle shows disabled state)
-    if (settings.ocr.disabled) {
-      elements.ocrToggle.classList.add('active');
-    } else {
-      elements.ocrToggle.classList.remove('active');
-    }
-
     // Setup reasoning toggle for settings page
     setupSettingsReasoningToggle();
 
     if (elements.themeSelector) {
       elements.themeSelector.value = settings.theme || 'auto';
     }
+  }
+
+  /**
+   * Show the one-time PrivacyGuard auto-enable banner if applicable.
+   */
+  async function checkPrivacyGuardBanner() {
+    const result = await chrome.storage.local.get([
+      'captureai-privacy-guard-defaulted',
+      'captureai-privacy-guard-notice-seen'
+    ]);
+    const shouldShow = result['captureai-privacy-guard-defaulted'] === true
+      && result['captureai-privacy-guard-notice-seen'] !== true;
+
+    elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+  }
+
+  /**
+   * Dismiss the PrivacyGuard auto-enable banner and persist the decision.
+   */
+  async function dismissPrivacyGuardBanner() {
+    await chrome.storage.local.set({ 'captureai-privacy-guard-notice-seen': true });
+    elements.privacyGuardBanner.classList.add('hidden');
   }
 
   /**
@@ -806,42 +820,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save settings
     await saveSettings();
 
-    // Show message
+    // Show banner on the active webpage when enabling
     if (settings.privacyGuard.enabled) {
-      alert('PrivacyGuard enabled. Reload pages for protection to take effect.');
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+          await ensureContentScriptLoaded(tab.id);
+          chrome.tabs.sendMessage(tab.id, { action: 'showPrivacyGuardBanner' }).catch(() => {});
+        }
+      } catch (_error) {
+        // Silent — banner is the sole notification for this toggle
+      }
     }
   }
 
   /**
-   * Add domain to blacklist
+   * Add the current tab's hostname to the blacklist
    */
-  async function addDomain() {
-    const domain = elements.domainInput.value.trim().toLowerCase();
-
-    if (!domain) {
+  async function addCurrentSite() {
+    let hostname;
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.url) return;
+      hostname = new URL(tab.url).hostname.toLowerCase();
+    } catch (_error) {
       return;
     }
 
-    // Basic domain validation
-    const domainPattern = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
-    if (!domainPattern.test(domain)) {
-      alert('Please enter a valid domain (e.g., example.com)');
-      return;
-    }
+    if (!hostname || hostname.startsWith('chrome') || hostname === 'newtab') return;
 
-    // Check if already in blacklist
-    if (settings.domainBlacklist.includes(domain)) {
-      alert('Domain already in blacklist');
-      return;
-    }
+    if (settings.domainBlacklist.includes(hostname)) return;
 
-    // Add to blacklist
-    settings.domainBlacklist.push(domain);
-
-    // Save and update UI
+    settings.domainBlacklist.push(hostname);
     await saveSettings();
     renderDomainList();
-    elements.domainInput.value = '';
   }
 
   /**
@@ -862,7 +874,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settings.domainBlacklist.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'domain-list-empty';
-      empty.textContent = 'No domains in blacklist';
+      empty.textContent = 'No websites added';
       elements.domainList.appendChild(empty);
       return;
     }
@@ -884,23 +896,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.appendChild(btn);
       elements.domainList.appendChild(item);
     });
-  }
-
-  /**
-   * Toggle OCR on/off (inverted logic - toggle controls disabled state)
-   */
-  async function toggleOCR() {
-    settings.ocr.disabled = !settings.ocr.disabled;
-
-    // Update UI
-    if (settings.ocr.disabled) {
-      elements.ocrToggle.classList.add('active');
-    } else {
-      elements.ocrToggle.classList.remove('active');
-    }
-
-    // Save settings
-    await saveSettings();
   }
 
   /**

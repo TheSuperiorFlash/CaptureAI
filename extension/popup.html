@@ -59,6 +59,18 @@
                     <div id="usage-content"></div>
                 </div>
 
+                <!-- PrivacyGuard auto-enable notice (shown once after first Pro upgrade) -->
+                <div id="privacy-guard-banner" class="privacy-guard-banner hidden">
+                    <button id="privacy-guard-banner-dismiss" class="privacy-guard-banner-dismiss">✕</button>
+                    <div class="privacy-guard-banner-content">
+                        <span class="privacy-guard-banner-icon">✦</span>
+                        <div class="privacy-guard-banner-text">
+                            <strong>PrivacyGuard is now on</strong>
+                            <p>Keeps your activity private while using the extension — websites won't know when you switch tabs or copy text. Reload open pages to start protection.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <button id="capture-btn" class="button button-primary button-with-icon">
                     <img src="icons/camera.png" alt="Camera" class="button-icon">
                     Capture a Question
@@ -139,7 +151,7 @@
                         <div>
                             <div class="settings-item-title">PrivacyGuard</div>
                             <div class="settings-item-description">
-                                Prevents websites from detecting extension usage and tab switching
+                                Prevents websites from detecting when you switch tabs, copy text, or use the extension.
                             </div>
                         </div>
                         <div class="toggle-switch" id="privacy-guard-toggle">
@@ -147,16 +159,15 @@
                         </div>
                     </div>
 
+                    <!-- Shown whenever PrivacyGuard is enabled -->
+
                     <div class="domain-blacklist-section">
-                        <div class="domain-blacklist-label">
-                            Disable on specific websites:
-                        </div>
-                        <div class="domain-input-group">
-                            <input type="text" id="domain-input" placeholder="example.com">
-                            <button id="add-domain-btn">Add</button>
+                        <div class="domain-blacklist-header">
+                            <div class="domain-blacklist-label">Website blacklist:</div>
+                            <button id="add-current-site-btn" class="add-current-site-btn">+ Add website</button>
                         </div>
                         <div id="domain-list">
-                            <div class="domain-list-empty">No domains in blacklist</div>
+                            <div class="domain-list-empty">No websites added</div>
                         </div>
                     </div>
                 </div>
@@ -184,19 +195,6 @@
                                 <span class="reasoning-label reasoning-label-low">Low</span>
                                 <span class="reasoning-label reasoning-label-medium">Medium</span>
                                 <span class="reasoning-label reasoning-label-high">High</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="ocr-item" class="settings-card">
-                        <div class="settings-item-header">
-                            <div>
-                                <div class="settings-item-title">Disable OCR Extraction</div>
-                                <div class="settings-item-description">
-                                    Send image data instead of extracting text (not recommended)
-                                </div>
-                            </div>
-                            <div class="toggle-switch" id="ocr-toggle">
-                                <div class="toggle-slider"></div>
                             </div>
                         </div>
                     </div>

@@ -750,63 +750,48 @@ body {
 
 .domain-blacklist-section {
     border-top: var(--space-size-base-1) solid var(--color-border-subtle-default);
-    padding-top: var(--space-size-base-12);
-    margin-top: var(--space-size-base-12);
+    padding-top: var(--space-size-base-8);
+    margin-top: var(--space-size-base-8);
+}
+
+.domain-blacklist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-size-base-10);
 }
 
 .domain-blacklist-label {
     font-size: var(--font-size-base-11);
     color: var(--color-text-secondary-default);
     line-height: 1.3;
-    margin-bottom: var(--space-size-base-10);
+    white-space: nowrap;
 }
 
-.domain-input-group {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
-}
-
-#domain-input {
-    flex: 1;
-    padding: var(--space-size-base-8) var(--space-size-base-12);
-    border: var(--space-size-base-1) solid var(--color-input-border);
+.add-current-site-btn {
+    padding: 3px 6px;
+    background-color: var(--color-button-secondary-background);
+    color: var(--color-button-secondary-text);
+    border: var(--space-size-base-1) solid var(--color-button-secondary-border);
     border-radius: var(--border-radius-button-pill);
-    font-size: var(--font-size-base-12);
-    color: var(--color-input-text);
-    background-color: var(--color-input-background);
-    outline: none;
-}
-
-#domain-input:focus {
-    border-color: var(--color-input-focus-border);
-    background-color: var(--color-input-focus-background);
-}
-
-#add-domain-btn {
-    padding: var(--space-size-base-8) var(--space-size-base-16);
-    background-color: var(--color-button-primary-background);
-    color: var(--color-button-primary-text);
-    border: none;
-    border-radius: var(--border-radius-button-pill);
-    font-size: var(--font-size-base-12);
+    font-size: var(--font-size-base-11);
     font-weight: var(--font-weight-base-medium);
     cursor: pointer;
-    box-shadow: var(--shadow-button-primary);
     transition: background-color 0.2s, transform 0.1s;
 }
 
-#add-domain-btn:hover {
-    background-color: var(--color-button-primary-hover);
+.add-current-site-btn:hover {
+    background-color: var(--color-button-secondary-hover);
 }
 
-#add-domain-btn:active {
+.add-current-site-btn:active {
     transform: scale(0.96);
 }
 
 #domain-list {
-    max-height: 150px;
+    max-height: 85px;
     overflow-y: auto;
+    padding-right: 4px;
 }
 
 #domain-list::-webkit-scrollbar {
@@ -819,7 +804,7 @@ body {
 }
 
 #domain-list::-webkit-scrollbar-thumb {
-    background: var(--color-surface-neutral-default);
+    background: var(--color-base-gray-500);
     border-radius: 3px;
 }
 
@@ -1040,6 +1025,69 @@ body {
     pointer-events: none;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     letter-spacing: 0.5px;
+}
+
+/* PrivacyGuard Banner */
+.privacy-guard-banner {
+    border-left: 3px solid #218aff;
+    background-color: var(--color-button-secondary-background);
+    border-radius: var(--border-radius-base-sm);
+    padding: 10px 12px 8px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.privacy-guard-banner-content {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.privacy-guard-banner-icon {
+    color: #218aff;
+    font-size: 14px;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+
+.privacy-guard-banner-text strong {
+    display: block;
+    color: var(--color-text-primary-default);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.privacy-guard-banner-text p {
+    color: var(--color-text-secondary-default);
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.privacy-guard-banner-dismiss {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary-default);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.privacy-guard-banner-dismiss:hover {
+    color: var(--color-text-primary-default);
+}
+
+/* PrivacyGuard active status note in settings */
+.privacy-guard-active-note {
+    font-size: 11px;
+    color: var(--color-text-secondary-default);
+    padding: 6px 0 2px;
+    line-height: 1.5;
 }
 
 #settings-view.basic-tier-view .advanced-toggle {

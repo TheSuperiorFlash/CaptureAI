@@ -286,7 +286,7 @@ if (typeof chrome !== 'undefined' && chrome.commands?.onCommand) {
  * Only runs in browser environment (not in tests)
  */
 if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
-  chrome.runtime.onInstalled.addListener(() => {
+  chrome.runtime.onInstalled.addListener(async () => {
     // Create context menu
     chrome.contextMenus.create({
       id: 'captureai-ask-text',
@@ -300,6 +300,12 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
     // Set up periodic user cache refresh and refresh immediately
     chrome.alarms.create('captureai-refresh-user-cache', { periodInMinutes: 30 });
     AuthService.refreshUserCache();
+
+    // Auto-enable PrivacyGuard for existing Pro users on extension update
+    const result = await chrome.storage.local.get('captureai-user-tier');
+    if (result['captureai-user-tier'] === 'pro') {
+      applyPrivacyGuardDefault();
+    }
   });
 }
 
