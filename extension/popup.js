@@ -11,9 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusMessage: document.getElementById('status-message'),
     responseSection: document.getElementById('response-section'),
     responseContent: document.getElementById('response-content'),
-    migrationNotice: document.getElementById('migration-notice'),
-    migrationNoticeText: document.getElementById('migration-notice-text'),
-    migrationDismissBtn: document.getElementById('migration-dismiss-btn'),
     licenseKeySection: document.getElementById('license-key-section'),
     licenseKeyInput: document.getElementById('license-key-input'),
     activateBtn: document.getElementById('activate-btn'),
@@ -123,24 +120,6 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function initializePopup() {
     try {
-      // Check for migration notice
-      const migrationNotice = await Migration.getMigrationNotice();
-      if (migrationNotice) {
-        elements.migrationNoticeText.textContent = migrationNotice;
-        elements.migrationNotice.classList.remove('hidden');
-
-        const dismissMigrationNotice = () => {
-          Migration.clearMigrationNotice();
-          elements.migrationNotice.classList.add('hidden');
-        };
-
-        // Allow manual dismiss
-        elements.migrationDismissBtn.addEventListener('click', dismissMigrationNotice, { once: true });
-
-        // Auto-dismiss after 30 seconds as a fallback
-        setTimeout(dismissMigrationNotice, 30000);
-      }
-
       // Load and display custom keybinds
       await updateKeybindsDisplay();
 

@@ -24,23 +24,6 @@ const Migration = {
 
     console.log('[Migration] Starting migration to license key system...');
 
-    // Check if user had an API key or old auth token stored
-    const oldData = await chrome.storage.local.get([
-      'captureai-api-key',
-      'captureai-auth-token'
-    ]);
-
-    const hadOldAuth = !!(oldData['captureai-api-key'] || oldData['captureai-auth-token']);
-
-    if (hadOldAuth) {
-      console.log('[Migration] Found old authentication, setting migration notice...');
-
-      // Set a notice for the user
-      await chrome.storage.local.set({
-        'captureai-migration-notice': 'CaptureAI now uses license keys! Get your free license key to continue using the extension.'
-      });
-    }
-
     // Remove old authentication data (keep user-tier to avoid downgrading Pro users)
     await chrome.storage.local.remove([
       'captureai-api-key',
@@ -66,23 +49,6 @@ const Migration = {
     console.log('[Migration] Migration completed successfully');
     return true;
   },
-
-  /**
-   * Check if migration notice needs to be shown
-   * @returns {Promise<string|null>} Migration notice or null
-   */
-  async getMigrationNotice() {
-    const result = await chrome.storage.local.get('captureai-migration-notice');
-    return result['captureai-migration-notice'] || null;
-  },
-
-  /**
-   * Clear migration notice (after user has seen it)
-   * @returns {Promise<void>}
-   */
-  async clearMigrationNotice() {
-    await chrome.storage.local.remove('captureai-migration-notice');
-  }
 
 };
 

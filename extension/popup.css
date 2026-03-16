@@ -457,43 +457,6 @@ body {
     padding: 0;
 }
 
-.migration-notice {
-    background-color: var(--color-surface-warning-default);
-    border: var(--space-size-base-1) solid var(--color-border-warning-default);
-    border-radius: var(--border-radius-base-lg);
-    margin: var(--space-size-base-10) var(--space-size-base-15);
-    padding: var(--space-size-base-15);
-}
-
-.migration-notice-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-size-base-10);
-}
-
-.migration-notice-title {
-    font-size: var(--font-size-base-14);
-    color: var(--color-text-warning-default);
-    font-weight: var(--font-weight-base-medium);
-}
-
-.migration-dismiss-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-warning-default);
-    font-size: var(--font-size-base-12);
-    padding: 0;
-    line-height: 1;
-    opacity: 0.7;
-}
-
-.migration-notice-text {
-    font-size: var(--font-size-base-12);
-    color: var(--color-text-warning-default);
-    line-height: 1.4;
-}
 
 .activation-header {
     text-align: center;
