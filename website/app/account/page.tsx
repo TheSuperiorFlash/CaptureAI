@@ -52,7 +52,7 @@ function UsageRing({
 }) {
   const size = 140
   const strokeWidth = 8
-  const radius = (size - strokeWidth * 2) / 2
+  const radius = (size - strokeWidth * 2) / 2 - 6
   const circumference = 2 * Math.PI * radius
   const pct = limit !== null ? Math.min(percentage ?? 0, 100) : (used > 0 ? 100 : 0)
   const dashOffset = circumference - (pct / 100) * circumference
@@ -63,7 +63,7 @@ function UsageRing({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        className="-rotate-90"
+        className="-rotate-90 overflow-visible"
         aria-hidden="true"
       >
         <defs>
