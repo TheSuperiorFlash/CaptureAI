@@ -7,6 +7,85 @@ export const metadata: Metadata = {
     description: 'Learn how to use CaptureAI. Guides, keyboard shortcuts, and FAQ.',
 }
 
+const INLINE_LINK_CLASS = 'text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300';
+
+type QaItem = { q: string; a: React.ReactNode };
+
+const FAQ_ITEMS: QaItem[] = [
+    {
+        q: 'How do I get a license key?',
+        a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link> and enter your email. You&apos;ll receive a key via email after completing checkout.</>,
+    },
+    {
+        q: 'What\'s the difference between Basic and Pro?',
+        a: 'Basic gives you 50 AI requests per day for $1.49/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
+    },
+    {
+        q: 'Which browser is supported?',
+        a: 'CaptureAI works exclusively on Google Chrome (desktop). It uses Chrome-specific extension APIs that are not available in Firefox, Safari, or Edge.',
+    },
+    {
+        q: 'How do I upgrade to Pro?',
+        a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll see a prorated amount so you only pay for the remaining time.</>,
+    },
+    {
+        q: 'How do I cancel my subscription?',
+        a: <>Log in to your <Link href="/account" className={INLINE_LINK_CLASS}>account dashboard</Link> and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal, where you can cancel anytime. Your access continues until the end of the billing period.</>,
+    },
+    {
+        q: 'What is Privacy Guard?',
+        a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension. It overrides browser focus and visibility APIs at the page level.',
+    },
+    {
+        q: 'Are my screenshots stored on your servers?',
+        a: 'No. Screenshots are never stored on our servers. Text is extracted locally in your browser using Tesseract.js OCR. Only the extracted text (or image if OCR confidence is too low) is sent to the AI for analysis.',
+    },
+    {
+        q: 'Do you offer refunds?',
+        a: <>Refunds are considered on a case-by-case basis within 7 days of purchase. Email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your order details.</>,
+    },
+];
+
+const TROUBLESHOOTING_ITEMS: QaItem[] = [
+    {
+        q: 'The floating button isn\'t appearing on the page',
+        a: 'Refresh the page after installing the extension. On some sites the content script loads after the page — pressing Ctrl+Shift+E will force the UI to appear. If it still doesn\'t show, check that the extension is enabled at chrome://extensions.',
+    },
+    {
+        q: 'I paid but never received my license key',
+        a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your receipt.</>,
+    },
+    {
+        q: 'The AI is giving wrong or irrelevant answers',
+        a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing. If OCR is misreading text, open Settings in the popup and enable "Disable OCR Extraction" to send the image directly instead.',
+    },
+    {
+        q: 'It says "Daily limit reached"',
+        a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, <Link href="/activate" className={INLINE_LINK_CLASS}>upgrade to Pro</Link>.</>,
+    },
+    {
+        q: 'The extension doesn\'t work on a specific site',
+        a: 'Some sites use strict Content Security Policies that can interfere with extensions. CaptureAI cannot run on internal Chrome pages (chrome://, edge://) or the Chrome Web Store. For exam platforms, make sure Privacy Guard is enabled (Pro) if the site blocks extension activity.',
+    },
+    {
+        q: 'My license key says "Invalid or expired"',
+        a: <>Your subscription may have lapsed due to a failed payment. Log in to your <Link href="/account" className={INLINE_LINK_CLASS}>account dashboard</Link> to check your subscription status and update your payment method.</>,
+    },
+];
+
+function QaList({ items }: { items: QaItem[] }) {
+    return (
+        <div className="space-y-6">
+            {items.map((item, i) => (
+                <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
+                    <h3 className="mb-2 text-sm font-medium text-[--color-text]">{item.q}</h3>
+                    <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function HelpPage() {
     return (
         <div className="relative overflow-x-hidden py-20 md:py-28">
@@ -111,47 +190,7 @@ export default function HelpPage() {
                         </div>
                         <h2 className="text-lg font-semibold text-[--color-text]">FAQ</h2>
                     </div>
-                    <div className="space-y-6">
-                        {([
-                            {
-                                q: 'How do I get a license key?',
-                                a: <>Visit the <Link href="/activate" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">activation page</Link> and enter your email. You&apos;ll receive a key via email after completing checkout.</>,
-                            },
-                            {
-                                q: 'What\'s the difference between Basic and Pro?',
-                                a: 'Basic gives you 50 AI requests per day for $1.49/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
-                            },
-                            {
-                                q: 'Which browser is supported?',
-                                a: 'CaptureAI works exclusively on Google Chrome (desktop). It uses Chrome-specific extension APIs that are not available in Firefox, Safari, or Edge.',
-                            },
-                            {
-                                q: 'How do I upgrade to Pro?',
-                                a: <>Visit the <Link href="/activate" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll see a prorated amount so you only pay for the remaining time.</>,
-                            },
-                            {
-                                q: 'How do I cancel my subscription?',
-                                a: <>Log in to your <Link href="/account" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">account dashboard</Link> and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal, where you can cancel anytime. Your access continues until the end of the billing period.</>,
-                            },
-                            {
-                                q: 'What is Privacy Guard?',
-                                a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension. It overrides browser focus and visibility APIs at the page level.',
-                            },
-                            {
-                                q: 'Are my screenshots stored on your servers?',
-                                a: 'No. Screenshots are never stored on our servers. Text is extracted locally in your browser using Tesseract.js OCR. Only the extracted text (or image if OCR confidence is too low) is sent to the AI for analysis.',
-                            },
-                            {
-                                q: 'Do you offer refunds?',
-                                a: <>Refunds are considered on a case-by-case basis within 7 days of purchase. Email <a href="mailto:support@captureai.dev" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">support@captureai.dev</a> with your order details.</>,
-                            },
-                        ] as { q: string; a: React.ReactNode }[]).map((item, i) => (
-                            <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
-                                <h3 className="mb-2 text-sm font-medium text-[--color-text]">{item.q}</h3>
-                                <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
-                            </div>
-                        ))}
-                    </div>
+                    <QaList items={FAQ_ITEMS} />
                 </section>
 
                 {/* Troubleshooting */}
@@ -161,40 +200,9 @@ export default function HelpPage() {
                             <AlertCircle className="h-5 w-5 text-red-400" />
                         </div>
                         <h2 className="text-lg font-semibold text-[--color-text]">Troubleshooting</h2>
+
                     </div>
-                    <div className="space-y-6">
-                        {([
-                            {
-                                q: 'The floating button isn\'t appearing on the page',
-                                a: 'Refresh the page after installing the extension. On some sites the content script loads after the page — pressing Ctrl+Shift+E will force the UI to appear. If it still doesn\'t show, check that the extension is enabled at chrome://extensions.',
-                            },
-                            {
-                                q: 'I paid but never received my license key',
-                                a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">support@captureai.dev</a> with your receipt.</>,
-                            },
-                            {
-                                q: 'The AI is giving wrong or irrelevant answers',
-                                a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing. If OCR is misreading text, open Settings in the popup and enable "Disable OCR Extraction" to send the image directly instead.',
-                            },
-                            {
-                                q: 'It says "Daily limit reached"',
-                                a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, <Link href="/activate" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">upgrade to Pro</Link>.</>,
-                            },
-                            {
-                                q: 'The extension doesn\'t work on a specific site',
-                                a: 'Some sites use strict Content Security Policies that can interfere with extensions. CaptureAI cannot run on internal Chrome pages (chrome://, edge://) or the Chrome Web Store. For exam platforms, make sure Privacy Guard is enabled (Pro) if the site blocks extension activity.',
-                            },
-                            {
-                                q: 'My license key says "Invalid or expired"',
-                                a: <>Your subscription may have lapsed due to a failed payment. Log in to your <Link href="/account" className="text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300">account dashboard</Link> to check your subscription status and update your payment method.</>,
-                            },
-                        ] as { q: string; a: React.ReactNode }[]).map((item, i) => (
-                            <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
-                                <h3 className="mb-2 text-sm font-medium text-[--color-text]">{item.q}</h3>
-                                <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
-                            </div>
-                        ))}
-                    </div>
+                    <QaList items={TROUBLESHOOTING_ITEMS} />
                 </section>
 
                 {/* Contact CTA */}

@@ -245,9 +245,11 @@ export const Messaging = {
    * @returns {boolean}
    */
   handleShowPrivacyGuardBanner(sendResponse) {
-    if (window.CaptureAI?.UICore?.showPrivacyGuardBanner) {
-      window.CaptureAI.UICore.showPrivacyGuardBanner();
+    if (!window.CaptureAI?.UICore?.showPrivacyGuardBanner) {
+      sendResponse({ success: false });
+      return false;
     }
+    window.CaptureAI.UICore.showPrivacyGuardBanner();
     sendResponse({ success: true });
     return false;
   },
