@@ -180,8 +180,12 @@ body {
 }
 
 .theme-dropdown option {
-    background-color: #111214;
-    /* Solid color matching your primary dark background */
+    background-color: #ffffff;
+    color: #000000;
+}
+
+[data-theme="dark"] .theme-dropdown option {
+    background-color: #000000;
     color: #ffffff;
 }
 
