@@ -356,12 +356,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.usageSection.classList.remove('hidden');
       updateUsageStats(); // No await - load asynchronously
     } else {
-      // Enable PrivacyGuard by default for Pro users
-      if (!settings.privacyGuard.enabled) {
+      // Auto-enable PrivacyGuard only once when user first becomes Pro
+      const result = await chrome.storage.local.get('captureai-privacy-guard-defaulted');
+      if (result['captureai-privacy-guard-defaulted'] !== true) {
         settings.privacyGuard.enabled = true;
         elements.privacyGuardToggle.classList.add('active');
         saveSettings();
-        // Show the alert banner when PrivacyGuard is auto-enabled
+        // Mark as auto-enabled and show the alert banner
+        await chrome.storage.local.set({ 'captureai-privacy-guard-defaulted': true });
         await chrome.storage.local.remove('captureai-privacy-guard-notice-seen');
         await checkPrivacyGuardBanner();
       }
