@@ -611,6 +611,8 @@ body {
     background:
         linear-gradient(135deg, rgba(33, 138, 255, 0.4) 0%, rgba(162, 82, 255, 0.4) 100%) padding-box,
         linear-gradient(135deg, #218aff 0%, #a252ff 100%) border-box;
+    background-size: calc(100% - 2px) calc(100% - 2px), 100% 100%;
+    background-position: 1px 1px, 0 0;
     border: 1px solid transparent;
     color: var(--color-text-inverse-default);
     font-size: 11px;
