@@ -361,11 +361,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         settings.privacyGuard.enabled = true;
         elements.privacyGuardToggle.classList.add('active');
         saveSettings();
-        // Mark as defaulted so the alert banner shows
-        await chrome.storage.local.set({ 'captureai-privacy-guard-defaulted': true });
-        // Reset the "seen" flag so banner displays
+        // Show the alert banner when PrivacyGuard is auto-enabled
         await chrome.storage.local.remove('captureai-privacy-guard-notice-seen');
-        // Refresh banner display
         await checkPrivacyGuardBanner();
       }
 
