@@ -200,6 +200,7 @@ export default function HelpPage() {
                             <AlertCircle className="h-5 w-5 text-red-400" />
                         </div>
                         <h2 className="text-lg font-semibold text-[--color-text]">Troubleshooting</h2>
+
                     </div>
                     <QaList items={TROUBLESHOOTING_ITEMS} />
                 </section>
