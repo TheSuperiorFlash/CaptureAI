@@ -890,18 +890,28 @@ export class SubscriptionHandler {
       if (!customerEmail) return;
 
       const subscriptionId = invoice.subscription;
-
-      // Determine the tier from the subscription line item in this invoice.
-      // This keeps the tier column in sync when a plan change is paid via the
-      // Customer Portal (or any other path), without relying solely on the
-      // customer.subscription.updated webhook.
-      const subscriptionLine = invoice.lines?.data?.find(line => line.type === 'subscription');
-      const priceId = subscriptionLine?.price?.id;
       let newTier = null;
-      if (priceId === this.env.STRIPE_PRICE_BASIC) {
-        newTier = 'basic';
-      } else if (priceId === this.env.STRIPE_PRICE_PRO) {
-        newTier = 'pro';
+
+      // Fetch the subscription to get the current price and sync tier.
+      // Proration invoices (billing_reason=subscription_update) don't have a
+      // type:'subscription' line item, so we can't read tier from the invoice
+      // itself — fetching the subscription is the only reliable approach.
+      if (subscriptionId) {
+        try {
+          const subResponse = await fetchWithTimeout(
+            `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+            { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+            5000
+          );
+          if (subResponse.ok) {
+            const subscription = await subResponse.json();
+            const priceId = subscription.items?.data?.[0]?.price?.id;
+            if (priceId === this.env.STRIPE_PRICE_BASIC) newTier = 'basic';
+            else if (priceId === this.env.STRIPE_PRICE_PRO) newTier = 'pro';
+          }
+        } catch (fetchErr) {
+          console.error('Failed to fetch subscription in payment handler:', fetchErr);
+        }
       }
 
       if (newTier && subscriptionId) {
