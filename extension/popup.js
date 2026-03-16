@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.userEmail.textContent = 'License activated';
       }
 
-      applyTierUI(user.tier);
+      await applyTierUI(user.tier);
 
       // Check if one-time PrivacyGuard banner should be shown
       await checkPrivacyGuardBanner();
@@ -337,13 +337,15 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Apply tier-specific UI updates: badge, upgrade button, and usage stats
    * @param {string} tier - 'basic' or 'pro'
    */
-  function applyTierUI(tier) {
+  async function applyTierUI(tier) {
     const normalizedTier = normalizeTier(tier);
     elements.userTier.textContent = normalizedTier.toUpperCase();
 
     if (normalizedTier === 'basic') {
       // Ensure PrivacyGuard is disabled for Basic tier (handles edge cases like downgrades)
       if (settings.privacyGuard.enabled) {
+        // Save the state before disabling, so we can restore it if user upgrades back
+        await chrome.storage.local.set({ 'captureai-privacy-guard-before-downgrade': true });
         settings.privacyGuard.enabled = false;
         elements.privacyGuardToggle.classList.remove('active');
         saveSettings();
@@ -356,6 +358,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.usageSection.classList.remove('hidden');
       updateUsageStats(); // No await - load asynchronously
     } else {
+      // Check if PrivacyGuard was previously enabled before a downgrade
+      const result = await chrome.storage.local.get('captureai-privacy-guard-before-downgrade');
+      if (result['captureai-privacy-guard-before-downgrade'] === true && !settings.privacyGuard.enabled) {
+        settings.privacyGuard.enabled = true;
+        elements.privacyGuardToggle.classList.add('active');
+        saveSettings();
+        // Clear the flag
+        await chrome.storage.local.remove('captureai-privacy-guard-before-downgrade');
+      }
+
       elements.upgradeBtn.classList.add('hidden');
       elements.userTier.classList.add('tier-pro');
       elements.userTier.classList.remove('tier-basic');
@@ -1153,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const newTier = changes['captureai-user-tier'].newValue;
       if (newTier && currentState.user) {
         currentState.user = { ...currentState.user, tier: newTier };
-        applyTierUI(newTier);
+        applyTierUI(newTier); // Fire and forget - will update UI in background
       }
     }
     if (changes['captureai-last-usage'] && !elements.usageSection.classList.contains('hidden')) {
