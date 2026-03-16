@@ -328,7 +328,7 @@ const AuthService = {
    * Get subscription portal URL (for managing subscription)
    * @returns {Promise<Object>} { url } - Stripe portal URL
    */
-  async getPortalUrl() {
+  async getPortalUrl(tier = null) {
     const backendUrl = await this.getBackendUrl();
     const licenseKey = await this.getLicenseKey();
 
@@ -336,7 +336,11 @@ const AuthService = {
       throw new Error('No license key found');
     }
 
-    const response = await this.fetchWithTimeout(`${backendUrl}/api/subscription/portal`, {
+    const url = tier
+      ? `${backendUrl}/api/subscription/portal?tier=${encodeURIComponent(tier)}`
+      : `${backendUrl}/api/subscription/portal`;
+
+    const response = await this.fetchWithTimeout(url, {
       headers: {
         'Authorization': `LicenseKey ${licenseKey}`
       }

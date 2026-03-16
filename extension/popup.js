@@ -215,40 +215,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Handle upgrade button click
+   * Handle upgrade button click — opens Stripe Customer Portal pre-configured for Pro upgrade
    */
   async function handleUpgrade() {
-    if (!currentState.user || !currentState.user.email) {
-      // No email on file — send them to the website to upgrade
-      try {
-        await chrome.tabs.create({ url: 'https://captureai.dev/activate' });
-      } catch (err) {
-        console.error('Failed to open upgrade page:', err);
-      }
-      return;
-    }
-
-    return handleBuyProWithEmail(currentState.user.email);
-  }
-
-  async function handleBuyProWithEmail(email) {
-    elements.upgradeBtn.disabled = true;
-    elements.upgradeBtn.textContent = 'Loading...';
-
     try {
-      const checkout = await AuthService.createCheckoutSession(email);
-
-      chrome.tabs.create({ url: checkout.url });
-
-      showResponseMessage('Check your email for your Pro license key after payment!', 'success');
-
-      elements.upgradeBtn.disabled = false;
-      elements.upgradeBtn.textContent = 'Upgrade to Pro';
-    } catch (error) {
-      console.error('Upgrade error:', error);
-      showResponseMessage(error.message || 'Failed to start upgrade', 'error');
-      elements.upgradeBtn.disabled = false;
-      elements.upgradeBtn.textContent = 'Upgrade to Pro';
+      const data = await AuthService.getPortalUrl('pro');
+      chrome.tabs.create({ url: data.url });
+    } catch (err) {
+      console.error('Failed to open upgrade portal:', err);
+      showResponseMessage('Failed to open upgrade page', 'error');
     }
   }
 

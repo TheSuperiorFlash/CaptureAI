@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
@@ -89,10 +88,6 @@ interface ResultState {
 }
 
 interface ConfirmationData {
-    amountDueCents: number
-    subtotalCents: number
-    totalCents: number
-    currency: string
     tier: string
     email: string
 }
@@ -109,24 +104,6 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     const [codeSending, setCodeSending] = useState(false)
     const [codeError, setCodeError] = useState<string | null>(null)
     const [resendCooldown, setResendCooldown] = useState(0)
-
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: data.currency.toUpperCase(),
-        minimumFractionDigits: 2,
-    }).format(data.amountDueCents / 100)
-
-    const features = data.tier === 'pro' ? [
-        'Unlimited AI requests — no daily cap',
-        'Privacy Guard — stay undetected',
-        'Ask Mode — follow-up questions',
-        'Auto-Solve — hands-free answers',
-    ] : [
-        '50 AI requests per day',
-        'Screenshot capture',
-        'Floating interface',
-        'Stealth Mode',
-    ]
 
     const sendCode = async () => {
         setCodeSending(true)
@@ -171,78 +148,52 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onCancel} />
-            <div className={`relative w-full max-w-md transition-all duration-300 ease-out ${
+            <div className={`relative w-full max-w-sm transition-all duration-300 ease-out ${
                 visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
             }`}>
                 <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-48 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
                 <div className="relative rounded-[28px] border border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
                     <button type="button" onClick={onCancel}
                         className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white/80"
-                        aria-label="Cancel upgrade">
+                        aria-label="Cancel">
                         <XIcon className="h-4 w-4" />
                     </button>
 
                     <div className="mb-6 flex justify-center">
                         <div className="flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-1.5">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
-                            </span>
-                            <span className="text-xs font-semibold tracking-wider text-cyan-400 uppercase">
-                                {data.tier === 'pro' ? 'Upgrade to Pro' : `Switch to ${data.tier}`}
-                            </span>
+                            <Mail className="h-3.5 w-3.5 text-cyan-400" />
+                            <span className="text-xs font-semibold tracking-wider text-cyan-400 uppercase">Verify your identity</span>
                         </div>
                     </div>
 
-                    <p className="mb-1 text-center text-xs font-medium uppercase tracking-wider text-[--color-text-tertiary]">Amount due today</p>
-                    <p className="mb-2 text-center font-inter text-[3.25rem] font-extrabold leading-none text-gradient-static">{formattedAmount}</p>
-                    <p className="mb-7 text-center text-sm text-[--color-text-tertiary]">Includes credit for any unused time on your current plan</p>
+                    <p className="mb-1 text-center text-base font-semibold text-[--color-text]">Check your email</p>
+                    <p className="mb-6 text-center text-sm text-[--color-text-tertiary]">
+                        {codeSent ? `We sent a code to ${data.email}` : 'Sending verification code...'}
+                    </p>
 
-                    <div className="divider-gradient mb-7" />
-
-                    <ul className="mb-6 space-y-3">
-                        {features.map((feature) => (
-                            <li key={feature} className="flex items-center gap-3">
-                                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15">
-                                    <Check className="h-3 w-3 text-cyan-400" />
-                                </div>
-                                <span className="text-sm text-[--color-text-secondary]">{feature}</span>
-                            </li>
-                        ))}
-                    </ul>
-
-                    {/* Verification code section */}
-                    <div className="mb-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                        <div className="mb-3 flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-cyan-400" />
-                            <span className="text-xs font-medium text-[--color-text-secondary]">
-                                {codeSent ? `Code sent to ${data.email}` : 'Sending verification code...'}
-                            </span>
-                        </div>
-                        <input
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            placeholder="Enter 6-digit code"
-                            value={verificationCode}
-                            onChange={(e) => handleCodeInput(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
-                            maxLength={6}
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-lg tracking-[0.3em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
-                        />
-                        {codeError && (
-                            <p className="mt-2 text-xs text-red-400">{codeError}</p>
-                        )}
-                        <div className="mt-2 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={sendCode}
-                                disabled={codeSending || resendCooldown > 0}
-                                className="text-xs text-[--color-text-tertiary] transition-colors hover:text-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                                {codeSending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
-                            </button>
-                        </div>
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        placeholder="000000"
+                        value={verificationCode}
+                        onChange={(e) => handleCodeInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
+                        maxLength={6}
+                        className="mb-2 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[--color-text] placeholder:text-[--color-text-tertiary]/30 placeholder:tracking-[0.5em] focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
+                    />
+                    {codeError && (
+                        <p className="mb-3 text-center text-xs text-red-400">{codeError}</p>
+                    )}
+                    <div className="mb-6 flex justify-center">
+                        <button
+                            type="button"
+                            onClick={sendCode}
+                            disabled={codeSending || resendCooldown > 0}
+                            className="text-xs text-[--color-text-tertiary] transition-colors hover:text-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            {codeSending ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                        </button>
                     </div>
 
                     <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
@@ -251,7 +202,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
-                            : data.tier === 'pro' ? 'Confirm Upgrade' : 'Confirm Change'
+                            : 'Continue to Stripe'
                         }
                     </button>
 
@@ -362,7 +313,7 @@ export default function ActivatePage() {
     const handleBasicSignup = async () => {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
         if (data.requiresConfirmation) {
-            showConfirmModal({ amountDueCents: data.amountDueCents as number, subtotalCents: data.subtotalCents as number, totalCents: data.totalCents as number, currency: data.currency as string, tier: data.tier as string, email })
+            showConfirmModal({ tier: data.tier as string, email })
             return
         }
         if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
@@ -371,7 +322,7 @@ export default function ActivatePage() {
     const handleProSignup = async () => {
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
         if (data.requiresConfirmation) {
-            showConfirmModal({ amountDueCents: data.amountDueCents as number, subtotalCents: data.subtotalCents as number, totalCents: data.totalCents as number, currency: data.currency as string, tier: data.tier as string, email })
+            showConfirmModal({ tier: data.tier as string, email })
             return
         }
         if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }

@@ -101,7 +101,7 @@ export class SubscriptionHandler {
               .bind(null, 'inactive', existingUser.id).run();
           }
         } else {
-          // Step 2: confirmed — verify email ownership via OTP before applying the tier switch
+          // Step 2: confirmed — verify OTP, then redirect to Stripe Customer Portal to complete the plan change
           const verificationCode = validateVerificationCode(body.verificationCode, true);
           const codeValid = await this.consumeVerificationCode(email, verificationCode, 'tier_switch', tier);
           if (!codeValid) {
@@ -109,11 +109,11 @@ export class SubscriptionHandler {
           }
 
           try {
-            const switchResult = await this.switchExistingSubscriptionTier(existingSubscriptionId, tier, existingUser.id, email);
-            return jsonResponse({ ...switchResult, sessionId: 'tier_change_' + existingSubscriptionId, changedTier: true });
-          } catch (switchError) {
-            if (!this.isStripeMissingResourceError(switchError)) {
-              throw switchError;
+            const portalUrl = await this.createPortalWithPlanChange(existingUser.stripe_customer_id, existingSubscriptionId, tier);
+            return jsonResponse({ url: portalUrl, sessionId: 'tier_change_' + existingSubscriptionId });
+          } catch (portalError) {
+            if (!this.isStripeMissingResourceError(portalError)) {
+              throw portalError;
             }
             // Stale subscription ID — clear and fall through to fresh checkout
             await this.db
@@ -1319,7 +1319,7 @@ export class SubscriptionHandler {
       }
 
       const userData = await this.db
-        .prepare('SELECT stripe_customer_id FROM users WHERE id = ?')
+        .prepare('SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?')
         .bind(user.userId)
         .first();
 
@@ -1327,9 +1327,18 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'No subscription found' }, 400);
       }
 
-      const portal = await this.createBillingPortal(userData.stripe_customer_id);
+      const { searchParams } = new URL(request.url);
+      const tier = searchParams.get('tier');
 
-      return jsonResponse({ url: portal.url });
+      let portalUrl;
+      if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id) {
+        portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier);
+      } else {
+        const portal = await this.createBillingPortal(userData.stripe_customer_id);
+        portalUrl = portal.url;
+      }
+
+      return jsonResponse({ url: portalUrl });
 
     } catch (error) {
       console.error('Portal error:', error);
@@ -1818,6 +1827,69 @@ export class SubscriptionHandler {
     }
 
     return await response.json();
+  }
+
+  /**
+   * Create a Customer Portal session pre-configured to confirm a specific plan change.
+   * The portal lands directly on the subscription update confirmation page, showing
+   * the prorated amount. Stripe applies the change when the customer confirms.
+   */
+  async createPortalWithPlanChange(customerId, subscriptionId, newTier) {
+    const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
+    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+
+    if (!newPriceId) {
+      throw new Error('Price not configured');
+    }
+
+    const subResponse = await fetchWithTimeout(
+      `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+      { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+      5000
+    );
+
+    if (!subResponse.ok) {
+      const error = await subResponse.json();
+      const e = new Error(error.error?.message || 'Failed to fetch subscription');
+      e.stripeCode = error.error?.code;
+      e.stripeType = error.error?.type;
+      throw e;
+    }
+
+    const subscription = await subResponse.json();
+    const itemId = subscription.items?.data?.[0]?.id;
+
+    if (!itemId) {
+      throw new Error('Subscription item not found');
+    }
+
+    const response = await fetchWithTimeout('https://api.stripe.com/v1/billing_portal/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.stripeKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        customer: customerId,
+        return_url: `${extensionUrl}/activate`,
+        'flow_data[type]': 'subscription_update_confirm',
+        'flow_data[subscription_update_confirm][subscription]': subscriptionId,
+        'flow_data[subscription_update_confirm][items][0][id]': itemId,
+        'flow_data[subscription_update_confirm][items][0][price]': newPriceId,
+        'flow_data[subscription_update_confirm][items][0][quantity]': '1'
+      })
+    }, 5000);
+
+    if (!response.ok) {
+      const error = await response.json();
+      const e = new Error(error.error?.message || 'Failed to create portal session');
+      e.stripeCode = error.error?.code;
+      e.stripeType = error.error?.type;
+      throw e;
+    }
+
+    const portal = await response.json();
+    return portal.url;
   }
 
   /**
