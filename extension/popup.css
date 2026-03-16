@@ -622,8 +622,7 @@ body {
 }
 
 #upgrade-btn:hover {
-    box-shadow: 0 4px 12px rgba(162, 82, 255, 0.4);
-    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(162, 82, 255, 0.4);
 }
 
 #upgrade-btn:active {
@@ -1128,4 +1127,58 @@ body {
     opacity: 1;
     pointer-events: auto;
     filter: none;
+}
+
+/* Usage Warning Banner */
+.usage-warning-banner {
+    border-left: 3px solid #ff9800;
+    background-color: var(--color-button-secondary-background);
+    border-radius: var(--border-radius-base-sm);
+    padding: 10px 12px 8px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.usage-warning-banner-content {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.usage-warning-banner-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.usage-warning-banner-text strong {
+    display: block;
+    color: var(--color-text-primary-default);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.usage-warning-banner-text p {
+    color: var(--color-text-secondary-default);
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.usage-warning-banner-dismiss {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary-default);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.usage-warning-banner-dismiss:hover {
+    color: var(--color-text-primary-default);
 }
