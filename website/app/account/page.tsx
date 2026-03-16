@@ -17,12 +17,14 @@ import {
   ArrowUpRight,
   Eye,
   EyeOff,
+  User,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { API_BASE_URL } from '@/lib/api'
 import { useSession } from '@/hooks/useSession'
+import { ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
 
 interface UsageData {
   today: {
@@ -48,8 +50,8 @@ function UsageRing({
   percentage: number | null
   isPro: boolean
 }) {
-  const size = 156
-  const strokeWidth = 10
+  const size = 140
+  const strokeWidth = 8
   const radius = (size - strokeWidth * 2) / 2
   const circumference = 2 * Math.PI * radius
   const pct = limit !== null ? Math.min(percentage ?? 0, 100) : (used > 0 ? 100 : 0)
@@ -90,7 +92,10 @@ function UsageRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={limit === null ? 0 : dashOffset}
-          style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+          style={{ 
+            transition: 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.4))'
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -228,13 +233,13 @@ export default function AccountPage() {
         }`}
       />
 
-      <div className="relative z-10 mx-auto max-w-3xl px-5 sm:px-6">
+      <ScrollRevealStagger delay={0.1} className="relative z-10 mx-auto max-w-4xl px-5 sm:px-6">
 
         {/* ─── Profile header ─── */}
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <ScrollRevealItem className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-center sm:gap-4">
           <div className="flex items-center gap-4">
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-inter text-lg font-bold text-white shadow-lg ${
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl font-inter text-xl font-bold text-white shadow-lg ${
                 isPro
                   ? 'bg-gradient-to-br from-cyan-400 to-blue-600 shadow-cyan-500/20'
                   : 'bg-gradient-to-br from-blue-600 to-blue-800 shadow-blue-600/20'
@@ -243,8 +248,8 @@ export default function AccountPage() {
               {user.email[0].toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-semibold text-white leading-tight">{user.email}</p>
-              <p className="mt-0.5 text-xs text-[--color-text-tertiary]">Member since {formattedDate}</p>
+              <p className="text-base font-semibold text-white leading-tight">{user.email}</p>
+              <p className="mt-1 text-xs text-[--color-text-tertiary]">Member since {formattedDate}</p>
             </div>
           </div>
 
@@ -253,25 +258,27 @@ export default function AccountPage() {
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 rounded-lg p-2 text-[--color-text-tertiary] transition-colors hover:bg-white/[0.05] hover:text-red-400"
+              className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]"
               aria-label="Sign out"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden text-sm sm:block">Sign out</span>
+              <span className="hidden sm:block">Sign out</span>
             </button>
           </div>
-        </div>
+        </ScrollRevealItem>
 
         {/* ─── Main card: Usage ring + Subscription ─── */}
-        <div className="mb-4 overflow-hidden rounded-[24px] border border-white/[0.07] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-6 backdrop-blur-xl md:p-8">
-          <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
+        <ScrollRevealItem className="mb-6 w-full">
+          <div className="gradient-border rounded-[28px] w-full">
+            <div className="w-full rounded-[28px] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-6 shadow-[0_0_80px_rgba(0,71,255,0.06),0_40px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl md:p-8">
+              <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
 
             {/* Usage ring */}
             <div className="flex flex-col items-center gap-3">
               {usageLoading ? (
                 <div
                   className="flex items-center justify-center"
-                  style={{ width: 156, height: 156 }}
+                  style={{ width: 140, height: 140 }}
                 >
                   <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/60" />
                 </div>
@@ -357,7 +364,7 @@ export default function AccountPage() {
                 <Separator className="bg-white/[0.06]" />
                 <Link
                   href="/activate"
-                  className="inline-flex w-fit items-center gap-1 text-sm text-[--color-text-secondary] transition-colors hover:text-white"
+                  className="inline-flex w-fit items-center gap-1 text-sm text-cyan-400 transition-colors hover:text-cyan-300"
                 >
                   Change plan
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -365,57 +372,69 @@ export default function AccountPage() {
               </div>
             </div>
           </div>
-        </div>
+            </div>
+          </div>
+        </ScrollRevealItem>
 
         {/* ─── Bottom row ─── */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
 
           {/* Account details */}
-          <div className="rounded-[20px] border border-white/[0.07] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-6 backdrop-blur-xl">
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-widest text-[--color-text-tertiary]">
-              Account
-            </p>
-            <div className="space-y-4">
-              <div>
-                <p className="mb-1 text-xs text-[--color-text-tertiary]">Email</p>
-                <p className="text-sm text-white">{user.email}</p>
+          <ScrollRevealItem>
+            <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-[28px] p-7 md:p-8">
+              <div className="absolute -right-8 -top-8 p-8 opacity-5 transition-opacity group-hover:opacity-10">
+                <User className="h-40 w-40 text-emerald-400" />
+              </div>
+              
+              <div className="relative z-10 mb-8 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 ring-1 ring-emerald-500/20">
+                  <User className="h-6 w-6 text-emerald-400" />
+                </div>
+                <h2 className="text-[19px] font-bold text-[--color-text]">Account Details</h2>
               </div>
 
-              <div className="divider-gradient" />
+              <div className="relative z-10 flex flex-1 flex-col space-y-6">
+                <div>
+                  <p className="mb-2 text-xs font-medium text-[--color-text-tertiary]">Email address</p>
+                  <div className="flex w-full items-center rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3">
+                    <p className="truncate text-[15px] font-medium text-white">{user.email}</p>
+                  </div>
+                </div>
 
-              <div>
-                <p className="mb-2 text-xs text-[--color-text-tertiary]">License key</p>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[13px] text-[--color-text-secondary]">
-                    {licenseKey ? (keyRevealed ? licenseKey : maskKey(licenseKey)) : '—'}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Tooltip>
-                      <TooltipTrigger
-                        type="button"
-                        onClick={() => setKeyRevealed(!keyRevealed)}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
-                        aria-label={keyRevealed ? 'Hide license key' : 'Reveal license key'}
-                      >
-                        {keyRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </TooltipTrigger>
-                      <TooltipContent>{keyRevealed ? 'Hide' : 'Reveal'}</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger
-                        type="button"
-                        onClick={copyLicenseKey}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
-                        aria-label="Copy license key"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-400" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </TooltipTrigger>
-                      <TooltipContent>{copied ? 'Copied!' : 'Copy to clipboard'}</TooltipContent>
-                    </Tooltip>
+                <div>
+                  <p className="mb-2 text-xs font-medium text-[--color-text-tertiary]">License key</p>
+                  <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] pl-4 pr-1.5 py-1.5">
+                    <span className="truncate font-mono text-[14px] text-[--color-text-secondary]">
+                      {licenseKey ? (keyRevealed ? licenseKey : maskKey(licenseKey)) : '—'}
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Tooltip>
+                        <TooltipTrigger
+                          type="button"
+                          onClick={() => setKeyRevealed(!keyRevealed)}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
+                          aria-label={keyRevealed ? 'Hide license key' : 'Reveal license key'}
+                        >
+                          {keyRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </TooltipTrigger>
+                        <TooltipContent>{keyRevealed ? 'Hide' : 'Reveal'}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger
+                          type="button"
+                          onClick={copyLicenseKey}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-[--color-text-tertiary] transition-colors hover:bg-white/[0.06] hover:text-white"
+                          aria-label="Copy license key"
+                        >
+                          {copied ? (
+                            <Check className="h-4 w-4 text-emerald-400" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </TooltipTrigger>
+                        <TooltipContent>{copied ? 'Copied!' : 'Copy to clipboard'}</TooltipContent>
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -432,17 +451,27 @@ export default function AccountPage() {
                 </a>
               </div>
             </div>
-          </div>
+          </ScrollRevealItem>
 
           {/* Billing */}
-          <div className="rounded-[20px] border border-white/[0.07] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-6 backdrop-blur-xl">
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-widest text-[--color-text-tertiary]">
-              Billing
-            </p>
-            <p className="mb-6 text-sm leading-relaxed text-[--color-text-secondary]">
-              Update your payment method, view invoices, or cancel your subscription via the Stripe
-              portal.
-            </p>
+          <ScrollRevealItem>
+            <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-[28px] p-7 md:p-8">
+              <div className="absolute -right-8 -top-8 p-8 opacity-5 transition-opacity group-hover:opacity-10">
+                <CreditCard className="h-40 w-40 text-blue-400" />
+              </div>
+              
+              <div className="relative z-10 mb-8 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-500/5 ring-1 ring-blue-500/20">
+                  <CreditCard className="h-6 w-6 text-blue-400" />
+                </div>
+                <h2 className="text-[19px] font-bold text-[--color-text]">Billing</h2>
+              </div>
+
+              <div className="relative z-10 flex flex-1 flex-col justify-between">
+                <p className="mb-8 text-[15px] leading-relaxed text-[--color-text-secondary]">
+                  Update your payment method, view invoices, or safely cancel your subscription via the Stripe
+                  portal.
+                </p>
             <Button
               onClick={openBillingPortal}
               disabled={portalLoading}
@@ -457,10 +486,12 @@ export default function AccountPage() {
                   <ExternalLink className="h-3.5 w-3.5 opacity-60" />
                 </>
               )}
-            </Button>
-          </div>
+              </Button>
+              </div>
+            </div>
+          </ScrollRevealItem>
         </div>
-      </div>
+      </ScrollRevealStagger>
     </div>
   )
 }

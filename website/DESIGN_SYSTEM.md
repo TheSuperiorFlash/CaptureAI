@@ -295,8 +295,8 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 | `app/contact/page.tsx` | Contact cards (Support email + Feedback email) |
 | `app/privacy/page.tsx` | Privacy Policy (legal page, minimal styling) |
 | `app/terms/page.tsx` | Terms of Service (legal page, minimal styling) |
-| `app/account/login/page.tsx` | Email + 6-digit OTP login (two-step form with resend cooldown) |
-| `app/account/page.tsx` | Account dashboard: subscription, usage, billing portal, account details |
+| `app/account/login/page.tsx` | Email + 6-digit OTP login (two-step form with ScrollReveal staggered entrance) |
+| `app/account/page.tsx` | Account dashboard: masonry grid layout with glass cards for subscription, usage, billing portal, account details |
 | `app/payment-success/page.tsx` | Post-payment verification with retry logic (max 5 retries, exponential backoff) |
 | `app/error.tsx` | Error boundary page |
 | `app/not-found.tsx` | 404 page |

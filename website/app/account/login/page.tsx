@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Mail, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Fingerprint, Mail, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { API_BASE_URL } from '@/lib/api'
 import { useSession } from '@/hooks/useSession'
+import { ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -143,21 +144,26 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 gradient-mesh" />
       <div className="pointer-events-none absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
 
-      <div className="relative z-10 mx-auto flex max-w-md flex-col items-center px-6">
+      <ScrollRevealStagger delay={0.1} className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center px-6">
         {/* Header */}
-        <div className="mb-10 text-center">
+        <ScrollRevealItem className="mb-10 text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-500/5 ring-1 ring-white/10">
+            <Fingerprint className="h-7 w-7 text-blue-400" />
+          </div>
           <h1 className="mb-3 text-3xl font-bold text-[--color-text] md:text-4xl">
-            Sign in to your account
+            Welcome back
           </h1>
           <p className="text-[--color-text-secondary]">
             {step === 'email'
               ? 'Enter the email address used for your subscription'
               : `Enter the 6-digit code sent to ${email}`}
           </p>
-        </div>
+        </ScrollRevealItem>
 
         {/* Card */}
-        <div className="w-full rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-8 shadow-[0_0_80px_rgba(0,71,255,0.06),0_40px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <ScrollRevealItem className="w-full">
+          <div className="gradient-border rounded-[28px] w-full">
+            <div className="w-full rounded-[28px] bg-gradient-to-b from-[#0c1125]/80 to-[#060913]/80 p-8 shadow-[0_0_80px_rgba(0,71,255,0.06),0_40px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
           {step === 'email' ? (
             <>
               {/* Email step */}
@@ -259,18 +265,20 @@ export default function LoginPage() {
               </div>
             </>
           )}
-        </div>
+            </div>
+          </div>
+        </ScrollRevealItem>
 
         {/* Footer link */}
-        <div className="mt-8 text-center">
+        <ScrollRevealItem className="mt-8 text-center">
           <p className="text-sm text-[--color-text-tertiary]">
             Don&apos;t have an account?{' '}
             <Link href="/activate" className="text-blue-400 transition-colors hover:text-cyan-400">
               Get started
             </Link>
           </p>
-        </div>
-      </div>
+        </ScrollRevealItem>
+      </ScrollRevealStagger>
     </div>
   )
 }
