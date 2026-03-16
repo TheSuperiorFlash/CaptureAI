@@ -344,8 +344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (normalizedTier === 'basic') {
       // Ensure PrivacyGuard is disabled for Basic tier (handles edge cases like downgrades)
       if (settings.privacyGuard.enabled) {
-        // Save the state before disabling, so we can restore it if user upgrades back
-        await chrome.storage.local.set({ 'captureai-privacy-guard-before-downgrade': true });
         settings.privacyGuard.enabled = false;
         elements.privacyGuardToggle.classList.remove('active');
         saveSettings();
@@ -358,14 +356,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.usageSection.classList.remove('hidden');
       updateUsageStats(); // No await - load asynchronously
     } else {
-      // Check if PrivacyGuard was previously enabled before a downgrade
-      const result = await chrome.storage.local.get('captureai-privacy-guard-before-downgrade');
-      if (result['captureai-privacy-guard-before-downgrade'] === true && !settings.privacyGuard.enabled) {
+      // Enable PrivacyGuard by default for Pro users
+      if (!settings.privacyGuard.enabled) {
         settings.privacyGuard.enabled = true;
         elements.privacyGuardToggle.classList.add('active');
         saveSettings();
-        // Clear the flag
-        await chrome.storage.local.remove('captureai-privacy-guard-before-downgrade');
+        // Mark as defaulted so the alert banner shows
+        await chrome.storage.local.set({ 'captureai-privacy-guard-defaulted': true });
+        // Reset the "seen" flag so banner displays
+        await chrome.storage.local.remove('captureai-privacy-guard-notice-seen');
+        // Refresh banner display
+        await checkPrivacyGuardBanner();
       }
 
       elements.upgradeBtn.classList.add('hidden');
