@@ -267,7 +267,7 @@
    --color-surface-primary-default: #111214;
    --color-surface-secondary-default: #0a0b0c;
    --color-surface-tertiary-default: #050505;
-   --color-surface-floating-default: rgba(17, 18, 20, 0.85);
+   --color-surface-floating-default: rgba(10, 11, 12, 0.85);
 
    --color-surface-neutral-default: var(--color-base-white-translucent-05);
    --color-surface-neutral-hover: var(--color-base-white-translucent-08);
@@ -290,9 +290,3 @@
    --color-image-attach-background-active: rgba(20, 20, 20, 0.8);
 }
 
-/* Global Switch for Pilled Buttons (Reacts to JS Config) */
-:root[data-pill-style="true"],
-[data-pill-style="true"] #captureai-panel {
-   --config-button-radius: 100px;
-   --config-toggle-radius: 100px;
-}

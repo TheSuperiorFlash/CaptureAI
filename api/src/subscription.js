@@ -714,6 +714,16 @@ export class SubscriptionHandler {
           await this.handleSubscriptionUpdated(event.data.object);
           break;
         }
+
+        case 'charge.refunded': {
+          await this.handleChargeRefunded(event.data.object);
+          break;
+        }
+
+        case 'charge.dispute.created': {
+          await this.handleDisputeCreated(event.data.object);
+          break;
+        }
       }
 
       return jsonResponse({ received: true });
@@ -953,6 +963,95 @@ export class SubscriptionHandler {
       }
     } catch (error) {
       console.error('Subscription cancellation handler error:', error);
+    }
+  }
+
+  /**
+   * Handle charge refund — revoke access for refunded users so they cannot
+   * continue using the product after receiving their money back.
+   */
+  async handleChargeRefunded(charge) {
+    try {
+      const customerId = charge.customer;
+      if (!customerId) {
+        return;
+      }
+
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_customer_id = ?')
+        .bind(customerId)
+        .first();
+
+      if (!user) {
+        return;
+      }
+
+      await this.db
+        .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_customer_id = ?")
+        .bind('cancelled', null, customerId)
+        .run();
+
+      await this.logSubscriptionEvent({
+        email: user.email,
+        eventType: 'refund',
+        fromTier: user.tier,
+        fromStatus: user.subscription_status,
+        toStatus: 'cancelled',
+        stripeEventId: charge.id,
+        metadata: { amount_refunded: charge.amount_refunded, currency: charge.currency },
+      }).catch(err => console.error('Audit log failed:', err));
+    } catch (error) {
+      console.error('Charge refund handler error:', error);
+    }
+  }
+
+  /**
+   * Handle payment dispute (chargeback) — log the event for billing audit.
+   */
+  async handleDisputeCreated(dispute) {
+    try {
+      const chargeId = dispute.charge;
+      if (!chargeId) {
+        return;
+      }
+
+      // Fetch the charge to get the customer ID
+      const chargeResponse = await fetchWithTimeout(
+        `https://api.stripe.com/v1/charges/${chargeId}`,
+        { headers: { 'Authorization': `Bearer ${this.stripeKey}` } },
+        5000
+      );
+
+      if (!chargeResponse.ok) {
+        console.error('Dispute handler: failed to fetch charge', chargeId);
+        return;
+      }
+
+      const charge = await chargeResponse.json();
+      const customerId = charge.customer;
+      if (!customerId) {
+        return;
+      }
+
+      const user = await this.db
+        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_customer_id = ?')
+        .bind(customerId)
+        .first();
+
+      if (!user) {
+        return;
+      }
+
+      await this.logSubscriptionEvent({
+        email: user.email,
+        eventType: 'chargeback',
+        fromTier: user.tier,
+        fromStatus: user.subscription_status,
+        stripeEventId: dispute.id,
+        metadata: { amount: dispute.amount, currency: dispute.currency, reason: dispute.reason },
+      }).catch(err => console.error('Audit log failed:', err));
+    } catch (error) {
+      console.error('Dispute handler error:', error);
     }
   }
 

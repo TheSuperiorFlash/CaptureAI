@@ -9,10 +9,8 @@
     async init() {
       try {
         // Tesseract.js is loaded via manifest content_scripts, check if available
-        if (typeof Tesseract !== 'undefined') {
-          console.log('Tesseract.js loaded successfully via manifest');
-        } else {
-          console.warn('Tesseract.js not available - OCR will not work');
+        if (typeof Tesseract === 'undefined') {
+          console.error('CaptureAI: Tesseract.js not available - OCR will not work');
         }
 
         if (document.readyState === 'loading') {

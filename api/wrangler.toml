@@ -90,5 +90,6 @@ crons = ["0 3 * * *"]
 #   wrangler secret put STRIPE_PRICE_BASIC
 #   wrangler secret put RESEND_API_KEY
 #   wrangler secret put FROM_EMAIL
+#   wrangler secret put ADMIN_KEY       ← protects GET /api/ai/total-usage (admin analytics endpoint)
 # Recommended FROM_EMAIL format: CaptureAI <license@mail.captureai.dev>
 # Note: Avoid "noreply" addresses for better deliverability

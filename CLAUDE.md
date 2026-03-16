@@ -77,10 +77,9 @@ captureai-reasoning-level      # 0, 1, or 2
 captureai-settings             # {privacyGuard: {enabled, domainBlacklist}, ocr: {disabled}, theme}
 captureai-last-usage           # Cached AI response usage stats
 captureai-privacy-guard-defaulted  # Auto-enable flag on first Pro upgrade
+captureai-privacy-guard-notice-seen   # True once user dismisses the auto-enable banner
 captureai-backend-url          # Backend URL (default: https://api.captureai.workers.dev)
-captureai-migration-license-v3-complete  # Migration completion flag
-captureai-migration-notice     # Message shown in popup after migration
-captureai-api-key              # Legacy API key (deprecated, migration fallback)
+captureai-api-key              # Legacy API key (deprecated, kept for reference only)
 ```
 
 ## Coding Standards
@@ -154,7 +153,7 @@ captureai-api-key              # Legacy API key (deprecated, migration fallback)
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
 **Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow
