@@ -202,7 +202,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
-                            : 'Continue to Stripe'
+                            : 'Continue to payment'
                         }
                     </button>
 
