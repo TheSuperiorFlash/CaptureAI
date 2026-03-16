@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     responseContent: document.getElementById('response-content'),
     migrationNotice: document.getElementById('migration-notice'),
     migrationNoticeText: document.getElementById('migration-notice-text'),
+    migrationDismissBtn: document.getElementById('migration-dismiss-btn'),
     licenseKeySection: document.getElementById('license-key-section'),
     licenseKeyInput: document.getElementById('license-key-input'),
     activateBtn: document.getElementById('activate-btn'),
@@ -127,11 +128,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (migrationNotice) {
         elements.migrationNoticeText.textContent = migrationNotice;
         elements.migrationNotice.classList.remove('hidden');
-        // Clear the notice after showing it
-        setTimeout(() => {
+
+        const dismissMigrationNotice = () => {
           Migration.clearMigrationNotice();
           elements.migrationNotice.classList.add('hidden');
-        }, 10000); // Hide after 10 seconds
+        };
+
+        // Allow manual dismiss
+        elements.migrationDismissBtn.addEventListener('click', dismissMigrationNotice, { once: true });
+
+        // Auto-dismiss after 30 seconds as a fallback
+        setTimeout(dismissMigrationNotice, 30000);
       }
 
       // Load and display custom keybinds
@@ -1070,10 +1077,47 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentState.currentResponse = request.message;
       currentState.isError = request.isError || false;
 
-      elements.responseContent.textContent = request.message;
-      elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+      const isDailyLimit = request.isError && request.message.includes('Daily limit reached');
+      const isMinuteLimit = request.isError && request.message.includes('Rate limit reached');
+
+      if (isDailyLimit || isMinuteLimit) {
+        renderRateLimitError(isDailyLimit);
+      } else {
+        elements.responseContent.textContent = request.message;
+        elements.responseContent.className = request.isError ? 'response-content error' : 'response-content';
+      }
     }
   });
+
+  /**
+   * Render a user-friendly rate limit error in the response area.
+   * For daily limit errors on Basic tier, adds an inline Upgrade CTA.
+   * @param {boolean} isDailyLimit - true for daily limit, false for per-minute
+   */
+  function renderRateLimitError(isDailyLimit) {
+    elements.responseContent.className = 'response-content error';
+    elements.responseContent.textContent = '';
+
+    const msgEl = document.createElement('span');
+
+    if (isDailyLimit) {
+      msgEl.textContent = 'Daily limit reached. Upgrade to Pro for unlimited requests.';
+    } else {
+      msgEl.textContent = 'Rate limit reached. Please wait a moment and try again.';
+    }
+
+    elements.responseContent.appendChild(msgEl);
+
+    // Show upgrade CTA inline for Basic tier users who hit the daily cap
+    const isBasicTier = currentState.user?.tier === 'basic' || currentState.user?.tier === 'Basic';
+    if (isDailyLimit && isBasicTier) {
+      const upgradeBtn = document.createElement('button');
+      upgradeBtn.textContent = 'Upgrade to Pro →';
+      upgradeBtn.className = 'inline-upgrade-btn';
+      upgradeBtn.addEventListener('click', handleUpgrade);
+      elements.responseContent.appendChild(upgradeBtn);
+    }
+  }
 
   /**
    * Listen for storage changes to update tier UI in real time

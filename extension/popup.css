@@ -221,6 +221,19 @@ body {
     color: var(--color-text-success-default);
 }
 
+.inline-upgrade-btn {
+    display: block;
+    margin-top: var(--space-size-base-8);
+    background: none;
+    border: var(--space-size-base-1) solid var(--color-text-danger-default);
+    border-radius: var(--border-radius-base-md);
+    color: var(--color-text-danger-default);
+    cursor: pointer;
+    font-size: var(--font-size-base-12);
+    padding: var(--space-size-base-5) var(--space-size-base-10);
+    font-weight: var(--font-weight-base-medium);
+}
+
 .info-icon {
     width: 12px;
     height: 12px;
@@ -452,11 +465,28 @@ body {
     padding: var(--space-size-base-15);
 }
 
+.migration-notice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-size-base-10);
+}
+
 .migration-notice-title {
     font-size: var(--font-size-base-14);
     color: var(--color-text-warning-default);
-    margin-bottom: var(--space-size-base-10);
     font-weight: var(--font-weight-base-medium);
+}
+
+.migration-dismiss-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-warning-default);
+    font-size: var(--font-size-base-12);
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
 }
 
 .migration-notice-text {

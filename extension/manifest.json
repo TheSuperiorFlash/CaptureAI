@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "CaptureAI",
     "short_name": "CaptureAI",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "author": "Grayson Kramer",
     "description": "Screenshot any question on Canvas, Moodle, or Blackboard and get the answer instantly with AI.",
     "homepage_url": "https://captureai.dev",
