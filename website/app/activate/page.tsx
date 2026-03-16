@@ -175,7 +175,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         type="text"
                         inputMode="numeric"
                         autoComplete="one-time-code"
-                        placeholder="000000"
+                        placeholder="Enter 6-digit code"
                         value={verificationCode}
                         onChange={(e) => handleCodeInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
