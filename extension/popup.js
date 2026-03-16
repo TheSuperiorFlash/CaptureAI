@@ -46,7 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     advancedArrow: document.getElementById('advanced-arrow'),
     themeSelector: document.getElementById('theme-selector'),
     privacyGuardBanner: document.getElementById('privacy-guard-banner'),
-    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss')
+    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss'),
+    usageWarningBanner: document.getElementById('usage-warning-banner'),
+    usageWarningBannerDismiss: document.getElementById('usage-warning-banner-dismiss'),
+    usageWarningTitle: document.getElementById('usage-warning-title'),
+    usageWarningMessage: document.getElementById('usage-warning-message')
   };
 
   // State variables
@@ -92,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Banner event listeners
   elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+  elements.usageWarningBannerDismiss.addEventListener('click', dismissUsageWarningBanner);
 
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
@@ -337,6 +342,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.userTier.textContent = normalizedTier.toUpperCase();
 
     if (normalizedTier === 'basic') {
+      // Ensure PrivacyGuard is disabled for Basic tier (handles edge cases like downgrades)
+      if (settings.privacyGuard.enabled) {
+        settings.privacyGuard.enabled = false;
+        elements.privacyGuardToggle.classList.remove('active');
+        saveSettings();
+      }
+
       elements.upgradeBtn.classList.remove('hidden');
       elements.userTier.classList.add('tier-basic');
       elements.userTier.classList.remove('tier-pro');
@@ -461,9 +473,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.usageContent.appendChild(barOuter);
         elements.usageContent.appendChild(todayDiv);
       }
+
+      // Check if warning banner should be shown
+      checkUsageWarningBanner(usage);
     } catch (error) {
       console.error('Error loading usage stats:', error);
       elements.usageContent.textContent = 'Unable to load usage stats';
+      // Hide warning banner on error
+      elements.usageWarningBanner.classList.add('hidden');
     }
   }
 
@@ -783,6 +800,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function dismissPrivacyGuardBanner() {
     await chrome.storage.local.set({ 'captureai-privacy-guard-notice-seen': true });
     elements.privacyGuardBanner.classList.add('hidden');
+  }
+
+  /**
+   * Check if usage warning banner should be shown.
+   * Shows banner only when at 80% usage or 5 requests remaining on Basic tier.
+   * @param {Object} usage - Usage object with limitType and today stats
+   */
+  function checkUsageWarningBanner(usage) {
+    if (!usage || usage.limitType !== 'per_day') {
+      // Only show for Basic tier (per_day limit)
+      elements.usageWarningBanner.classList.add('hidden');
+      return;
+    }
+
+    const used = parseInt(usage.today.used, 10) || 0;
+    const limit = parseInt(usage.today.limit, 10) || 0;
+    const remaining = Math.max(0, limit - used);
+    const percentage = limit > 0 ? Math.round((used / limit) * 100) : 0;
+
+    // Show warning if at 80% or 5 requests remaining
+    const shouldShow = percentage >= 80 || remaining <= 5;
+
+    if (shouldShow) {
+      // Update banner message based on condition
+      if (remaining <= 5) {
+        elements.usageWarningMessage.textContent = `Only ${remaining} request${remaining === 1 ? '' : 's'} remaining today.`;
+      } else {
+        elements.usageWarningMessage.textContent = `You've used ${percentage}% of your daily limit (${used} of ${limit} requests).`;
+      }
+      elements.usageWarningBanner.classList.remove('hidden');
+    } else {
+      elements.usageWarningBanner.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Dismiss the usage warning banner.
+   */
+  function dismissUsageWarningBanner() {
+    elements.usageWarningBanner.classList.add('hidden');
   }
 
   /**
