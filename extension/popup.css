@@ -821,7 +821,7 @@ body {
 }
 
 #domain-list {
-    max-height: 80px;
+    max-height: 100px;
     overflow-y: auto;
     padding-right: 4px;
 }
