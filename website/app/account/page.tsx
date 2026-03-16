@@ -197,7 +197,7 @@ export default function AccountPage() {
 
   const maskKey = (key: string) => {
     if (key.length <= 4) return key
-    return '••••' + key.slice(-4)
+    return '••••-••••-••••-••••-' + key.slice(-4)
   }
 
   const handleSignOut = () => {
@@ -356,9 +356,9 @@ export default function AccountPage() {
               <div className="space-y-3">
                 <div className="text-xs text-[--color-text-tertiary]">
                   {isPro ? (
-                    <p>Monthly subscription • Auto-renews</p>
+                    <p>$9.99/month • Auto-renews</p>
                   ) : (
-                    <p>Weekly subscription • Auto-renews</p>
+                    <p>$1.49/week • Auto-renews</p>
                   )}
                 </div>
                 <Separator className="bg-white/[0.06]" />
@@ -382,9 +382,6 @@ export default function AccountPage() {
           {/* Account details */}
           <ScrollRevealItem>
             <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-[28px] p-7 md:p-8">
-              <div className="absolute -right-8 -top-8 p-8 opacity-5 transition-opacity group-hover:opacity-10">
-                <User className="h-40 w-40 text-emerald-400" />
-              </div>
               
               <div className="relative z-10 mb-8 flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 ring-1 ring-emerald-500/20">
@@ -441,8 +438,7 @@ export default function AccountPage() {
 
               <div className="divider-gradient" />
 
-              <div>
-                <p className="mb-1 text-xs text-[--color-text-tertiary]">Privacy</p>
+              <div className="pt-5">
                 <a
                   href={`mailto:support@captureai.dev?subject=${encodeURIComponent('Data Export Request')}&body=${encodeURIComponent(`Please export all data associated with my account: ${user.email}`)}`}
                   className="text-xs text-[--color-text-tertiary] transition-colors hover:text-[--color-text-secondary] underline underline-offset-2"
@@ -456,9 +452,6 @@ export default function AccountPage() {
           {/* Billing */}
           <ScrollRevealItem>
             <div className="glass-card group relative flex h-full flex-col overflow-hidden rounded-[28px] p-7 md:p-8">
-              <div className="absolute -right-8 -top-8 p-8 opacity-5 transition-opacity group-hover:opacity-10">
-                <CreditCard className="h-40 w-40 text-blue-400" />
-              </div>
               
               <div className="relative z-10 mb-8 flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-blue-500/5 ring-1 ring-blue-500/20">
