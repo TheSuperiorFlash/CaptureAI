@@ -180,12 +180,12 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         onChange={(e) => handleCodeInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
                         maxLength={6}
-                        className="mb-2 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[--color-text] placeholder:text-[--color-text-tertiary] placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
                     />
                     {codeError && (
-                        <p className="mb-3 text-center text-xs text-red-400">{codeError}</p>
+                        <p className="mt-2 text-center text-xs text-red-400">{codeError}</p>
                     )}
-                    <div className="mb-6 flex justify-center">
+                    <div className="mt-3 mb-6 flex justify-center">
                         <button
                             type="button"
                             onClick={sendCode}
@@ -202,7 +202,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
-                            : 'Continue to Stripe'
+                            : 'Continue to payment'
                         }
                     </button>
 
