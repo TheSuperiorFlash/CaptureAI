@@ -672,6 +672,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.mainView.classList.add('hidden');
     elements.settingsView.classList.remove('hidden');
 
+    // Ensure upgrade button is in correct state for current tier
+    if (currentState.user) {
+      applyTierUI(currentState.user.tier);
+    }
+
     // Load settings
     await loadSettings();
   }
@@ -1094,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (changes['captureai-user-tier']) {
       const newTier = changes['captureai-user-tier'].newValue;
-      if (newTier && currentState.user && !elements.mainControls.classList.contains('hidden')) {
+      if (newTier && currentState.user) {
         currentState.user = { ...currentState.user, tier: newTier };
         applyTierUI(newTier);
       }
