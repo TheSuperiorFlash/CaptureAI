@@ -334,11 +334,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   function applyTierUI(tier) {
     const normalizedTier = normalizeTier(tier);
-    console.log('applyTierUI called with tier:', tier, 'normalized:', normalizedTier);
     elements.userTier.textContent = normalizedTier.toUpperCase();
 
     if (normalizedTier === 'basic') {
-      console.log('Setting tier to BASIC - showing upgrade button');
       elements.upgradeBtn.classList.remove('hidden');
       elements.userTier.classList.add('tier-basic');
       elements.userTier.classList.remove('tier-pro');
@@ -346,7 +344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.usageSection.classList.remove('hidden');
       updateUsageStats(); // No await - load asynchronously
     } else {
-      console.log('Setting tier to PRO - hiding upgrade button');
       elements.upgradeBtn.classList.add('hidden');
       elements.userTier.classList.add('tier-pro');
       elements.userTier.classList.remove('tier-basic');
@@ -677,11 +674,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Ensure upgrade button is in correct state for current tier
     if (currentState.user) {
-      console.log('Applying tier UI in showSettings:', currentState.user.tier);
       applyTierUI(currentState.user.tier);
-      console.log('Upgrade button classList:', elements.upgradeBtn.classList.toString());
-    } else {
-      console.log('WARNING: currentState.user is null in showSettings');
     }
 
     // Load settings
