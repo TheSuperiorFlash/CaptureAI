@@ -1108,6 +1108,7 @@ export class SubscriptionHandler {
   async handleSubscriptionUpdated(subscription) {
     try {
       const subscriptionId = subscription.id;
+      const customerId = subscription.customer;
       const status = subscription.status;
 
       // Map Stripe subscription statuses to subscription_status
@@ -1118,28 +1119,40 @@ export class SubscriptionHandler {
         : ['active', 'trialing'].includes(status) ? 'active'
           : 'inactive';
 
-      const user = await this.db
-        .prepare('SELECT email, tier, subscription_status FROM users WHERE stripe_subscription_id = ?')
+      // Try subscription ID first; fall back to customer ID in case the subscription
+      // ID changed (e.g. plan interval switch via portal creating a new subscription).
+      let user = await this.db
+        .prepare('SELECT id, email, tier, subscription_status FROM users WHERE stripe_subscription_id = ?')
         .bind(subscriptionId)
         .first();
+
+      if (!user && customerId) {
+        user = await this.db
+          .prepare('SELECT id, email, tier, subscription_status FROM users WHERE stripe_customer_id = ?')
+          .bind(customerId)
+          .first();
+      }
+
+      if (!user) {
+        console.error('handleSubscriptionUpdated: no user found for subscription', subscriptionId, 'customer', customerId);
+        return;
+      }
 
       if (subscriptionStatus === 'inactive') {
         // Revoke tier access when subscription lapses
         await this.db
-          .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
-          .bind(subscriptionStatus, null, subscriptionId)
+          .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
+          .bind(subscriptionStatus, null, subscriptionId, user.id)
           .run();
 
-        if (user) {
-          await this.logSubscriptionEvent({
-            email: user.email,
-            eventType: 'subscription_lapsed',
-            fromTier: user.tier,
-            fromStatus: user.subscription_status,
-            toStatus: subscriptionStatus,
-            stripeEventId: subscription.id
-          }).catch(err => console.error('Audit log failed:', err));
-        }
+        await this.logSubscriptionEvent({
+          email: user.email,
+          eventType: 'subscription_lapsed',
+          fromTier: user.tier,
+          fromStatus: user.subscription_status,
+          toStatus: subscriptionStatus,
+          stripeEventId: subscription.id
+        }).catch(err => console.error('Audit log failed:', err));
         return;
       }
 
@@ -1153,23 +1166,27 @@ export class SubscriptionHandler {
         newTier = 'pro';
       }
 
+      // Log price comparison to help diagnose mismatches in production
+      console.log('handleSubscriptionUpdated: priceId', newPriceId, '-> tier', newTier,
+        '| BASIC configured:', !!this.env.STRIPE_PRICE_BASIC, '| PRO configured:', !!this.env.STRIPE_PRICE_PRO);
+
       if (newTier) {
         await this.db
-          .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
-          .bind(subscriptionStatus, newTier, subscriptionId)
+          .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
+          .bind(subscriptionStatus, newTier, subscriptionId, user.id)
           .run();
       } else {
         await this.db
-          .prepare("UPDATE users SET subscription_status = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
-          .bind(subscriptionStatus, subscriptionId)
+          .prepare("UPDATE users SET subscription_status = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
+          .bind(subscriptionStatus, subscriptionId, user.id)
           .run();
       }
 
       // When no recognized price ID is present, newTier is null and the DB tier is unchanged.
       // Compare against the effective resulting tier to avoid false audit entries.
-      const effectiveTier = newTier ?? user?.tier;
+      const effectiveTier = newTier ?? user.tier;
 
-      if (user && (user.tier !== effectiveTier || user.subscription_status !== subscriptionStatus)) {
+      if (user.tier !== effectiveTier || user.subscription_status !== subscriptionStatus) {
         await this.logSubscriptionEvent({
           email: user.email,
           eventType: 'subscription_updated',
@@ -1351,7 +1368,7 @@ export class SubscriptionHandler {
       }
 
       const userData = await this.db
-        .prepare('SELECT stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?')
         .bind(user.userId)
         .first();
 
@@ -1364,7 +1381,22 @@ export class SubscriptionHandler {
 
       let portalUrl;
       if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id) {
-        portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier);
+        try {
+          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier);
+        } catch (planChangeError) {
+          // If plan change portal fails (stale subscription, missing item, etc.),
+          // fall back to regular billing portal. User can still upgrade from there.
+          if (this.isStripeMissingResourceError(planChangeError)) {
+            // Subscription is stale in Stripe - clear it and fall back to regular portal
+            await this.db
+              .prepare("UPDATE users SET stripe_subscription_id = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
+              .bind(null, 'inactive', userData.id)
+              .run();
+          }
+          // Fall back to basic billing portal for any error
+          const portal = await this.createBillingPortal(userData.stripe_customer_id);
+          portalUrl = portal.url;
+        }
       } else {
         const portal = await this.createBillingPortal(userData.stripe_customer_id);
         portalUrl = portal.url;
@@ -1891,8 +1923,8 @@ export class SubscriptionHandler {
     const subscription = await subResponse.json();
     const itemId = subscription.items?.data?.[0]?.id;
 
-    if (!itemId) {
-      throw new Error('Subscription item not found');
+    if (!itemId || subscription.items?.data?.length === 0) {
+      throw new Error('Subscription item not found - subscription may be inactive');
     }
 
     const response = await fetchWithTimeout('https://api.stripe.com/v1/billing_portal/sessions', {
