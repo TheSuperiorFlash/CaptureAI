@@ -608,22 +608,21 @@ body {
 }
 
 #upgrade-btn {
-    background: none;
-    border: 1px solid var(--color-border-subtle-default);
-    background-color: var(--color-surface-neutral-default);
-    color: var(--color-text-primary-default);
+    background: linear-gradient(135deg, #218aff 0%, #a252ff 100%);
+    border: none;
+    color: var(--color-text-inverse-default);
     font-size: 11px;
     padding: 3px 10px;
-    border-radius: var(--border-radius-button-pill);
+    border-radius: var(--border-radius-base-xl);
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(162, 82, 255, 0.3);
 }
 
 #upgrade-btn:hover {
-    background-color: rgba(33, 138, 255, 0.08);
-    color: #218aff;
-    border-color: rgba(33, 138, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(162, 82, 255, 0.4);
+    transform: translateY(-1px);
 }
 
 #upgrade-btn:active {
