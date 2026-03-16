@@ -769,14 +769,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /**
    * Show the one-time PrivacyGuard auto-enable banner if applicable.
+   * Only shown while PrivacyGuard is actually active — avoids stale
+   * "PrivacyGuard is now on" messages after it has been disabled.
    */
   async function checkPrivacyGuardBanner() {
     const result = await chrome.storage.local.get([
       'captureai-privacy-guard-defaulted',
-      'captureai-privacy-guard-notice-seen'
+      'captureai-privacy-guard-notice-seen',
+      'captureai-settings'
     ]);
+    const savedSettings = result['captureai-settings'] || {};
+    const isPrivacyGuardEnabled = savedSettings.privacyGuard?.enabled === true;
     const shouldShow = result['captureai-privacy-guard-defaulted'] === true
-      && result['captureai-privacy-guard-notice-seen'] !== true;
+      && result['captureai-privacy-guard-notice-seen'] !== true
+      && isPrivacyGuardEnabled;
 
     elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
   }
@@ -812,10 +818,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
           await ensureContentScriptLoaded(tab.id);
-          chrome.tabs.sendMessage(tab.id, { action: 'showPrivacyGuardBanner' }).catch(() => {});
+          chrome.tabs.sendMessage(tab.id, { action: 'showPrivacyGuardBanner' })
+            .catch(err => console.warn('CaptureAI: Banner delivery failed:', err));
         }
-      } catch (_error) {
-        // Silent — banner is the sole notification for this toggle
+      } catch (bannerError) {
+        console.warn('CaptureAI: Could not send PrivacyGuard banner:', bannerError);
       }
     }
   }
@@ -827,15 +834,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     let hostname;
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab?.url) return;
+      if (!tab?.url) {
+        return;
+      }
       hostname = new URL(tab.url).hostname.toLowerCase();
-    } catch (_error) {
+    } catch (tabError) {
+      console.warn('CaptureAI: Could not get current tab URL:', tabError);
       return;
     }
 
-    if (!hostname || hostname.startsWith('chrome') || hostname === 'newtab') return;
+    if (!hostname || hostname.startsWith('chrome') || hostname === 'newtab') {
+      return;
+    }
 
-    if (settings.domainBlacklist.includes(hostname)) return;
+    if (settings.domainBlacklist.includes(hostname)) {
+      return;
+    }
 
     settings.domainBlacklist.push(hostname);
     await saveSettings();

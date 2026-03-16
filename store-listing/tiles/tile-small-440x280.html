@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=440">
+  <title>CaptureAI — Small Promo Tile (440×280)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 440px;
+      height: 280px;
+      overflow: hidden;
+      background: #fff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .tile {
+      width: 440px;
+      height: 280px;
+      background: #ffffff;
+      display: flex;
+      align-items: stretch;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle background grid */
+    .tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(33,138,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(33,138,255,0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    /* ── LEFT SIDE: Copy ── */
+    .copy-side {
+      width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 28px 22px 28px 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+
+    .brand-logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #218aff 0%, #0055cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Camera icon inside brand logo */
+    .brand-logo svg {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #333333;
+      letter-spacing: -0.2px;
+    }
+
+    .headline {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333333;
+      line-height: 1.22;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .headline em {
+      font-style: normal;
+      color: #218aff;
+    }
+
+    .subline {
+      font-size: 12px;
+      font-weight: 400;
+      color: #666666;
+      line-height: 1.5;
+    }
+
+    /* ── RIGHT SIDE: Floating panel mock ── */
+    .panel-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      padding: 18px 18px 18px 8px;
+    }
+
+    /* Decorative blue glow behind the panel */
+    .panel-side::before {
+      content: '';
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 170px;
+      height: 220px;
+      background: radial-gradient(ellipse at center, rgba(33,138,255,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .floating-panel {
+      width: 170px;
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow:
+        0 16px 48px rgba(0,0,0,0.12),
+        0 0 0 1px rgba(0,0,0,0.04);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    /* Panel header */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .panel-brand {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .panel-logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #218aff 0%, #0055cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel-logo svg {
+      width: 10px;
+      height: 10px;
+      fill: #fff;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #333333;
+    }
+
+    /* Mode toggle pill */
+    .mode-toggle {
+      width: 70px;
+      height: 18px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 2px;
+    }
+
+    .toggle-thumb {
+      width: 34px;
+      height: 14px;
+      background: #218aff;
+      border-radius: 100px;
+      position: absolute;
+      left: 2px;
+    }
+
+    .toggle-label {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      text-align: center;
+      font-size: 8px;
+      font-weight: 600;
+      line-height: 14px;
+    }
+
+    .toggle-label.active { color: #fff; }
+    .toggle-label.inactive { color: #999; }
+
+    /* Response area */
+    .response-area {
+      background: rgba(0,0,0,0.02);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 10px;
+      padding: 7px 8px;
+      min-height: 44px;
+    }
+
+    .response-label {
+      font-size: 8px;
+      font-weight: 600;
+      color: #999999;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+    }
+
+    .response-text {
+      font-size: 9px;
+      font-weight: 500;
+      color: #333333;
+      line-height: 1.4;
+    }
+
+    .response-text .highlight {
+      color: #218aff;
+      font-weight: 700;
+    }
+
+    /* Capture button */
+    .btn-capture {
+      height: 34px;
+      background: #218aff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      box-shadow: 0 4px 12px rgba(33,138,255,0.3);
+    }
+
+    .btn-capture svg {
+      width: 12px;
+      height: 12px;
+      fill: #fff;
+    }
+
+    .btn-capture-text {
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Quick capture button */
+    .btn-quick {
+      height: 28px;
+      background: rgba(0,0,0,0.03);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-quick-text {
+      font-size: 9px;
+      font-weight: 600;
+      color: #333333;
+    }
+  </style>
+</head>
+<body>
+<div class="tile">
+
+  <!-- LEFT: Copy -->
+  <div class="copy-side">
+    <div class="brand">
+      <div class="brand-logo">
+        <!-- Camera icon -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.92c.04-.3.07-.61.07-.93s-.03-.63-.07-.93l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.07.62-.07.94s.03.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.07-.47-.12-.61l-2.03-1.58Z"/>
+        </svg>
+      </div>
+      <span class="brand-name">CaptureAI</span>
+    </div>
+
+    <h1 class="headline">Screenshot<br>any question.<br><em>Get the answer.</em></h1>
+    <p class="subline">No tab-switching.<br>No copy-pasting. Just answers.</p>
+  </div>
+
+  <!-- RIGHT: Floating panel mockup -->
+  <div class="panel-side">
+    <div class="floating-panel">
+
+      <!-- Header -->
+      <div class="panel-header">
+        <div class="panel-brand">
+          <div class="panel-logo">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.92c.04-.3.07-.61.07-.93s-.03-.63-.07-.93l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.07.62-.07.94s.03.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.07-.47-.12-.61l-2.03-1.58Z"/>
+            </svg>
+          </div>
+          <span class="panel-title">CaptureAI</span>
+        </div>
+        <div class="mode-toggle">
+          <div class="toggle-thumb"></div>
+          <span class="toggle-label active">Capture</span>
+          <span class="toggle-label inactive">Ask</span>
+        </div>
+      </div>
+
+      <!-- Response area -->
+      <div class="response-area">
+        <div class="response-label">Response</div>
+        <div class="response-text">The answer is <span class="highlight">C — The mitochondria</span>, responsible for producing ATP through cellular respiration.</div>
+      </div>
+
+      <!-- Capture button -->
+      <div class="btn-capture">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m8 3a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3Z"/>
+        </svg>
+        <span class="btn-capture-text">Capture a Question</span>
+      </div>
+
+      <!-- Quick Capture -->
+      <div class="btn-quick">
+        <span class="btn-quick-text">Quick Capture</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

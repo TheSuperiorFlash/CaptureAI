@@ -111,7 +111,7 @@ export default {
         .catch(err => console.error('Usage breakdown cleanup failed:', err)),
       db.prepare("DELETE FROM usage_daily WHERE date < DATE('now', '-90 days')")
         .run()
-        .catch(err => console.error('Usage daily cleanup failed:', err)),
+        .catch(err => console.error('Usage daily cleanup failed:', err))
     ]));
   }
 };
