@@ -626,7 +626,9 @@ export const UICore = {
     const BANNER_ID = 'captureai-pg-banner';
 
     // Only one banner at a time
-    if (document.getElementById(BANNER_ID)) return;
+    if (document.getElementById(BANNER_ID)) {
+      return;
+    }
 
     // Ensure theme CSS vars are available on the page
     this.injectThemeCSS();
@@ -638,7 +640,9 @@ export const UICore = {
 
     const banner = document.createElement('div');
     banner.id = BANNER_ID;
-    if (isDark) banner.setAttribute('data-theme', 'dark');
+    if (isDark) {
+      banner.setAttribute('data-theme', 'dark');
+    }
 
     banner.style.cssText = `
       position: fixed !important;
@@ -646,22 +650,22 @@ export const UICore = {
       left: 50% !important;
       width: 30% !important;
       z-index: 2147483647 !important;
-      background: var(--color-floating-panel-background) !important;
-      color: var(--color-text-primary-default) !important;
-      font-family: var(--font-family-base) !important;
+      background: var(--color-floating-panel-background, rgba(30,30,30,0.97)) !important;
+      color: var(--color-text-primary-default, #f0f0f0) !important;
+      font-family: var(--font-family-base, system-ui, sans-serif) !important;
       font-size: 15px !important;
       padding: 12px 16px !important;
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
       box-sizing: border-box !important;
-      border-left: 3px solid var(--color-border-brand-default) !important;
-      border-bottom: 1px solid var(--color-border-subtle-default) !important;
-      border-right: 1px solid var(--color-border-subtle-default) !important;
-      border-radius: 0 0 var(--border-radius-base-lg) var(--border-radius-base-lg) !important;
-      box-shadow: var(--shadow-floating-panel) !important;
-      backdrop-filter: var(--backdrop-floating-panel) !important;
-      -webkit-backdrop-filter: var(--backdrop-floating-panel) !important;
+      border-left: 3px solid var(--color-border-brand-default, #06b6d4) !important;
+      border-bottom: 1px solid var(--color-border-subtle-default, rgba(255,255,255,0.12)) !important;
+      border-right: 1px solid var(--color-border-subtle-default, rgba(255,255,255,0.12)) !important;
+      border-radius: 0 0 var(--border-radius-base-lg, 8px) var(--border-radius-base-lg, 8px) !important;
+      box-shadow: var(--shadow-floating-panel, 0 4px 24px rgba(0,0,0,0.4)) !important;
+      backdrop-filter: var(--backdrop-floating-panel, blur(12px)) !important;
+      -webkit-backdrop-filter: var(--backdrop-floating-panel, blur(12px)) !important;
       transform: translateX(-50%) translateY(-100%) !important;
       transition: transform 0.25s ease !important;
       pointer-events: auto !important;
@@ -674,11 +678,14 @@ export const UICore = {
     text.style.cssText = 'flex: 1 !important; line-height: 1.5 !important;';
 
     const dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.setAttribute('aria-label', 'Dismiss PrivacyGuard banner');
+    dismiss.title = 'Dismiss PrivacyGuard banner';
     dismiss.textContent = '✕';
     dismiss.style.cssText = `
       background: none !important;
       border: none !important;
-      color: var(--color-text-tertiary-default) !important;
+      color: var(--color-text-tertiary-default, #888) !important;
       font-size: 15px !important;
       cursor: pointer !important;
       padding: 0 !important;
@@ -703,7 +710,9 @@ export const UICore = {
 
     // Slide in (two rAF frames to guarantee transition fires after paint)
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => { banner.style.transform = 'translateX(-50%) translateY(0)'; });
+      requestAnimationFrame(() => {
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      });
     });
 
     // Auto-dismiss after 8 seconds
