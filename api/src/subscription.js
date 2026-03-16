@@ -887,20 +887,42 @@ export class SubscriptionHandler {
   async handlePaymentSucceeded(invoice) {
     try {
       const customerEmail = invoice.customer_email;
+      if (!customerEmail) return;
 
-      if (customerEmail) {
-        await this.db
-          .prepare("UPDATE users SET subscription_status = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
-          .bind('active', customerEmail)
-          .run();
+      const subscriptionId = invoice.subscription;
 
-        await this.logSubscriptionEvent({
-          email: customerEmail,
-          eventType: 'payment_succeeded',
-          toStatus: 'active',
-          stripeEventId: invoice.id
-        }).catch(err => console.error('Audit log failed:', err));
+      // Determine the tier from the subscription line item in this invoice.
+      // This keeps the tier column in sync when a plan change is paid via the
+      // Customer Portal (or any other path), without relying solely on the
+      // customer.subscription.updated webhook.
+      const subscriptionLine = invoice.lines?.data?.find(line => line.type === 'subscription');
+      const priceId = subscriptionLine?.price?.id;
+      let newTier = null;
+      if (priceId === this.env.STRIPE_PRICE_BASIC) {
+        newTier = 'basic';
+      } else if (priceId === this.env.STRIPE_PRICE_PRO) {
+        newTier = 'pro';
       }
+
+      if (newTier && subscriptionId) {
+        await this.db
+          .prepare("UPDATE users SET subscription_status = 'active', tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
+          .bind(newTier, subscriptionId, customerEmail)
+          .run();
+      } else {
+        await this.db
+          .prepare("UPDATE users SET subscription_status = 'active', updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
+          .bind(customerEmail)
+          .run();
+      }
+
+      await this.logSubscriptionEvent({
+        email: customerEmail,
+        eventType: 'payment_succeeded',
+        toTier: newTier,
+        toStatus: 'active',
+        stripeEventId: invoice.id
+      }).catch(err => console.error('Audit log failed:', err));
     } catch (error) {
       console.error('Payment succeeded handler error:', error);
     }
