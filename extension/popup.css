@@ -857,9 +857,9 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: var(--space-size-base-8) var(--space-size-base-12);
-    background-color: var(--color-card-background);
-    border: var(--space-size-base-1) solid var(--color-border-subtle-default);
-    border-radius: var(--border-radius-base-lg);
+    background-color: var(--color-input-background);
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--border-radius-base-md);
     margin-bottom: var(--space-size-base-5);
     font-size: var(--font-size-base-12);
 }
