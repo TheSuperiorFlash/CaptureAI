@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1400">
+  <title>CaptureAI — Marquee Promo Tile (1400×560)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 1400px;
+      height: 560px;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .tile {
+      width: 1400px;
+      height: 560px;
+      background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 55%, #f8fbff 100%);
+      display: flex;
+      align-items: stretch;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background dots */
+    .tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(33,138,255,0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    /* Blue accent blob — top left */
+    .blob-tl {
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(ellipse at center, rgba(33,138,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Blue accent blob — bottom right */
+    .blob-br {
+      position: absolute;
+      bottom: -100px;
+      right: 80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(33,138,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── Column 1: Headline + brand (left ~36%) ─── */
+    .col-headline {
+      width: 500px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 52px 48px 52px 64px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #218aff 0%, #0055cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(33,138,255,0.35);
+    }
+
+    .brand-logo svg { width: 20px; height: 20px; fill: #fff; }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333333;
+    }
+
+    .headline {
+      font-size: 40px;
+      font-weight: 800;
+      color: #1a1a1a;
+      letter-spacing: -1.4px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .headline em {
+      font-style: normal;
+      color: #218aff;
+    }
+
+    .subline {
+      font-size: 15.5px;
+      font-weight: 400;
+      color: #555555;
+      line-height: 1.55;
+      margin-bottom: 28px;
+      max-width: 360px;
+    }
+
+    .cta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #218aff;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 100px;
+      box-shadow: 0 6px 18px rgba(33,138,255,0.32);
+      width: fit-content;
+    }
+
+    .cta-arrow {
+      font-size: 15px;
+    }
+
+    /* Divider line between columns */
+    .col-divider {
+      width: 1px;
+      background: rgba(0,0,0,0.06);
+      align-self: stretch;
+      margin: 40px 0;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ─── Column 2: 3-step flow (center ~30%) ─── */
+    .col-steps {
+      flex: 0 0 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 52px 44px;
+      gap: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .steps-heading {
+      font-size: 11px;
+      font-weight: 700;
+      color: #218aff;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 24px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 0;
+    }
+
+    .step + .step {
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .step-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-icon-wrap.blue   { background: rgba(33,138,255,0.12); }
+    .step-icon-wrap.indigo { background: rgba(100,80,255,0.10); }
+    .step-icon-wrap.green  { background: rgba(76,175,101,0.12); }
+
+    .step-icon-wrap svg { width: 22px; height: 22px; }
+
+    .step-body {}
+
+    .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: #218aff;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 2px;
+    }
+
+    .step-num.indigo { color: #6450ff; }
+    .step-num.green  { color: #4caf65; }
+
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+
+    .step-desc {
+      font-size: 12px;
+      font-weight: 400;
+      color: #666666;
+      line-height: 1.45;
+    }
+
+    /* Arrow connector between steps */
+    .step-connector {
+      display: flex;
+      align-items: center;
+      padding-left: 22px;
+      color: rgba(33,138,255,0.3);
+      font-size: 18px;
+      line-height: 1;
+      height: 0;
+      overflow: visible;
+    }
+
+    /* ─── Column 3: Floating panel demo (right ~34%) ─── */
+    .col-demo {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 60px 40px 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Simulated page behind the panel */
+    .demo-bg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #f4f6f8;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06);
+    }
+
+    /* Fake page content strips */
+    .demo-content {
+      padding: 20px 20px;
+    }
+
+    .demo-strip {
+      height: 10px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.08);
+      margin-bottom: 8px;
+    }
+
+    .demo-strip.short  { width: 55%; }
+    .demo-strip.medium { width: 78%; }
+    .demo-strip.long   { width: 90%; }
+    .demo-strip.xshort { width: 38%; }
+
+    /* Selection box in demo */
+    .demo-selection {
+      position: absolute;
+      top: 62px;
+      left: 14px;
+      right: 14px;
+      height: 84px;
+      border: 2px dashed #218aff;
+      border-radius: 10px 10px 0 10px;
+      box-shadow:
+        0 0 18px rgba(33,138,255,0.7),
+        0 0 45px rgba(33,138,255,0.3);
+    }
+
+    /* Dark overlay strips around selection */
+    .demo-ov-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 62px;
+      background: rgba(0,0,0,0.4);
+    }
+    .demo-ov-bottom {
+      position: absolute;
+      top: 148px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+    }
+
+    /* Floating panel inside demo */
+    .demo-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 188px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 12px 36px rgba(0,0,0,0.14),
+        0 0 0 1px rgba(0,0,0,0.04);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .dp-brand {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dp-logo {
+      width: 17px;
+      height: 17px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #218aff 0%, #0055cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dp-logo svg { width: 9px; height: 9px; fill: #fff; }
+
+    .dp-title { font-size: 10px; font-weight: 700; color: #333; }
+
+    .dp-toggle {
+      width: 68px;
+      height: 17px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 2px;
+    }
+
+    .dp-thumb {
+      width: 32px;
+      height: 13px;
+      background: #218aff;
+      border-radius: 100px;
+      position: absolute;
+      left: 2px;
+    }
+
+    .dp-toggle-label {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      text-align: center;
+      font-size: 7.5px;
+      font-weight: 600;
+    }
+    .dp-toggle-label.a { color: #fff; }
+    .dp-toggle-label.i { color: #999; }
+
+    .dp-response {
+      background: rgba(0,0,0,0.02);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 8px;
+      padding: 7px 8px;
+      min-height: 48px;
+    }
+
+    .dp-resp-label {
+      font-size: 7.5px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+    }
+
+    .dp-resp-text {
+      font-size: 9px;
+      color: #333;
+      line-height: 1.45;
+    }
+
+    .dp-resp-text strong { color: #218aff; }
+
+    .dp-btn-capture {
+      height: 30px;
+      background: #218aff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      box-shadow: 0 3px 10px rgba(33,138,255,0.3);
+    }
+
+    .dp-btn-capture svg { width: 11px; height: 11px; fill: #fff; }
+    .dp-btn-capture-text { font-size: 9px; font-weight: 700; color: #fff; }
+
+    .dp-btn-quick {
+      height: 24px;
+      background: rgba(0,0,0,0.03);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dp-btn-quick-text { font-size: 8.5px; font-weight: 600; color: #333; }
+  </style>
+</head>
+<body>
+<div class="tile">
+  <div class="blob-tl"></div>
+  <div class="blob-br"></div>
+
+  <!-- ── Column 1: Headline ── -->
+  <div class="col-headline">
+    <div class="brand-row">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m8 3a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3Z"/>
+        </svg>
+      </div>
+      <span class="brand-name">CaptureAI</span>
+    </div>
+
+    <h1 class="headline">The fastest way<br>to get <em>answers</em><br>while studying.</h1>
+    <p class="subline">Screenshot any question on your screen — AI gives you the answer in seconds. No switching tabs. No copy-pasting.</p>
+
+    <div class="cta-badge">
+      Free to try <span class="cta-arrow">→</span>
+    </div>
+  </div>
+
+  <div class="col-divider"></div>
+
+  <!-- ── Column 2: Steps ── -->
+  <div class="col-steps">
+    <div class="steps-heading">How it works</div>
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-icon-wrap blue">
+        <!-- Selection/crosshair icon -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 9V5a2 2 0 0 1 2-2h4M3 15v4a2 2 0 0 0 2 2h4M21 9V5a2 2 0 0 0-2-2h-4M21 15v4a2 2 0 0 1-2 2h-4" stroke="#218aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="2" fill="#218aff"/>
+        </svg>
+      </div>
+      <div class="step-body">
+        <div class="step-num">Step 1</div>
+        <div class="step-title">Select the question</div>
+        <div class="step-desc">Drag a box around any question on your screen — on any website.</div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-icon-wrap indigo">
+        <!-- AI/sparkle icon -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="#6450ff" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" stroke="#6450ff" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="step-body">
+        <div class="step-num indigo">Step 2</div>
+        <div class="step-title">AI reads it instantly</div>
+        <div class="step-desc">Our AI reads the question and figures out the answer.</div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-icon-wrap green">
+        <!-- Checkmark / answer icon -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12l2 2 4-4" stroke="#4caf65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="3" width="18" height="18" rx="4" stroke="#4caf65" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div class="step-body">
+        <div class="step-num green">Step 3</div>
+        <div class="step-title">Get your answer</div>
+        <div class="step-desc">The answer appears right on your screen — no new tabs, no interruption.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-divider"></div>
+
+  <!-- ── Column 3: Live demo mockup ── -->
+  <div class="col-demo">
+    <div class="demo-bg">
+
+      <!-- Fake page content -->
+      <div class="demo-content">
+        <div class="demo-strip short"  style="margin-bottom:14px; height:12px; background:rgba(33,138,255,0.2); width:45%;"></div>
+        <div class="demo-strip long"></div>
+        <div class="demo-strip medium"></div>
+        <div class="demo-strip xshort"></div>
+      </div>
+
+      <!-- Overlay (darkening above and below selection) -->
+      <div class="demo-ov-top"></div>
+      <div class="demo-ov-bottom"></div>
+
+      <!-- Selection box -->
+      <div class="demo-selection"></div>
+
+      <!-- Floating panel -->
+      <div class="demo-panel">
+        <div class="dp-header">
+          <div class="dp-brand">
+            <div class="dp-logo">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m8 3a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3Z"/>
+              </svg>
+            </div>
+            <span class="dp-title">CaptureAI</span>
+          </div>
+          <div class="dp-toggle">
+            <div class="dp-thumb"></div>
+            <span class="dp-toggle-label a">Capture</span>
+            <span class="dp-toggle-label i">Ask</span>
+          </div>
+        </div>
+
+        <div class="dp-response">
+          <div class="dp-resp-label">Response</div>
+          <div class="dp-resp-text">The answer is <strong>C — The mitochondria.</strong> It produces ATP through cellular respiration.</div>
+        </div>
+
+        <div class="dp-btn-capture">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m8 3a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3Z"/>
+          </svg>
+          <span class="dp-btn-capture-text">Capture a Question</span>
+        </div>
+
+        <div class="dp-btn-quick">
+          <span class="dp-btn-quick-text">Quick Capture</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
