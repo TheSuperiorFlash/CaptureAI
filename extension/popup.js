@@ -348,6 +348,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.privacyGuardToggle.classList.remove('active');
         saveSettings();
       }
+      // Clear the auto-enable flag so re-upgrades trigger the auto-enable again
+      await chrome.storage.local.remove('captureai-privacy-guard-defaulted');
 
       elements.upgradeBtn.classList.remove('hidden');
       elements.userTier.classList.add('tier-basic');
