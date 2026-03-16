@@ -180,7 +180,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                         onChange={(e) => handleCodeInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter' && canConfirm) onConfirm(verificationCode) }}
                         maxLength={6}
-                        className="mb-2 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[--color-text] placeholder:text-[--color-text-tertiary]/30 placeholder:tracking-[0.5em] focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
+                        className="mb-2 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-center font-mono text-2xl tracking-[0.5em] text-[--color-text] placeholder:text-[--color-text-tertiary]/30 placeholder:tracking-normal placeholder:font-sans placeholder:text-sm focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/15 transition-all"
                     />
                     {codeError && (
                         <p className="mb-3 text-center text-xs text-red-400">{codeError}</p>
