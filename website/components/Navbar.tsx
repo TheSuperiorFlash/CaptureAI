@@ -236,6 +236,9 @@ export default function Navbar() {
                 <div className="hidden md:flex items-center relative z-10">
                     <MagneticButton magneticRange={10}>
                         <motion.div
+                            initial={{
+                                borderRadius: isScrolled ? "24px" : "12px"
+                            }}
                             animate={{
                                 borderRadius: isScrolled ? "24px" : "12px"
                             }}
