@@ -3,12 +3,12 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, Keyboard, HelpCircle, MessageSquare, AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Help & FAQ',
-  description:
-    'CaptureAI help center. Setup guides, troubleshooting for Canvas, Moodle, and Blackboard, keyboard shortcuts, and FAQ.',
-  alternates: {
-    canonical: '/help',
-  },
+    title: 'Help & FAQ',
+    description:
+        'CaptureAI help center. Setup guides, troubleshooting for Canvas, Moodle, and Blackboard, keyboard shortcuts, and FAQ.',
+    alternates: {
+        canonical: '/help',
+    },
 }
 
 const INLINE_LINK_CLASS = 'text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300';
