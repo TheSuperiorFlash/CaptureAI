@@ -3,7 +3,6 @@
 import { useRef, useEffect } from 'react'
 import { Camera, MousePointer, Eye, Repeat, Shield, MessageSquare, LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
-import FadeImageLoop from './FadeImageLoop'
 
 interface Feature {
     icon: LucideIcon
@@ -14,7 +13,6 @@ interface Feature {
     glow: string
     image?: string
     video?: string
-    images?: [string, string]
 }
 
 const features: Feature[] = [
@@ -142,10 +140,8 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                 <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
                     {feature.description}
                 </p>
-                <div className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased', WebkitBackfaceVisibility: 'hidden', transform: 'translate3d(0, 0, 0)', WebkitTransform: 'translate3d(0, 0, 0)' }}>
-                    {feature.images ? (
-                        <FadeImageLoop image1={feature.images[0]} image2={feature.images[1]} />
-                    ) : feature.video ? (
+                <div className="mt-4 rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ clipPath: 'inset(0 round 1rem)' }}>
+                    {feature.video ? (
                         <video
                             src={feature.video}
                             autoPlay
@@ -153,25 +149,12 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                             muted
                             playsInline
                             className="w-full h-full object-cover"
-                            style={{
-                                backfaceVisibility: 'hidden',
-                                WebkitBackfaceVisibility: 'hidden',
-                                transform: 'translate3d(0, 0, 0)',
-                                WebkitTransform: 'translate3d(0, 0, 0)',
-                                willChange: 'transform'
-                            }}
                         />
                     ) : feature.image ? (
                         <img
                             src={feature.image}
                             alt={feature.title}
                             className="w-full h-full object-cover"
-                            style={{
-                                imageRendering: 'auto',
-                                WebkitFontSmoothing: 'antialiased',
-                                backfaceVisibility: 'hidden',
-                                willChange: 'transform'
-                            }}
                         />
                     ) : (
                         <div className="w-full h-full" />
