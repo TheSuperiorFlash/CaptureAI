@@ -142,7 +142,7 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                 <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
                     {feature.description}
                 </p>
-                <div className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}>
+                <div className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased', WebkitBackfaceVisibility: 'hidden', transform: 'translate3d(0, 0, 0)', WebkitTransform: 'translate3d(0, 0, 0)' }}>
                     {feature.images ? (
                         <FadeImageLoop image1={feature.images[0]} image2={feature.images[1]} />
                     ) : feature.video ? (
@@ -153,6 +153,13 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                             muted
                             playsInline
                             className="w-full h-full object-cover"
+                            style={{
+                                backfaceVisibility: 'hidden',
+                                WebkitBackfaceVisibility: 'hidden',
+                                transform: 'translate3d(0, 0, 0)',
+                                WebkitTransform: 'translate3d(0, 0, 0)',
+                                willChange: 'transform'
+                            }}
                         />
                     ) : feature.image ? (
                         <img
