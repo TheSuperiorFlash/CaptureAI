@@ -980,7 +980,7 @@ export class SubscriptionHandler {
 
       await this.db
         .prepare("UPDATE users SET subscription_status = ?, tier = ?, updated_at = datetime('now') WHERE stripe_subscription_id = ?")
-        .bind('cancelled', null, subscriptionId)
+        .bind('cancelled', 'basic', subscriptionId)
         .run();
 
       if (user) {
@@ -1026,7 +1026,7 @@ export class SubscriptionHandler {
 
       await this.db
         .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE stripe_customer_id = ?")
-        .bind('cancelled', null, null, customerId)
+        .bind('cancelled', 'basic', null, customerId)
         .run();
 
       await this.logSubscriptionEvent({
@@ -1085,7 +1085,7 @@ export class SubscriptionHandler {
       // Revoke access on chargeback — mirrors the refund handler behaviour.
       await this.db
         .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE stripe_customer_id = ?")
-        .bind('cancelled', null, null, customerId)
+        .bind('cancelled', 'basic', null, customerId)
         .run();
 
       await this.logSubscriptionEvent({
@@ -1142,7 +1142,7 @@ export class SubscriptionHandler {
         // Revoke tier access when subscription lapses
         await this.db
           .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
-          .bind(subscriptionStatus, null, subscriptionId, user.id)
+          .bind(subscriptionStatus, 'basic', subscriptionId, user.id)
           .run();
 
         await this.logSubscriptionEvent({

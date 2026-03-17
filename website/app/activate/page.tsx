@@ -128,7 +128,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
         if (visible && !codeSent && !codeSending) {
             sendCode()
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visible])
 
     // Resend cooldown timer
@@ -149,9 +149,8 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onCancel} />
-            <div className={`relative w-full max-w-sm transition-all duration-300 ease-out ${
-                visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
-            }`}>
+            <div className={`relative w-full max-w-sm transition-all duration-300 ease-out ${visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+                }`}>
                 <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-48 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
                 <div className="relative rounded-[28px] border border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
                     <button type="button" onClick={onCancel}
@@ -198,9 +197,8 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                     </div>
 
                     <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
-                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${
-                            !canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
-                        }`}>
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${!canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
+                            }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
                             : 'Continue to payment'
@@ -331,249 +329,249 @@ export default function ActivatePage() {
 
     return (
         <>
-        <div className="relative overflow-x-hidden py-20 md:py-28">
-            {/* Background */}
-            <div className="pointer-events-none absolute inset-0 gradient-mesh" />
-            <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
-            <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
-            {/* Sparkles particle background */}
-            <div className="pointer-events-none absolute inset-0 h-full w-full">
-                <SparklesCore
-                    id="activate-sparkles"
-                    background="transparent"
-                    minSize={0.6}
-                    maxSize={1.4}
-                    particleDensity={20}
-                    className="h-full w-full"
-                    particleColor="#FFFFFF"
-                    speed={0.7}
-                />
-            </div>
-
-            <div className="relative z-10 mx-auto max-w-5xl px-6">
-                {/* Header */}
-                <div className="mx-auto mb-8 max-w-xl text-center">
-                    <h1 className="mb-3">
-                        <span className="text-[--color-text]">Choose your </span>
-                        <span className="text-gradient-static">plan</span>
-                    </h1>
-                    <p className="text-[--color-text-secondary]">
-                        Start basic for 50 requests per day, or unlock everything with Pro.
-                    </p>
+            <div className="relative overflow-x-hidden py-20 md:py-28">
+                {/* Background */}
+                <div className="pointer-events-none absolute inset-0 gradient-mesh" />
+                <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
+                <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
+                {/* Sparkles particle background */}
+                <div className="pointer-events-none absolute inset-0 h-full w-full">
+                    <SparklesCore
+                        id="activate-sparkles"
+                        background="transparent"
+                        minSize={0.6}
+                        maxSize={1.4}
+                        particleDensity={15}
+                        className="h-full w-full"
+                        particleColor="#FFFFFF"
+                        speed={0.5}
+                    />
                 </div>
 
-                {/* Plans grid */}
-                <div
-                    className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchCancel}
-                >
-                    {/* Basic plan */}
-                    <div
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={selectedTier === 'basic'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
-                            ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
-                            : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
-                            }`}
-                        onClick={() => setSelectedTier('basic')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
-                    >
-                        <div className="absolute right-6 top-6">
-                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'basic'
-                                ? 'border-blue-500 bg-blue-500'
-                                : 'border-white/20'
-                                }`}>
-                                {selectedTier === 'basic' && <Check className="h-4 w-4 text-white" />}
-                            </div>
-                        </div>
-                        <div className="mb-6">
-                            <h2 className="text-xl font-bold text-[--color-text]">Basic</h2>
-                            <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
-                        </div>
-
-                        <div className="mb-7">
-                            <span className="text-4xl font-extrabold font-inter text-[--color-text]">$1.49</span>
-                            <span className="text-sm text-[--color-text-tertiary]"> / week</span>
-                        </div>
-
-                        <ul className="space-y-3">
-                            {basicFeatures.map((f) => (
-                                <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
-                                    {f.limited ? (
-                                        <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
-                                    ) : f.included ? (
-                                        <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                    ) : (
-                                        <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
-                                    )}
-                                    <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
-                                </li>
-                            ))}
-                        </ul>
+                <div className="relative z-10 mx-auto max-w-5xl px-6">
+                    {/* Header */}
+                    <div className="mx-auto mb-8 max-w-xl text-center">
+                        <h1 className="mb-3">
+                            <span className="text-[--color-text]">Choose your </span>
+                            <span className="text-gradient-static">plan</span>
+                        </h1>
+                        <p className="text-[--color-text-secondary]">
+                            Start basic for 50 requests per day, or unlock everything with Pro.
+                        </p>
                     </div>
 
-                    {/* Pro plan */}
+                    {/* Plans grid */}
                     <div
-                        role="button"
-                        tabIndex={0}
-                        aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
-                            ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
-                            : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
-                            }`}
-                        onClick={() => setSelectedTier('pro')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                        className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={handleTouchCancel}
                     >
-                        <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
-                            <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                        {/* Basic plan */}
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={selectedTier === 'basic'}
+                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
+                                ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
+                                : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
+                                }`}
+                            onClick={() => setSelectedTier('basic')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
+                        >
                             <div className="absolute right-6 top-6">
-                                <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                    ? 'border-cyan-400 bg-cyan-400'
+                                <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'basic'
+                                    ? 'border-blue-500 bg-blue-500'
                                     : 'border-white/20'
                                     }`}>
-                                    {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                    {selectedTier === 'basic' && <Check className="h-4 w-4 text-white" />}
                                 </div>
                             </div>
                             <div className="mb-6">
-                                <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
-                                <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
+                                <h2 className="text-xl font-bold text-[--color-text]">Basic</h2>
+                                <p className="text-sm text-[--color-text-tertiary]">For trying it out</p>
                             </div>
 
                             <div className="mb-7">
-                                <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / month</span>
-                            </div>
-
-                            {/* Pro highlights grid */}
-                            <div className="mb-7 grid grid-cols-2 gap-2.5">
-                                {proHighlights.map((h) => {
-                                    const Icon = h.icon
-                                    return (
-                                        <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
-                                            <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
-                                            <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
-                                            <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
-                                        </div>
-                                    )
-                                })}
+                                <span className="text-4xl font-extrabold font-inter text-[--color-text]">$1.49</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / week</span>
                             </div>
 
                             <ul className="space-y-3">
-                                {proFeatures.map((f) => (
-                                    <li key={f.text} className="flex items-center gap-3">
-                                        <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                {basicFeatures.map((f) => (
+                                    <li key={f.text} className={`flex items-center gap-3 ${!f.included ? 'opacity-30' : ''}`}>
+                                        {f.limited ? (
+                                            <Minus className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" aria-hidden="true" />
+                                        ) : f.included ? (
+                                            <Check className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        ) : (
+                                            <XIcon className="h-4 w-4 flex-shrink-0 text-[--color-text-tertiary]" />
+                                        )}
                                         <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                    </div>
-                    </div>
-                </div>
 
-                {/* Email + CTA section */}
-                <div className="mx-auto mt-12 max-w-2xl">
-                    <div className="glass-card rounded-2xl p-8 md:p-10">
-                        <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
-                            {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
-                        </h3>
-                        <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                            Enter your email to proceed to secure checkout via Stripe.
-                        </p>
+                        {/* Pro plan */}
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={selectedTier === 'pro'}
+                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                                ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
+                                : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
+                                }`}
+                            onClick={() => setSelectedTier('pro')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                        >
+                            <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                                <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                                    <div className="absolute right-6 top-6">
+                                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
+                                            ? 'border-cyan-400 bg-cyan-400'
+                                            : 'border-white/20'
+                                            }`}>
+                                            {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                        </div>
+                                    </div>
+                                    <div className="mb-6">
+                                        <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
+                                        <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
+                                    </div>
 
-                        <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !loading) {
-                                        e.preventDefault()
-                                        handleSignup()
-                                    }
-                                }}
-                                placeholder="your@email.com"
-                                aria-label="Email address"
-                                autoComplete="email"
-                                className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-3.5 text-base text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleSignup}
-                                disabled={loading}
-                                className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-all ${loading
-                                    ? 'cursor-not-allowed bg-blue-600/40'
-                                    : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
-                                    }`}
-                            >
-                                {loading ? (
-                                    <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
+                                    <div className="mb-7">
+                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
+                                        <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                    </div>
+
+                                    {/* Pro highlights grid */}
+                                    <div className="mb-7 grid grid-cols-2 gap-2.5">
+                                        {proHighlights.map((h) => {
+                                            const Icon = h.icon
+                                            return (
+                                                <div key={h.title} className="rounded-xl bg-white/[0.03] p-3">
+                                                    <Icon className="mb-1.5 h-4 w-4 text-cyan-400" />
+                                                    <div className="text-xs font-medium text-[--color-text]">{h.title}</div>
+                                                    <div className="text-[11px] text-[--color-text-tertiary]">{h.desc}</div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+
+                                    <ul className="space-y-3">
+                                        {proFeatures.map((f) => (
+                                            <li key={f.text} className="flex items-center gap-3">
+                                                <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
+                                                <span className="text-sm text-[--color-text-secondary]">{f.text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Email + CTA section */}
+                    <div className="mx-auto mt-12 max-w-2xl">
+                        <div className="glass-card rounded-2xl p-8 md:p-10">
+                            <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
+                                {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
+                            </h3>
+                            <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
+                                Enter your email to proceed to secure checkout via Stripe.
+                            </p>
+
+                            <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !loading) {
+                                            e.preventDefault()
+                                            handleSignup()
+                                        }
+                                    }}
+                                    placeholder="your@email.com"
+                                    aria-label="Email address"
+                                    autoComplete="email"
+                                    className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-5 py-3.5 text-base text-[--color-text] placeholder:text-[--color-text-tertiary] focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleSignup}
+                                    disabled={loading}
+                                    className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-all ${loading
+                                        ? 'cursor-not-allowed bg-blue-600/40'
+                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
+                                        }`}
+                                >
+                                    {loading ? (
+                                        <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
+                                    ) : (
+                                        <>
+                                            Continue
+                                            <ArrowRight className="h-4 w-4" />
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+
+                            {/* Result message */}
+                            {result && (
+                                result.type === 'info' ? (
+                                    <div
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
+                                        className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5"
+                                    >
+                                        <div className="flex flex-col items-center text-center">
+                                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15">
+                                                <AlertCircle className="h-5 w-5 text-amber-400" />
+                                            </div>
+                                            <h3 className="mb-1.5 text-sm font-semibold text-amber-400">Already subscribed</h3>
+                                            <p className="text-sm text-amber-200/70">{result.message}</p>
+                                        </div>
+                                    </div>
                                 ) : (
-                                    <>
-                                        Continue
-                                        <ArrowRight className="h-4 w-4" />
-                                    </>
-                                )}
-                            </button>
+                                    <div
+                                        role="status"
+                                        aria-live="polite"
+                                        aria-atomic="true"
+                                        className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
+                                    >
+                                        <div className="flex flex-col items-center text-center">
+                                            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
+                                                <AlertCircle className="h-5 w-5 text-red-400" />
+                                            </div>
+                                            <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
+                                            <p className="text-sm text-red-200/70">{result.message}</p>
+                                        </div>
+                                    </div>
+                                )
+                            )}
                         </div>
 
-
-                        {/* Result message */}
-                        {result && (
-                            result.type === 'info' ? (
-                                <div
-                                    role="status"
-                                    aria-live="polite"
-                                    aria-atomic="true"
-                                    className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5"
-                                >
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15">
-                                            <AlertCircle className="h-5 w-5 text-amber-400" />
-                                        </div>
-                                        <h3 className="mb-1.5 text-sm font-semibold text-amber-400">Already subscribed</h3>
-                                        <p className="text-sm text-amber-200/70">{result.message}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    role="status"
-                                    aria-live="polite"
-                                    aria-atomic="true"
-                                    className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
-                                >
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
-                                            <AlertCircle className="h-5 w-5 text-red-400" />
-                                        </div>
-                                        <h3 className="mb-1.5 text-sm font-semibold text-red-400">Something went wrong</h3>
-                                        <p className="text-sm text-red-200/70">{result.message}</p>
-                                    </div>
-                                </div>
-                            )
-                        )}
+                        {/* Footer */}
+                        <p className="mt-6 text-center text-xs text-[--color-text-tertiary]">
+                            Already have a key? Open the CaptureAI extension popup to activate it.
+                        </p>
                     </div>
-
-                    {/* Footer */}
-                    <p className="mt-6 text-center text-xs text-[--color-text-tertiary]">
-                        Already have a key? Open the CaptureAI extension popup to activate it.
-                    </p>
                 </div>
-            </div>
-        </div >
+            </div >
 
-        {confirmationData && (
-            <UpgradeConfirmModal
-                data={confirmationData}
-                visible={modalVisible}
-                loading={confirmLoading}
-                onConfirm={handleConfirmUpgrade}
-                onCancel={hideConfirmModal}
-            />
-        )}
+            {confirmationData && (
+                <UpgradeConfirmModal
+                    data={confirmationData}
+                    visible={modalVisible}
+                    loading={confirmLoading}
+                    onConfirm={handleConfirmUpgrade}
+                    onCancel={hideConfirmModal}
+                />
+            )}
         </>
     )
 }

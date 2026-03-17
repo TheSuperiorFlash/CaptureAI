@@ -12,7 +12,7 @@ Maximalist/expressive aesthetic: pure dark backgrounds, rich deep blue + electri
 
 ## Color Tokens
 
-Defined in `globals.css` under `@theme inline`:
+Defined in `globals.css` under `@theme`:
 
 | Token | Value | Usage |
 |---|---|---|
@@ -211,7 +211,7 @@ text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300
 ### PRO Badges
 
 ```jsx
-<span className="rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 border border-cyan-500/20 shadow-lg">
+<span className="rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 shadow-lg">
   PRO
 </span>
 ```

@@ -48,7 +48,7 @@ function PlatformMarquee({ logos }: { logos: typeof platformLogos }) {
     const trackRef = useRef<HTMLDivElement>(null)
     const xPos = useRef(0)
     const x = useMotionValue(0)
-    const speed = 25 // pixels per second (matches old 30s CSS animation)
+    const speed = 20 // pixels per second (matches old 30s CSS animation)
 
     useAnimationFrame((_, delta) => {
         if (!trackRef.current) return
@@ -131,7 +131,7 @@ export default function Hero() {
                 </div>
 
                 {/* Blob 3: Bottom Left */}
-                <div className="absolute bottom-[300px] left-[-150px] h-[1000px] w-[1000px] pointer-events-none">
+                <div className="absolute bottom-[100px] left-[-150px] h-[1000px] w-[1000px] pointer-events-none">
                     <div
                         className="h-full w-full rounded-full bg-[#0d3bbf] gradient-blur"
                         style={{ opacity: isMounted ? 0.3 : 0 }}

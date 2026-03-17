@@ -7,7 +7,8 @@
    Spacing: 8pt grid
    ============================================ */
 
-@theme inline {
+/* stylelint-disable-next-line at-rule-no-unknown */
+@theme {
   --color-background: #08090b;
   /* Near-black background */
   --color-foreground: #fafafa;
@@ -237,15 +238,15 @@ p {
 
 .glass {
   background: var(--color-surface-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .glass-card {
   background: linear-gradient(145deg, rgba(11, 17, 32, 0.8) 0%, rgba(6, 9, 19, 0.6) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
@@ -293,10 +294,13 @@ p {
 /* ---- Animations ---- */
 
 @keyframes float-slow {
-  0%, 100% {
+
+  0%,
+  100% {
     translate: 0 0;
     rotate: 0deg;
   }
+
   50% {
     translate: 0 -25px;
     rotate: 2deg;
@@ -304,10 +308,13 @@ p {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: var(--pulse-opacity-low, 0.15);
     scale: 1;
   }
+
   50% {
     opacity: var(--pulse-opacity-high, 0.3);
     scale: 1.05;

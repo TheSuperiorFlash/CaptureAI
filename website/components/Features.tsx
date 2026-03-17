@@ -31,7 +31,7 @@ const features: Feature[] = [
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Answers appear inline on the page in a subtle overlay. No popups, no new windows — just the answer, right where you need it.',
+        description: 'Answers appear inline on the page in a subtle overlay. No popups, no new windows; just the answer, right where you need it.',
         color: 'from-indigo-500/30 to-indigo-600/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] group-hover:border-indigo-500/30',
     },
@@ -69,7 +69,7 @@ const features: Feature[] = [
     {
         icon: InfinityIcon,
         title: 'Unlimited Requests',
-        description: 'Free users get 10 requests per day. Pro removes that limit entirely — use CaptureAI as much as you need.',
+        description: 'Basic users get 50 requests per day. Pro removes that limit entirely, use CaptureAI as much as you need.',
         pro: true,
         color: 'from-[#0047ff]/40 to-[#00f0ff]/20',
         glow: 'group-hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] group-hover:border-[#00f0ff]/40',
@@ -138,7 +138,7 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
             {/* Inner Content bumped up in Z space to create parallax */}
             <div className="relative z-10 flex flex-col h-full pointer-events-none" style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}>
                 {feature.pro && (
-                    <span className="absolute right-0 top-0 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 border border-cyan-500/20 shadow-lg">
+                    <span className="absolute right-0 top-0 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 shadow-lg">
                         PRO
                     </span>
                 )}
