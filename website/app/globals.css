@@ -293,28 +293,24 @@ p {
 /* ---- Animations ---- */
 
 @keyframes float-slow {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
+  0%, 100% {
+    translate: 0 0;
+    rotate: 0deg;
   }
-
   50% {
-    transform: translateY(-25px) rotate(2deg);
+    translate: 0 -25px;
+    rotate: 2deg;
   }
 }
 
 @keyframes pulse-glow {
-
-  0%,
-  100% {
-    opacity: 0.15;
-    transform: scale(1);
+  0%, 100% {
+    opacity: var(--pulse-opacity-low, 0.15);
+    scale: 1;
   }
-
   50% {
-    opacity: 0.3;
-    transform: scale(1.05);
+    opacity: var(--pulse-opacity-high, 0.3);
+    scale: 1.05;
   }
 }
 

@@ -95,8 +95,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.backToMainBtn.addEventListener('click', showMainView);
 
   // Banner event listeners
-  elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
-  elements.usageWarningBannerDismiss.addEventListener('click', dismissUsageWarningBanner);
+  if (elements.privacyGuardBannerDismiss) {
+    elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+  }
+  if (elements.usageWarningBannerDismiss) {
+    elements.usageWarningBannerDismiss.addEventListener('click', dismissUsageWarningBanner);
+  }
 
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
@@ -494,7 +498,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error loading usage stats:', error);
       elements.usageContent.textContent = 'Unable to load usage stats';
       // Hide warning banner on error
-      elements.usageWarningBanner.classList.add('hidden');
+      if (elements.usageWarningBanner) {
+        elements.usageWarningBanner.classList.add('hidden');
+      }
     }
   }
 
@@ -805,7 +811,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       && result['captureai-privacy-guard-notice-seen'] !== true
       && isPrivacyGuardEnabled;
 
-    elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+    if (elements.privacyGuardBanner) {
+      elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+    }
   }
 
   /**
@@ -813,7 +821,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function dismissPrivacyGuardBanner() {
     await chrome.storage.local.set({ 'captureai-privacy-guard-notice-seen': true });
-    elements.privacyGuardBanner.classList.add('hidden');
+    if (elements.privacyGuardBanner) {
+      elements.privacyGuardBanner.classList.add('hidden');
+    }
   }
 
   /**
@@ -822,6 +832,8 @@ document.addEventListener('DOMContentLoaded', async () => {
    * @param {Object} usage - Usage object with limitType and today stats
    */
   function checkUsageWarningBanner(usage) {
+    if (!elements.usageWarningBanner) return;
+
     if (!usage || usage.limitType !== 'per_day') {
       // Only show for Basic tier (per_day limit)
       elements.usageWarningBanner.classList.add('hidden');
@@ -853,7 +865,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Dismiss the usage warning banner.
    */
   function dismissUsageWarningBanner() {
-    elements.usageWarningBanner.classList.add('hidden');
+    if (elements.usageWarningBanner) {
+      elements.usageWarningBanner.classList.add('hidden');
+    }
   }
 
   /**

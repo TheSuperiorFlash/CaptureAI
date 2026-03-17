@@ -98,23 +98,6 @@ export default function Hero() {
     const shouldReduceMotion = useReducedMotion()
     const [isMounted, setIsMounted] = useState(false)
 
-    // Interactive Mouse Glow
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const { currentTarget, clientX, clientY } = e
-        const { left, top, width, height } = currentTarget.getBoundingClientRect()
-        mouseX.set(clientX - left - width / 2)
-        mouseY.set(clientY - top - height / 2)
-    }
-
-    const springConfig = { damping: 40, stiffness: 100, mass: 2 }
-    const glowX1 = useSpring(useTransform(mouseX, x => !shouldReduceMotion ? x * 0.3 : 0), springConfig)
-    const glowY1 = useSpring(useTransform(mouseY, y => !shouldReduceMotion ? y * 0.3 : 0), springConfig)
-    const glowX2 = useSpring(useTransform(mouseX, x => !shouldReduceMotion ? x * -0.2 : 0), springConfig)
-    const glowY2 = useSpring(useTransform(mouseY, y => !shouldReduceMotion ? y * -0.2 : 0), springConfig)
-
     const text1Words = "Screenshot any question.".split(' ')
     const text2Words = "Get the exact answer.".split(' ')
 
@@ -123,40 +106,50 @@ export default function Hero() {
         setIsMounted(true)
     }, [])
 
-
-
     return (
         <section
             className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-48"
-            onMouseMove={handleMouseMove}
         >
             {/* Layered deeper gradient background with smooth fade-out */}
             <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
                 <div className="absolute inset-0 aurora-bg" />
-                <motion.div
-                    className="absolute left-[50%] top-[-200px] h-[800px] w-[1000px] -ml-[500px] rounded-full bg-[#0047ff] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none"
-                    style={{ x: glowX1, y: glowY1, opacity: (isMounted && shouldReduceMotion) ? 0.2 : 0.8 }}
-                />
-                <motion.div
-                    className="absolute right-[-100px] top-[50px] h-[600px] w-[600px] rounded-full bg-[#00f0ff] gradient-blur gradient-blur-animated animate-float-slow motion-reduce:animate-none"
-                    style={{ x: glowX2, y: glowY2, opacity: (isMounted && shouldReduceMotion) ? 0.08 : 0.3 }}
-                />
-                <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: shouldReduceMotion ? 0.18 : 0.7 } : { opacity: 0.7 }} />
-                {/* Sparkles particle background — hidden when prefers-reduced-motion */}
-                {!shouldReduceMotion && (
-                    <div className="absolute inset-0 h-full w-full">
-                        <SparklesCore
-                            id="hero-sparkles"
-                            background="transparent"
-                            minSize={0.6}
-                            maxSize={1.4}
-                            particleDensity={100}
-                            className="h-full w-full"
-                            particleColor="#FFFFFF"
-                            speed={1}
-                        />
-                    </div>
-                )}
+
+                {/* Blob 1: Top Center */}
+                <div className="absolute left-[50%] top-[-200px] h-[1000px] w-[1000px] -ml-[500px] pointer-events-none">
+                    <div
+                        className="h-full w-full rounded-full bg-[#0047ff] gradient-blur"
+                        style={{ opacity: isMounted ? 0.4 : 0 }}
+                    />
+                </div>
+
+                {/* Blob 2: Right */}
+                <div className="absolute right-[-100px] top-[50px] h-[800px] w-[800px] pointer-events-none">
+                    <div
+                        className="h-full w-full rounded-full bg-[#00f0ff] gradient-blur"
+                        style={{ opacity: isMounted ? 0.3 : 0 }}
+                    />
+                </div>
+
+                {/* Blob 3: Bottom Left */}
+                <div className="absolute bottom-[300px] left-[-150px] h-[1000px] w-[1000px] pointer-events-none">
+                    <div
+                        className="h-full w-full rounded-full bg-[#0d3bbf] gradient-blur"
+                        style={{ opacity: isMounted ? 0.3 : 0 }}
+                    />
+                </div>
+                {/* Sparkles particle background — dynamic density based on reduced motion */}
+                <div className="absolute inset-0 h-full w-full">
+                    <SparklesCore
+                        id="hero-sparkles"
+                        background="transparent"
+                        minSize={0.6}
+                        maxSize={1.4}
+                        particleDensity={30}
+                        className="h-full w-full"
+                        particleColor="#FFFFFF"
+                        speed={1}
+                    />
+                </div>
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">

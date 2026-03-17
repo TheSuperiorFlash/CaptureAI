@@ -66,9 +66,8 @@ Defined in `globals.css` under `@theme inline`:
 - **`.gradient-section`** — Top-centered radial gradient overlay (`rgba(0,71,255,0.1)`)
 
 ### Animations
-- **`.animate-float-slow`** — Gentle 10s vertical float (`translateY(-25px)`) + slight rotation (2deg)
-- **`.animate-pulse-glow`** — Opacity pulse (0.15→0.3) + scale pulse (1→1.05), 6s cycle
-- **`.animate-shimmer`** — Background-position shimmer, 8s cycle
+- **`.animate-float-slow`** — Gentle 10s vertical float (`translateY(-25px)`) + slight rotation (2deg). Uses independent `translate`/`rotate` properties to avoid `transform` conflicts.
+- **`.animate-pulse-glow`** — Scale pulse (1→1.05) + opacity pulse. Default opacity is 0.15→0.3, but can be customized via `--pulse-opacity-low` and `--pulse-opacity-high` CSS variables. Uses independent `scale` property.
 - **`.animate-marquee`** — Linear translateX marquee, 30s cycle (used for platform logos)
 
 ### Entrance Animations
@@ -268,7 +267,7 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 | File | Purpose |
 |---|---|
 | `components/Navbar.tsx` | Floating pill nav with liquid glass + mobile dropdown |
-| `components/Hero.tsx` | Homepage hero with interactive mouse-tracking glow orbs, word-by-word spring entrance, platform marquee |
+| `components/Hero.tsx` | Homepage hero with static deep-blue/cyan background glow orbs, word-by-word spring entrance, platform marquee |
 | `components/ScrollStory.tsx` | Apple-style scroll-pinned story (400vh container, 3 sequences with mock quiz UI transitions) |
 | `components/FloatingUIShowcase.tsx` | Interactive 1.75× replica of extension popup (capture/ask mode toggle) |
 | `components/PrivacyGuardSlider.tsx` | Before/after image comparison with pointer-driven slider (mobile only) |
