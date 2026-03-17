@@ -45,10 +45,10 @@ export default function ScrollStory() {
     const anchorY = useTransform(scrollYProgress, [0, 0.4, 1], [150, 0, -100])
 
     // --- Window UI Transitions ---
-    const clutterOpacity = useTransform(scrollYProgress, [0.3, 0.4], [1, 0])
-    const cleanOpacity = useTransform(scrollYProgress, [0.35, 0.45], [0, 1])
-    const captureBoxOpacity = useTransform(scrollYProgress, [0.45, 0.55, 0.65, 0.75], [0, 1, 1, 0])
-    const captureBoxClipPath = useTransform(scrollYProgress, [0.45, 0.55], ["inset(0% 0% 100% 0%)", "inset(0% 0% 0% 0%)"])
+    const clutterOpacity = useTransform(scrollYProgress, [0.27, 0.37], [1, 0])
+    const cleanOpacity = useTransform(scrollYProgress, [0.32, 0.42], [0, 1])
+    const captureBoxOpacity = useTransform(scrollYProgress, [0.42, 0.52, 0.65, 0.75], [0, 1, 1, 0])
+    const captureBoxClipPath = useTransform(scrollYProgress, [0.42, 0.52], ["inset(0% 0% 100% 0%)", "inset(0% 0% 0% 0%)"])
 
     // --- Answer Selection ---
     const answerOpacity = useTransform(scrollYProgress, [0.72, 0.82], [0, 1])
@@ -211,7 +211,7 @@ export default function ScrollStory() {
 
                                         {/* Floating Capture Overlay - Sized tightly around quiz 1 */}
                                         <motion.div
-                                            className="absolute -inset-3 md:-inset-6 overflow-hidden rounded-xl border-2 border-dashed border-cyan-400/50 bg-cyan-400/5 mix-blend-screen"
+                                            className="absolute -inset-3 md:-inset-6 overflow-hidden rounded-xl border-2 border-dashed border-[#218aff]/50 bg-[#218aff]/5 mix-blend-screen"
                                             style={{
                                                 opacity: captureBoxOpacity,
                                                 clipPath: captureBoxClipPath
