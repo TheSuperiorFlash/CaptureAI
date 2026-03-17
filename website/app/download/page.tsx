@@ -5,6 +5,9 @@ import { Chrome, Check, Download, ArrowRight, Shield, Zap } from 'lucide-react'
 export const metadata: Metadata = {
     title: 'Download',
     description: 'Download the CaptureAI Chrome extension. Free AI-powered screenshot answers for students.',
+    alternates: {
+        canonical: '/download',
+    },
     openGraph: {
         title: 'Download CaptureAI',
         description: 'Free Chrome extension for students. Screenshot any question and get instant AI-powered answers.',

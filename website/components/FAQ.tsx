@@ -2,33 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-
-export const faqs = [
-    {
-        question: 'Which browsers are supported?',
-        answer: 'CaptureAI is built for Google Chrome only. It uses Chrome-specific extension APIs and has been tested exclusively on Chrome.',
-    },
-    {
-        question: 'What happens when I hit the daily limit?',
-        answer: 'Basic accounts get 50 requests per day. When you reach the limit, you can wait for the daily reset or upgrade to Pro for unlimited requests.',
-    },
-    {
-        question: 'Can I upgrade or cancel anytime?',
-        answer: 'Yes. You can upgrade to Pro at any point, and cancel your subscription whenever you want. No questions asked.',
-    },
-    {
-        question: 'Is my data stored anywhere?',
-        answer: 'Screenshots are processed securely and are not stored on our servers. We don\'t keep copies of your captured images or the questions they contain.',
-    },
-    {
-        question: 'Will my school detect the extension?',
-        answer: 'With Privacy Guard (Pro), the extension prevents quiz platforms from detecting its presence. Your browser activity logs appear as normal browsing.',
-    },
-    {
-        question: 'How accurate are the answers?',
-        answer: 'CaptureAI uses a capable AI model to analyze questions. Accuracy is high for most subjects, but we recommend reviewing answers as part of your study process.',
-    },
-]
+import { FAQS } from '@/lib/faq-data'
 
 export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -51,7 +25,7 @@ export default function FAQ() {
                     {/* Right column — accordion */}
                     <div className="reveal-up delay-200">
                         <div className="glass-card rounded-3xl p-2 select-none">
-                            {faqs.map((faq, index) => {
+                            {FAQS.map((faq, index) => {
                                 const panelId = `faq-panel-${index}`
                                 const buttonId = `faq-button-${index}`
                                 return (
@@ -62,7 +36,7 @@ export default function FAQ() {
                                             aria-expanded={openIndex === index}
                                             aria-controls={panelId}
                                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                            className={`flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02] ${index === 0 ? 'rounded-t-2xl' : index === faqs.length - 1 ? 'rounded-b-2xl' : 'rounded-none'}`}
+                                            className={`flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02] ${index === 0 ? 'rounded-t-2xl' : index === FAQS.length - 1 ? 'rounded-b-2xl' : 'rounded-none'}`}
                                         >
                                             <span className={`text-[16px] font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                                 {faq.question}

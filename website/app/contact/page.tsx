@@ -5,6 +5,9 @@ import { Mail, MessageCircle, ArrowRight, BookOpen } from 'lucide-react'
 export const metadata: Metadata = {
     title: 'Contact',
     description: 'Get in touch with the CaptureAI team for support or feature requests.',
+    alternates: {
+        canonical: '/contact',
+    },
 }
 
 export default function ContactPage() {

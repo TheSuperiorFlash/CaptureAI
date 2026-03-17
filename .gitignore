@@ -76,4 +76,4 @@ coverage/
 captureai-extension.zip
 
 ### Interface Design System ###
-.interface-design/
+.interface-design/.worktrees/

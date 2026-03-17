@@ -3,18 +3,23 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, Keyboard, HelpCircle, MessageSquare, AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Help',
-    description: 'Learn how to use CaptureAI. Guides, keyboard shortcuts, and FAQ.',
+    title: 'Help & FAQ',
+    description:
+        'CaptureAI help center. Setup guides, troubleshooting for Canvas, Moodle, and Blackboard, keyboard shortcuts, and FAQ.',
+    alternates: {
+        canonical: '/help',
+    },
 }
 
 const INLINE_LINK_CLASS = 'text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300';
 
-type QaItem = { q: string; a: React.ReactNode };
+type QaItem = { q: string; a: React.ReactNode; aPlain?: string };
 
 const FAQ_ITEMS: QaItem[] = [
     {
         q: 'How do I get a license key?',
         a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link> and enter your email. You&apos;ll receive a key via email after completing checkout.</>,
+        aPlain: "Visit the activation page and enter your email. You'll receive a key via email after completing checkout.",
     },
     {
         q: 'What\'s the difference between Basic and Pro?',
@@ -27,10 +32,12 @@ const FAQ_ITEMS: QaItem[] = [
     {
         q: 'How do I upgrade to Pro?',
         a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll see a prorated amount so you only pay for the remaining time.</>,
+        aPlain: "Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you'll see a prorated amount so you only pay for the remaining time.",
     },
     {
         q: 'How do I cancel my subscription?',
         a: <>Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.</>,
+        aPlain: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.',
     },
     {
         q: 'What is Privacy Guard?',
@@ -43,6 +50,7 @@ const FAQ_ITEMS: QaItem[] = [
     {
         q: 'Do you offer refunds?',
         a: <>Refunds are considered on a case-by-case basis within 7 days of purchase. Email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your order details.</>,
+        aPlain: 'Refunds are considered on a case-by-case basis within 7 days of purchase. Email support@captureai.dev with your order details.',
     },
 ];
 
@@ -54,6 +62,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'I paid but never received my license key',
         a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your receipt.</>,
+        aPlain: "Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don't see it after 10 minutes, email support@captureai.dev with your receipt.",
     },
     {
         q: 'The AI is giving wrong or irrelevant answers',
@@ -62,6 +71,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'It says "Daily limit reached"',
         a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, <Link href="/activate" className={INLINE_LINK_CLASS}>upgrade to Pro</Link>.</>,
+        aPlain: "You've used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, upgrade to Pro.",
     },
     {
         q: 'The extension doesn\'t work on a specific site',
@@ -70,6 +80,15 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'My license key says "Invalid or expired"',
         a: <>Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can check your subscription status and update your payment method.</>,
+        aPlain: 'Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click "Manage Billing" to access the Stripe billing portal where you can check your subscription status and update your payment method.',
+    },
+    {
+        q: 'Does CaptureAI work on locked-down browsers like Respondus?',
+        a: "CaptureAI captures from your screen, not the browser's internal state, so it works alongside Respondus Monitor. Privacy Guard (Pro) goes further — it prevents the exam page from detecting tab switches, focus loss, and extension activity. Respondus LockDown Browser blocks all extensions by design and is not supported.",
+    },
+    {
+        q: "Why isn't CaptureAI working on my school's LMS?",
+        a: "First check that the extension is enabled at chrome://extensions. Some school LMS pages use strict Content Security Policies — try pressing Ctrl+Shift+E to force the UI to appear. If the site runs inside an iframe (common on Blackboard and Canvas), the extension may not inject into nested frames. On exam platforms, enable Privacy Guard (Pro) to prevent the site from blocking extension activity.",
     },
 ];
 
@@ -87,7 +106,26 @@ function QaList({ items }: { items: QaItem[] }) {
 }
 
 export default function HelpPage() {
+    const allItems = [...FAQ_ITEMS, ...TROUBLESHOOTING_ITEMS]
+    const faqJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: allItems.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: typeof item.a === 'string' ? item.a : item.aPlain!,
+        },
+      })),
+    }
+
     return (
+        <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
         <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
@@ -226,5 +264,6 @@ export default function HelpPage() {
                 </section>
             </div>
         </div>
+        </>
     )
 }

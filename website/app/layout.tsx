@@ -45,8 +45,8 @@ export const metadata: Metadata = {
         images: [
             {
                 url: '/og-image.png',
-                width: 1737,
-                height: 1584,
+                width: 1200,
+                height: 630,
                 alt: 'CaptureAI Chrome Extension',
             },
         ],
