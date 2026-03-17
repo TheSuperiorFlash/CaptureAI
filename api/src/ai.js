@@ -660,17 +660,10 @@ export class AIHandler {
   async recordUsage({ email, promptType, model, inputTokens, outputTokens, cachedTokens, totalCost: overrideCost, cached = false, responseTime }) {
     const totalCost = this.calculateUsageCost({ model, inputTokens, outputTokens, cachedTokens, overrideCost });
 
-    // Both writes are wrapped in a transaction so they succeed or fail together,
-    // preventing divergence between rate-limit counters (usage_daily) and analytics (usage_breakdown).
-    await this.db.exec('BEGIN');
-    try {
-      await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
-      await this.upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
-      await this.db.exec('COMMIT');
-    } catch (error) {
-      await this.db.exec('ROLLBACK');
-      throw error;
-    }
+    // Both upserts use INSERT ... ON CONFLICT which are atomic in SQLite.
+    // No explicit transaction needed; D1 doesn't support SQL BEGIN/COMMIT.
+    await this.upsertUsageDaily({ email, inputTokens, outputTokens, totalCost, cached });
+    await this.upsertUsageBreakdown({ email, promptType, model, inputTokens, outputTokens, totalCost, cached, responseTime });
   }
 
   /**

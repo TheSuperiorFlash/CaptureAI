@@ -50,6 +50,9 @@ const PROMPT_TYPES = {
 /**
  * OpenAI API configuration
  */
+/** Daily request count at which the usage warning banner is shown */
+const USAGE_WARNING_THRESHOLD = 40;
+
 const OPENAI_CONFIG = {
   API_URL: 'https://api.openai.com/v1/chat/completions',
   VERBOSITY: 'low',
@@ -239,7 +242,8 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
       'askQuestion': handleAskQuestion,
       'enablePrivacyGuard': handleEnablePrivacyGuard,
       'disablePrivacyGuard': handleDisablePrivacyGuard,
-      'getPrivacyGuardStatus': handleGetPrivacyGuardStatus
+      'getPrivacyGuardStatus': handleGetPrivacyGuardStatus,
+      'openUpgradePortal': handleOpenUpgradePortal
     };
 
     const handler = handlers[request.action];
@@ -559,6 +563,22 @@ async function handleAskQuestion(request, sender, sendResponse) {
 }
 
 /**
+ * Open the Stripe upgrade portal for Pro tier
+ * @param {Object} _request - Unused
+ * @param {Object} _sender - Unused
+ * @param {Function} sendResponse - Response callback
+ */
+async function handleOpenUpgradePortal(_request, _sender, sendResponse) {
+  try {
+    const data = await AuthService.getPortalUrl('pro');
+    chrome.tabs.create({ url: data.url });
+    sendResponse({ success: true });
+  } catch (err) {
+    sendResponse({ success: false });
+  }
+}
+
+/**
  * Handle privacy guard enable request
  * Injects privacy protection script into MAIN world
  * Requires Pro tier subscription
@@ -714,12 +734,16 @@ async function sendToOpenAI(data, apiKey, promptType = PROMPT_TYPES.ANSWER) {
       chrome.storage.local.set({
         'captureai-last-usage': { data: response.usage, updatedAt: Date.now() }
       });
+      maybeShowUsageWarningBanner(response.usage);
     }
 
     return response.answer || 'No response found';
 
   } catch (error) {
-    console.error('Backend API error:', error);
+    const isExpected = error.message?.includes('Daily limit reached') || error.message?.includes('Rate limit reached');
+    if (!isExpected) {
+      console.error('Backend API error:', error);
+    }
     return formatError(error.message || 'Failed to get AI response');
   }
 }
@@ -767,12 +791,16 @@ async function sendTextOnlyQuestion(question, apiKey) {
       chrome.storage.local.set({
         'captureai-last-usage': { data: response.usage, updatedAt: Date.now() }
       });
+      maybeShowUsageWarningBanner(response.usage);
     }
 
     return response.answer || 'No response found';
 
   } catch (error) {
-    console.error('Backend API error:', error);
+    const isExpected = error.message?.includes('Daily limit reached') || error.message?.includes('Rate limit reached');
+    if (!isExpected) {
+      console.error('Backend API error:', error);
+    }
     return formatError(error.message || 'Failed to get AI response');
   }
 }
@@ -829,6 +857,46 @@ async function processImage(imageUri, request, sender, options = {}) {
 // ============================================================================
 // SECTION 6: CHROME APIS - MESSAGING
 // ============================================================================
+
+/**
+ * Show usage warning banner on the active tab if a daily threshold is crossed.
+ * Two independent thresholds: 40 requests used, and 5 requests remaining.
+ * Each fires at most once per day via separate storage keys.
+ * @param {Object} usage - Usage object from API response (usedToday, dailyLimit, limitType)
+ */
+async function maybeShowUsageWarningBanner(usage) {
+  if (!usage || usage.limitType !== 'per_day') return;
+
+  const remaining = Math.max(0, (usage.dailyLimit || 0) - usage.usedToday);
+  const today = new Date().toISOString().slice(0, 10);
+  const stored = await chrome.storage.local.get([
+    'captureai-usage-warning-shown-date',
+    'captureai-usage-critical-shown-date'
+  ]);
+
+  let warningMessage = null;
+
+  if (remaining <= 5 && stored['captureai-usage-critical-shown-date'] !== today) {
+    await chrome.storage.local.set({ 'captureai-usage-critical-shown-date': today });
+    warningMessage = `Only ${remaining} request${remaining === 1 ? '' : 's'} remaining today.`;
+  } else if (usage.usedToday >= USAGE_WARNING_THRESHOLD && stored['captureai-usage-warning-shown-date'] !== today) {
+    await chrome.storage.local.set({ 'captureai-usage-warning-shown-date': today });
+    const percentage = usage.dailyLimit > 0 ? Math.round((usage.usedToday / usage.dailyLimit) * 100) : 0;
+    warningMessage = `You've used ${percentage}% of your daily limit (${usage.usedToday} of ${usage.dailyLimit} requests).`;
+  }
+
+  if (!warningMessage) return;
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && isValidUrl(tab.url)) {
+      chrome.tabs.sendMessage(tab.id, { action: 'showUsageWarningBanner', warningMessage })
+        .catch(() => {}); // Fire-and-forget; content script may not be ready
+    }
+  } catch (error) {
+    // Non-critical: banner delivery failed silently
+  }
+}
 
 /**
  * Send status message to content script (e.g., "Capturing...", "Processing...")

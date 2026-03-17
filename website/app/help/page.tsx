@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Keyboard, HelpCircle, MessageSquare, AlertCircle } from 'lucide-react'
+import QaAccordion from './QaAccordion'
 
 export const metadata: Metadata = {
     title: 'Help & FAQ',
@@ -14,6 +15,33 @@ export const metadata: Metadata = {
 const INLINE_LINK_CLASS = 'text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300';
 
 type QaItem = { q: string; a: React.ReactNode; aPlain?: string };
+
+const FAQ_SCHEMA_ITEMS = [
+    { q: 'How do I get a license key?', a: 'Visit the activation page at captureai.app/activate and enter your email. You\'ll receive a key via email after completing checkout.' },
+    { q: 'What\'s the difference between Basic and Pro?', a: 'Basic gives you 50 AI requests per day for $1.49/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.' },
+    { q: 'Which browser is supported?', a: 'CaptureAI works exclusively on Google Chrome (desktop).' },
+    { q: 'How do I upgrade to Pro?', a: 'Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you\'ll see a prorated amount so you only pay for the remaining time.' },
+    { q: 'How do I cancel my subscription?', a: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime.' },
+    { q: 'What is Privacy Guard?', a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension.' },
+    { q: 'Are my screenshots stored on your servers?', a: 'No. Screenshots are never stored on our servers. Text is extracted locally using Tesseract.js OCR and only sent to the AI for analysis.' },
+    { q: 'Do you offer refunds?', a: 'Refunds are considered on a case-by-case basis within 7 days of purchase. Email support@captureai.dev with your order details.' },
+    { q: 'The floating button isn\'t appearing on the page', a: 'Refresh the page after installing. Press Ctrl+Shift+E to force the UI to appear. Check that the extension is enabled at chrome://extensions.' },
+    { q: 'I paid but never received my license key', a: 'Check your spam/junk folder for an email from captureai.dev. If you still don\'t see it after 10 minutes, email support@captureai.dev with your receipt.' },
+    { q: 'The AI is giving wrong or irrelevant answers', a: 'Capture only the question text, not the entire page. Enable "Disable OCR Extraction" in Settings to send the image directly if OCR is misreading text.' },
+    { q: 'It says "Daily limit reached"', a: 'You\'ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. Upgrade to Pro for unlimited requests.' },
+    { q: 'The extension doesn\'t work on a specific site', a: 'Some sites use strict Content Security Policies. CaptureAI cannot run on chrome:// or Chrome Web Store pages. Enable Privacy Guard (Pro) for exam platforms.' },
+    { q: 'My license key says "Invalid or expired"', a: 'Your subscription may have lapsed due to a failed payment. Open Settings, click "Manage Billing" to check your subscription status and update your payment method.' },
+];
+
+const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_SCHEMA_ITEMS.map(({ q, a }) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+};
 
 const FAQ_ITEMS: QaItem[] = [
     {
@@ -92,18 +120,6 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     },
 ];
 
-function QaList({ items }: { items: QaItem[] }) {
-    return (
-        <div className="space-y-6">
-            {items.map((item, i) => (
-                <div key={i} className={i > 0 ? 'border-t border-white/[0.04] pt-6' : ''}>
-                    <h3 className="mb-2 text-sm font-medium text-[--color-text]">{item.q}</h3>
-                    <p className="text-sm text-[--color-text-tertiary]">{item.a}</p>
-                </div>
-            ))}
-        </div>
-    );
-}
 
 export default function HelpPage() {
     const allItems = [...FAQ_ITEMS, ...TROUBLESHOOTING_ITEMS]
@@ -228,7 +244,7 @@ export default function HelpPage() {
                         </div>
                         <h2 className="text-lg font-semibold text-[--color-text]">FAQ</h2>
                     </div>
-                    <QaList items={FAQ_ITEMS} />
+                    <QaAccordion items={FAQ_ITEMS} />
                 </section>
 
                 {/* Troubleshooting */}
@@ -240,7 +256,7 @@ export default function HelpPage() {
                         <h2 className="text-lg font-semibold text-[--color-text]">Troubleshooting</h2>
 
                     </div>
-                    <QaList items={TROUBLESHOOTING_ITEMS} />
+                    <QaAccordion items={TROUBLESHOOTING_ITEMS} />
                 </section>
 
                 {/* Contact CTA */}

@@ -1,7 +1,7 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import HowItWorks from '@/components/HowItWorks'
-import FAQ from '@/components/FAQ'
+import FAQ, { faqs } from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
@@ -26,18 +26,29 @@ export const metadata: Metadata = {
 
 export default function Home() {
     // Static JSON-LD structured data - no user input, safe for dangerouslySetInnerHTML
-    const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
-        name: 'CaptureAI',
-        applicationCategory: 'BrowserApplication',
-        operatingSystem: 'Chrome',
-        offers: [
-            { '@type': 'Offer', price: '1.49', priceCurrency: 'USD', name: 'Basic' },
-            { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
-        ],
-        description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
-    }
+    const jsonLd = [
+        {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'CaptureAI',
+            applicationCategory: 'BrowserApplication',
+            operatingSystem: 'Chrome',
+            offers: [
+                { '@type': 'Offer', price: '1.49', priceCurrency: 'USD', name: 'Basic' },
+                { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
+            ],
+            description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqs.map(({ question, answer }) => ({
+                '@type': 'Question',
+                name: question,
+                acceptedAnswer: { '@type': 'Answer', text: answer },
+            })),
+        },
+    ]
 
     const faqJsonLd = {
         '@context': 'https://schema.org',

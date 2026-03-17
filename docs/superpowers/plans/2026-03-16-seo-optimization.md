@@ -26,39 +26,24 @@
 
 - [ ] **Step 1: Create `website/lib/faq-data.ts`**
 
-Move the `faqs` array out of `FAQ.tsx` into a plain data file (no `'use client'`). Also add the two new FAQ items for keyword coverage.
+Move the `faqs` array out of `FAQ.tsx` into a plain data file (no `'use client'`). Trim to 3 existing items (removing the daily limit, upgrade/cancel, and data storage entries), update question wording to name CaptureAI explicitly, and add 2 new SEO-targeted items — 5 total.
 
 ```typescript
 // website/lib/faq-data.ts
 
 export const faqs = [
   {
-    question: 'Which browsers are supported?',
+    question: 'Which browsers does CaptureAI support?',
     answer:
       'CaptureAI is built for Google Chrome only. It uses Chrome-specific extension APIs and has been tested exclusively on Chrome.',
   },
   {
-    question: 'What happens when I hit the daily limit?',
+    question: 'Will my school detect CaptureAI?',
     answer:
-      'Basic accounts get 50 requests per day. When you reach the limit, you can wait for the daily reset or upgrade to Pro for unlimited requests.',
+      'With Privacy Guard, CaptureAI prevents quiz platforms from detecting its presence. Your browser activity logs appear as normal browsing.',
   },
   {
-    question: 'Can I upgrade or cancel anytime?',
-    answer:
-      'Yes. You can upgrade to Pro at any point, and cancel your subscription whenever you want. No questions asked.',
-  },
-  {
-    question: 'Is my data stored anywhere?',
-    answer:
-      "Screenshots are processed securely and are not stored on our servers. We don't keep copies of your captured images or the questions they contain.",
-  },
-  {
-    question: 'Will my school detect the extension?',
-    answer:
-      'With Privacy Guard (Pro), the extension prevents quiz platforms from detecting its presence. Your browser activity logs appear as normal browsing.',
-  },
-  {
-    question: 'How accurate are the answers?',
+    question: 'How accurate are CaptureAI\'s answers?',
     answer:
       'CaptureAI uses a capable AI model to analyze questions. Accuracy is high for most subjects, but we recommend reviewing answers as part of your study process.',
   },
@@ -68,9 +53,9 @@ export const faqs = [
       'Yes. CaptureAI works on Canvas, Moodle, Blackboard, Top Hat, Schoology, and virtually every other learning platform. If you can see it on screen, you can capture it.',
   },
   {
-    question: 'What types of questions can CaptureAI answer?',
+    question: 'Can CaptureAI answer math and science questions?',
     answer:
-      'CaptureAI handles multiple choice, short answer, true/false, math problems, science questions, and written prompts. It reads the question from your screen and provides a direct answer with explanation.',
+      'Yes. CaptureAI handles multiple choice, short answer, true/false, math problems, science questions, and written prompts. It reads the question from your screen using OCR and sends it to AI for analysis.',
   },
 ]
 ```
