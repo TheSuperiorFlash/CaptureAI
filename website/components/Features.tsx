@@ -1,8 +1,9 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { Camera, MousePointer, Eye, Zap, Repeat, Shield, MessageSquare, Infinity as InfinityIcon, LucideIcon } from 'lucide-react'
+import { Camera, MousePointer, Eye, Repeat, Shield, MessageSquare, LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
+import FadeImageLoop from './FadeImageLoop'
 
 interface Feature {
     icon: LucideIcon
@@ -11,49 +12,47 @@ interface Feature {
     pro?: boolean
     color: string
     glow: string
+    image?: string
+    video?: string
+    images?: [string, string]
 }
 
 const features: Feature[] = [
     {
         icon: Camera,
         title: 'Screenshot Capture',
-        description: 'Select any area of your screen with a keyboard shortcut. The extension reads the text and instantly gives you the correct answer.',
+        description: 'Select any screen area with a keyboard shortcut. CaptureAI reads the text and returns the correct answer instantly.',
         color: 'from-blue-600/30 to-blue-700/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] group-hover:border-blue-500/30',
     },
     {
         icon: MousePointer,
         title: 'Floating Interface',
-        description: 'A small, draggable panel sits on top of any webpage. Click it to capture, view answers, or access settings without leaving your tab.',
+        description: 'A draggable panel sits over any webpage. Capture, view answers, or adjust settings without leaving your tab.',
         color: 'from-cyan-500/30 to-cyan-600/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] group-hover:border-cyan-500/30',
+        image: '/floating-ui.png',
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Answers appear inline on the page in a subtle overlay. No popups, no new windows; just the answer, right where you need it.',
+        description: 'Answers appear as a subtle inline overlay — no popups, no new windows. Just the answer, right where you need it.',
         color: 'from-indigo-500/30 to-indigo-600/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] group-hover:border-indigo-500/30',
     },
     {
-        icon: Zap,
-        title: 'Works on Any Site',
-        description: 'Homework platforms, study guides, PDFs in the browser — if you can see it on screen, CaptureAI can read and answer it.',
-        color: 'from-sky-500/30 to-sky-600/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(14,165,233,0.15)] group-hover:border-sky-500/30',
-    },
-    {
         icon: Shield,
         title: 'Privacy Guard',
-        description: 'Prevents quiz platforms from detecting extension activity. Your browser logs stay clean and show only normal browsing behavior.',
+        description: 'Prevents quiz platforms from detecting extension activity. Your browser logs show only normal browsing.',
         pro: true,
         color: 'from-teal-500/30 to-teal-600/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] group-hover:border-teal-500/30',
+        video: '/pg-video.mp4',
     },
     {
         icon: MessageSquare,
         title: 'Ask Mode',
-        description: 'Ask follow-up questions about a captured screenshot or type a question directly. Get detailed explanations, not just answers.',
+        description: 'Ask follow-up questions about a capture or type directly. Get detailed explanations, not just answers.',
         pro: true,
         color: 'from-violet-500/30 to-violet-600/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] group-hover:border-violet-500/30',
@@ -61,18 +60,10 @@ const features: Feature[] = [
     {
         icon: Repeat,
         title: 'Auto-Solve',
-        description: 'Automatically answers questions on supported platforms like Vocabulary.com. Enable it and let the extension work through problems for you.',
+        description: 'Automatically works through questions on supported platforms like Vocabulary.com. Enable and let it run.',
         pro: true,
         color: 'from-blue-400/30 to-cyan-500/10',
         glow: 'group-hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] group-hover:border-blue-400/30',
-    },
-    {
-        icon: InfinityIcon,
-        title: 'Unlimited Requests',
-        description: 'Basic users get 50 requests per day. Pro removes that limit entirely, use CaptureAI as much as you need.',
-        pro: true,
-        color: 'from-[#0047ff]/40 to-[#00f0ff]/20',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(0,240,255,0.2)] group-hover:border-[#00f0ff]/40',
     },
 ]
 
@@ -148,9 +139,37 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                 <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
                     {feature.title}
                 </h3>
-                <p className="text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
+                <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
                     {feature.description}
                 </p>
+                <div className="mt-4 overflow-hidden rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ backfaceVisibility: 'hidden', WebkitFontSmoothing: 'antialiased' }}>
+                    {feature.images ? (
+                        <FadeImageLoop image1={feature.images[0]} image2={feature.images[1]} />
+                    ) : feature.video ? (
+                        <video
+                            src={feature.video}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover"
+                        />
+                    ) : feature.image ? (
+                        <img
+                            src={feature.image}
+                            alt={feature.title}
+                            className="w-full h-full object-cover"
+                            style={{
+                                imageRendering: 'auto',
+                                WebkitFontSmoothing: 'antialiased',
+                                backfaceVisibility: 'hidden',
+                                willChange: 'transform'
+                            }}
+                        />
+                    ) : (
+                        <div className="w-full h-full" />
+                    )}
+                </div>
             </div>
         </motion.div>
     )
@@ -214,7 +233,7 @@ export default function Features() {
                 </motion.div>
 
                 {/* Desktop Grid */}
-                <div className="hidden sm:grid gap-5 grid-cols-2 lg:grid-cols-4 perspective-[1200px]">
+                <div className="hidden sm:grid gap-5 grid-cols-2 lg:grid-cols-3 perspective-[1200px]">
                     {features.map((feature, index) => (
                         <FeatureCard
                             key={feature.title}
