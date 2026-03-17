@@ -12,7 +12,8 @@ import MagneticButton from '@/components/MagneticButton'
 import PrivacyGuardSlider from '@/components/PrivacyGuardSlider'
 import Pricing from '@/components/Pricing'
 import FloatingUIShowcase from '@/components/FloatingUIShowcase'
-import { faqs } from '@/lib/faq-data'
+import { FAQS } from '@/lib/faq-data'
+import { SITE_URL } from '@/lib/constants'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -41,7 +42,7 @@ export default function Home() {
     const faqJsonLd = {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: faqs.map((faq) => ({
+        mainEntity: FAQS.map((faq) => ({
             '@type': 'Question',
             name: faq.question,
             acceptedAnswer: {
@@ -55,8 +56,8 @@ export default function Home() {
         '@context': 'https://schema.org',
         '@type': 'Organization',
         name: 'CaptureAI',
-        url: 'https://captureai.dev',
-        logo: 'https://captureai.dev/logo.png',
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo.png`,
     }
 
     return (

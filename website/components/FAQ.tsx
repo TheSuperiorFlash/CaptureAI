@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { faqs } from '@/lib/faq-data'
+import { FAQS } from '@/lib/faq-data'
 
 export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
@@ -25,7 +25,7 @@ export default function FAQ() {
                     {/* Right column — accordion */}
                     <div className="reveal-up delay-200">
                         <div className="glass-card rounded-3xl p-2 select-none">
-                            {faqs.map((faq, index) => {
+                            {FAQS.map((faq, index) => {
                                 const panelId = `faq-panel-${index}`
                                 const buttonId = `faq-button-${index}`
                                 return (
@@ -36,7 +36,7 @@ export default function FAQ() {
                                             aria-expanded={openIndex === index}
                                             aria-controls={panelId}
                                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                            className={`flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02] ${index === 0 ? 'rounded-t-2xl' : index === faqs.length - 1 ? 'rounded-b-2xl' : 'rounded-none'}`}
+                                            className={`flex w-full items-center justify-between gap-4 px-6 py-6 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02] ${index === 0 ? 'rounded-t-2xl' : index === FAQS.length - 1 ? 'rounded-b-2xl' : 'rounded-none'}`}
                                         >
                                             <span className={`text-[16px] font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                                 {faq.question}

@@ -1,6 +1,6 @@
 // website/lib/faq-data.ts
 
-export const faqs = [
+export const FAQS = [
   {
     question: 'Which browsers does CaptureAI support?',
     answer:

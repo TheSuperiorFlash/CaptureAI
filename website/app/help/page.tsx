@@ -13,12 +13,13 @@ export const metadata: Metadata = {
 
 const INLINE_LINK_CLASS = 'text-cyan-400 underline underline-offset-2 transition-colors hover:text-cyan-300';
 
-type QaItem = { q: string; a: React.ReactNode };
+type QaItem = { q: string; a: React.ReactNode; aPlain?: string };
 
 const FAQ_ITEMS: QaItem[] = [
     {
         q: 'How do I get a license key?',
         a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link> and enter your email. You&apos;ll receive a key via email after completing checkout.</>,
+        aPlain: "Visit the activation page and enter your email. You'll receive a key via email after completing checkout.",
     },
     {
         q: 'What\'s the difference between Basic and Pro?',
@@ -31,10 +32,12 @@ const FAQ_ITEMS: QaItem[] = [
     {
         q: 'How do I upgrade to Pro?',
         a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll see a prorated amount so you only pay for the remaining time.</>,
+        aPlain: "Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you'll see a prorated amount so you only pay for the remaining time.",
     },
     {
         q: 'How do I cancel my subscription?',
         a: <>Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.</>,
+        aPlain: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.',
     },
     {
         q: 'What is Privacy Guard?',
@@ -47,6 +50,7 @@ const FAQ_ITEMS: QaItem[] = [
     {
         q: 'Do you offer refunds?',
         a: <>Refunds are considered on a case-by-case basis within 7 days of purchase. Email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your order details.</>,
+        aPlain: 'Refunds are considered on a case-by-case basis within 7 days of purchase. Email support@captureai.dev with your order details.',
     },
 ];
 
@@ -58,6 +62,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'I paid but never received my license key',
         a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your receipt.</>,
+        aPlain: "Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don't see it after 10 minutes, email support@captureai.dev with your receipt.",
     },
     {
         q: 'The AI is giving wrong or irrelevant answers',
@@ -66,6 +71,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'It says "Daily limit reached"',
         a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, <Link href="/activate" className={INLINE_LINK_CLASS}>upgrade to Pro</Link>.</>,
+        aPlain: "You've used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, upgrade to Pro.",
     },
     {
         q: 'The extension doesn\'t work on a specific site',
@@ -74,6 +80,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'My license key says "Invalid or expired"',
         a: <>Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can check your subscription status and update your payment method.</>,
+        aPlain: 'Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click "Manage Billing" to access the Stripe billing portal where you can check your subscription status and update your payment method.',
     },
     {
         q: 'Does CaptureAI work on locked-down browsers like Respondus?',
@@ -103,16 +110,14 @@ export default function HelpPage() {
     const faqJsonLd = {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      mainEntity: allItems
-        .filter((item) => typeof item.a === 'string')
-        .map((item) => ({
-          '@type': 'Question',
-          name: item.q,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: item.a as string,
-          },
-        })),
+      mainEntity: allItems.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: typeof item.a === 'string' ? item.a : item.aPlain!,
+        },
+      })),
     }
 
     return (
