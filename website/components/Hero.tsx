@@ -142,19 +142,21 @@ export default function Hero() {
                     style={{ x: glowX2, y: glowY2, opacity: (isMounted && shouldReduceMotion) ? 0.08 : 0.3 }}
                 />
                 <div className="absolute bottom-[100px] left-[-150px] h-[450px] w-[450px] rounded-full bg-[#0d3bbf] gradient-blur gradient-blur-animated animate-pulse-glow motion-reduce:animate-none" style={isMounted ? { animationDelay: shouldReduceMotion ? '0s' : '2s', opacity: shouldReduceMotion ? 0.18 : 0.7 } : { opacity: 0.7 }} />
-                {/* Sparkles particle background */}
-                <div className="absolute inset-0 h-full w-full">
-                    <SparklesCore
-                        id="hero-sparkles"
-                        background="transparent"
-                        minSize={0.6}
-                        maxSize={1.4}
-                        particleDensity={100}
-                        className="h-full w-full"
-                        particleColor="#FFFFFF"
-                        speed={1}
-                    />
-                </div>
+                {/* Sparkles particle background — hidden when prefers-reduced-motion */}
+                {!shouldReduceMotion && (
+                    <div className="absolute inset-0 h-full w-full">
+                        <SparklesCore
+                            id="hero-sparkles"
+                            background="transparent"
+                            minSize={0.6}
+                            maxSize={1.4}
+                            particleDensity={100}
+                            className="h-full w-full"
+                            particleColor="#FFFFFF"
+                            speed={1}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-6">
