@@ -160,7 +160,7 @@ export default function Hero() {
                     animate="visible"
                 >
                     {/* Badge */}
-                    <motion.div variants={itemVariants} className="glass mb-8 inline-flex items-center gap-3 rounded-full px-4 py-1.5 border-cyan-500/20 bg-[#0a0b0c]/80">
+                    <motion.div variants={itemVariants} className="mb-8 inline-flex items-center gap-3 rounded-full px-4 py-1.5 border border-white/5 bg-black/40 backdrop-blur-[16px]">
                         <span className="relative flex h-2 w-2">
                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />

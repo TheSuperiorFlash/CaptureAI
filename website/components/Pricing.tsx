@@ -89,15 +89,15 @@ export default function Pricing() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier('pro')}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                     >
-                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
-                            <div className="relative flex flex-1 w-full flex-col rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-8">
+                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] transition-all duration-300 ${selectedTier === 'pro' ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] md:shadow-none md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50' : 'border-white/10 hover:border-cyan-400/50'}`}>
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>
