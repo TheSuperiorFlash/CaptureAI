@@ -505,7 +505,7 @@ describe('Specialized Loggers', () => {
 
   describe('logRateLimit', () => {
     test('should log rate limit warning', () => {
-      logRateLimit(logger, 'user-1', 'basic', 50, 8);
+      logRateLimit(logger, 'user-1', 'basic', 10, 8);
       const parsed = JSON.parse(console.warn.mock.calls[0][0]);
       expect(parsed.level).toBe('WARN');
       expect(parsed.message).toBe('rate_limit_approached');

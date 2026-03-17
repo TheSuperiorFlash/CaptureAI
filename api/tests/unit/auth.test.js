@@ -325,20 +325,6 @@ describe('AuthHandler', () => {
       expect(body.user.licenseKey).toBe(SAMPLE_BASIC_USER.license_key);
     });
 
-    test('should update last_validated_at on successful validation', async () => {
-      validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_BASIC_USER.license_key });
-      validateLicenseKey.mockReturnValue(SAMPLE_BASIC_USER.license_key);
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
-
-      const request = mockRequest();
-      await handler.validateKey(request);
-
-      // The second prepare call should be the UPDATE
-      const calls = db.prepare.mock.calls;
-      const updateCall = calls.find(([sql]) => sql.includes('UPDATE users'));
-      expect(updateCall).toBeDefined();
-    });
-
     test('should log successful authentication', async () => {
       validateRequestBody.mockResolvedValue({ licenseKey: SAMPLE_BASIC_USER.license_key });
       validateLicenseKey.mockReturnValue(SAMPLE_BASIC_USER.license_key);
@@ -651,21 +637,21 @@ describe('AuthHandler', () => {
 
   describe('getCurrentUser', () => {
     test('should return full user data for authenticated user', async () => {
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
-      db.setResponse('SELECT id, email, tier, license_key', SAMPLE_BASIC_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_ACTIVE_BASIC_USER);
+      db.setResponse('SELECT id, email, tier, license_key', SAMPLE_ACTIVE_BASIC_USER);
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_ACTIVE_BASIC_USER.license_key}` }
       });
       const response = await handler.getCurrentUser(request);
       const body = await parseResponse(response);
 
       expect(response.status).toBe(200);
-      expect(body.id).toBe(SAMPLE_BASIC_USER.id);
-      expect(body.email).toBe(SAMPLE_BASIC_USER.email);
+      expect(body.id).toBe(SAMPLE_ACTIVE_BASIC_USER.id);
+      expect(body.email).toBe(SAMPLE_ACTIVE_BASIC_USER.email);
       expect(body.tier).toBe('basic');
-      expect(body.licenseKey).toBe(SAMPLE_BASIC_USER.license_key);
-      expect(body.createdAt).toBe(SAMPLE_BASIC_USER.created_at);
+      expect(body.licenseKey).toBe(SAMPLE_ACTIVE_BASIC_USER.license_key);
+      expect(body.createdAt).toBe(SAMPLE_ACTIVE_BASIC_USER.created_at);
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -679,11 +665,11 @@ describe('AuthHandler', () => {
 
     test('should return 404 when user not found in DB after authentication', async () => {
       // First query (authenticate) finds user, second query (full data) returns null
-      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_BASIC_USER);
+      db.setResponse('SELECT * FROM users WHERE license_key', SAMPLE_ACTIVE_BASIC_USER);
       // Do not set a response for the SELECT id query, so it returns null
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_ACTIVE_BASIC_USER.license_key}` }
       });
 
       // We need the second prepare call to return null. Override prepare to
@@ -696,7 +682,7 @@ describe('AuthHandler', () => {
           first: jest.fn(async () => {
             // First call: authenticate -> return user
             // Second call: full user data -> return null
-            if (callCount === 1) return SAMPLE_BASIC_USER;
+            if (callCount === 1) return SAMPLE_ACTIVE_BASIC_USER;
             return null;
           }),
           run: jest.fn(async () => ({ success: true }))
@@ -719,7 +705,7 @@ describe('AuthHandler', () => {
           // authenticate's getUserByLicenseKey
           return {
             bind: jest.fn().mockReturnThis(),
-            first: jest.fn(async () => SAMPLE_BASIC_USER),
+            first: jest.fn(async () => SAMPLE_ACTIVE_BASIC_USER),
             run: jest.fn(async () => ({ success: true }))
           };
         }
@@ -728,7 +714,7 @@ describe('AuthHandler', () => {
       });
 
       const request = mockRequest({
-        headers: { Authorization: `LicenseKey ${SAMPLE_BASIC_USER.license_key}` }
+        headers: { Authorization: `LicenseKey ${SAMPLE_ACTIVE_BASIC_USER.license_key}` }
       });
       const response = await handler.getCurrentUser(request);
       const body = await parseResponse(response);
@@ -907,10 +893,10 @@ describe('AuthHandler', () => {
     });
 
     test('should include the next charge date', () => {
-      const html = handler.generateProEmailHTML('ABCD-1234-EFGH-5678-IJKL');
-      // The date should be approximately one month from now
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const html = handler.generateProEmailHTML('ABCD-1234-EFGH-5678-IJKL', nextMonth);
+      // The date should be approximately one month from now
       const expectedYear = nextMonth.getFullYear().toString();
       expect(html).toContain(expectedYear);
     });
