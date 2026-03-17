@@ -4,6 +4,9 @@ import Link from 'next/link'
 export const metadata: Metadata = {
     title: 'Terms of Service',
     description: 'Terms of Service for the CaptureAI Chrome extension.',
+    alternates: {
+        canonical: '/terms',
+    },
 }
 
 export default function TermsPage() {
