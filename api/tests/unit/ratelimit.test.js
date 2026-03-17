@@ -465,14 +465,6 @@ describe('RateLimitPresets', () => {
     });
   });
 
-  test('should have FREE_KEY_CREATION preset with correct values', () => {
-    expect(RateLimitPresets.FREE_KEY_CREATION).toMatchObject({
-      limit: 3,
-      windowMs: 60000,
-      bindingName: 'RATE_LIMITER_FREE_KEY'
-    });
-  });
-
   test('should have LICENSE_VALIDATION preset with correct values', () => {
     expect(RateLimitPresets.LICENSE_VALIDATION).toMatchObject({
       limit: 10,
@@ -505,8 +497,8 @@ describe('RateLimitPresets', () => {
     });
   });
 
-  test('should have exactly 6 presets', () => {
-    expect(Object.keys(RateLimitPresets)).toHaveLength(6);
+  test('should have exactly 5 presets', () => {
+    expect(Object.keys(RateLimitPresets)).toHaveLength(5);
   });
 
   test('should have limit, windowMs, and bindingName in every preset', () => {

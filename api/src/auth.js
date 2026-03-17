@@ -299,20 +299,12 @@ export class AuthHandler {
 
       // Use paid subscription email for pro and basic tiers
       if (tier === 'pro' || tier === 'basic') {
-        let billingDate;
-        if (nextBillingDate instanceof Date) {
-          billingDate = nextBillingDate;
-        } else {
-          const d = new Date();
-          // Basic is billed weekly; Pro is billed monthly
-          if (tier === 'basic') {
-            d.setDate(d.getDate() + 7);
-          } else {
-            d.setMonth(d.getMonth() + 1);
-          }
-          billingDate = d;
-        }
-        const formattedDate = billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        // Use Stripe's actual current_period_end date; falls back to generic text
+        // only when the Stripe API call in handleCheckoutCompleted fails (rare).
+        const billingDate = nextBillingDate instanceof Date ? nextBillingDate : null;
+        const formattedDate = billingDate
+          ? billingDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+          : 'your next billing cycle';
 
         const htmlContent = this.generateProEmailHTML(licenseKey, billingDate, isNewUser, tierDisplay);
 

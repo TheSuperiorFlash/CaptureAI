@@ -63,6 +63,7 @@ function createFullEnv(overrides = {}) {
     STRIPE_SECRET_KEY: 'sk_test_123',
     STRIPE_WEBHOOK_SECRET: 'whsec_test_123',
     STRIPE_PRICE_PRO: 'price_123',
+    STRIPE_PRICE_BASIC: 'price_456',
     DB: {},
     ENVIRONMENT: 'development',
     ...overrides
@@ -204,12 +205,12 @@ describe('Worker Entry Point', () => {
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://captureai.dev');
     });
 
-    test('should allow thesuperiorflash.github.io origin', async () => {
+    test('should reject thesuperiorflash.github.io origin', async () => {
       const request = createRequest('/health', 'GET', {
         'Origin': 'https://thesuperiorflash.github.io'
       });
       const response = await worker.fetch(request, env, ctx);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://thesuperiorflash.github.io');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('null');
     });
 
     test('should allow localhost in development mode', async () => {

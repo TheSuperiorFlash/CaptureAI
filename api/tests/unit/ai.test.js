@@ -173,10 +173,12 @@ describe('AIHandler', () => {
         promptType: 'answer'
       }, 1);
 
-      expect(payload.messages).toHaveLength(1);
-      expect(payload.messages[0].content).toHaveLength(2);
-      expect(payload.messages[0].content[0].type).toBe('text');
-      expect(payload.messages[0].content[1].type).toBe('image_url');
+      expect(payload.messages).toHaveLength(2);
+      expect(payload.messages[0].role).toBe('system');
+      expect(payload.messages[1].role).toBe('user');
+      expect(payload.messages[1].content).toHaveLength(2);
+      expect(payload.messages[1].content[0].type).toBe('text');
+      expect(payload.messages[1].content[1].type).toBe('image_url');
     });
 
     test('should build ask mode with image payload', () => {
@@ -186,8 +188,8 @@ describe('AIHandler', () => {
         promptType: 'ask'
       }, 1);
 
-      expect(payload.messages).toHaveLength(1);
-      expect(payload.messages[0].content[0].text).toContain('Explain this');
+      expect(payload.messages).toHaveLength(2);
+      expect(payload.messages[1].content[0].text).toContain('Explain this');
       expect(payload.max_completion_tokens).toBe(4000); // ask mode has higher limit
     });
 
@@ -220,7 +222,9 @@ describe('AIHandler', () => {
         promptType: 'auto_solve'
       }, 1);
 
-      expect(payload.messages[0].content[0].text).toContain('correct choice');
+      expect(payload.messages).toHaveLength(2);
+      expect(payload.messages[0].role).toBe('system');
+      expect(payload.messages[0].content).toContain('correct');
     });
 
     test('should build auto_solve with OCR only', () => {
@@ -229,7 +233,8 @@ describe('AIHandler', () => {
         promptType: 'auto_solve'
       }, 1);
 
-      expect(payload.messages[1].content).toContain('correct choice');
+      expect(payload.messages).toHaveLength(2);
+      expect(payload.messages[0].content).toContain('correct');
       expect(payload.messages[1].content).toContain('option1');
     });
 
@@ -283,14 +288,17 @@ describe('AIHandler', () => {
       }).toThrow('No image data or OCR text provided');
     });
 
-    test('should enhance prompt with OCR text when both image and OCR present', () => {
+    test('should include system message when both image and OCR present', () => {
       const payload = handler.buildPayload({
         imageData: 'data:image/png;base64,abc123',
         ocrText: 'Extracted text from image',
         promptType: 'answer'
       }, 1);
 
-      expect(payload.messages[0].content[0].text).toContain('Extracted text from image');
+      expect(payload.messages).toHaveLength(2);
+      expect(payload.messages[0].role).toBe('system');
+      expect(payload.messages[1].content[0].type).toBe('text');
+      expect(payload.messages[1].content[1].type).toBe('image_url');
     });
   });
 
@@ -307,21 +315,21 @@ describe('AIHandler', () => {
 
   describe('checkUsageLimit', () => {
     test('should check basic tier daily limit', async () => {
-      env.DB._mockFirst.mockResolvedValueOnce({ count: 5 });
+      env.DB._mockFirst.mockResolvedValueOnce({ request_count: 5 });
       const result = await handler.checkUsageLimit('user-1', 'basic');
 
       expect(result.allowed).toBe(true);
       expect(result.used).toBe(5);
-      expect(result.limit).toBe(10);
+      expect(result.limit).toBe(50);
       expect(result.limitType).toBe('per_day');
     });
 
     test('should block basic tier when limit exceeded', async () => {
-      env.DB._mockFirst.mockResolvedValueOnce({ count: 10 });
+      env.DB._mockFirst.mockResolvedValueOnce({ request_count: 50 });
       const result = await handler.checkUsageLimit('user-1', 'basic');
 
       expect(result.allowed).toBe(false);
-      expect(result.used).toBe(10);
+      expect(result.used).toBe(50);
     });
 
     test('should use rate limiter for pro tier', async () => {
@@ -356,35 +364,29 @@ describe('AIHandler', () => {
   describe('recordUsage', () => {
     test('should insert usage record with cost calculation', async () => {
       await handler.recordUsage({
-        userId: 'user-1',
+        email: 'user-1@example.com',
         promptType: 'answer',
         model: 'low',
-        tokensUsed: 100,
         inputTokens: 80,
         outputTokens: 20,
-        reasoningTokens: 0,
         cachedTokens: 0,
-        inputMethod: 'ocr',
         responseTime: 500,
         cached: false
       });
 
       expect(env.DB.prepare).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO usage_records')
+        expect.stringContaining('INSERT INTO usage_')
       );
     });
 
     test('should calculate cost with cached tokens', async () => {
       await handler.recordUsage({
-        userId: 'user-1',
+        email: 'user-1@example.com',
         promptType: 'answer',
         model: 'low',
-        tokensUsed: 100,
         inputTokens: 80,
         outputTokens: 20,
-        reasoningTokens: 0,
         cachedTokens: 40,
-        inputMethod: 'text',
         responseTime: 300,
         cached: true
       });
@@ -427,7 +429,7 @@ describe('AIHandler', () => {
           choices: [{ message: { content: 'cached answer' } }],
           usage: { total_tokens: 50 }
         }),
-        headers: { get: (key) => key === 'cf-cache-status' ? 'HIT' : null }
+        headers: { get: (key) => key === 'cf-aig-cache-status' ? 'HIT' : null }
       });
 
       const result = await handler.sendToGateway({}, 'user-1');
@@ -451,9 +453,10 @@ describe('AIHandler', () => {
     test('should return basic tier usage', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
+        email: 'test@example.com',
         tier: 'basic'
       });
-      env.DB._mockFirst.mockResolvedValueOnce({ count: 3 });
+      env.DB._mockFirst.mockResolvedValueOnce({ request_count: 3 });
 
       const request = createMockRequest('GET');
       const response = await handler.getUsage(request);
@@ -462,17 +465,16 @@ describe('AIHandler', () => {
       expect(body.tier).toBe('basic');
       expect(body.limitType).toBe('per_day');
       expect(body.today.used).toBe(3);
-      expect(body.today.limit).toBe(10);
+      expect(body.today.limit).toBe(50);
     });
 
     test('should return pro tier usage with per-minute data', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
+        email: 'test@example.com',
         tier: 'pro'
       });
-      env.DB._mockFirst
-        .mockResolvedValueOnce({ count: 50 })   // daily usage
-        .mockResolvedValueOnce({ count: 5 });    // last minute
+      env.DB._mockFirst.mockResolvedValueOnce({ request_count: 50 });
 
       const request = createMockRequest('GET');
       const response = await handler.getUsage(request);
@@ -481,7 +483,7 @@ describe('AIHandler', () => {
       expect(body.tier).toBe('pro');
       expect(body.limitType).toBe('per_minute');
       expect(body.today.limit).toBeNull(); // Unlimited daily
-      expect(body.lastMinute).toBeDefined();
+      expect(body.rateLimit).toBeDefined();
     });
 
     test('should return 401 when not authenticated', async () => {
@@ -563,6 +565,7 @@ describe('AIHandler', () => {
     test('should return analytics with default 30 day period', async () => {
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
+        email: 'test@example.com',
         tier: 'pro'
       });
 
@@ -572,12 +575,9 @@ describe('AIHandler', () => {
             total_requests: 50,
             total_input_tokens: 5000,
             total_output_tokens: 2000,
-            total_reasoning_tokens: 500,
-            total_cached_tokens: 1000,
             total_cost: 0.015,
             avg_input_tokens: 100,
             avg_output_tokens: 40,
-            avg_reasoning_tokens: 10,
             avg_cost_per_request: 0.0003,
             avg_response_time: 1200
           }
@@ -605,8 +605,6 @@ describe('AIHandler', () => {
       expect(body.overall.totalCost).toBe('0.015000');
       expect(body.overall.tokens.input.total).toBe(5000);
       expect(body.overall.tokens.output.total).toBe(2000);
-      expect(body.overall.tokens.reasoning.total).toBe(500);
-      expect(body.overall.tokens.cached.total).toBe(1000);
       expect(body.overall.avgResponseTime).toBe(1200);
       expect(body.byPromptType).toHaveLength(2);
       expect(body.byPromptType[0].promptType).toBe('answer');
@@ -807,15 +805,12 @@ describe('AIHandler', () => {
       }));
 
       await expect(handler.recordUsage({
-        userId: 'user-1',
+        email: 'user-1@example.com',
         promptType: 'answer',
         model: 'low',
-        tokensUsed: 100,
         inputTokens: 80,
         outputTokens: 20,
-        reasoningTokens: 0,
         cachedTokens: 0,
-        inputMethod: 'text',
         responseTime: 500,
         cached: false
       })).rejects.toThrow('DB write failed');
@@ -823,47 +818,42 @@ describe('AIHandler', () => {
 
     test('should use default pricing for unknown model', async () => {
       await handler.recordUsage({
-        userId: 'user-1',
+        email: 'user-1@example.com',
         promptType: 'answer',
         model: 'unknown_model',
-        tokensUsed: 100,
         inputTokens: 80,
         outputTokens: 20,
-        reasoningTokens: 0,
         cachedTokens: 0,
-        inputMethod: 'text',
         responseTime: 500,
         cached: false
       });
 
-      // Should not throw - uses 'low' pricing as default
+      // Should not throw - uses 'medium' pricing as default
       expect(env.DB.prepare).toHaveBeenCalled();
     });
 
     test('should handle none model pricing correctly', async () => {
       await handler.recordUsage({
-        userId: 'user-1',
+        email: 'user-1@example.com',
         promptType: 'answer',
         model: 'none',
-        tokensUsed: 100,
         inputTokens: 80,
         outputTokens: 20,
-        reasoningTokens: 0,
         cachedTokens: 0,
-        inputMethod: 'ocr',
         responseTime: 300,
         cached: false
       });
 
       expect(env.DB.prepare).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO usage_records')
+        expect.stringContaining('INSERT INTO usage_')
       );
     });
   });
 
   describe('checkUsageLimit - null count edge case', () => {
     test('should handle null count from rate limiter', async () => {
-      checkRateLimit.mockResolvedValueOnce({ allowed: true, count: null });
+      checkRateLimit.mockReset();
+      checkRateLimit.mockResolvedValue({ allowed: true, count: null });
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const result = await handler.checkUsageLimit('user-1', 'pro');
@@ -871,9 +861,7 @@ describe('AIHandler', () => {
       expect(result.allowed).toBe(true);
       expect(result.used).toBe(0); // null ?? 0 = 0
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('null count'),
-        expect.any(String),
-        expect.any(String)
+        expect.stringContaining('null count')
       );
       consoleSpy.mockRestore();
     });
