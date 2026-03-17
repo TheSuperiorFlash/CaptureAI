@@ -46,7 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     advancedArrow: document.getElementById('advanced-arrow'),
     themeSelector: document.getElementById('theme-selector'),
     privacyGuardBanner: document.getElementById('privacy-guard-banner'),
-    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss')
+    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss'),
+    usageWarningBanner: document.getElementById('usage-warning-banner'),
+    usageWarningBannerDismiss: document.getElementById('usage-warning-banner-dismiss'),
+    usageWarningTitle: document.getElementById('usage-warning-title'),
+    usageWarningMessage: document.getElementById('usage-warning-message')
   };
 
   // State variables
@@ -461,8 +465,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       // Pro tier: usage section is hidden, so we skip display
 
-      // Send warning banner to page if approaching daily limit
-      await sendUsageWarningToPage(usage);
+      // Show warning banner in popup if approaching daily limit
+      await checkUsageWarningBanner(usage);
     } catch (error) {
       console.error('Error loading usage stats:', error);
       elements.usageContent.textContent = 'Unable to load usage stats';
@@ -796,14 +800,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Send usage warning banner to the active webpage if approaching daily limit.
+   * Show usage warning banner in the popup if approaching daily limit.
    * Shows for Basic tier only, when at 80% usage or 5 requests remaining.
    * @param {Object} usage - Usage object with limitType and today stats
    */
-  function checkUsageWarningBanner(usage) {
+  async function checkUsageWarningBanner(usage) {
     if (!elements.usageWarningBanner) return;
 
     if (!usage || usage.limitType !== 'per_day') {
+      elements.usageWarningBanner.classList.add('hidden');
       return;
     }
 
@@ -811,11 +816,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const limit = parseInt(usage.today.limit, 10) || 0;
     const remaining = Math.max(0, limit - used);
 
-    if (used < 40 && remaining > 5) {
+    // thresholds: at least 40 requests (80% of 50) or 5 remaining
+    if (used < (limit * 0.8) && remaining > 5) {
+      elements.usageWarningBanner.classList.add('hidden');
       return;
     }
 
-    // Each threshold fires at most once per day — background.js may have already shown it
+    // Each threshold fires at most once per day
     const today = new Date().toISOString().slice(0, 10);
     const stored = await chrome.storage.local.get([
       'captureai-usage-warning-shown-date',
@@ -827,11 +834,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (remaining <= 5 && stored['captureai-usage-critical-shown-date'] !== today) {
       await chrome.storage.local.set({ 'captureai-usage-critical-shown-date': today });
       warningMessage = `Only ${remaining} request${remaining === 1 ? '' : 's'} remaining today.`;
-    } else if (used >= 40 && stored['captureai-usage-warning-shown-date'] !== today) {
+    } else if (used >= (limit * 0.8) && stored['captureai-usage-warning-shown-date'] !== today) {
       await chrome.storage.local.set({ 'captureai-usage-warning-shown-date': today });
       const percentage = limit > 0 ? Math.round((used / limit) * 100) : 0;
       warningMessage = `You've used ${percentage}% of your daily limit (${used} of ${limit} requests).`;
     }
+
+    if (warningMessage) {
+      elements.usageWarningMessage.textContent = warningMessage;
+      elements.usageWarningBanner.classList.remove('hidden');
+    }
+  }
 
   /**
    * Dismiss the usage warning banner.

@@ -64,6 +64,9 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 |-----|------|-------------|
 | `captureai-last-usage` | object | `{data, updatedAt}` — cached AI response usage stats |
 | `captureai-privacy-guard-defaulted` | boolean | Auto-enable flag on first Pro upgrade |
+| `captureai-privacy-guard-notice-seen` | boolean | Track if PrivacyGuard banner seen |
+| `captureai-usage-warning-shown-date` | string | Track daily limit warning (YYYY-MM-DD) |
+| `captureai-usage-critical-shown-date` | string | Track daily limit critical warning (YYYY-MM-DD) |
 | `captureai-migration-license-v3-complete` | boolean | Migration completion flag |
 | `captureai-migration-notice` | string | Message shown in popup after migration |
 | `captureai-api-key` | string | Legacy API key (deprecated, read as fallback during migration) |

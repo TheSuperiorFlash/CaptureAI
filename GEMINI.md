@@ -77,6 +77,9 @@ captureai-reasoning-level      # 0, 1, or 2
 captureai-settings             # {privacyGuard: {enabled, domainBlacklist}, ocr: {disabled}, theme}
 captureai-last-usage           # Cached AI response usage stats
 captureai-privacy-guard-defaulted  # Auto-enable flag on first Pro upgrade
+captureai-privacy-guard-notice-seen  # Boolean - track if PrivacyGuard banner seen
+captureai-usage-warning-shown-date  # String (YYYY-MM-DD) - track daily limit warning
+captureai-usage-critical-shown-date # String (YYYY-MM-DD) - track daily limit critical warning
 captureai-backend-url          # Backend URL (default: https://api.captureai.workers.dev)
 captureai-migration-license-v3-complete  # Migration completion flag
 captureai-migration-notice     # Message shown in popup after migration
