@@ -1,7 +1,7 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
 import HowItWorks from '@/components/HowItWorks'
-import FAQ, { faqs } from '@/components/FAQ'
+import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ScrollReveal, ScrollRevealStagger, ScrollRevealItem } from '@/components/ScrollReveal'
@@ -42,7 +42,7 @@ export default function Home() {
         {
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
-            mainEntity: faqs.map(({ question, answer }) => ({
+            mainEntity: FAQS.map(({ question, answer }) => ({
                 '@type': 'Question',
                 name: question,
                 acceptedAnswer: { '@type': 'Answer', text: answer },
