@@ -49,6 +49,9 @@ export const Messaging = {
       case 'showPrivacyGuardBanner':
         return this.handleShowPrivacyGuardBanner(sendResponse);
 
+      case 'showUsageWarningBanner':
+        return this.handleShowUsageWarningBanner(request, sendResponse);
+
       case 'showCapturingMessage':
         return this.handleShowCapturingMessage(sendResponse);
 
@@ -250,6 +253,22 @@ export const Messaging = {
       return false;
     }
     window.CaptureAI.UICore.showPrivacyGuardBanner();
+    sendResponse({ success: true });
+    return false;
+  },
+
+  /**
+   * Handle show usage warning banner request
+   * @param {Object} request - Message request with warningMessage
+   * @param {Function} sendResponse - Response callback
+   * @returns {boolean}
+   */
+  handleShowUsageWarningBanner(request, sendResponse) {
+    if (!window.CaptureAI?.UICore?.showUsageWarningBanner) {
+      sendResponse({ success: false });
+      return false;
+    }
+    window.CaptureAI.UICore.showUsageWarningBanner(request.warningMessage);
     sendResponse({ success: true });
     return false;
   },

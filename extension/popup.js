@@ -46,11 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     advancedArrow: document.getElementById('advanced-arrow'),
     themeSelector: document.getElementById('theme-selector'),
     privacyGuardBanner: document.getElementById('privacy-guard-banner'),
-    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss'),
-    usageWarningBanner: document.getElementById('usage-warning-banner'),
-    usageWarningBannerDismiss: document.getElementById('usage-warning-banner-dismiss'),
-    usageWarningTitle: document.getElementById('usage-warning-title'),
-    usageWarningMessage: document.getElementById('usage-warning-message')
+    privacyGuardBannerDismiss: document.getElementById('privacy-guard-banner-dismiss')
   };
 
   // State variables
@@ -96,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Banner event listeners
   elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
-  elements.usageWarningBannerDismiss.addEventListener('click', dismissUsageWarningBanner);
 
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
@@ -432,10 +427,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (usage.limitType === 'per_day') {
         // Basic tier - show daily stats
-        const used = parseInt(usage.today.used, 10) || 0;
-        const limit = parseInt(usage.today.limit, 10) || 0;
+        const used = parseInt(usage.today?.used, 10) || 0;
+        const limit = parseInt(usage.today?.limit, 10) || 0;
         const remaining = Math.max(0, limit - used);
-        const percentage = Math.min(100, Math.max(0, parseFloat(usage.today.percentage) || 0));
+        const percentage = Math.min(100, Math.max(0, parseFloat(usage.today?.percentage) || 0));
 
         const statsDiv = document.createElement('div');
         statsDiv.className = 'usage-stat-text';
@@ -458,43 +453,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.usageContent.appendChild(statsDiv);
         elements.usageContent.appendChild(barOuter);
         elements.usageContent.appendChild(remainingDiv);
-      } else {
-        // Pro tier - show per-minute stats
-        const used = parseInt(usage.lastMinute.used, 10) || 0;
-        const limit = parseInt(usage.lastMinute.limit, 10) || 0;
-        const todayUsed = parseInt(usage.today.used, 10) || 0;
-        const percentage = Math.min(100, Math.max(0, parseFloat(usage.lastMinute.percentage) || 0));
-
-        const statsDiv = document.createElement('div');
-        statsDiv.className = 'usage-stat-text';
-        const strong = document.createElement('strong');
-        strong.textContent = used;
-        statsDiv.appendChild(strong);
-        statsDiv.appendChild(document.createTextNode(` / ${limit} requests/minute`));
-
-        const barOuter = document.createElement('div');
-        barOuter.className = 'usage-bar-outer';
-        const barInner = document.createElement('div');
-        barInner.className = 'usage-bar-inner';
-        barInner.style.setProperty('--bar-width', `${percentage}%`);
-        barOuter.appendChild(barInner);
-
-        const todayDiv = document.createElement('div');
-        todayDiv.className = 'usage-remaining-text';
-        todayDiv.textContent = `${todayUsed} requests used today (unlimited)`;
-
-        elements.usageContent.appendChild(statsDiv);
-        elements.usageContent.appendChild(barOuter);
-        elements.usageContent.appendChild(todayDiv);
       }
+      // Pro tier: usage section is hidden, so we skip display
 
-      // Check if warning banner should be shown
-      checkUsageWarningBanner(usage);
+      // Send warning banner to page if approaching daily limit
+      await sendUsageWarningToPage(usage);
     } catch (error) {
       console.error('Error loading usage stats:', error);
       elements.usageContent.textContent = 'Unable to load usage stats';
-      // Hide warning banner on error
-      elements.usageWarningBanner.classList.add('hidden');
     }
   }
 
@@ -817,43 +783,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /**
-   * Check if usage warning banner should be shown.
-   * Shows banner only when at 80% usage or 5 requests remaining on Basic tier.
+   * Send usage warning banner to the active webpage if approaching daily limit.
+   * Shows for Basic tier only, when at 80% usage or 5 requests remaining.
    * @param {Object} usage - Usage object with limitType and today stats
    */
-  function checkUsageWarningBanner(usage) {
+  async function sendUsageWarningToPage(usage) {
     if (!usage || usage.limitType !== 'per_day') {
-      // Only show for Basic tier (per_day limit)
-      elements.usageWarningBanner.classList.add('hidden');
       return;
     }
 
     const used = parseInt(usage.today.used, 10) || 0;
     const limit = parseInt(usage.today.limit, 10) || 0;
     const remaining = Math.max(0, limit - used);
-    const percentage = limit > 0 ? Math.round((used / limit) * 100) : 0;
 
-    // Show warning if at 80% or 5 requests remaining
-    const shouldShow = percentage >= 80 || remaining <= 5;
-
-    if (shouldShow) {
-      // Update banner message based on condition
-      if (remaining <= 5) {
-        elements.usageWarningMessage.textContent = `Only ${remaining} request${remaining === 1 ? '' : 's'} remaining today.`;
-      } else {
-        elements.usageWarningMessage.textContent = `You've used ${percentage}% of your daily limit (${used} of ${limit} requests).`;
-      }
-      elements.usageWarningBanner.classList.remove('hidden');
-    } else {
-      elements.usageWarningBanner.classList.add('hidden');
+    if (used < 40 && remaining > 5) {
+      return;
     }
-  }
 
-  /**
-   * Dismiss the usage warning banner.
-   */
-  function dismissUsageWarningBanner() {
-    elements.usageWarningBanner.classList.add('hidden');
+    // Each threshold fires at most once per day — background.js may have already shown it
+    const today = new Date().toISOString().slice(0, 10);
+    const stored = await chrome.storage.local.get([
+      'captureai-usage-warning-shown-date',
+      'captureai-usage-critical-shown-date'
+    ]);
+
+    let warningMessage = null;
+
+    if (remaining <= 5 && stored['captureai-usage-critical-shown-date'] !== today) {
+      await chrome.storage.local.set({ 'captureai-usage-critical-shown-date': today });
+      warningMessage = `Only ${remaining} request${remaining === 1 ? '' : 's'} remaining today.`;
+    } else if (used >= 40 && stored['captureai-usage-warning-shown-date'] !== today) {
+      await chrome.storage.local.set({ 'captureai-usage-warning-shown-date': today });
+      const percentage = limit > 0 ? Math.round((used / limit) * 100) : 0;
+      warningMessage = `You've used ${percentage}% of your daily limit (${used} of ${limit} requests).`;
+    }
+
+    if (!warningMessage) return;
+
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+        await ensureContentScriptLoaded(tab.id);
+        chrome.tabs.sendMessage(tab.id, { action: 'showUsageWarningBanner', warningMessage })
+          .catch(err => console.warn('CaptureAI: Usage warning delivery failed:', err));
+      }
+    } catch (error) {
+      console.warn('CaptureAI: Could not send usage warning banner:', error);
+    }
   }
 
   /**
@@ -1130,27 +1106,20 @@ document.addEventListener('DOMContentLoaded', async () => {
    * @param {boolean} isDailyLimit - true for daily limit, false for per-minute
    */
   function renderRateLimitError(isDailyLimit) {
-    elements.responseContent.className = 'response-content error';
+    elements.responseContent.className = isDailyLimit ? 'response-content' : 'response-content error';
     elements.responseContent.textContent = '';
 
-    const msgEl = document.createElement('span');
-
     if (isDailyLimit) {
-      msgEl.textContent = 'Daily limit reached. Upgrade to Pro for unlimited requests.';
+      elements.responseContent.appendChild(document.createTextNode('Daily limit reached. '));
+      const btn = document.createElement('button');
+      btn.textContent = 'Upgrade to Pro';
+      btn.style.cssText = 'background:none;border:none;padding:0;color:#3b82f6;text-decoration:underline;cursor:pointer;font:inherit;';
+      btn.addEventListener('click', handleUpgrade);
+      elements.responseContent.appendChild(btn);
     } else {
+      const msgEl = document.createElement('span');
       msgEl.textContent = 'Rate limit reached. Please wait a moment and try again.';
-    }
-
-    elements.responseContent.appendChild(msgEl);
-
-    // Show upgrade CTA inline for Basic tier users who hit the daily cap
-    const isBasicTier = currentState.user?.tier === 'basic' || currentState.user?.tier === 'Basic';
-    if (isDailyLimit && isBasicTier) {
-      const upgradeBtn = document.createElement('button');
-      upgradeBtn.textContent = 'Upgrade to Pro →';
-      upgradeBtn.className = 'inline-upgrade-btn';
-      upgradeBtn.addEventListener('click', handleUpgrade);
-      elements.responseContent.appendChild(upgradeBtn);
+      elements.responseContent.appendChild(msgEl);
     }
   }
 

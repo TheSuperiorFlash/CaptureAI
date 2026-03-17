@@ -201,8 +201,8 @@
     }
 
     .step-icon-wrap svg {
-      width: 20px;
-      height: 20px;
+      width: 36px;
+      height: 36px;
     }
 
     .step-icon-wrap.blue {
@@ -268,20 +268,6 @@
       padding: 40px 60px 40px 30px;
       position: relative;
       z-index: 2;
-    }
-
-    /* Simulated page behind the panel */
-    .demo-bg {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #f4f6f8;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(0, 0, 0, 0.06);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     /* Fake page content strips */
@@ -352,12 +338,11 @@
       width: 188px;
       background: #ffffff;
       border-radius: 16px;
-      box-shadow:
-        0 12px 36px rgba(0, 0, 0, 0.14),
-        0 0 0 1px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      /* removed box-shadow */
       padding: 12px;
       display: flex;
-      transform: scale(1.35);
+      transform: scale(2.15);
       transform-origin: center;
       flex-direction: column;
       gap: 8px;
@@ -408,12 +393,12 @@
     }
 
     .dp-thumb {
-      width: 40px;
-      height: 14px;
+      width: 41px;
+      height: 18px;
       background: #218aff;
       border-radius: 100px;
       position: absolute;
-      left: 2px;
+      left: 0px;
     }
 
     .dp-toggle-label {
@@ -423,6 +408,7 @@
       text-align: center;
       font-size: 8.5px;
       font-weight: 600;
+      margin-left: 2px;
     }
 
     .dp-toggle-label.a {
@@ -431,6 +417,7 @@
 
     .dp-toggle-label.i {
       color: #999;
+      margin-left: 4px;
     }
 
     .dp-response {
@@ -467,7 +454,6 @@
       align-items: center;
       justify-content: center;
       gap: 5px;
-      box-shadow: 0 3px 10px rgba(33, 138, 255, 0.3);
     }
 
     .dp-btn-capture img {
@@ -502,7 +488,6 @@
 <body>
   <div class="tile">
     <div class="blob-tl"></div>
-    <div class="blob-br"></div>
 
     <!-- ── Column 1: Headline ── -->
     <div class="col-headline">
