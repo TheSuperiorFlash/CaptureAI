@@ -603,12 +603,12 @@ body {
 }
 
 #user-tier.tier-pro {
-    background: linear-gradient(135deg, #218aff 0%, #a252ff 100%);
-    box-shadow: 0 2px 6px rgba(162, 82, 255, 0.3);
+    background: linear-gradient(135deg, #218aff 0%, #00BCD4 100%);
+    box-shadow: 0 2px 6px rgba(33, 138, 255, 0.3);
 }
 
 #upgrade-btn {
-    background: linear-gradient(135deg, rgba(33, 138, 255, 0.85) 0%, rgba(162, 82, 255, 0.85) 100%);
+    background: linear-gradient(135deg, #218aff 0%, #00BCD4 100%);
     border: none;
     color: var(--color-text-inverse-default);
     font-size: 11px;
@@ -621,7 +621,7 @@ body {
 }
 
 #upgrade-btn:hover {
-    box-shadow: 0 0 12px rgba(33, 138, 255, 0.4);
+    box-shadow: 0 0 12px rgba(33, 138, 255, 0.3);
 }
 
 #upgrade-btn:active {
