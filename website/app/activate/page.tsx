@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
+import { SparklesCore } from '@/components/ui/sparkles'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -335,6 +336,19 @@ export default function ActivatePage() {
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
             <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
             <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
+            {/* Sparkles particle background */}
+            <div className="pointer-events-none absolute inset-0 h-full w-full">
+                <SparklesCore
+                    id="activate-sparkles"
+                    background="transparent"
+                    minSize={0.6}
+                    maxSize={1.4}
+                    particleDensity={20}
+                    className="h-full w-full"
+                    particleColor="#FFFFFF"
+                    speed={0.7}
+                />
+            </div>
 
             <div className="relative z-10 mx-auto max-w-5xl px-6">
                 {/* Header */}
