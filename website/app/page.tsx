@@ -12,6 +12,7 @@ import MagneticButton from '@/components/MagneticButton'
 import PrivacyGuardSlider from '@/components/PrivacyGuardSlider'
 import Pricing from '@/components/Pricing'
 import FloatingUIShowcase from '@/components/FloatingUIShowcase'
+import { faqs } from '@/lib/faq-data'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -37,11 +38,40 @@ export default function Home() {
         description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
     }
 
+    const faqJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.answer,
+            },
+        })),
+    }
+
+    const orgJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'CaptureAI',
+        url: 'https://captureai.dev',
+        logo: 'https://captureai.dev/logo.png',
+    }
+
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
             />
             <Hero />
 
