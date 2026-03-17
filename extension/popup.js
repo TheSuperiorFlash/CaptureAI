@@ -91,7 +91,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   elements.backToMainBtn.addEventListener('click', showMainView);
 
   // Banner event listeners
-  elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+  if (elements.privacyGuardBannerDismiss) {
+    elements.privacyGuardBannerDismiss.addEventListener('click', dismissPrivacyGuardBanner);
+  }
+  if (elements.usageWarningBannerDismiss) {
+    elements.usageWarningBannerDismiss.addEventListener('click', dismissUsageWarningBanner);
+  }
 
   // Settings event listeners
   elements.privacyGuardToggle.addEventListener('click', togglePrivacyGuard);
@@ -461,6 +466,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       console.error('Error loading usage stats:', error);
       elements.usageContent.textContent = 'Unable to load usage stats';
+      // Hide warning banner on error
+      if (elements.usageWarningBanner) {
+        elements.usageWarningBanner.classList.add('hidden');
+      }
     }
   }
 
@@ -771,7 +780,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       && result['captureai-privacy-guard-notice-seen'] !== true
       && isPrivacyGuardEnabled;
 
-    elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+    if (elements.privacyGuardBanner) {
+      elements.privacyGuardBanner.classList.toggle('hidden', !shouldShow);
+    }
   }
 
   /**
@@ -779,7 +790,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    */
   async function dismissPrivacyGuardBanner() {
     await chrome.storage.local.set({ 'captureai-privacy-guard-notice-seen': true });
-    elements.privacyGuardBanner.classList.add('hidden');
+    if (elements.privacyGuardBanner) {
+      elements.privacyGuardBanner.classList.add('hidden');
+    }
   }
 
   /**
@@ -787,7 +800,9 @@ document.addEventListener('DOMContentLoaded', async () => {
    * Shows for Basic tier only, when at 80% usage or 5 requests remaining.
    * @param {Object} usage - Usage object with limitType and today stats
    */
-  async function sendUsageWarningToPage(usage) {
+  function checkUsageWarningBanner(usage) {
+    if (!elements.usageWarningBanner) return;
+
     if (!usage || usage.limitType !== 'per_day') {
       return;
     }
@@ -818,17 +833,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       warningMessage = `You've used ${percentage}% of your daily limit (${used} of ${limit} requests).`;
     }
 
-    if (!warningMessage) return;
-
-    try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
-        await ensureContentScriptLoaded(tab.id);
-        chrome.tabs.sendMessage(tab.id, { action: 'showUsageWarningBanner', warningMessage })
-          .catch(err => console.warn('CaptureAI: Usage warning delivery failed:', err));
-      }
-    } catch (error) {
-      console.warn('CaptureAI: Could not send usage warning banner:', error);
+  /**
+   * Dismiss the usage warning banner.
+   */
+  function dismissUsageWarningBanner() {
+    if (elements.usageWarningBanner) {
+      elements.usageWarningBanner.classList.add('hidden');
     }
   }
 
