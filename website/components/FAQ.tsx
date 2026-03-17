@@ -2,33 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-
-export const faqs = [
-    {
-        question: 'Which browsers are supported?',
-        answer: 'CaptureAI is built for Google Chrome only. It uses Chrome-specific extension APIs and has been tested exclusively on Chrome.',
-    },
-    {
-        question: 'What happens when I hit the daily limit?',
-        answer: 'Basic accounts get 50 requests per day. When you reach the limit, you can wait for the daily reset or upgrade to Pro for unlimited requests.',
-    },
-    {
-        question: 'Can I upgrade or cancel anytime?',
-        answer: 'Yes. You can upgrade to Pro at any point, and cancel your subscription whenever you want. No questions asked.',
-    },
-    {
-        question: 'Is my data stored anywhere?',
-        answer: 'Screenshots are processed securely and are not stored on our servers. We don\'t keep copies of your captured images or the questions they contain.',
-    },
-    {
-        question: 'Will my school detect the extension?',
-        answer: 'With Privacy Guard (Pro), the extension prevents quiz platforms from detecting its presence. Your browser activity logs appear as normal browsing.',
-    },
-    {
-        question: 'How accurate are the answers?',
-        answer: 'CaptureAI uses a capable AI model to analyze questions. Accuracy is high for most subjects, but we recommend reviewing answers as part of your study process.',
-    },
-]
+import { faqs } from '@/lib/faq-data'
 
 export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
