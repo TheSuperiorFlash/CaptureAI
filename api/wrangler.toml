@@ -5,8 +5,8 @@ name = "api"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
-# Account ID - Get from: https://dash.cloudflare.com/ (right sidebar)
-account_id = "e411f43b15c9122c0056a08f727eef15"
+# Account ID - set via environment variable: export CLOUDFLARE_ACCOUNT_ID=your_account_id
+# Wrangler reads CLOUDFLARE_ACCOUNT_ID automatically; do not hardcode here.
 
 # Workers AI Gateway binding
 # This automatically connects to your AI Gateway
@@ -18,7 +18,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "captureai-db"
-database_id = "8056a7db-be99-4c64-8316-daf6c5c9b48f"  # Created when you run: wrangler d1 create captureai-db
+database_id = "YOUR_D1_DATABASE_ID"  # Created when you run: wrangler d1 create captureai-db
 
 # Native Rate Limiting bindings (Cloudflare Rate Limiting API)
 # https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
@@ -68,7 +68,6 @@ namespace_id = "1006"
 # Set these with: wrangler secret put SECRET_NAME
 [vars]
 # Public variables (not sensitive)
-CLOUDFLARE_ACCOUNT_ID = "e411f43b15c9122c0056a08f727eef15"
 CLOUDFLARE_GATEWAY_NAME = "captureai-gateway"
 BASIC_TIER_DAILY_LIMIT = "50"
 PRO_TIER_RATE_LIMIT_PER_MINUTE = "20"  # 20 requests per minute for Pro tier
@@ -90,6 +89,7 @@ crons = ["0 3 * * *"]
 #   wrangler secret put STRIPE_PRICE_BASIC
 #   wrangler secret put RESEND_API_KEY
 #   wrangler secret put FROM_EMAIL
-#   wrangler secret put ADMIN_KEY       ← protects GET /api/ai/total-usage (admin analytics endpoint)
+#   wrangler secret put ADMIN_KEY              ← protects GET /api/ai/total-usage (admin analytics endpoint)
+#   wrangler secret put CLOUDFLARE_ACCOUNT_ID  ← used to construct AI Gateway URL
 # Recommended FROM_EMAIL format: CaptureAI <license@mail.captureai.dev>
 # Note: Avoid "noreply" addresses for better deliverability
