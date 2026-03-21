@@ -47,11 +47,12 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
               }}
               className={cn(
                 'w-fit rounded-xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] p-3',
-                option.isCta
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500'
-                  : 'bg-[#111111d1]'
+                option.isCta ? '' : 'bg-[#111111d1]'
               )}
-              style={!option.isCta ? { backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' } : undefined}
+              style={option.isCta
+                ? { backgroundColor: '#2563eb' }
+                : { backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }
+              }
             >
               <button
                 type="button"
