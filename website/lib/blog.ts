@@ -39,9 +39,9 @@ The best way to use AI for studying is as a **starting point**. When you encount
 
 AI tools work best when they help you learn patterns. If you notice that a certain type of calculus problem keeps coming up, use the AI-provided answers to understand the method — then practice without the tool.
 
-### 3. Use OCR-Based Tools for Speed
+### 3. Use Screen-Reading Tools for Speed
 
-Tools like CaptureAI use OCR (Optical Character Recognition) to extract text from your screen. This means you don't need to retype questions — just select the area and let the AI read it. This saves enormous time during timed assignments. See [how CaptureAI's OCR pipeline works](/blog/how-captureai-works) for a deeper look at the technology.
+Tools like CaptureAI use advanced text recognition to read questions directly from your screen. This means you don't need to retype questions — just select the area and let the AI process it. This saves enormous time during timed assignments. See [how CaptureAI reads text](/blog/how-captureai-works) for a deeper look at the technology.
 
 ### 4. Combine AI with Active Recall
 
@@ -55,7 +55,7 @@ Not all AI tools are equal. Here's what to look for:
 - **Privacy**: Your data should stay local — no screenshots stored on servers (read more about [privacy and AI tools](/blog/privacy-and-ai-tools-what-students-need-to-know))
 - **Platform support**: It should work on [Canvas, Moodle, Blackboard](/blog/canvas-moodle-blackboard-tips-for-students), and other LMS platforms
 
-CaptureAI checks all these boxes. It runs as a lightweight Chrome extension, processes text locally with OCR, and delivers answers from advanced AI models.
+CaptureAI checks all these boxes. It runs as a lightweight Chrome extension, processes text securely on your own device, and delivers answers from advanced AI models.
 
 ## Getting Started
 
@@ -77,7 +77,7 @@ AI is a tool — how you use it determines whether it makes you smarter or just 
 ## AI-Powered Study Tools
 
 ### CaptureAI
-The standout in this category. CaptureAI lets you screenshot any question on your screen and get an instant AI-powered answer. It works on every learning platform — [Canvas, Moodle, Blackboard](/blog/canvas-moodle-blackboard-tips-for-students), Top Hat, Schoology — and processes text locally using OCR so your [screenshots never leave your device](/blog/privacy-and-ai-tools-what-students-need-to-know).
+The standout in this category. CaptureAI lets you screenshot any question on your screen and get an instant AI-powered answer. It works on every learning platform — [Canvas, Moodle, Blackboard](/blog/canvas-moodle-blackboard-tips-for-students), Top Hat, Schoology — and processes text securely on your own device so your [screenshots never leave your computer](/blog/privacy-and-ai-tools-what-students-need-to-know).
 
 **Key features:**
 - Screenshot-to-answer in seconds
@@ -126,7 +126,7 @@ Ready to add the most powerful study tool to your Chrome setup? [Install Capture
   {
     slug: 'how-captureai-works',
     title: 'How CaptureAI Works: Screenshot to Answer in Seconds',
-    description: 'A deep dive into how CaptureAI turns a screenshot of any question into an accurate AI-powered answer — the technology behind OCR, AI models, and the floating interface.',
+    description: 'A deep dive into how CaptureAI turns a screenshot of any question into an accurate AI-powered answer — the technology behind text recognition, AI models, and the floating interface.',
     datePublished: '2026-03-20',
     tags: ['CaptureAI', 'how it works', 'technology'],
     content: `CaptureAI looks simple from the outside: you press a keyboard shortcut, drag to select a question, and get an answer. But under the hood, there's a sophisticated pipeline that makes this possible in seconds.
@@ -135,13 +135,13 @@ Ready to add the most powerful study tool to your Chrome setup? [Install Capture
 
 When you press **Ctrl+Shift+X**, CaptureAI activates a capture overlay on your current tab. You drag to select the area containing your question. The extension captures that area as an image — this all happens locally in your browser, with no data sent anywhere yet. For all available shortcuts, visit the [help center](/help).
 
-## Step 2: OCR Text Extraction
+## Step 2: Secure Text Extraction
 
-The captured image is processed by **Tesseract.js**, an OCR (Optical Character Recognition) engine that runs entirely in your browser. It extracts the text from the screenshot — question text, answer options, labels, and any other visible content.
+The captured image is processed by a **secure scanning engine** that runs entirely within your browser. It extracts the text from the screenshot — question text, answer options, labels, and any other visible content.
 
-If OCR confidence is above 60%, CaptureAI sends only the extracted text to the AI. This is a **90% bandwidth savings** compared to sending the full image, and it means your [screenshots never leave your device](/blog/privacy-and-ai-tools-what-students-need-to-know) in most cases.
+If the text scanning confidence is high, CaptureAI sends only the extracted text to the AI. This makes the response incredibly fast and uses far less data than sending a full image, and it means your [screenshots never leave your device](/blog/privacy-and-ai-tools-what-students-need-to-know) in most cases.
 
-If OCR confidence is low (blurry text, handwritten notes, complex diagrams), CaptureAI falls back to sending the image directly to the AI model for visual analysis.
+If the scanning confidence is low (blurry text, handwritten notes, complex diagrams), CaptureAI falls back to sending the image directly to the AI model for visual analysis.
 
 ## Step 3: AI Analysis
 
@@ -163,10 +163,10 @@ The answer appears directly on your screen in the CaptureAI floating panel. No n
 
 Many exam platforms monitor browser behavior — they check if you've switched tabs, lost focus, or have extensions installed. CaptureAI's **Privacy Guard** (Pro feature) intercepts these detection methods:
 
-- Overrides \`document.hasFocus()\` to always return true
-- Blocks visibility and focus change events
-- Prevents the page from detecting browser extensions
-- Removes AI detection honeypots
+- Masks your activity so the test platform always thinks you're actively viewing it
+- Stops the page from tracking when you switch tabs or click away
+- Prevents the platform from detecting study tools
+- Disables tracking systems designed to catch extensions
 
 This means your activity logs on [Canvas, Moodle](/blog/canvas-moodle-blackboard-tips-for-students), or other platforms show only normal browsing behavior.
 
@@ -274,10 +274,10 @@ Most AI study tools need to send your questions to a server for processing. The 
 
 CaptureAI was designed with privacy as a core principle:
 
-### Local OCR Processing
-When you capture a screenshot, CaptureAI processes it locally in your browser using Tesseract.js OCR. The text is extracted on your device — the screenshot itself is never uploaded to any server. See the [full technical breakdown](/blog/how-captureai-works) of how the OCR pipeline works.
+### Private On-Device Scanning
+When you capture a screenshot, CaptureAI processes it locally in your browser using a built-in text recognition engine. The text is extracted on your own device — the screenshot itself is rarely uploaded to any server. See the [full technical breakdown](/blog/how-captureai-works) of how the text scanning pipeline works.
 
-Only when OCR confidence is too low (below 60%) does CaptureAI fall back to sending the image. In the vast majority of cases, only extracted text reaches the AI model.
+Only when scanning confidence is too low does CaptureAI fall back to sending the image. In the vast majority of cases, only extracted text reaches the AI model.
 
 ### No Data Storage
 CaptureAI does not store your questions, answers, or screenshots on its servers. Each request is processed and the response is returned — nothing is saved.
@@ -295,10 +295,10 @@ No question content, no answer history, no browsing data.
 Privacy isn't just about what data a tool collects — it's also about whether other platforms can detect that you're using tools.
 
 CaptureAI's Privacy Guard (Pro feature) prevents exam platforms from detecting the extension:
-- **Focus detection blocked**: The page can't tell if you switched tabs
-- **Visibility API overridden**: The page always thinks it's the active tab
-- **Extension detection prevented**: Honeypot scripts that look for extensions are neutralized
-- **Activity logs stay clean**: Your [LMS](/blog/canvas-moodle-blackboard-tips-for-students) logs show only normal browsing
+- **Tab switching masked**: The exam page can't tell if you clicked away to another tab
+- **Active state frozen**: The platform always believes you are actively viewing the quiz
+- **Extension sweeps blocked**: Advanced tracking scripts designed to find study tools are neutralized
+- **Activity logs stay clean**: Your [LMS](/blog/canvas-moodle-blackboard-tips-for-students) logs show only normal, permitted browsing
 
 ## Red Flags to Watch For
 
