@@ -180,7 +180,7 @@ export default function Navbar() {
                 />
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
-                    <Image src="/logo.svg" alt="CaptureAI" width={28} height={28} priority />
+                    <Image src="/logo.png" alt="CaptureAI" width={28} height={28} priority />
                     <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
                 </Link>
 
