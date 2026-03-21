@@ -88,6 +88,7 @@ module.exports = {
     '/dist/',
     '/coverage/',
     '/api/',
-    '/e2e/'
+    '/e2e/',
+    '/.worktrees/'
   ]
 };
