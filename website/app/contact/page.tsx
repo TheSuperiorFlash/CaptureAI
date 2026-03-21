@@ -63,7 +63,7 @@ export default function ContactPage() {
                         </p>
                         <a
                             href="mailto:feedback@captureai.dev"
-                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-white/[0.15] hover:text-[--color-text]"
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-[--color-text-secondary] transition-all sm:hover:border-white/[0.15] sm:hover:text-[--color-text]"
                         >
                             <MessageCircle className="h-4 w-4" />
                             feedback@captureai.dev
@@ -83,7 +83,7 @@ export default function ContactPage() {
                         </p>
                         <Link
                             href="/help"
-                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-sm font-medium text-[--color-text-secondary] transition-all hover:border-white/[0.15] hover:text-[--color-text]"
+                            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-6 py-3 text-sm font-medium text-[--color-text-secondary] transition-all sm:hover:border-white/[0.15] sm:hover:text-[--color-text]"
                         >
                             Help Center
                             <ArrowRight className="h-4 w-4" />

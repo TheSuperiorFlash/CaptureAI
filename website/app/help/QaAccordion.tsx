@@ -22,7 +22,7 @@ export default function QaAccordion({ items }: { items: QaItem[] }) {
                             aria-expanded={openIndex === index}
                             aria-controls={panelId}
                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                            className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
+                            className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors sm:hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
                         >
                             <span className={`text-sm font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                 {item.q}

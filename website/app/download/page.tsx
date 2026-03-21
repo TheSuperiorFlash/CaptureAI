@@ -159,7 +159,7 @@ export default function DownloadPage() {
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
                     <Link
                         href="/help"
-                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors hover:border-blue-500/20"
+                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors sm:hover:border-blue-500/20"
                     >
                         <HelpCircle className="h-5 w-5 flex-shrink-0 text-cyan-400" />
                         <div>
@@ -169,7 +169,7 @@ export default function DownloadPage() {
                     </Link>
                     <Link
                         href="/blog/how-captureai-works"
-                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors hover:border-blue-500/20"
+                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors sm:hover:border-blue-500/20"
                     >
                         <BookOpen className="h-5 w-5 flex-shrink-0 text-cyan-400" />
                         <div>

@@ -241,7 +241,7 @@ export default function HelpPage() {
                             <Link
                                 key={guide.href}
                                 href={guide.href}
-                                className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                                className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5 transition-colors sm:hover:bg-white/[0.04]"
                             >
                                 <div>
                                     <span className="text-sm font-medium text-[--color-text]">{guide.title}</span>
