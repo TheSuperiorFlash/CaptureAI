@@ -251,6 +251,12 @@ export default function HelpPage() {
                             </Link>
                         ))}
                     </div>
+                    <div className="mt-6 text-center">
+                        <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300">
+                            View all guides on the blog
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
                 </section>
 
                 {/* FAQ */}
