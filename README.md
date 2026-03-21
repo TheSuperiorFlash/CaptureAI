@@ -8,7 +8,7 @@
 
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-brightgreen)](https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkppmkecmoeomnjd)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-2.0.1-orange.svg)](manifest.json)
 
 </div>
 
