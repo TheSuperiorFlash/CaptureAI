@@ -1,6 +1,5 @@
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
-import HowItWorks from '@/components/HowItWorks'
 import FAQ from '@/components/FAQ'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -26,40 +25,26 @@ export const metadata: Metadata = {
 
 export default function Home() {
     // Static JSON-LD structured data - no user input, safe for dangerouslySetInnerHTML
-    const jsonLd = [
-        {
-            '@context': 'https://schema.org',
-            '@type': 'SoftwareApplication',
-            name: 'CaptureAI',
-            applicationCategory: 'BrowserApplication',
-            operatingSystem: 'Chrome',
-            offers: [
-                { '@type': 'Offer', price: '1.49', priceCurrency: 'USD', name: 'Basic' },
-                { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
-            ],
-            description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
-        },
-        {
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: FAQS.map(({ question, answer }) => ({
-                '@type': 'Question',
-                name: question,
-                acceptedAnswer: { '@type': 'Answer', text: answer },
-            })),
-        },
-    ]
+    const softwareJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'CaptureAI',
+        applicationCategory: 'BrowserApplication',
+        operatingSystem: 'Chrome',
+        offers: [
+            { '@type': 'Offer', price: '1.49', priceCurrency: 'USD', name: 'Basic' },
+            { '@type': 'Offer', price: '9.99', priceCurrency: 'USD', name: 'Pro' },
+        ],
+        description: 'Chrome extension that screenshots any question and gives you the answer instantly.',
+    }
 
     const faqJsonLd = {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: FAQS.map((faq) => ({
+        mainEntity: FAQS.map(({ question, answer }) => ({
             '@type': 'Question',
-            name: faq.question,
-            acceptedAnswer: {
-                '@type': 'Answer',
-                text: faq.answer,
-            },
+            name: question,
+            acceptedAnswer: { '@type': 'Answer', text: answer },
         })),
     }
 
@@ -75,7 +60,7 @@ export default function Home() {
         <>
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
             />
             <script
                 type="application/ld+json"
@@ -191,8 +176,6 @@ export default function Home() {
             </section>
 
             <Features />
-
-            <HowItWorks />
 
             {/* ---- Pricing ---- */}
             <Pricing />
