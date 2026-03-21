@@ -108,6 +108,9 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* ---- Features ---- */}
+            <Features />
+
             {/* ---- Privacy Guard Showcase ---- */}
             <section className="relative py-24 md:py-32 overflow-x-clip">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
@@ -174,8 +177,6 @@ export default function Home() {
                     </ScrollRevealStagger>
                 </div>
             </section>
-
-            <Features />
 
             {/* ---- Pricing ---- */}
             <Pricing />
