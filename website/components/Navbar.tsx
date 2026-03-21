@@ -260,6 +260,7 @@ export default function Navbar() {
                         onClick={() => setIsOpen(!isOpen)}
                         className="relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] transition-colors p-2"
                         aria-label="Toggle menu"
+                        aria-expanded={isOpen}
                     >
                         <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}

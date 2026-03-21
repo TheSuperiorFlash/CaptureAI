@@ -5,6 +5,9 @@ import { Check, X as XIcon, Minus } from 'lucide-react'
 import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 
+const TIER_BASIC = 'basic'
+const TIER_PRO = 'pro'
+
 export default function Pricing() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
 
@@ -24,27 +27,27 @@ export default function Pricing() {
                     <div className="flex md:hidden justify-center mt-8 mb-4">
                         <div 
                             className="relative flex w-60 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
-                            onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
+                            onClick={() => setSelectedTier(selectedTier === TIER_BASIC ? TIER_PRO : TIER_BASIC)}
                         >
                             <div
                                 className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
-                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
+                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === TIER_PRO ? 'translateX(100%)' : 'translateX(0)' }}
                             />
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
-                                    selectedTier === 'basic' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+                                    selectedTier === TIER_BASIC ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
                                 }`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_BASIC); }}
                             >
                                 Basic
                             </button>
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
-                                    selectedTier === 'pro' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+                                    selectedTier === TIER_PRO ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
                                 }`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_PRO); }}
                             >
                                 Pro
                             </button>
@@ -62,15 +65,15 @@ export default function Pricing() {
                     <div
                         role="button"
                         tabIndex={0}
-                        aria-pressed={selectedTier === 'basic'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'basic'
+                        aria-pressed={selectedTier === TIER_BASIC}
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_BASIC
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
-                        onClick={() => setSelectedTier('basic')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
+                        onClick={() => setSelectedTier(TIER_BASIC)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier(TIER_BASIC); } }}
                     >
-                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === 'basic' ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
+                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
                                 <span className="text-4xl font-bold font-inter text-[--color-text]">$1.49</span>
@@ -118,16 +121,16 @@ export default function Pricing() {
                     <div
                         role="button"
                         tabIndex={0}
-                        aria-pressed={selectedTier === 'pro'}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                        aria-pressed={selectedTier === TIER_PRO}
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_PRO
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
-                        onClick={() => setSelectedTier('pro')}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                        onClick={() => setSelectedTier(TIER_PRO)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier(TIER_PRO); } }}
                     >
-                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] transition-all duration-300 ${selectedTier === 'pro' ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] md:shadow-none md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
-                            <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50' : 'border-white/10 sm:hover:border-cyan-400/50'}`}>
+                        <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] transition-all duration-300 ${selectedTier === TIER_PRO ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] md:shadow-none md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === TIER_PRO ? 'border-cyan-400/50' : 'border-white/10 sm:hover:border-cyan-400/50'}`}>
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>

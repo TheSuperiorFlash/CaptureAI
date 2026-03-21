@@ -138,11 +138,22 @@ export default function Features() {
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const container = e.currentTarget
-        const itemWidth = container.scrollWidth / features.length
-        const newIndex = Math.round(container.scrollLeft / itemWidth)
-        if (newIndex >= 0 && newIndex < features.length) {
-            setActiveIndex(newIndex)
-        }
+        const containerCenter = container.scrollLeft + container.clientWidth / 2
+        const cards = Array.from(container.children) as HTMLDivElement[]
+
+        let nextIndex = 0
+        let smallestDistance = Number.POSITIVE_INFINITY
+
+        cards.forEach((card, index) => {
+            const cardCenter = card.offsetLeft + card.offsetWidth / 2
+            const distance = Math.abs(cardCenter - containerCenter)
+            if (distance < smallestDistance) {
+                smallestDistance = distance
+                nextIndex = index
+            }
+        })
+
+        setActiveIndex(nextIndex)
     }
 
     return (
@@ -182,7 +193,7 @@ export default function Features() {
                     <div
                         ref={scrollContainerRef}
                         onScroll={handleScroll}
-                        className="grid grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] overflow-x-auto snap-x snap-mandatory gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
+                        className="grid grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] overflow-x-auto snap-x snap-mandatory gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     >
                         {features.map((feature, index) => (
                             <div key={`${feature.title}-${index}`} className="snap-center h-[90%] w-full">

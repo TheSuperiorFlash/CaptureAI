@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -19,10 +19,24 @@ type FloatingActionMenuProps = {
 };
 
 const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingActionMenuProps) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={menuRef}
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
@@ -37,7 +51,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
         >
           {options.map((option, index) => (
             <motion.div
-              key={index}
+              key={option.label}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
@@ -57,8 +71,8 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
               <button
                 type="button"
                 onClick={() => {
-                  option.onClick();
                   onClose();
+                  option.onClick();
                 }}
                 className={cn(
                   'flex flex-row-reverse items-center justify-end gap-2 text-sm font-medium transition-colors whitespace-nowrap',
