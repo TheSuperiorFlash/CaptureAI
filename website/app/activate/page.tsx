@@ -369,6 +369,37 @@ export default function ActivatePage() {
                         </p>
                     </div>
 
+                    {/* Mobile Tier Toggle */}
+                    <div className="flex md:hidden justify-center mt-6 mb-10">
+                        <div 
+                            className="relative flex w-60 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
+                            onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
+                        >
+                            <div
+                                className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
+                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
+                            />
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'basic' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
+                            >
+                                Basic
+                            </button>
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'pro' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
+                            >
+                                Pro
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Plans grid */}
                     <div
                         className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"

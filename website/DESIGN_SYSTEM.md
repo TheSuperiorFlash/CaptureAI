@@ -271,7 +271,7 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 | `components/ScrollStory.tsx` | Apple-style scroll-pinned story (400vh container, 3 sequences with mock quiz UI transitions) |
 | `components/FloatingUIShowcase.tsx` | Interactive 1.75× replica of extension popup (capture/ask mode toggle) |
 | `components/PrivacyGuardSlider.tsx` | Before/after image comparison with pointer-driven slider (mobile only) |
-| `components/Features.tsx` | 8-feature grid with 3D tilt cards + dynamic glass glare, infinite mobile swipe carousel |
+| `components/Features.tsx` | 6-feature grid with 3D tilt cards + dynamic glass glare, finite mobile swipe carousel with position dots. Supports optional `mobileDescription` for responsive text. |
 | `components/HowItWorks.tsx` | 3-step flow with gradient connecting line |
 | `components/Pricing.tsx` | Free vs Pro pricing cards with mobile swipe-to-switch (stacked card deck) |
 | `components/FAQ.tsx` | Two-column layout: left header + right accordion with glass card wrapper |

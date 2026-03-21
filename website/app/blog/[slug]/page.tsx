@@ -193,9 +193,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {/* Back link */}
             <Link
               href="/blog"
-              className="mb-10 inline-flex items-center gap-1.5 text-sm font-medium text-[--color-text-tertiary] transition-colors hover:text-cyan-400 group"
+              className="mb-10 inline-flex items-center gap-1.5 text-sm font-medium text-[--color-text-tertiary] transition-colors sm:hover:text-cyan-400 group"
             >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              <ArrowLeft className="h-4 w-4 transition-transform sm:group-hover:-translate-x-1" />
               Back to blog
             </Link>
 

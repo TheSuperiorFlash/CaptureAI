@@ -108,14 +108,14 @@ export default function Hero() {
 
     return (
         <section
-            className="relative overflow-x-clip pb-32 pt-32 md:pb-48 md:pt-48"
+            className="relative overflow-x-clip pb-20 pt-24 md:pb-48 md:pt-48"
         >
             {/* Layered deeper gradient background with smooth fade-out */}
             <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
                 <div className="absolute inset-0 aurora-bg" />
 
                 {/* Blob 1: Top Center */}
-                <div className="absolute left-[50%] top-[-200px] h-[1000px] w-[1000px] -ml-[500px] pointer-events-none">
+                <div className="absolute left-[50%] top-[-100px] md:top-[-200px] h-[500px] w-[500px] md:h-[1000px] md:w-[1000px] -ml-[250px] md:-ml-[500px] pointer-events-none">
                     <div
                         className="h-full w-full rounded-full bg-[#0047ff] gradient-blur"
                         style={{ opacity: isMounted ? 0.4 : 0 }}
@@ -123,7 +123,7 @@ export default function Hero() {
                 </div>
 
                 {/* Blob 2: Right */}
-                <div className="absolute right-[-100px] top-[50px] h-[800px] w-[800px] pointer-events-none">
+                <div className="absolute right-[-150px] md:right-[-100px] top-[50px] h-[400px] w-[400px] md:h-[800px] md:w-[800px] pointer-events-none">
                     <div
                         className="h-full w-full rounded-full bg-[#00f0ff] gradient-blur"
                         style={{ opacity: isMounted ? 0.3 : 0 }}
@@ -131,7 +131,7 @@ export default function Hero() {
                 </div>
 
                 {/* Blob 3: Bottom Left */}
-                <div className="absolute bottom-[100px] left-[-150px] h-[1000px] w-[1000px] pointer-events-none">
+                <div className="absolute bottom-[50px] md:bottom-[100px] left-[-150px] h-[500px] w-[500px] md:h-[1000px] md:w-[1000px] pointer-events-none">
                     <div
                         className="h-full w-full rounded-full bg-[#0d3bbf] gradient-blur"
                         style={{ opacity: isMounted ? 0.3 : 0 }}

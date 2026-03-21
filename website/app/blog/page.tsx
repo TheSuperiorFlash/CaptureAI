@@ -64,7 +64,7 @@ export default function BlogIndex() {
           <ScrollReveal delay={0.1} className="mb-10 lg:mb-16">
             <Link
               href={`/blog/${featuredPost.slug}`}
-              className="glass-card group block overflow-hidden rounded-[2rem] transition-all duration-300 hover:border-blue-500/30 hover:shadow-[0_0_40px_rgba(0,113,255,0.12)] bg-[#0B0D14]/80"
+              className="glass-card group block overflow-hidden rounded-[2rem] transition-all duration-300 sm:hover:border-blue-500/30 sm:hover:shadow-[0_0_40px_rgba(0,113,255,0.12)] bg-[#0B0D14]/80"
             >
               <div className="flex flex-col md:flex-row">
                 {/* Left: Content */}
@@ -77,7 +77,7 @@ export default function BlogIndex() {
                       {new Date(featuredPost.datePublished).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </time>
                   </div>
-                  <h2 className="mb-4 text-2xl font-extrabold text-[--color-text] transition-colors group-hover:text-cyan-400 md:text-3xl lg:text-4xl lg:leading-tight">
+                  <h2 className="mb-4 text-2xl font-extrabold text-[--color-text] transition-colors sm:group-hover:text-cyan-400 md:text-3xl lg:text-4xl lg:leading-tight">
                     {featuredPost.title}
                   </h2>
                   <p className="mb-8 text-base md:text-lg leading-relaxed text-[--color-text-secondary]">
@@ -85,7 +85,7 @@ export default function BlogIndex() {
                   </p>
                   <div className="mt-auto flex flex-wrap gap-2">
                     {featuredPost.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[--color-text-tertiary] transition-colors group-hover:bg-white/[0.08]">
+                      <span key={tag} className="rounded-full bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[--color-text-tertiary] transition-colors sm:group-hover:bg-white/[0.08]">
                         {tag}
                       </span>
                     ))}
@@ -94,15 +94,15 @@ export default function BlogIndex() {
                 {/* Right: Visual element */}
                 <div className="relative hidden w-[45%] min-w-[320px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#0033aa]/20 to-[#00aaff]/10 md:flex">
                   <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.04]" />
-                  <div className="gradient-blur absolute h-[150%] w-[150%] bg-blue-600/30 transition-transform duration-700 ease-out group-hover:scale-110 group-hover:bg-cyan-500/20" />
+                  <div className="gradient-blur absolute h-[150%] w-[150%] bg-blue-600/30 transition-transform duration-700 ease-out sm:group-hover:scale-110 sm:group-hover:bg-cyan-500/20" />
                   
                   {/* Decorative abstract UI block */}
-                  <div className="relative h-[200px] w-[280px] rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-all duration-500 group-hover:-translate-y-2 group-hover:translate-x-1 group-hover:rotate-[3deg]">
+                  <div className="relative h-[200px] w-[280px] rounded-2xl border border-white/[0.08] bg-white/[0.02] shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-all duration-500 sm:group-hover:-translate-y-2 sm:group-hover:translate-x-1 sm:group-hover:rotate-[3deg]">
                     <div className="flex h-10 items-center border-b border-white/[0.06] px-5">
                       <div className="flex gap-2">
-                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors group-hover:bg-[#ff5f56]" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors group-hover:bg-[#ffbd2e]" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors group-hover:bg-[#27c93f]" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors sm:group-hover:bg-[#ff5f56]" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors sm:group-hover:bg-[#ffbd2e]" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-white/20 transition-colors sm:group-hover:bg-[#27c93f]" />
                       </div>
                     </div>
                     <div className="flex h-[calc(100%-40px)] items-center justify-center p-6">
@@ -126,7 +126,7 @@ export default function BlogIndex() {
             <ScrollRevealItem key={post.slug} className="h-full">
               <Link
                 href={`/blog/${post.slug}`}
-                className="glass-card group flex h-full flex-col rounded-3xl p-8 transition-all duration-300 hover:border-blue-500/30 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] bg-[#0A0C10]/80"
+                className="glass-card group flex h-full flex-col rounded-3xl p-8 transition-all duration-300 sm:hover:border-blue-500/30 sm:hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] bg-[#0A0C10]/80"
               >
                 <div className="mb-5 flex flex-wrap items-center gap-2">
                   <time className="text-[13px] font-medium tracking-wide text-[--color-text-tertiary]" dateTime={post.datePublished}>
@@ -135,22 +135,22 @@ export default function BlogIndex() {
                   <span className="mx-2 text-[--color-text-tertiary]/50">•</span>
                   <div className="flex gap-1.5 flex-wrap">
                     {post.tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="rounded-full bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[--color-text-tertiary] transition-colors group-hover:text-cyan-400/80">
+                      <span key={tag} className="rounded-full bg-white/[0.03] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[--color-text-tertiary] transition-colors sm:group-hover:text-cyan-400/80">
                         {tag}
                       </span>
                     ))}
                   </div>
                 </div>
-                <h2 className="mb-4 text-xl font-bold leading-snug text-[--color-text] transition-colors group-hover:text-cyan-400">
+                <h2 className="mb-4 text-xl font-bold leading-snug text-[--color-text] transition-colors sm:group-hover:text-cyan-400">
                   {post.title}
                 </h2>
                 <p className="mb-8 text-[15px] leading-relaxed text-[--color-text-secondary]">
                   {post.description}
                 </p>
                 <div className="mt-auto border-t border-white/[0.04] pt-5">
-                  <span className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wide text-cyan-400 transition-colors group-hover:text-cyan-300">
+                  <span className="inline-flex items-center gap-2 text-[14px] font-bold tracking-wide text-cyan-400 transition-colors sm:group-hover:text-cyan-300">
                     Read article
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-4 w-4 transition-transform sm:group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>
