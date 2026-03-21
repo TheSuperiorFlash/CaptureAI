@@ -32,7 +32,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
             stiffness: 300,
             damping: 20,
           }}
-          className={cn('fixed z-50 flex flex-col gap-2', className)}
+          className={cn('fixed z-50 flex flex-col items-end gap-2', className)}
           style={{ right: '1.5rem', top: '5rem' }}
         >
           {options.map((option, index) => (
@@ -51,7 +51,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
                   ? 'bg-gradient-to-r from-blue-600 to-blue-500'
                   : 'bg-[#111111d1]'
               )}
-              style={{ backdropFilter: 'blur(24px)' }}
+              style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
             >
               <button
                 type="button"
