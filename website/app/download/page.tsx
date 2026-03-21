@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Check, Download, ArrowRight, Shield, Zap, HelpCircle, BookOpen } from 'lucide-react'
+import { Chrome, Check, Download, ArrowRight, Shield, Zap, HelpCircle, BookOpen } from 'lucide-react'
 import { SITE_URL } from '@/lib/constants'
 import InstallButton from '@/components/InstallButton'
 
