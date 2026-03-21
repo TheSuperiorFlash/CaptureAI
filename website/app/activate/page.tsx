@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
@@ -216,6 +216,23 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     )
 }
 
+const ActivateSparkles = memo(function ActivateSparkles() {
+    return (
+        <div className="pointer-events-none absolute inset-0 h-full w-full">
+            <SparklesCore
+                id="activate-sparkles"
+                background="transparent"
+                minSize={0.6}
+                maxSize={1.4}
+                particleDensity={15}
+                className="h-full w-full"
+                particleColor="#FFFFFF"
+                speed={0.5}
+            />
+        </div>
+    )
+})
+
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
@@ -338,18 +355,7 @@ export default function ActivatePage() {
                 <div className="absolute left-1/2 top-[10%] h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
                 <div className="absolute right-[-100px] top-[40%] h-[300px] w-[300px] rounded-full bg-cyan-500 gradient-blur" />
                 {/* Sparkles particle background */}
-                <div className="pointer-events-none absolute inset-0 h-full w-full">
-                    <SparklesCore
-                        id="activate-sparkles"
-                        background="transparent"
-                        minSize={0.6}
-                        maxSize={1.4}
-                        particleDensity={15}
-                        className="h-full w-full"
-                        particleColor="#FFFFFF"
-                        speed={0.5}
-                    />
-                </div>
+                <ActivateSparkles />
 
                 <div className="relative z-10 mx-auto max-w-5xl px-6">
                     {/* Header */}
