@@ -46,11 +46,12 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
                 delay: index * 0.05,
               }}
               className={cn(
-                'w-fit rounded-xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] backdrop-blur-2xl p-3',
+                'w-fit rounded-xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] p-3',
                 option.isCta
                   ? 'bg-gradient-to-r from-blue-600 to-blue-500'
                   : 'bg-[#111111d1]'
               )}
+              style={{ backdropFilter: 'blur(24px)' }}
             >
               <button
                 type="button"
