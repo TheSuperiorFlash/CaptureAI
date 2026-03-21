@@ -23,9 +23,9 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
           transition={{
             duration: 0.3,
             type: 'spring',
@@ -51,7 +51,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
                   ? 'bg-gradient-to-r from-blue-600 to-blue-500'
                   : 'bg-[#111111d1]'
               )}
-              style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+              style={!option.isCta ? { backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' } : undefined}
             >
               <button
                 type="button"
