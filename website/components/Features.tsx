@@ -20,21 +20,21 @@ const features: Feature[] = [
         title: 'Screenshot Capture',
         description: 'Capture any screen area and get the correct answer instantly.',
         color: 'from-blue-600/30 to-blue-700/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] hover:border-blue-500/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] sm:hover:border-blue-500/30',
     },
     {
         icon: MousePointer,
         title: 'Floating Interface',
         description: 'A draggable panel over any webpage for captures and answers.',
         color: 'from-cyan-500/30 to-cyan-600/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] hover:border-cyan-500/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] sm:hover:border-cyan-500/30',
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
         description: 'Answers appear inline — no popups, no new windows.',
         color: 'from-indigo-500/30 to-indigo-600/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] hover:border-indigo-500/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] sm:hover:border-indigo-500/30',
     },
     {
         icon: Shield,
@@ -42,7 +42,7 @@ const features: Feature[] = [
         description: 'Hides all extension or browser (tab switching) activity from quiz platforms.',
         pro: true,
         color: 'from-teal-500/30 to-teal-600/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] hover:border-teal-500/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] sm:hover:border-teal-500/30',
     },
     {
         icon: MessageSquare,
@@ -50,7 +50,7 @@ const features: Feature[] = [
         description: 'Type or capture to get detailed explanations, not just answers.',
         pro: true,
         color: 'from-violet-500/30 to-violet-600/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-violet-500/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] sm:hover:border-violet-500/30',
     },
     {
         icon: Repeat,
@@ -59,7 +59,7 @@ const features: Feature[] = [
         mobileDescription: 'Automatically answers questions on supported sites (e.g. Vocabulary.com)',
         pro: true,
         color: 'from-blue-400/30 to-cyan-500/10',
-        glow: 'hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] hover:border-blue-400/30',
+        glow: 'sm:hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] sm:hover:border-blue-400/30',
     },
 ]
 
@@ -101,7 +101,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
         >
             {/* Glare overlay */}
             <motion.div
-                className="absolute inset-0 rounded-3xl opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover:opacity-100 pointer-events-none"
+                className="absolute inset-0 rounded-3xl opacity-0 mix-blend-overlay transition-opacity duration-300 sm:group-hover:opacity-100 pointer-events-none"
                 style={{ backgroundImage }}
             />
             <div className="relative flex flex-col h-full" style={animate ? { transform: 'translateZ(40px)', transformStyle: 'preserve-3d' } : undefined}>
@@ -116,7 +116,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
                 <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
                     {feature.title}
                 </h3>
-                <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
+                <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] sm:group-hover:text-[--color-text-secondary] transition-colors">
                     <span className={feature.mobileDescription ? 'hidden sm:inline' : ''}>
                         {feature.description}
                     </span>
