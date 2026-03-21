@@ -32,7 +32,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
             stiffness: 300,
             damping: 20,
           }}
-          className={cn('absolute right-0 top-full mt-2 z-50 flex flex-col gap-2', className)}
+          className={cn('fixed right-6 top-20 z-50 flex flex-col gap-2', className)}
         >
           {options.map((option, index) => (
             <motion.div
