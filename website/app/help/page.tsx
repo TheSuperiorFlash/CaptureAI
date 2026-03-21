@@ -224,26 +224,31 @@ export default function HelpPage() {
                     </div>
                 </section>
 
-                {/* Keyboard Shortcuts */}
+                {/* Blog CTA */}
                 <section className="glass-card mb-8 rounded-2xl p-8">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
-                            <Keyboard className="h-5 w-5 text-violet-400" />
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
+                            <FileText className="h-5 w-5 text-blue-400" />
                         </div>
-                        <h2 className="text-lg font-semibold text-[--color-text]">Keyboard Shortcuts</h2>
+                        <h2 className="text-lg font-semibold text-[--color-text]">Guides & Tips</h2>
                     </div>
                     <div className="space-y-3">
                         {[
-                            { keys: 'Ctrl + Shift + X', action: 'Capture an area of the screen' },
-                            { keys: 'Ctrl + Shift + F', action: 'Quick capture last area' },
-                            { keys: 'Ctrl + Shift + E', action: 'Toggle the floating panel' },
-                        ].map((shortcut) => (
-                            <div key={shortcut.keys} className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5">
-                                <span className="text-sm text-[--color-text-secondary]">{shortcut.action}</span>
-                                <code className="whitespace-nowrap rounded-lg border border-white/[0.06] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-cyan-400">
-                                    {shortcut.keys}
-                                </code>
-                            </div>
+                            { href: '/blog/how-captureai-works', title: 'How CaptureAI Works', desc: 'Deep dive into the screenshot-to-answer pipeline' },
+                            { href: '/blog/canvas-moodle-blackboard-tips-for-students', title: 'Canvas, Moodle & Blackboard Tips', desc: 'Master your learning management system' },
+                            { href: '/blog/privacy-and-ai-tools-what-students-need-to-know', title: 'Privacy & AI Tools', desc: 'How CaptureAI protects your data' },
+                        ].map((guide) => (
+                            <Link
+                                key={guide.href}
+                                href={guide.href}
+                                className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                            >
+                                <div>
+                                    <span className="text-sm font-medium text-[--color-text]">{guide.title}</span>
+                                    <p className="text-xs text-[--color-text-tertiary]">{guide.desc}</p>
+                                </div>
+                                <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 text-cyan-400" />
+                            </Link>
                         ))}
                     </div>
                 </section>
@@ -271,31 +276,26 @@ export default function HelpPage() {
                     <QaAccordion items={TROUBLESHOOTING_ITEMS} />
                 </section>
 
-                {/* Blog CTA */}
+                {/* Keyboard Shortcuts */}
                 <section className="glass-card mb-8 rounded-2xl p-8">
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-cyan-500/10">
-                            <FileText className="h-5 w-5 text-blue-400" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/15 to-blue-500/10">
+                            <Keyboard className="h-5 w-5 text-violet-400" />
                         </div>
-                        <h2 className="text-lg font-semibold text-[--color-text]">Guides & Tips</h2>
+                        <h2 className="text-lg font-semibold text-[--color-text]">Keyboard Shortcuts</h2>
                     </div>
                     <div className="space-y-3">
                         {[
-                            { href: '/blog/how-captureai-works', title: 'How CaptureAI Works', desc: 'Deep dive into the screenshot-to-answer pipeline' },
-                            { href: '/blog/canvas-moodle-blackboard-tips-for-students', title: 'Canvas, Moodle & Blackboard Tips', desc: 'Master your learning management system' },
-                            { href: '/blog/privacy-and-ai-tools-what-students-need-to-know', title: 'Privacy & AI Tools', desc: 'How CaptureAI protects your data' },
-                        ].map((guide) => (
-                            <Link
-                                key={guide.href}
-                                href={guide.href}
-                                className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
-                            >
-                                <div>
-                                    <span className="text-sm font-medium text-[--color-text]">{guide.title}</span>
-                                    <p className="text-xs text-[--color-text-tertiary]">{guide.desc}</p>
-                                </div>
-                                <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 text-cyan-400" />
-                            </Link>
+                            { keys: 'Ctrl + Shift + X', action: 'Capture an area of the screen' },
+                            { keys: 'Ctrl + Shift + F', action: 'Quick capture last area' },
+                            { keys: 'Ctrl + Shift + E', action: 'Toggle the floating panel' },
+                        ].map((shortcut) => (
+                            <div key={shortcut.keys} className="flex items-center justify-between gap-4 rounded-xl bg-white/[0.02] px-5 py-3.5">
+                                <span className="text-sm text-[--color-text-secondary]">{shortcut.action}</span>
+                                <code className="whitespace-nowrap rounded-lg border border-white/[0.06] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-cyan-400">
+                                    {shortcut.keys}
+                                </code>
+                            </div>
                         ))}
                     </div>
                 </section>
