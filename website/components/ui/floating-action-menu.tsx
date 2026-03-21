@@ -51,7 +51,7 @@ const FloatingActionMenu = ({ options, isOpen, onClose, className }: FloatingAct
                   ? 'bg-gradient-to-r from-blue-600 to-blue-500'
                   : 'bg-[#111111d1]'
               )}
-              style={!option.isCta ? { backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' } : undefined}
+              style={!option.isCta ? { backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' } : undefined}
             >
               <button
                 type="button"

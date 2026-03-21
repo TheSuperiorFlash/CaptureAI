@@ -110,7 +110,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
                         PRO
                     </span>
                 )}
-                <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br border border-white/5 shadow-inner ${feature.color}`}>
+                <div className={`mb-6 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br border border-white/5 shadow-inner ${feature.color}`}>
                     <Icon className="h-5 w-5 text-white/90" strokeWidth={2.5} />
                 </div>
                 <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
