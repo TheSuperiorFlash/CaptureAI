@@ -24,7 +24,7 @@ const posts: BlogPost[] = [
 
 Traditional studying means reading textbooks, watching lectures, and Googling questions one at a time. AI tools compress that loop. Instead of spending 10 minutes searching for the answer to a single question, you can get it in seconds.
 
-CaptureAI takes this a step further: you screenshot the question directly from your screen — whether it's on Canvas, Moodle, Blackboard, or any other platform — and the AI reads it, understands the context, and delivers the answer. Learn more about [how the screenshot-to-answer pipeline works](/blog/how-captureai-works).
+CaptureAI (often searched as Capture AI) takes this a step further: you screenshot the question directly from your screen — whether it's on Canvas, Moodle, Blackboard, or any other platform — and the AI reads it, understands the context, and delivers the answer. Learn more about [how the screenshot-to-answer pipeline works](/blog/how-captureai-works).
 
 ## Practical Strategies for AI-Assisted Studying
 
@@ -77,7 +77,7 @@ AI is a tool — how you use it determines whether it makes you smarter or just 
 ## AI-Powered Study Tools
 
 ### CaptureAI
-The standout in this category. CaptureAI lets you screenshot any question on your screen and get an instant AI-powered answer. It works on every learning platform — [Canvas, Moodle, Blackboard](/blog/canvas-moodle-blackboard-tips-for-students), Top Hat, Schoology — and processes text securely on your own device so your [screenshots never leave your computer](/blog/privacy-and-ai-tools-what-students-need-to-know).
+The standout in this category. CaptureAI (or Capture AI as many students call it) lets you screenshot any question on your screen and get an instant AI-powered answer. It works on every learning platform — [Canvas, Moodle, Blackboard](/blog/canvas-moodle-blackboard-tips-for-students), Top Hat, Schoology — and processes text securely on your own device so your [screenshots never leave your computer](/blog/privacy-and-ai-tools-what-students-need-to-know).
 
 **Key features:**
 - Screenshot-to-answer in seconds
@@ -129,7 +129,7 @@ Ready to add the most powerful study tool to your Chrome setup? [Install Capture
     description: 'A deep dive into how CaptureAI turns a screenshot of any question into an accurate AI-powered answer — the technology behind text recognition, AI models, and the floating interface.',
     datePublished: '2026-03-20',
     tags: ['CaptureAI', 'how it works', 'technology'],
-    content: `CaptureAI looks simple from the outside: you press a keyboard shortcut, drag to select a question, and get an answer. But under the hood, there's a sophisticated pipeline that makes this possible in seconds.
+    content: `CaptureAI (also known as Capture AI) looks simple from the outside: you press a keyboard shortcut, drag to select a question, and get an answer. But under the hood, there's a sophisticated pipeline that makes this possible in seconds.
 
 ## Step 1: Screen Capture
 
