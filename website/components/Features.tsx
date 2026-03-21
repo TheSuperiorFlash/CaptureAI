@@ -96,7 +96,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
             transition={{ type: 'spring', stiffness: 100, damping: 15, delay: (index % 4) * 0.1 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{ transformStyle: 'preserve-3d', rotateX, rotateY, transformPerspective: 1200 }}
+            style={animate ? { transformStyle: 'preserve-3d', rotateX, rotateY, transformPerspective: 1200 } : undefined}
             className={`glass-card group h-full relative flex flex-col rounded-3xl p-7 pb-11 sm:pb-7 transition-shadow duration-300 ease-out ${feature.glow}`}
         >
             {/* Glare overlay */}
