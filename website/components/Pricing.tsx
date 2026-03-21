@@ -21,31 +21,34 @@ export default function Pricing() {
                         Simple plans. Upgrade when you need more.
                     </p>
                     {/* Mobile Tier Toggle */}
-                    <div className="flex md:hidden justify-center items-center gap-3 mt-8">
-                        <span 
-                            className={`text-sm tracking-wide transition-colors cursor-pointer ${selectedTier === 'basic' ? 'text-white font-medium drop-shadow-md' : 'text-white/40 hover:text-white/80'}`} 
-                            onClick={() => setSelectedTier('basic')}
-                        >
-                            Basic
-                        </span>
-                        <button
-                            type="button"
-                            className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-white/10 transition-colors duration-200 ease-in-out focus:outline-none"
-                            role="switch"
-                            aria-checked={selectedTier === 'pro'}
+                    <div className="flex md:hidden justify-center mt-6 mb-2">
+                        <div 
+                            className="relative flex w-52 rounded-full bg-[#111420] p-1 border border-white/5 shadow-inner cursor-pointer"
                             onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
                         >
-                            <span
-                                aria-hidden="true"
-                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full shadow ring-0 transition duration-200 ease-in-out ${selectedTier === 'pro' ? 'translate-x-5 bg-cyan-400' : 'translate-x-0 bg-white/80'}`}
+                            <div
+                                className="absolute top-1 bottom-1 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
+                                style={{ width: 'calc(50% - 4px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
                             />
-                        </button>
-                        <span 
-                            className={`text-sm tracking-wide transition-colors cursor-pointer ${selectedTier === 'pro' ? 'text-cyan-400 font-medium drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]' : 'text-cyan-400/40 hover:text-cyan-400/80'}`} 
-                            onClick={() => setSelectedTier('pro')}
-                        >
-                            Pro
-                        </span>
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-1.5 text-sm font-medium transition-colors duration-300 ${
+                                    selectedTier === 'basic' ? 'text-blue-700' : 'text-[#7e92b3] hover:text-white/80'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
+                            >
+                                Basic
+                            </button>
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-1.5 text-sm font-medium transition-colors duration-300 ${
+                                    selectedTier === 'pro' ? 'text-blue-700' : 'text-[#7e92b3] hover:text-white/80'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
+                            >
+                                Pro
+                            </button>
+                        </div>
                     </div>
                 </ScrollReveal>
 
