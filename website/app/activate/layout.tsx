@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: 'Activate CaptureAI - Choose Your Plan',
-    description: 'Activate your CaptureAI Chrome extension and start getting instant AI-powered answers. Basic plan includes 50 requests per day. Upgrade to Pro for unlimited homework help.',
+    description: 'Choose your CaptureAI plan — Basic at $1.49/week for 50 daily requests or Pro at $9.99/month with unlimited AI answers and Privacy Guard.',
     alternates: {
         canonical: '/activate',
     },

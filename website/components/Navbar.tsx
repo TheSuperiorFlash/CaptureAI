@@ -253,7 +253,7 @@ export default function Navbar() {
                                 href="/activate"
                                 onClick={(e) => {
                                     handleNavClick(e, '/activate')
-                                    trackEvent('click_get_started', { location: 'navbar_desktop' })
+                                    trackEvent('click_get_started', { location: 'navbar_desktop', value: 1.20, currency: 'USD' })
                                 }}
                                 className="glow-btn inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 whitespace-nowrap"
                             >
@@ -312,7 +312,7 @@ export default function Navbar() {
                                 onClick={(e) => {
                                     handleNavClick(e, '/activate')
                                     setIsOpen(false)
-                                    trackEvent('click_get_started', { location: 'navbar_mobile' })
+                                    trackEvent('click_get_started', { location: 'navbar_mobile', value: 1.20, currency: 'USD' })
                                 }}
                             >
                                 Get Started

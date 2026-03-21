@@ -64,27 +64,27 @@ export default function ScrollStory() {
         return (
             <section className="relative bg-[--color-background] py-24 space-y-24">
                 <div className="mx-auto max-w-5xl px-6 text-center">
-                    <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                    <p className="heading-style-h2 text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl" role="presentation">
                         Homework shouldn&apos;t be a <br className="hidden md:block" />
                         <span className="text-gradient">search mission.</span>
-                    </h2>
+                    </p>
                     <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
                         Press a key, drag to select. CaptureAI picks up exactly what&apos;s on your screen, no typing required.
                     </p>
                 </div>
                 <div className="mx-auto max-w-5xl px-6 text-center">
-                    <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                    <p className="heading-style-h2 text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl" role="presentation">
                         The AI reads what you see instantly.
-                    </h2>
+                    </p>
                     <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
                         Text, multiple-choice options, and diagrams. Everything visible in your selection is analyzed in seconds.
                     </p>
                 </div>
                 <div className="mx-auto max-w-5xl px-6 text-center">
-                    <h2 className="drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+                    <p className="heading-style-h2 drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl" role="presentation">
                         The answer appears <br className="hidden md:block" />
                         where you need it most.
-                    </h2>
+                    </p>
                     <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
                         Instantly. Seamlessly. Without a trace.
                     </p>
@@ -283,10 +283,10 @@ export default function ScrollStory() {
                         className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity1, y: y1, scale: scale1 }}
                     >
-                        <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                        <p className="heading-style-h2 text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl" role="presentation">
                             Homework shouldn&apos;t be a <br className="hidden md:block" />
                             <span className="text-gradient">search mission.</span>
-                        </h2>
+                        </p>
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-2xl">
                             Press a key, drag to select. CaptureAI picks up exactly what&apos;s on your screen, no typing required.
                         </p>
@@ -297,9 +297,9 @@ export default function ScrollStory() {
                         className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity2, y: y2, scale: scale2 }}
                     >
-                        <h2 className="text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl">
+                        <p className="heading-style-h2 text-4xl font-bold tracking-tight text-[--color-text] md:text-6xl lg:text-7xl" role="presentation">
                             The AI reads what you see instantly.
-                        </h2>
+                        </p>
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-2xl">
                             Text, multiple-choice options, and diagrams. Everything visible in your selection is analyzed in seconds.
                         </p>
@@ -310,10 +310,10 @@ export default function ScrollStory() {
                         className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-shadow-glow md:drop-shadow-[0_4px_32px_rgba(0,0,0,0.9)]"
                         style={{ opacity: opacity3, y: y3, scale: scale3 }}
                     >
-                        <h2 className="md:drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl">
+                        <p className="heading-style-h2 md:drop-shadow-[0_0_40px_rgba(0,240,255,0.3)] text-4xl font-bold tracking-tight text-white md:text-6xl lg:text-7xl" role="presentation">
                             The answer appears <br className="hidden md:block" />
                             where you need it most.
-                        </h2>
+                        </p>
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-[--color-text-secondary] md:text-2xl">
                             Instantly. Seamlessly. Without a trace.
                         </p>

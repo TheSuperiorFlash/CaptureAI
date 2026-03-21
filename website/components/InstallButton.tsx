@@ -12,7 +12,7 @@ export default function InstallButton() {
       target="_blank"
       rel="noopener noreferrer"
       className="glow-btn flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
-      onClick={() => trackEvent('click_install', { location: 'download_page' })}
+      onClick={() => trackEvent('click_install', { location: 'download_page', value: 1.20, currency: 'USD' })}
     >
       <Chrome className="h-4 w-4" />
       Add to Chrome — Start now

@@ -33,10 +33,11 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Support */}
+                    {/* Resources */}
                     <div>
-                        <h4 className="mb-5 text-[15px] font-semibold tracking-wide text-[--color-text]">Support</h4>
+                        <h4 className="mb-5 text-[15px] font-semibold tracking-wide text-[--color-text]">Resources</h4>
                         <ul className="space-y-3.5">
+                            <li><Link href="/blog" className="text-[15px] font-medium text-[--color-text-tertiary] transition-colors duration-200 hover:text-cyan-400">Blog</Link></li>
                             <li><Link href="/help" className="text-[15px] font-medium text-[--color-text-tertiary] transition-colors duration-200 hover:text-cyan-400">Help Center</Link></li>
                             <li><Link href="/contact" className="text-[15px] font-medium text-[--color-text-tertiary] transition-colors duration-200 hover:text-cyan-400">Contact</Link></li>
                             <li><a href="https://github.com/TheSuperiorFlash/CaptureAI" target="_blank" rel="noopener noreferrer" className="text-[15px] font-medium text-[--color-text-tertiary] transition-colors duration-200 hover:text-cyan-400">GitHub</a></li>

@@ -95,11 +95,16 @@ h6 {
   line-height: 1.05;
 }
 
-h2 {
+h2,
+.heading-style-h2 {
   font-size: clamp(2rem, 4vw + 0.25rem, 3.25rem);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.1;
+}
+
+.heading-style-h2 {
+  font-family: Outfit, system-ui, -apple-system, sans-serif;
 }
 
 h3 {

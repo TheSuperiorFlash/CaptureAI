@@ -311,7 +311,7 @@ export default function ActivatePage() {
     }
 
     const handleBasicSignup = async () => {
-        trackEvent('click_checkout', { tier: 'basic' })
+        trackEvent('click_checkout', { tier: 'basic', value: 5.96, currency: 'USD' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, email })
@@ -321,7 +321,7 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
-        trackEvent('click_checkout', { tier: 'pro' })
+        trackEvent('click_checkout', { tier: 'pro', value: 9.99, currency: 'USD' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, email })
