@@ -8,6 +8,7 @@ interface Feature {
     icon: LucideIcon
     title: string
     description: string
+    mobileDescription?: string
     pro?: boolean
     color: string
     glow: string
@@ -55,6 +56,7 @@ const features: Feature[] = [
         icon: Repeat,
         title: 'Auto-Solve',
         description: 'Automatically answers questions on supported platforms (e.g. Vocabulary.com)',
+        mobileDescription: 'Automatically answers questions on supported sites (e.g. Vocabulary.com)',
         pro: true,
         color: 'from-blue-400/30 to-cyan-500/10',
         glow: 'hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] hover:border-blue-400/30',
@@ -115,7 +117,14 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
                     {feature.title}
                 </h3>
                 <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
-                    {feature.description}
+                    <span className={feature.mobileDescription ? 'hidden sm:inline' : ''}>
+                        {feature.description}
+                    </span>
+                    {feature.mobileDescription && (
+                        <span className="sm:hidden">
+                            {feature.mobileDescription}
+                        </span>
+                    )}
                 </p>
             </div>
         </motion.div>
