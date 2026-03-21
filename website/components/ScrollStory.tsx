@@ -94,7 +94,7 @@ export default function ScrollStory() {
     }
 
     return (
-        <section ref={containerRef} className="relative h-[400vh] bg-[--color-background]">
+        <section ref={containerRef} className="relative h-[250vh] md:h-[400vh] bg-[--color-background]">
             {/*
               This is the sticky viewport. It stays pinned while the user scrolls
               through the 400vh parent container.

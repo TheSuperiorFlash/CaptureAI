@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { Camera, MousePointer, Eye, Repeat, Shield, MessageSquare, LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'framer-motion'
 
@@ -125,26 +125,14 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
 export default function Features() {
     const shouldReduceMotion = useReducedMotion()
     const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const container = scrollContainerRef.current
-        if (!container) return
-        const rafId = requestAnimationFrame(() => {
-            if (container.scrollWidth > container.clientWidth) {
-                container.scrollLeft = container.scrollWidth / 3
-            }
-        })
-        return () => cancelAnimationFrame(rafId)
-    }, [])
+    const [activeIndex, setActiveIndex] = useState(0)
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const container = e.currentTarget
-        const oneThird = container.scrollWidth / 3
-        const threshold = Math.max(10, oneThird * 0.03)
-        if (container.scrollLeft <= threshold) {
-            container.scrollLeft += oneThird
-        } else if (container.scrollLeft >= oneThird * 2 - threshold) {
-            container.scrollLeft -= oneThird
+        const itemWidth = container.scrollWidth / features.length
+        const newIndex = Math.round(container.scrollLeft / itemWidth)
+        if (newIndex >= 0 && newIndex < features.length) {
+            setActiveIndex(newIndex)
         }
     }
 
@@ -180,21 +168,32 @@ export default function Features() {
                     ))}
                 </div>
 
-                {/* Mobile Infinite Swipe */}
-                <div
-                    ref={scrollContainerRef}
-                    onScroll={handleScroll}
-                    className="grid sm:hidden grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
-                >
-                    {[...features, ...features, ...features].map((feature, index) => (
-                        <div key={`${feature.title}-${index}`} className="snap-center h-full w-full">
-                            <FeatureCard
-                                feature={feature}
-                                index={index}
-                                animate={false}
+                {/* Mobile Finite Swipe with Indicators */}
+                <div className="sm:hidden -mx-6 px-6 pb-6 w-[100vw]">
+                    <div
+                        ref={scrollContainerRef}
+                        onScroll={handleScroll}
+                        className="grid grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] overflow-x-auto snap-x snap-mandatory gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
+                    >
+                        {features.map((feature, index) => (
+                            <div key={`${feature.title}-${index}`} className="snap-center h-[90%] w-full">
+                                <FeatureCard
+                                    feature={feature}
+                                    index={index}
+                                    animate={false}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    {/* Dots Indicator */}
+                    <div className="flex justify-center gap-2 mt-2">
+                        {features.map((_, i) => (
+                            <div
+                                key={i}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-4 bg-cyan-400' : 'w-1.5 bg-white/20'}`}
                             />
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

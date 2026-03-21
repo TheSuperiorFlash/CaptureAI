@@ -277,7 +277,7 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             {isOpen && (
-                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[45%] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
+                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[65%] sm:w-[240px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/90 md:bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
                     <div className="flex justify-end pr-2 pt-[10px] pb-2">
                         <button
                             type="button"
