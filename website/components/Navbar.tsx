@@ -1,16 +1,18 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { usePathname } from 'next/navigation'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import MagneticButton from './MagneticButton'
 import { trackEvent } from '@/lib/analytics'
+import FloatingActionMenu from './ui/floating-action-menu'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
+    const router = useRouter()
     const [activeHash, setActiveHash] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
     const [isLowPerformance, setIsLowPerformance] = useState(false)
@@ -103,18 +105,6 @@ export default function Navbar() {
             window.removeEventListener('hashchange', updateHash)
         }
     }, [pathname])
-
-    useEffect(() => {
-        if (isOpen) {
-            document.body.classList.add('overflow-hidden')
-        } else {
-            document.body.classList.remove('overflow-hidden')
-        }
-
-        return () => {
-            document.body.classList.remove('overflow-hidden')
-        }
-    }, [isOpen])
 
     const navigation = [
         { name: 'Features', href: '/#features' },
@@ -263,65 +253,81 @@ export default function Navbar() {
                     </MagneticButton>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setIsOpen(!isOpen)}
-                    className={`relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] md:hidden ${!isScrolled && isOpen ? 'opacity-0 pointer-events-none' : ''}`}
-                    aria-hidden={!isScrolled && isOpen}
-                    tabIndex={!isScrolled && isOpen ? -1 : undefined}
-                    aria-label="Toggle menu"
-                >
-                    {isOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
-            </div>
 
-            {/* Mobile menu */}
-            {isOpen && (
-                <div className="pointer-events-auto transition-all duration-300 md:hidden absolute right-3 top-3 z-50 flex w-[65%] sm:w-[240px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#060913]/90 md:bg-[#060913]/60 shadow-2xl backdrop-blur-2xl">
-                    <div className="flex justify-end pr-2 pt-[10px] pb-2">
-                        <button
-                            type="button"
-                            onClick={() => setIsOpen(false)}
-                            className="text-[--color-text-tertiary] hover:text-[--color-text] transition-colors"
-                            aria-label="Close menu"
+                <div className="relative md:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="relative z-10 text-[--color-text-tertiary] hover:text-[--color-text] transition-colors p-2"
+                        aria-label="Toggle menu"
+                    >
+                        <motion.div
+                            animate={{ rotate: isOpen ? 180 : 0 }}
+                            transition={{ duration: 0.3 }}
                         >
-                            <X size={24} />
-                        </button>
-                    </div>
-                    <div className="flex flex-col space-y-1 px-3 pb-3">
-                        {navigation.map((item) => (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`block w-full rounded-lg px-3 py-2.5 text-sm transition-colors text-center ${isActive(item.href)
-                                    ? 'text-[--color-text] font-medium'
-                                    : 'text-[--color-text-tertiary] hover:text-[--color-text]'
-                                    }`}
-                                onClick={(e) => {
-                                    handleNavClick(e, item.href)
-                                    setIsOpen(false)
-                                }}
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
-                        <div className="w-full pt-1 pb-1">
-                            <Link
-                                href="/activate"
-                                className="glow-btn flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 py-2.5 font-semibold text-white text-[13px] px-2 h-9"
-                                onClick={(e) => {
-                                    handleNavClick(e, '/activate')
-                                    setIsOpen(false)
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
+                        </motion.div>
+                    </button>
+
+                    {/* Mobile menu dropdown */}
+                    <FloatingActionMenu
+                        isOpen={isOpen}
+                        onClose={() => setIsOpen(false)}
+                        options={[
+                            {
+                                label: 'Features',
+                                Icon: <Zap className="w-4 h-4" />,
+                                onClick: () => {
+                                    if (pathname === '/') {
+                                        const elem = document.getElementById('features')
+                                        if (elem) {
+                                            elem.scrollIntoView({ behavior: 'smooth' })
+                                            window.history.pushState(null, '', '/#features')
+                                        }
+                                    } else {
+                                        router.push('/#features')
+                                    }
+                                },
+                            },
+                            {
+                                label: 'Pricing',
+                                Icon: <Tag className="w-4 h-4" />,
+                                onClick: () => {
+                                    if (pathname === '/') {
+                                        const elem = document.getElementById('pricing')
+                                        if (elem) {
+                                            elem.scrollIntoView({ behavior: 'smooth' })
+                                            window.history.pushState(null, '', '/#pricing')
+                                        }
+                                    } else {
+                                        router.push('/#pricing')
+                                    }
+                                },
+                            },
+                            {
+                                label: 'Download',
+                                Icon: <Download className="w-4 h-4" />,
+                                onClick: () => router.push('/download'),
+                            },
+                            {
+                                label: 'Help',
+                                Icon: <HelpCircle className="w-4 h-4" />,
+                                onClick: () => router.push('/help'),
+                            },
+                            {
+                                label: 'Get Started',
+                                Icon: <ArrowRight className="w-4 h-4" />,
+                                isCta: true,
+                                onClick: () => {
                                     trackEvent('click_get_started', { location: 'navbar_mobile', value: 1.20, currency: 'USD' })
-                                }}
-                            >
-                                Get Started
-                                <ArrowRight className="h-3.5 w-3.5" />
-                            </Link>
-                        </div>
-                    </div>
+                                    router.push('/activate')
+                                },
+                            },
+                        ]}
+                        className="w-[240px]"
+                    />
                 </div>
-            )}
+            </div>
         </nav>
     )
 }
