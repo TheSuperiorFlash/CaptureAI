@@ -22,7 +22,7 @@ export default function QaAccordion({ items }: { items: QaItem[] }) {
                             aria-expanded={openIndex === index}
                             aria-controls={panelId}
                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                            className="flex w-full items-center justify-between gap-4 py-5 text-left transition-colors sm:hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
+                            className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors sm:hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-cyan] focus-visible:bg-white/[0.02]"
                         >
                             <span className={`text-sm font-medium transition-colors ${openIndex === index ? 'text-[--color-text]' : 'text-[--color-text-secondary]'}`}>
                                 {item.q}
@@ -38,7 +38,7 @@ export default function QaAccordion({ items }: { items: QaItem[] }) {
                             className={`grid transition-all duration-300 ease-out ${openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
                         >
                             <div className="overflow-hidden">
-                                <p className="pb-5 pt-1 text-sm leading-relaxed text-[--color-text-tertiary]">
+                                <p className="px-6 pb-5 pt-1 text-sm leading-relaxed text-[--color-text-tertiary]">
                                     {item.a}
                                 </p>
                             </div>
