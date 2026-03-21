@@ -158,6 +158,7 @@ export default function Features() {
 
     return (
         <section id="features" className="relative py-24 md:py-32 reveal-up overflow-x-clip">
+            <div className="divider-gradient absolute left-0 right-0 top-0" />
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
             <div className="relative z-10 mx-auto max-w-7xl px-6">
                 <motion.div
