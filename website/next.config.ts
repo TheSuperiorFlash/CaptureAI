@@ -10,11 +10,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
+              `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
+              "img-src 'self' data: blob: https://www.googletagmanager.com",
               "font-src 'self' data:",
-              `connect-src 'self' https://api.captureai.workers.dev${process.env.NEXT_PUBLIC_DEV_API_URL ? ` ${process.env.NEXT_PUBLIC_DEV_API_URL}` : ''}`,
+              `connect-src 'self' https://api.captureai.workers.dev https://www.google-analytics.com https://www.googletagmanager.com${process.env.NEXT_PUBLIC_DEV_API_URL ? ` ${process.env.NEXT_PUBLIC_DEV_API_URL}` : ''}`,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
@@ -39,6 +39,9 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  images: {
+    formats: ['image/avif', 'image/webp'],
   },
   turbopack: {
     root: __dirname,

@@ -5,6 +5,7 @@ import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity 
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
+import { trackEvent } from '@/lib/analytics'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -310,6 +311,7 @@ export default function ActivatePage() {
     }
 
     const handleBasicSignup = async () => {
+        trackEvent('click_checkout', { tier: 'basic' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, email })
@@ -319,6 +321,7 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
+        trackEvent('click_checkout', { tier: 'pro' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, email })

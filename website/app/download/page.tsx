@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Chrome, Check, Download, ArrowRight, Shield, Zap } from 'lucide-react'
+import { Check, Download, ArrowRight, Shield, Zap, HelpCircle, BookOpen } from 'lucide-react'
+import { SITE_URL } from '@/lib/constants'
+import InstallButton from '@/components/InstallButton'
 
 export const metadata: Metadata = {
     title: 'Download',
-    description: 'Download the CaptureAI Chrome extension. Free AI-powered screenshot answers for students.',
+    description: 'Download CaptureAI for Chrome — screenshot any question and get instant AI answers. Free setup in under a minute.',
     alternates: {
         canonical: '/download',
     },
@@ -35,8 +37,22 @@ const steps = [
     },
 ]
 
+const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Download' },
+    ],
+}
+
 export default function DownloadPage() {
     return (
+        <>
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
         <div className="relative overflow-x-hidden py-20 md:py-28">
             {/* Background */}
             <div className="pointer-events-none absolute inset-0 gradient-mesh" />
@@ -85,15 +101,7 @@ export default function DownloadPage() {
                             </div>
                         </div>
 
-                        <a
-                            href="https://chromewebstore.google.com/detail/captureai/idpdleplccjjbmdmjkpmmkecmoeomnjd?authuser=0&hl=en"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="glow-btn flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-sm font-semibold text-white transition-all hover:from-blue-500 hover:to-cyan-500"
-                        >
-                            <Chrome className="h-4 w-4" />
-                            Add to Chrome — Start now
-                        </a>
+                        <InstallButton />
                     </div>
                 </div>
 
@@ -147,6 +155,30 @@ export default function DownloadPage() {
                     </ul>
                 </div>
 
+                {/* Help & learn more */}
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
+                    <Link
+                        href="/help"
+                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors hover:border-blue-500/20"
+                    >
+                        <HelpCircle className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+                        <div>
+                            <span className="text-sm font-medium text-[--color-text]">Need help getting started?</span>
+                            <p className="text-xs text-[--color-text-tertiary]">Setup guides, shortcuts, and troubleshooting</p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/blog/how-captureai-works"
+                        className="glass-card flex flex-1 items-center gap-3 rounded-xl px-5 py-4 transition-colors hover:border-blue-500/20"
+                    >
+                        <BookOpen className="h-5 w-5 flex-shrink-0 text-cyan-400" />
+                        <div>
+                            <span className="text-sm font-medium text-[--color-text]">Learn how CaptureAI works</span>
+                            <p className="text-xs text-[--color-text-tertiary]">The technology behind screenshot-to-answer</p>
+                        </div>
+                    </Link>
+                </div>
+
                 {/* CTA */}
                 <div className="mt-10 text-center">
                     <p className="mb-4 text-sm text-[--color-text-tertiary]">
@@ -162,5 +194,6 @@ export default function DownloadPage() {
                 </div>
             </div>
         </div>
+        </>
     )
 }

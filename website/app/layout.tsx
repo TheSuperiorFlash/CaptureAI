@@ -13,6 +13,7 @@ import '@fontsource/inter/800.css'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import { SITE_URL } from '@/lib/constants'
 import SmoothScroll from '@/components/SmoothScroll'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     alternates: {
         canonical: '/',
     },
-    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant',
+    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant, Canvas help, Moodle helper, Blackboard study tool, online exam helper, AI screenshot tool, homework AI, OCR homework solver',
     icons: {
         icon: [
             { url: '/logo.svg', type: 'image/svg+xml' },
@@ -57,6 +58,9 @@ export const metadata: Metadata = {
         description: 'Chrome extension that gives you instant AI-powered answers from screenshots.',
         images: ['/og-image.png'],
     },
+    verification: {
+        google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    },
     robots: {
         index: true,
         follow: true,
@@ -78,6 +82,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="noise antialiased">
+                <GoogleAnalytics />
                 <TooltipProvider>
                 <SmoothScroll>
                     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">

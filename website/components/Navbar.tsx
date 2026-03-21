@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import MagneticButton from './MagneticButton'
+import { trackEvent } from '@/lib/analytics'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -189,7 +190,7 @@ export default function Navbar() {
                 />
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
-                    <Image src="/logo.svg" alt="CaptureAI" width={28} height={28} />
+                    <Image src="/logo.svg" alt="CaptureAI" width={28} height={28} priority />
                     <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
                 </Link>
 
@@ -250,7 +251,10 @@ export default function Navbar() {
                         >
                             <Link
                                 href="/activate"
-                                onClick={(e) => handleNavClick(e, '/activate')}
+                                onClick={(e) => {
+                                    handleNavClick(e, '/activate')
+                                    trackEvent('click_get_started', { location: 'navbar_desktop' })
+                                }}
                                 className="glow-btn inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-2 text-sm font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 whitespace-nowrap"
                             >
                                 Get Started
@@ -308,6 +312,7 @@ export default function Navbar() {
                                 onClick={(e) => {
                                     handleNavClick(e, '/activate')
                                     setIsOpen(false)
+                                    trackEvent('click_get_started', { location: 'navbar_mobile' })
                                 }}
                             >
                                 Get Started
