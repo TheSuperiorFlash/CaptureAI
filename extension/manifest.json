@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "CaptureAI (Capture AI)",
     "short_name": "CaptureAI",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Boost your grades with instant answers. Solve questions on your screen without switching tabs.",
     "homepage_url": "https://captureai.dev",
     "offline_enabled": false,
