@@ -38,7 +38,7 @@ const features: Feature[] = [
     {
         icon: Shield,
         title: 'Privacy Guard',
-        description: 'Hides all extension activity from quiz platforms.',
+        description: 'Hides all extension or browser (tab switching) activity from quiz platforms.',
         pro: true,
         color: 'from-teal-500/30 to-teal-600/10',
         glow: 'hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] hover:border-teal-500/30',
@@ -54,7 +54,7 @@ const features: Feature[] = [
     {
         icon: Repeat,
         title: 'Auto-Solve',
-        description: 'Automatically answers questions on supported platforms.',
+        description: 'Automatically answers questions on supported platforms (e.g. Vocabulary.com)',
         pro: true,
         color: 'from-blue-400/30 to-cyan-500/10',
         glow: 'hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] hover:border-blue-400/30',
