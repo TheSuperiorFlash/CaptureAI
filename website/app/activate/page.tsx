@@ -369,6 +369,37 @@ export default function ActivatePage() {
                         </p>
                     </div>
 
+                    {/* Mobile Tier Toggle */}
+                    <div className="flex md:hidden justify-center mt-6 mb-10">
+                        <div 
+                            className="relative flex w-60 rounded-full bg-[#0a0d14] p-1.5 border border-white/[0.08] shadow-inner cursor-pointer"
+                            onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
+                        >
+                            <div
+                                className="absolute top-1.5 bottom-1.5 rounded-full bg-[#f8fafc] shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-500 ease-out"
+                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
+                            />
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'basic' ? 'text-[#0f172a]' : 'text-[#8295ba] hover:text-white/90'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
+                            >
+                                Basic
+                            </button>
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'pro' ? 'text-[#0f172a]' : 'text-[#8295ba] hover:text-white/90'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
+                            >
+                                Pro
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Plans grid */}
                     <div
                         className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"

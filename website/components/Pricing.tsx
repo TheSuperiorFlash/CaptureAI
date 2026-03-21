@@ -21,19 +21,19 @@ export default function Pricing() {
                         Simple plans. Upgrade when you need more.
                     </p>
                     {/* Mobile Tier Toggle */}
-                    <div className="flex md:hidden justify-center mt-6 mb-2">
+                    <div className="flex md:hidden justify-center mt-8 mb-4">
                         <div 
-                            className="relative flex w-52 rounded-full bg-[#111420] p-1 border border-white/5 shadow-inner cursor-pointer"
+                            className="relative flex w-60 rounded-full bg-[#0a0d14] p-1.5 border border-white/[0.08] shadow-inner cursor-pointer"
                             onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
                         >
                             <div
-                                className="absolute top-1 bottom-1 rounded-full bg-white shadow-sm transition-transform duration-300 ease-in-out"
-                                style={{ width: 'calc(50% - 4px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
+                                className="absolute top-1.5 bottom-1.5 rounded-full bg-[#f8fafc] shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-500 ease-out"
+                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
                             />
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-1.5 text-sm font-medium transition-colors duration-300 ${
-                                    selectedTier === 'basic' ? 'text-blue-700' : 'text-[#7e92b3] hover:text-white/80'
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'basic' ? 'text-[#0f172a]' : 'text-[#8295ba] hover:text-white/90'
                                 }`}
                                 onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
                             >
@@ -41,8 +41,8 @@ export default function Pricing() {
                             </button>
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-1.5 text-sm font-medium transition-colors duration-300 ${
-                                    selectedTier === 'pro' ? 'text-blue-700' : 'text-[#7e92b3] hover:text-white/80'
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
+                                    selectedTier === 'pro' ? 'text-[#0f172a]' : 'text-[#8295ba] hover:text-white/90'
                                 }`}
                                 onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
                             >
