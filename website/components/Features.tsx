@@ -104,7 +104,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
                 className="absolute inset-0 rounded-3xl opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover:opacity-100 pointer-events-none"
                 style={{ backgroundImage }}
             />
-            <div className="relative flex flex-col h-full" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
+            <div className="relative flex flex-col h-full" style={animate ? { transform: 'translateZ(40px)', transformStyle: 'preserve-3d' } : undefined}>
                 {feature.pro && (
                     <span className="absolute right-0 top-0 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 shadow-lg">
                         PRO
