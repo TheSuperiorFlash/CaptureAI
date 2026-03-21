@@ -1,57 +1,22 @@
-Screenshot any question. Get the exact answer.
+CaptureAI — Instant answers without leaving your screen
 
-CaptureAI is the fastest way to get answers while studying online. Select any question on your screen, from multiple choice to complex math, and get an accurate, AI-powered answer in seconds. No copy-pasting, no switching tabs.
+Stop wasting time switching tabs or copying questions. CaptureAI is an AI-powered study tool that lets you answer questions instantly—right where you’re working. Simply select any problem on your screen and get a clear, accurate response in seconds.
 
-HOW IT WORKS
+Whether you’re working on homework, quizzes, or multiple choice questions, CaptureAI helps you stay focused and move faster.
 
-1. Capture — Drag to select any question on your screen.
+Study smarter, not harder
+• Answer questions instantly without switching tabs
+• Save time with a faster, more efficient workflow
+• Stay focused with a clean, distraction-free experience
+• Works across the platforms you already use
 
-2. Read — CaptureAI reads the question from your selection automatically.
+Key features
 
-3. Answer — AI analyzes the question and returns a clear, accurate answer in a floating panel right on your page.
+• One-Click Capture — Select any question on your screen to get started instantly
+• Instant AI Answers — Accurate answers for homework, quizzes, and more
+• Floating Answer Panel — View answers without opening new tabs
+• Wide Compatibility — Works on Canvas, Moodle, Blackboard, Schoology, and more
+• Auto-Solve Mode — Move through questions faster with automatic capture
 
-SUPPORTED PLATFORMS
-
-Works on every major learning platform:
-• Canvas (Instructure)
-• Moodle
-• Blackboard
-• Top Hat
-• Schoology
-• Respondus
-• Google Forms, Microsoft Forms
-• And virtually any website with questions
-
-KEY FEATURES
-
-Floating Answer Panel — A draggable panel appears right on your page with the answer. No pop-ups, no new tabs. Reposition, or hide it when needed.
-
-Stealth Mode — Answers appear as barely-visible text in the corner of your screen. Only you can see them.
-
-Keyboard Shortcuts — Work without touching the mouse:
-  • Ctrl+Shift+X — Start a new capture
-  • Ctrl+Shift+F — Quick recapture (reuses your last selection)
-  • Ctrl+Shift+E — Toggle the answer panel
-
-PRO FEATURES ($9.99/month)
-
-Privacy Guard — Prevents Canvas, Moodle, and Blackboard from detecting your activity. Blocks tab-switch monitoring, focus detection, and visibility tracking. Stay invisible to proctoring systems.
-
-Ask Mode — Type follow-up questions in natural language. Attach screenshots for more context. Get detailed, multi-step explanations for complex problems.
-
-Auto-Solve Mode — Automatically captures and answers questions as you move through a quiz. Support Vocabulary.com
-
-Unlimited Questions — No daily limits. Pro users get unlimited usage with no cap.
-
-Advanced Reasoning — Access the highest-accuracy mode for complex questions and multi-step problems.
-
-PRICING
-
-• Basic ($1.49/week) — 50 questions per day
-• Pro ($9.99/month) — Unlimited questions with Privacy Guard, Ask Mode, and Auto-Solve
-
-For Pro features, visit captureai.dev to subscribe. Your license key activates automatically.
-
-Need help? Visit captureai.dev or reach out through the extension's support page.
-
-CaptureAI — Screenshot any question. Get the exact answer.
+Get started today
+Install CaptureAI and start solving questions faster with a smarter, more efficient study tool.

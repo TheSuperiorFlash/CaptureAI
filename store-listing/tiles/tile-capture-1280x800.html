@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=920">
-  <title>CaptureAI — Large Promo Tile (920×680)</title>
+  <meta name="viewport" content="width=1280">
+  <title>CaptureAI — Large Promo Tile (1280×800)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -17,15 +17,15 @@
     }
 
     body {
-      width: 920px;
-      height: 680px;
+      width: 1280px;
+      height: 800px;
       overflow: hidden;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .tile {
-      width: 920px;
-      height: 680px;
+      width: 1280px;
+      height: 800px;
       background: #f4f6f8;
       position: relative;
       overflow: hidden;
@@ -35,7 +35,7 @@
 
     /* ── Top bar: headline ── */
     .top-bar {
-      padding: 36px 50px 0;
+      padding: 50px 70px 0;
       position: relative;
       z-index: 10;
     }
@@ -43,37 +43,39 @@
     .brand-row {
       display: flex;
       align-items: center;
-      gap: 9px;
-      margin-bottom: 14px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
+
     .brand-logo {
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 22%;
+      overflow: hidden;
       box-shadow: 0 4px 12px rgba(33, 138, 255, 0.35);
     }
 
     .brand-logo img {
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
     }
 
     .brand-name {
-      font-size: 16px;
+      font-size: 22px;
       font-weight: 700;
       color: #333333;
     }
 
     .headline {
-      font-size: 38px;
+      font-size: 52px;
       font-weight: 800;
       color: #1a1a1a;
-      letter-spacing: -1.2px;
+      letter-spacing: -1.7px;
       line-height: 1.15;
-      max-width: 540px;
     }
 
     .headline em {
@@ -81,20 +83,12 @@
       color: #218aff;
     }
 
-    .subline {
-      margin-top: 10px;
-      font-size: 16px;
-      font-weight: 400;
-      color: #555555;
-      max-width: 440px;
-      line-height: 1.5;
-    }
 
     /* ── Browser mockup area ── */
     .browser-area {
       flex: 1;
       position: relative;
-      margin: 24px 36px 0;
+      margin: 28px 50px 0;
     }
 
     /* Browser chrome shell */
@@ -102,7 +96,7 @@
       position: absolute;
       inset: 0;
       background: #ffffff;
-      border-radius: 14px 14px 0 0;
+      border-radius: 20px 20px 0 0;
       box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
       overflow: hidden;
       display: flex;
@@ -110,19 +104,19 @@
     }
 
     .browser-topbar {
-      height: 38px;
+      height: 45px;
       background: #f0f0f0;
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
       display: flex;
       align-items: center;
-      padding: 0 14px;
-      gap: 8px;
+      padding: 0 20px;
+      gap: 11px;
       flex-shrink: 0;
     }
 
     .browser-dot {
-      width: 11px;
-      height: 11px;
+      width: 15px;
+      height: 15px;
       border-radius: 50%;
     }
 
@@ -140,18 +134,18 @@
 
     .browser-address {
       flex: 1;
-      height: 22px;
+      height: 26px;
       background: #ffffff;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid rgba(0, 0, 0, 0.10);
       display: flex;
       align-items: center;
-      padding: 0 10px;
-      margin: 0 12px;
+      padding: 0 14px;
+      margin: 0 17px;
     }
 
     .address-text {
-      font-size: 10px;
+      font-size: 14px;
       color: #888888;
       font-weight: 400;
     }
@@ -160,70 +154,70 @@
     .exam-page {
       flex: 1;
       background: #ffffff;
-      padding: 28px 32px;
+      padding: 33px 44px;
       position: relative;
       overflow: hidden;
     }
 
     /* Simulated page header / breadcrumb */
     .page-header-bar {
-      height: 18px;
-      width: 280px;
+      height: 21px;
+      width: 390px;
       background: #e8ecef;
       border-radius: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     /* Question block */
     .question-block {
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
 
     .question-num {
-      font-size: 11px;
+      font-size: 15px;
       font-weight: 700;
       color: #218aff;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .question-text {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 500;
       color: #1a1a1a;
       line-height: 1.5;
-      max-width: 420px;
+      max-width: 580px;
     }
 
     .options-list {
       margin-top: 12px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 9px;
     }
 
     .option {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 8px 12px;
-      border-radius: 8px;
+      gap: 12px;
+      padding: 8px 16px;
+      border-radius: 11px;
       border: 1.5px solid rgba(0, 0, 0, 0.08);
       background: #fafafa;
-      max-width: 380px;
+      max-width: 570px;
     }
 
     .option-letter {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       color: #888888;
-      width: 14px;
+      width: 20px;
       flex-shrink: 0;
     }
 
     .option-text {
-      font-size: 12px;
+      font-size: 14px;
       color: #333333;
     }
 
@@ -233,20 +227,17 @@
     }
 
     /* ─── SELECTION BOX OVERLAY ─── */
-    /* Dark overlay (simulated) */
     .capture-overlay {
       position: absolute;
-      /* We use a pseudo-element technique: punch a hole via clip-path won't work cleanly in CSS.
-         Instead: 4 overlay strips around the selection box */
     }
 
     /* The selection highlight region — positioned over the question */
     .selection-box {
       position: absolute;
-      top: 55px;
-      left: 22px;
-      width: 425px;
-      height: 245px;
+      top: 65px;
+      left: 30px;
+      width: 600px;
+      height: 325px;
       border: 2px dashed #218aff;
       border-radius: 14px;
       box-shadow:
@@ -261,18 +252,18 @@
     /* ─── FLOATING PANEL ─── */
     .floating-panel {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 220px;
+      top: 20px;
+      right: 20px;
+      width: 305px;
       background: #ffffff;
-      border-radius: 18px;
+      border-radius: 25px;
       box-shadow:
         0 16px 48px rgba(0, 0, 0, 0.14),
         0 0 0 1px rgba(0, 0, 0, 0.04);
-      padding: 14px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 14px;
       z-index: 30;
     }
 
@@ -280,49 +271,49 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 10px;
+      padding-bottom: 14px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .panel-brand {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .panel-logo {
-      width: 20px;
-      height: 20px;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .panel-logo img {
-      width: 20px;
-      height: 20px;
+      width: 28px;
+      height: 28px;
     }
 
     .panel-title {
-      font-size: 12px;
+      font-size: 17px;
       font-weight: 700;
       color: #333333;
     }
 
     .mode-toggle {
-      width: 86px;
-      height: 22px;
+      width: 120px;
+      height: 31px;
       background: rgba(0, 0, 0, 0.05);
       border-radius: 100px;
       display: flex;
       align-items: center;
       position: relative;
-      padding: 2px;
+      padding: 3px;
     }
 
     .toggle-thumb {
-      width: 50px;
-      height: 20px;
+      width: 72px;
+      height: 31px;
       background: #218aff;
       border-radius: 100px;
       position: absolute;
@@ -334,10 +325,11 @@
       z-index: 1;
       flex: 1;
       text-align: center;
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 600;
-      line-height: 18px;
-      margin-left: 4px;
+      line-height: 26px;
+      margin-left: 6px;
+      margin-top: 0.5px;
     }
 
     .toggle-label.active {
@@ -353,20 +345,20 @@
       background: transparent;
       border: none;
       padding: 3px 0px;
-      min-height: 50px;
+      min-height: 60px;
       display: flex;
       flex-direction: column;
     }
 
     .response-label {
-      font-size: 11px;
+      font-size: 15px;
       font-weight: 500;
       color: #999999;
-      margin-bottom: 5px;
+      margin-bottom: 7px;
     }
 
     .response-text {
-      font-size: 10.5px;
+      font-size: 15px;
       font-weight: 400;
       color: #333333;
       line-height: 1.5;
@@ -378,50 +370,50 @@
     }
 
     .btn-capture {
-      height: 34px;
+      height: 47px;
       background: #218aff;
-      border-radius: 7px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       box-shadow: 0 4px 12px rgba(33, 138, 255, 0.3);
     }
 
     .btn-capture img {
-      width: 13px;
-      height: 13px;
+      width: 18px;
+      height: 18px;
     }
 
     .btn-capture-text {
-      font-size: 11px;
+      font-size: 15px;
       font-weight: 700;
       color: #ffffff;
     }
 
     .btn-quick {
-      height: 34px;
+      height: 47px;
       background: rgba(0, 0, 0, 0.03);
       border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 7px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .btn-quick-text {
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 600;
       color: #333333;
     }
 
     .bottom-bar {
-      height: 68px;
+      height: 80px;
       background: #ffffff;
       border-top: 1px solid rgba(0, 0, 0, 0.06);
       display: flex;
       align-items: center;
-      padding: 0 50px;
+      padding: 0 70px;
       gap: 0;
       flex-shrink: 0;
       position: relative;
@@ -431,35 +423,34 @@
     }
 
     .bottom-tagline {
-      font-size: 14px;
+      font-size: 19px;
       font-weight: 500;
       color: #666;
       flex-shrink: 0;
-      margin-right: 16px;
+      margin-right: 22px;
     }
 
     .platform-logos {
       display: flex;
       align-items: center;
-      gap: 30px;
-      margin-left: 14px;
+      gap: 42px;
+      margin-left: 20px;
       flex-shrink: 1;
-      /* allow logos space if needed */
     }
 
     .platform-logo {
-      height: 20px;
-      width: 80px;
+      height: 28px;
+      width: 110px;
       opacity: 0.45;
       filter: brightness(0) invert(0);
       object-fit: contain;
     }
 
     .quiz-form-title {
-      font-size: 18px;
+      font-size: 25px;
       font-weight: 700;
       color: #1a1a1a;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
   </style>
 </head>
@@ -475,8 +466,7 @@
         </div>
         <span class="brand-name">CaptureAI</span>
       </div>
-      <h1 class="headline">Draw a box.<br>Get the <em>answer.</em></h1>
-      <p class="subline">Works on every site your school uses — Canvas, Moodle, Blackboard, and more.</p>
+      <h1 class="headline">Screenshot any question.<br><em>Get the answer.</em></h1>
     </div>
 
     <!-- Browser mockup -->
@@ -497,29 +487,30 @@
         <div class="exam-page">
 
           <!-- Quiz Title (replacing skeleton) -->
-          <div class="quiz-form-title">Physics 101 Midterm Exam</div>
+          <div class="quiz-form-title">AP Physics 1 — Rotational Motion Quiz</div>
 
           <!-- Question 1 (inside selection box) -->
           <div class="question-block">
             <div class="question-num">Question 1 of 10</div>
-            <div class="question-text">According to Newton's Second Law of Motion, force is equal to mass multiplied by
-              what?</div>
+            <div class="question-text">A solid sphere, a hollow sphere, and a solid disk — all with equal mass M and
+              radius R — are released from rest and roll without slipping down an identical inclined plane. Which of the
+              following correctly ranks their translational speeds at the bottom?</div>
             <div class="options-list">
               <div class="option">
                 <span class="option-letter">A</span>
-                <span class="option-text">Velocity</span>
+                <span class="option-text">Solid sphere &gt; Solid disk &gt; Hollow sphere</span>
               </div>
               <div class="option">
                 <span class="option-letter">B</span>
-                <span class="option-text">Acceleration</span>
+                <span class="option-text">Hollow sphere &gt; Solid disk &gt; Solid sphere</span>
               </div>
               <div class="option">
                 <span class="option-letter">C</span>
-                <span class="option-text">Inertia</span>
+                <span class="option-text">All three reach the bottom with equal speeds</span>
               </div>
               <div class="option">
                 <span class="option-letter">D</span>
-                <span class="option-text">Momentum</span>
+                <span class="option-text">Solid disk &gt; Solid sphere &gt; Hollow sphere</span>
               </div>
             </div>
           </div>
@@ -528,8 +519,6 @@
             <div class="question-num">Question 2 of 10</div>
             <div class="question-text">Which organelle is responsible for producing energy in the form of ATP?</div>
           </div>
-
-          <!-- Overlay strips (darkening everything outside selection) REMOVED -->
 
           <!-- Selection box -->
           <div class="selection-box"></div>
@@ -546,13 +535,14 @@
               <div class="mode-toggle">
                 <div class="toggle-thumb"></div>
                 <span class="toggle-label active">Capture</span>
-                <span class="toggle-label inactive">Ask</span>
+                <span class="toggle-label inactive"> Ask</span>
               </div>
             </div>
             <div class="response-area">
               <div class="response-label">Response: </div>
-              <div class="response-text">The answer is <strong>B — Acceleration.</strong> Newton's Second Law states
-                that force is equal to mass times acceleration (F=ma).</div>
+              <div class="response-text">The answer is <strong>A — Solid sphere &gt; Disk &gt; Hollow sphere.</strong>
+                Lower rotational inertia means more energy goes into translational KE, so the solid sphere (I = ⅖MR²)
+                wins.</div>
             </div>
 
             <div class="btn-capture">
@@ -574,13 +564,14 @@
       <span class="bottom-tagline">Works on</span>
       <div class="platform-logos">
         <img class="platform-logo" src="../../website/public/platforms/canvas.png" alt="Canvas">
-        <img class="platform-logo" src="../../website/public/platforms/moodle.png" alt="Moodle">
+        <img class="platform-logo" src="../../website/public/platforms/moodle.png" alt="Moodle"
+          style="position:relative;top:-4px;">
         <img class="platform-logo" src="../../website/public/platforms/blackboard.png" alt="Blackboard">
         <img class="platform-logo" src="../../website/public/platforms/schoology.png" alt="Schoology">
         <img class="platform-logo" src="../../website/public/platforms/tophat.png" alt="Top Hat">
         <img class="platform-logo" src="../../website/public/platforms/respondus.png" alt="Respondus">
       </div>
-      <span style="margin-left:18px; font-size:12px; font-weight:500; color:#888; flex-shrink: 0;">+ many more</span>
+      <span style="margin-left:24px; font-size:16px; font-weight:500; color:#888; flex-shrink: 0;">+ many more</span>
     </div>
 
   </div>

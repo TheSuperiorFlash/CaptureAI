@@ -3,8 +3,9 @@ const path = require('path');
 
 const tiles = [
   { file: 'tile-small-440x280.html', width: 440, height: 280 },
-  { file: 'tile-large-920x680.html', width: 920, height: 680 },
-  { file: 'tile-large-1280x800.html', width: 1280, height: 800 },
+  { file: 'tile-capture-1280x800.html', width: 1280, height: 800 },
+  { file: 'tile-ask-1280x800.html', width: 1280, height: 800 },
+  { file: 'tile-cta-1280x800.html', width: 1280, height: 800 },
   { file: 'tile-marquee-1400x560.html', width: 1400, height: 560 }
 ];
 

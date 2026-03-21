@@ -19,75 +19,64 @@ const features: Feature[] = [
     {
         icon: Camera,
         title: 'Screenshot Capture',
-        description: 'Select any screen area with a keyboard shortcut. CaptureAI reads the text and returns the correct answer instantly.',
+        description: 'Capture any screen area and get the correct answer instantly.',
         color: 'from-blue-600/30 to-blue-700/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] group-hover:border-blue-500/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] hover:border-blue-500/30',
+        video: '/capture.mp4',
     },
     {
         icon: MousePointer,
         title: 'Floating Interface',
-        description: 'A draggable panel sits over any webpage. Capture, view answers, or adjust settings without leaving your tab.',
+        description: 'A draggable panel over any webpage for captures and answers.',
         color: 'from-cyan-500/30 to-cyan-600/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] group-hover:border-cyan-500/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] hover:border-cyan-500/30',
         image: '/floating-ui.png',
     },
     {
         icon: Eye,
         title: 'Stealth Mode',
-        description: 'Answers appear as a subtle inline overlay — no popups, no new windows. Just the answer, right where you need it.',
+        description: 'Answers appear inline — no popups, no new windows.',
         color: 'from-indigo-500/30 to-indigo-600/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] group-hover:border-indigo-500/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] hover:border-indigo-500/30',
     },
     {
         icon: Shield,
         title: 'Privacy Guard',
-        description: 'Prevents quiz platforms from detecting extension activity. Your browser logs show only normal browsing.',
+        description: 'Hides all extension activity from quiz platforms.',
         pro: true,
         color: 'from-teal-500/30 to-teal-600/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] group-hover:border-teal-500/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] hover:border-teal-500/30',
         video: '/pg-video.mp4',
     },
     {
         icon: MessageSquare,
         title: 'Ask Mode',
-        description: 'Ask follow-up questions about a capture or type directly. Get detailed explanations, not just answers.',
+        description: 'Type or capture to get detailed explanations, not just answers.',
         pro: true,
         color: 'from-violet-500/30 to-violet-600/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] group-hover:border-violet-500/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] hover:border-violet-500/30',
     },
     {
         icon: Repeat,
         title: 'Auto-Solve',
-        description: 'Automatically works through questions on supported platforms like Vocabulary.com. Enable and let it run.',
+        description: 'Automatically answers questions on supported platforms.',
         pro: true,
         color: 'from-blue-400/30 to-cyan-500/10',
-        glow: 'group-hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] group-hover:border-blue-400/30',
+        glow: 'hover:shadow-[0_0_30px_rgba(96,165,250,0.15)] hover:border-blue-400/30',
     },
 ]
 
-function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: { feature: Feature, index: number, shouldReduceMotion: boolean | null, disableAnimation?: boolean }) {
+function FeatureCard({ feature, index, animate }: { feature: Feature; index: number; animate: boolean }) {
+    const Icon = feature.icon
     const x = useMotionValue(0)
     const y = useMotionValue(0)
-
     const mouseXSpring = useSpring(x, { stiffness: 400, damping: 30 })
     const mouseYSpring = useSpring(y, { stiffness: 400, damping: 30 })
 
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"])
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"])
-
-    // Dynamic Glare
-    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"])
-    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"])
-    const backgroundImage = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.12) 0%, transparent 70%)`
-
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect()
-        const width = rect.width
-        const height = rect.height
-        const mouseX = e.clientX - rect.left
-        const mouseY = e.clientY - rect.top
-        x.set(mouseX / width - 0.5)
-        y.set(mouseY / height - 0.5)
+        x.set((e.clientX - rect.left) / rect.width - 0.5)
+        y.set((e.clientY - rect.top) / rect.height - 0.5)
     }
 
     const handleMouseLeave = () => {
@@ -95,37 +84,30 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
         y.set(0)
     }
 
-    const Icon = feature.icon
-    const shouldDisable = shouldReduceMotion || disableAnimation;
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['5deg', '-5deg'])
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-5deg', '5deg'])
+
+    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ['100%', '0%'])
+    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ['100%', '0%'])
+    const backgroundImage = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.12) 0%, transparent 70%)`
 
     return (
         <motion.div
+            initial={animate ? { opacity: 0, y: 30 } : false}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ type: 'spring', stiffness: 100, damping: 15, delay: (index % 4) * 0.1 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{
-                rotateX: shouldDisable ? 0 : rotateX,
-                rotateY: shouldDisable ? 0 : rotateY,
-                transformStyle: "preserve-3d",
-                transitionProperty: "color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow",
-            }}
-            initial={shouldDisable ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={shouldDisable ? { duration: 0 } : {
-                type: "spring",
-                stiffness: 100,
-                damping: 15,
-                delay: (index % 4) * 0.1
-            }}
+            style={{ transformStyle: 'preserve-3d', rotateX, rotateY, transformPerspective: 1200 }}
             className={`glass-card group h-full relative flex flex-col rounded-3xl p-7 transition-shadow duration-300 ease-out ${feature.glow}`}
         >
-            {/* Dynamic Glass Glare Overlay */}
+            {/* Glare overlay */}
             <motion.div
                 className="absolute inset-0 rounded-3xl opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover:opacity-100 pointer-events-none"
                 style={{ backgroundImage }}
             />
-            {/* Inner Content bumped up in Z space to create parallax */}
-            <div className="relative z-10 flex flex-col h-full pointer-events-none" style={{ transform: "translateZ(40px)", transformStyle: "preserve-3d" }}>
+            <div className="relative flex flex-col h-full" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
                 {feature.pro && (
                     <span className="absolute right-0 top-0 rounded-full bg-gradient-to-r from-[#0047ff]/20 to-[#00f0ff]/20 px-2.5 py-0.5 text-[10px] font-bold tracking-widest text-cyan-400 shadow-lg">
                         PRO
@@ -137,29 +119,30 @@ function FeatureCard({ feature, index, shouldReduceMotion, disableAnimation }: {
                 <h3 className="mb-2 text-[17px] font-semibold tracking-tight text-[--color-text]">
                     {feature.title}
                 </h3>
-                <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors pointer-events-auto">
+                <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
                     {feature.description}
                 </p>
-                <div className="mt-4 rounded-2xl border border-white/5 bg-black/20 aspect-square" style={{ clipPath: 'inset(0 round 1rem)' }}>
-                    {feature.video ? (
-                        <video
-                            src={feature.video}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="w-full h-full object-cover"
-                        />
-                    ) : feature.image ? (
-                        <img
-                            src={feature.image}
-                            alt={feature.title}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full" />
-                    )}
-                </div>
+                {(feature.video || feature.image) && (
+                    <div className="mt-5 rounded-2xl border border-white/5 bg-white overflow-hidden" style={{ height: '280px', contain: 'paint' }}>
+                        {feature.video ? (
+                            <video
+                                src={feature.video}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-contain"
+                                style={{ borderRadius: '1rem', overflow: 'hidden' }}
+                            />
+                        ) : (
+                            <img
+                                src={feature.image}
+                                alt={feature.title}
+                                className="w-full h-full object-contain"
+                            />
+                        )}
+                    </div>
+                )}
             </div>
         </motion.div>
     )
@@ -170,22 +153,14 @@ export default function Features() {
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        let rafId: number | null = null
-        // Jump to the middle copy on mount to allow immediate infinite swiping
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current
-            // Use requestAnimationFrame to let the DOM settle and measure width accurately
-            rafId = requestAnimationFrame(() => {
-                if (container.scrollWidth > container.clientWidth) {
-                    container.scrollLeft = container.scrollWidth / 3
-                }
-            })
-        }
-        return () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId)
+        const container = scrollContainerRef.current
+        if (!container) return
+        const rafId = requestAnimationFrame(() => {
+            if (container.scrollWidth > container.clientWidth) {
+                container.scrollLeft = container.scrollWidth / 3
             }
-        }
+        })
+        return () => cancelAnimationFrame(rafId)
     }, [])
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -193,10 +168,8 @@ export default function Features() {
         const oneThird = container.scrollWidth / 3
         const threshold = Math.max(10, oneThird * 0.03)
         if (container.scrollLeft <= threshold) {
-            // Jump forward one full set length seamlessly
             container.scrollLeft += oneThird
-        } else if (container.scrollLeft >= (oneThird * 2) - threshold) {
-            // Jump backward one full set length seamlessly
+        } else if (container.scrollLeft >= oneThird * 2 - threshold) {
             container.scrollLeft -= oneThird
         }
     }
@@ -204,14 +177,13 @@ export default function Features() {
     return (
         <section id="features" className="relative py-24 md:py-32 reveal-up overflow-x-clip">
             <div className="pointer-events-none absolute inset-0 aurora-bg opacity-30" />
-            <div className="relative z-10 mx-auto max-w-6xl px-6">
-                {/* Header */}
+            <div className="relative z-10 mx-auto max-w-7xl px-6">
                 <motion.div
                     className="mx-auto mb-16 max-w-2xl text-center"
-                    initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut" }}
+                    viewport={{ once: true, margin: '-100px' }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
                 >
                     <h2 className="mb-4">
                         <span className="text-[--color-text]">Everything you need, </span>
@@ -223,30 +195,29 @@ export default function Features() {
                 </motion.div>
 
                 {/* Desktop Grid */}
-                <div className="hidden sm:grid gap-5 grid-cols-2 lg:grid-cols-3 perspective-[1200px]">
+                <div className="hidden sm:grid gap-6 grid-cols-2 lg:grid-cols-3 auto-rows-max">
                     {features.map((feature, index) => (
                         <FeatureCard
                             key={feature.title}
                             feature={feature}
                             index={index}
-                            shouldReduceMotion={shouldReduceMotion}
+                            animate={!shouldReduceMotion}
                         />
                     ))}
                 </div>
 
-                {/* Mobile Infinite Swipe Row */}
+                {/* Mobile Infinite Swipe */}
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="grid sm:hidden grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 perspective-[1200px] pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
+                    className="grid sm:hidden grid-flow-col auto-cols-[85vw] min-[400px]:auto-cols-[320px] -mx-6 px-6 overflow-x-auto snap-x snap-mandatory gap-5 pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x"
                 >
                     {[...features, ...features, ...features].map((feature, index) => (
                         <div key={`${feature.title}-${index}`} className="snap-center h-full w-full">
                             <FeatureCard
                                 feature={feature}
                                 index={index}
-                                shouldReduceMotion={shouldReduceMotion}
-                                disableAnimation={true}
+                                animate={false}
                             />
                         </div>
                     ))}
