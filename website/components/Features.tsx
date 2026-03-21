@@ -11,8 +11,6 @@ interface Feature {
     pro?: boolean
     color: string
     glow: string
-    image?: string
-    video?: string
 }
 
 const features: Feature[] = [
@@ -22,7 +20,6 @@ const features: Feature[] = [
         description: 'Capture any screen area and get the correct answer instantly.',
         color: 'from-blue-600/30 to-blue-700/10',
         glow: 'hover:shadow-[0_0_30px_rgba(0,71,255,0.15)] hover:border-blue-500/30',
-        video: '/capture.mp4',
     },
     {
         icon: MousePointer,
@@ -30,7 +27,6 @@ const features: Feature[] = [
         description: 'A draggable panel over any webpage for captures and answers.',
         color: 'from-cyan-500/30 to-cyan-600/10',
         glow: 'hover:shadow-[0_0_30px_rgba(0,240,255,0.15)] hover:border-cyan-500/30',
-        image: '/floating-ui.png',
     },
     {
         icon: Eye,
@@ -46,7 +42,6 @@ const features: Feature[] = [
         pro: true,
         color: 'from-teal-500/30 to-teal-600/10',
         glow: 'hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] hover:border-teal-500/30',
-        video: '/pg-video.mp4',
     },
     {
         icon: MessageSquare,
@@ -122,27 +117,6 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
                 <p className="flex-1 text-[14px] leading-relaxed text-[--color-text-tertiary] group-hover:text-[--color-text-secondary] transition-colors">
                     {feature.description}
                 </p>
-                {(feature.video || feature.image) && (
-                    <div className="mt-5 rounded-2xl border border-white/5 bg-white overflow-hidden" style={{ height: '280px', contain: 'paint' }}>
-                        {feature.video ? (
-                            <video
-                                src={feature.video}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="w-full h-full object-contain"
-                                style={{ borderRadius: '1rem', overflow: 'hidden' }}
-                            />
-                        ) : (
-                            <img
-                                src={feature.image}
-                                alt={feature.title}
-                                className="w-full h-full object-contain"
-                            />
-                        )}
-                    </div>
-                )}
             </div>
         </motion.div>
     )
