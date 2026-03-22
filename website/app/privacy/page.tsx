@@ -42,9 +42,9 @@ export default function PrivacyPage() {
 
                         <h3 className="mb-2 mt-5 font-medium text-[--color-text-secondary]">Screenshots and Queries</h3>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>Screenshots are processed <strong className="text-[--color-text-secondary]">locally in your browser</strong> using on-device OCR (Tesseract.js) to extract text</li>
-                            <li>When OCR confidence is sufficient, only the extracted text (not the image) is sent to our backend for AI processing — this saves significant data and improves privacy</li>
-                            <li>If OCR confidence is low, the image may be sent for more accurate processing</li>
+                            <li>Screenshots are processed <strong className="text-[--color-text-secondary]">locally in your browser</strong> using on-device secure text extraction (Tesseract.js)</li>
+                            <li>When text extraction confidence is sufficient, only the extracted text (not the image) is sent to our backend for AI processing — this saves significant data and improves privacy</li>
+                            <li>If text extraction confidence is low, the image may be sent for more accurate processing</li>
                             <li>We do <strong className="text-[--color-text-secondary]">not</strong> store your screenshots or queries on our servers beyond the duration of the request</li>
                         </ul>
 

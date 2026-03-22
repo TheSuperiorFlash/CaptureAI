@@ -19,6 +19,7 @@ CREATE TABLE users (
   license_key TEXT UNIQUE NOT NULL,
   tier TEXT DEFAULT 'basic' CHECK (tier IN ('basic', 'pro')),
   subscription_status TEXT DEFAULT 'inactive' CHECK (subscription_status IN ('active', 'inactive', 'cancelled', 'past_due')),
+  billing_period TEXT DEFAULT 'weekly' CHECK (billing_period IN ('weekly', 'monthly')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT UNIQUE,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
