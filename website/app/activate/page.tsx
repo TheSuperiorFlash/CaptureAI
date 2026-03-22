@@ -248,6 +248,7 @@ export default function ActivatePage() {
     const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
     const [isTrial, setIsTrial] = useState(false)
+    const [isBasicHiding, setIsBasicHiding] = useState(false)
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -282,6 +283,22 @@ export default function ActivatePage() {
             setModalVisible(false)
         }
     }, [confirmationData])
+
+    const enterTrialMode = (e?: React.MouseEvent) => {
+        e?.stopPropagation()
+        setIsBasicHiding(true)
+        setSelectedTier('pro')
+        setBillingPeriod('weekly')
+        setTimeout(() => {
+            setIsTrial(true)
+            setIsBasicHiding(false)
+        }, 350)
+    }
+
+    const exitTrialMode = (e?: React.MouseEvent) => {
+        e?.stopPropagation()
+        setIsTrial(false)
+    }
 
     const handleSignup = async () => {
         const trimmedEmail = email.trim()
@@ -438,18 +455,19 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
+                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] transition-all duration-500 ease-in-out ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
                     >
                         {/* Basic plan — hidden in trial mode */}
-                        {!isTrial && (
+                        {(!isTrial || isBasicHiding) && (
+                        <div className={`row-start-1 col-start-1 md:row-auto md:col-auto transition-all duration-300 ease-in-out ${isBasicHiding ? 'opacity-0 -translate-x-3 pointer-events-none' : 'opacity-100'}`}>
                         <div
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'basic'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
+                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
                                 ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
                                 : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 }`}
@@ -494,6 +512,7 @@ export default function ActivatePage() {
                                 ))}
                             </ul>
                         </div>
+                        </div>
                         )}
 
                         {/* Pro plan */}
@@ -513,7 +532,7 @@ export default function ActivatePage() {
                                     {isTrial ? (
                                         <button
                                             type="button"
-                                            onClick={(e) => { e.stopPropagation(); setIsTrial(false); }}
+                                            onClick={exitTrialMode}
                                             className="absolute right-6 top-6 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 hover:text-white/70 transition-all"
                                             aria-label="Exit trial mode"
                                         >
@@ -534,7 +553,7 @@ export default function ActivatePage() {
                                         <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
                                     </div>
 
-                                    <div className="mb-7">
+                                    <div className="mb-7 flex items-end gap-3">
                                         <AnimatedPrice
                                             price={PRICES.pro[billingPeriod]}
                                             period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
@@ -542,6 +561,15 @@ export default function ActivatePage() {
                                             priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
                                             periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
                                         />
+                                        {!isTrial && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => enterTrialMode(e)}
+                                                className="mb-2 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
+                                            >
+                                                Try $0.99/wk
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Pro highlights grid */}
@@ -567,15 +595,6 @@ export default function ActivatePage() {
                                         ))}
                                     </ul>
 
-                                    {!isTrial && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); setIsTrial(true); setBillingPeriod('weekly'); setSelectedTier('pro'); }}
-                                            className="mt-5 w-full rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] py-2.5 text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/[0.08] hover:text-cyan-300"
-                                        >
-                                            Try Pro for $0.99 this week →
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         </div>
