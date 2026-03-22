@@ -21,7 +21,7 @@ jest.mock('../../src/auth.js', () => ({
 }));
 
 jest.mock('../../src/validation.js', () => ({
-  validateRequestBody: jest.fn().mockResolvedValue({ email: 'test@example.com' }),
+  validateRequestBody: jest.fn().mockResolvedValue({ email: 'test@example.com', billingPeriod: 'weekly' }),
   validateEmail: jest.fn().mockImplementation((email) => email.toLowerCase().trim()),
   validateStripeSignature: jest.fn().mockReturnValue({
     t: String(Math.floor(Date.now() / 1000)),
@@ -78,7 +78,10 @@ function createMockEnv(overrides = {}) {
     DB: createMockDB(),
     STRIPE_SECRET_KEY: 'sk_test_123',
     STRIPE_WEBHOOK_SECRET: 'whsec_test_123',
-    STRIPE_PRICE_PRO: 'price_pro_123',
+    STRIPE_PRICE_BASIC_WEEKLY: 'price_basic_weekly_123',
+    STRIPE_PRICE_BASIC_MONTHLY: 'price_basic_monthly_123',
+    STRIPE_PRICE_PRO_WEEKLY: 'price_pro_weekly_123',
+    STRIPE_PRICE_PRO_MONTHLY: 'price_pro_monthly_123',
     RESEND_API_KEY: 'resend_key_123',
     EXTENSION_URL: 'https://captureai.dev',
     BASIC_TIER_DAILY_LIMIT: '50',
@@ -140,12 +143,20 @@ describe('SubscriptionHandler', () => {
       const response = await handler.getPlans();
       const body = JSON.parse(await response.text());
 
-      expect(body.plans).toHaveLength(2);
+      expect(body.plans).toHaveLength(4);
       expect(body.plans[0].tier).toBe('basic');
-      expect(body.plans[0].price).toBe(1.49);
-      expect(body.plans[1].tier).toBe('pro');
-      expect(body.plans[1].price).toBe(9.99);
-      expect(body.plans[1].recommended).toBe(true);
+      expect(body.plans[0].billingPeriod).toBe('weekly');
+      expect(body.plans[0].price).toBe(1.99);
+      expect(body.plans[1].tier).toBe('basic');
+      expect(body.plans[1].billingPeriod).toBe('monthly');
+      expect(body.plans[1].price).toBe(5.99);
+      expect(body.plans[2].tier).toBe('pro');
+      expect(body.plans[2].billingPeriod).toBe('weekly');
+      expect(body.plans[2].price).toBe(3.49);
+      expect(body.plans[3].tier).toBe('pro');
+      expect(body.plans[3].billingPeriod).toBe('monthly');
+      expect(body.plans[3].price).toBe(9.99);
+      expect(body.plans[3].recommended).toBe(true);
     });
 
     test('should use configured daily limit', async () => {
@@ -172,7 +183,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should return 500 when price not configured', async () => {
-      delete env.STRIPE_PRICE_PRO;
+      delete env.STRIPE_PRICE_PRO_WEEKLY;
       handler = new SubscriptionHandler(env);
 
       const request = createMockRequest();
@@ -221,7 +232,7 @@ describe('SubscriptionHandler', () => {
       expect(body.tier).toBe('pro');
       expect(body.amountDueCents).toBe(199);
       expect(body.currency).toBe('usd');
-      expect(handler.previewSubscriptionTierChange).toHaveBeenCalledWith('sub_existing', 'pro');
+      expect(handler.previewSubscriptionTierChange).toHaveBeenCalledWith('sub_existing', 'pro', 'weekly');
     });
 
     test('should create new stripe customer when none exists', async () => {
