@@ -26,7 +26,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
-**Tiers:** Basic ($1.49/week, 50 req/day) | Pro ($9.99/mo, unlimited requests, 20 req/min rate limit)
+**Tiers:** Basic ($1.99/week or $5.99/month, 50 req/day) | Pro ($2.99/week or $9.99/month, unlimited requests, 20 req/min rate limit)
 
 ## Commands
 
@@ -56,10 +56,10 @@ cd api && npm run db:migrate  # Run migrations
 - **Usage Tracking**: Two-table strategy — `usage_breakdown` (per-day analytics by prompt_type + model, reliable writes) + `usage_daily` (O(1) rate limit checks, authoritative daily totals)
 - **Subscription Audit Log**: Every tier/status change is written to `subscription_events` (immutable, never deleted). Query it to answer billing disputes.
 - **Past-Due Auth**: Users with `subscription_status = 'past_due'` are granted Basic-tier access (Pro features blocked) until payment resolves. Cancelled/inactive users get no access.
-- **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
+- **Stripe Proration**: Plan changes (any tier or billing period switch) use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
-- **Tier-Switch OTP Verification**: Tier switches via `create-checkout` (confirmed flow) require a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification`, stored in `verification_codes` table (10-min TTL), and cleaned up by a daily cron trigger.
+- **Plan-Switch OTP Verification**: Any plan change (tier or billing period) via `create-checkout` (confirmed flow) requires a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification` (accepts `tier` + `billingPeriod`), stored in `verification_codes` table with a `planKey` (`tier_billingPeriod`, e.g. `pro_monthly`) in the `tier` column (10-min TTL), and cleaned up by a daily cron trigger.
 - **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
 - **Website Account System**: Email + 6-digit OTP login at `/account/login`. Dashboard at `/account` shows subscription, usage, billing portal, and account details. Session stored in `localStorage` using the license key as token (`captureai-web-session`, `captureai-web-user`). Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
 
@@ -154,7 +154,7 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
 **Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow

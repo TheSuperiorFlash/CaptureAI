@@ -28,7 +28,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
-**Tiers:** Basic ($1.49/week, 50 req/day) | Pro ($9.99/mo, 20 req/min unlimited)
+**Tiers:** Basic ($1.99/week or $5.99/month, 50 req/day) | Pro ($2.99/week or $9.99/month, 20 req/min unlimited)
 
 ## Commands
 
@@ -157,7 +157,7 @@ captureai-api-key              # Legacy API key (deprecated, migration fallback)
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `RESEND_API_KEY`, `FROM_EMAIL`
 **Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow

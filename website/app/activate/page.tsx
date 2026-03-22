@@ -1,11 +1,16 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useCallback } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
 import { trackEvent } from '@/lib/analytics'
+
+const PRICES = {
+    basic: { weekly: 1.99, monthly: 5.99 },
+    pro: { weekly: 2.99, monthly: 9.99 },
+} as const
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -91,6 +96,7 @@ interface ResultState {
 
 interface ConfirmationData {
     tier: string
+    billingPeriod: 'weekly' | 'monthly'
     email: string
 }
 
@@ -114,6 +120,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
             await apiPost(`${API_BASE_URL}/api/subscription/send-verification`, {
                 email: data.email,
                 tier: data.tier,
+                billingPeriod: data.billingPeriod,
             })
             setCodeSent(true)
             setResendCooldown(60)
@@ -236,12 +243,26 @@ const ActivateSparkles = memo(function ActivateSparkles() {
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
+    const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
     const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null)
     const [modalVisible, setModalVisible] = useState(false)
     const [confirmLoading, setConfirmLoading] = useState(false)
+
+    // Read tier and billing period from URL params (set by Pricing page links)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const tierParam = params.get('tier')
+        const billingParam = params.get('billing')
+        if (tierParam === 'basic' || tierParam === 'pro') {
+            setSelectedTier(tierParam)
+        }
+        if (billingParam === 'weekly' || billingParam === 'monthly') {
+            setBillingPeriod(billingParam)
+        }
+    }, [setSelectedTier])
 
     useEffect(() => {
         if (confirmationData) {
@@ -299,6 +320,7 @@ export default function ActivatePage() {
             const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, {
                 email: confirmationData.email,
                 tier: confirmationData.tier,
+                billingPeriod: confirmationData.billingPeriod,
                 confirmed: true,
                 verificationCode,
             })
@@ -328,20 +350,22 @@ export default function ActivatePage() {
     }
 
     const handleBasicSignup = async () => {
-        trackEvent('click_checkout', { tier: 'basic', value: 5.96, currency: 'USD' })
-        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic' })
+        const price = PRICES.basic[billingPeriod]
+        trackEvent('click_checkout', { tier: 'basic', billingPeriod, value: price, currency: 'USD' })
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic', billingPeriod })
         if (data.requiresConfirmation) {
-            showConfirmModal({ tier: data.tier as string, email })
+            showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
         }
         if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
     }
 
     const handleProSignup = async () => {
-        trackEvent('click_checkout', { tier: 'pro', value: 9.99, currency: 'USD' })
-        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro' })
+        const price = PRICES.pro[billingPeriod]
+        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD' })
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro', billingPeriod })
         if (data.requiresConfirmation) {
-            showConfirmModal({ tier: data.tier as string, email })
+            showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
         }
         if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
@@ -367,6 +391,36 @@ export default function ActivatePage() {
                         <p className="text-[--color-text-secondary]">
                             Start basic for 50 requests per day, or unlock everything with Pro.
                         </p>
+
+                        {/* Billing period toggle */}
+                        <div className="flex justify-center mt-6 mb-1">
+                            <div
+                                className="relative flex w-52 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
+                                onClick={() => setBillingPeriod(billingPeriod === 'weekly' ? 'monthly' : 'weekly')}
+                            >
+                                <div
+                                    className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
+                                    style={{ width: 'calc(50% - 6px)', transform: billingPeriod === 'monthly' ? 'translateX(100%)' : 'translateX(0)' }}
+                                />
+                                <button
+                                    type="button"
+                                    className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${billingPeriod === 'weekly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
+                                    onClick={(e) => { e.stopPropagation(); setBillingPeriod('weekly'); }}
+                                >
+                                    Weekly
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${billingPeriod === 'monthly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
+                                    onClick={(e) => { e.stopPropagation(); setBillingPeriod('monthly'); }}
+                                >
+                                    Monthly
+                                </button>
+                            </div>
+                        </div>
+                        {billingPeriod === 'monthly' && (
+                            <p className="text-xs text-cyan-400/80 mt-2">Save ~25% with monthly billing</p>
+                        )}
                     </div>
 
                     {/* Mobile Tier Toggle */}
@@ -433,8 +487,8 @@ export default function ActivatePage() {
                             </div>
 
                             <div className="mb-7">
-                                <span className="text-4xl font-extrabold font-inter text-[--color-text]">$1.49</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / week</span>
+                                <span className="text-4xl font-extrabold font-inter text-[--color-text]">${PRICES.basic[billingPeriod].toFixed(2)}</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / {billingPeriod === 'monthly' ? 'mo' : 'wk'}</span>
                             </div>
 
                             <ul className="space-y-3">
@@ -481,8 +535,8 @@ export default function ActivatePage() {
                                     </div>
 
                                     <div className="mb-7">
-                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">$9.99</span>
-                                        <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">${PRICES.pro[billingPeriod].toFixed(2)}</span>
+                                        <span className="text-sm text-[--color-text-tertiary]"> / {billingPeriod === 'monthly' ? 'mo' : 'wk'}</span>
                                     </div>
 
                                     {/* Pro highlights grid */}
@@ -519,7 +573,10 @@ export default function ActivatePage() {
                                 {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                             </h3>
                             <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                                Enter your email to proceed to secure checkout via Stripe.
+                                {billingPeriod === 'monthly'
+                                    ? `$${PRICES[selectedTier as 'basic' | 'pro'].monthly.toFixed(2)}/month — billed monthly. Enter your email to proceed via Stripe.`
+                                    : `$${PRICES[selectedTier as 'basic' | 'pro'].weekly.toFixed(2)}/week — billed weekly. Enter your email to proceed via Stripe.`
+                                }
                             </p>
 
                             <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">

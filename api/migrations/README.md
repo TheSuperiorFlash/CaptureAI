@@ -19,6 +19,7 @@ wrangler d1 execute captureai-db --file=schema.sql
 | # | File | Description |
 |---|------|-------------|
 | 0001 | `0001_initial_schema.sql` | Complete initial schema — all tables, indexes, and views |
+| 0002 | `0002_add_billing_period.sql` | Add `billing_period TEXT DEFAULT 'weekly'` to `users` table |
 
 All statements use `IF NOT EXISTS` guards and are idempotent.
 

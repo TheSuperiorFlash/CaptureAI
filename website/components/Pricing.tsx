@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
 import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
@@ -8,8 +9,18 @@ import { useSwipeTier } from '@/hooks/useSwipeTier'
 const TIER_BASIC = 'basic'
 const TIER_PRO = 'pro'
 
+const PRICES = {
+    basic: { weekly: 1.99, monthly: 5.99 },
+    pro: { weekly: 2.99, monthly: 9.99 },
+}
+
 export default function Pricing() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
+    const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
+
+    const basicPrice = PRICES.basic[billingPeriod]
+    const proPrice = PRICES.pro[billingPeriod]
+    const periodLabel = billingPeriod === 'monthly' ? 'mo' : 'wk'
 
     return (
         <section id="pricing" className="relative py-24 md:py-32 overflow-x-clip">
@@ -23,9 +34,40 @@ export default function Pricing() {
                     <p className="text-lg text-[--color-text-secondary]">
                         Simple plans. Upgrade when you need more.
                     </p>
+
+                    {/* Billing period toggle */}
+                    <div className="flex justify-center mt-8 mb-2">
+                        <div
+                            className="relative flex w-52 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
+                            onClick={() => setBillingPeriod(billingPeriod === 'weekly' ? 'monthly' : 'weekly')}
+                        >
+                            <div
+                                className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
+                                style={{ width: 'calc(50% - 6px)', transform: billingPeriod === 'monthly' ? 'translateX(100%)' : 'translateX(0)' }}
+                            />
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${billingPeriod === 'weekly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
+                                onClick={(e) => { e.stopPropagation(); setBillingPeriod('weekly'); }}
+                            >
+                                Weekly
+                            </button>
+                            <button
+                                type="button"
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${billingPeriod === 'monthly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
+                                onClick={(e) => { e.stopPropagation(); setBillingPeriod('monthly'); }}
+                            >
+                                Monthly
+                            </button>
+                        </div>
+                    </div>
+                    {billingPeriod === 'monthly' && (
+                        <p className="text-xs text-cyan-400/80 mt-2">Save ~25% with monthly billing</p>
+                    )}
+
                     {/* Mobile Tier Toggle */}
-                    <div className="flex md:hidden justify-center mt-8 mb-4">
-                        <div 
+                    <div className="flex md:hidden justify-center mt-6 mb-4">
+                        <div
                             className="relative flex w-60 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
                             onClick={() => setSelectedTier(selectedTier === TIER_BASIC ? TIER_PRO : TIER_BASIC)}
                         >
@@ -35,18 +77,14 @@ export default function Pricing() {
                             />
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
-                                    selectedTier === TIER_BASIC ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
-                                }`}
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${selectedTier === TIER_BASIC ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
                                 onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_BASIC); }}
                             >
                                 Basic
                             </button>
                             <button
                                 type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
-                                    selectedTier === TIER_PRO ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
-                                }`}
+                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${selectedTier === TIER_PRO ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
                                 onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_PRO); }}
                             >
                                 Pro
@@ -76,8 +114,8 @@ export default function Pricing() {
                         <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
-                                <span className="text-4xl font-bold font-inter text-[--color-text]">$1.49</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / week</span>
+                                <span className="text-4xl font-bold font-inter text-[--color-text]">${basicPrice.toFixed(2)}</span>
+                                <span className="text-sm text-[--color-text-tertiary]"> / {periodLabel}</span>
                             </div>
 
                             <ul className="mb-8 space-y-3.5 flex-1">
@@ -109,7 +147,7 @@ export default function Pricing() {
                             </ul>
 
                             <Link
-                                href="/activate"
+                                href={`/activate?tier=basic&billing=${billingPeriod}`}
                                 className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-colors hover:text-[--color-text] hover:!bg-white/[0.05] pointer-events-auto"
                             >
                                 Get Basic
@@ -136,8 +174,8 @@ export default function Pricing() {
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
                                 <div className="mb-7">
-                                    <span className="text-4xl font-bold font-inter text-gradient-static">$9.99</span>
-                                    <span className="text-sm text-[--color-text-tertiary]"> / month</span>
+                                    <span className="text-4xl font-bold font-inter text-gradient-static">${proPrice.toFixed(2)}</span>
+                                    <span className="text-sm text-[--color-text-tertiary]"> / {periodLabel}</span>
                                 </div>
 
                                 <ul className="mb-8 space-y-3.5 flex-1">
@@ -159,7 +197,7 @@ export default function Pricing() {
                                 </ul>
 
                                 <Link
-                                    href="/activate"
+                                    href={`/activate?tier=pro&billing=${billingPeriod}`}
                                     className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
                                     Get Pro
