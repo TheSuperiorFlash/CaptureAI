@@ -309,10 +309,7 @@ export default function Navbar() {
                                                     setIsResourcesOpen(false)
                                                     handleNavClick(e, item.href)
                                                 }}
-                                                className={`flex items-center gap-2 px-8 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 ${isActive(item.href)
-                                                    ? 'text-[--color-text]'
-                                                    : 'text-[--color-text]'
-                                                    }`}
+                                                className="flex items-center gap-2 px-8 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 text-[--color-text]"
                                             >
                                                 {item.label}
                                                 <item.Icon className="w-4 h-4 flex-shrink-0" />

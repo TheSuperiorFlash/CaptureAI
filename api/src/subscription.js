@@ -67,7 +67,7 @@ export class SubscriptionHandler {
       let customerId;
       let existingSubscriptionId = null;
       const existingUser = await this.db
-        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, subscription_status, tier FROM users WHERE email = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, subscription_status, tier, billing_period FROM users WHERE email = ?')
         .bind(email)
         .first();
 
@@ -238,10 +238,14 @@ export class SubscriptionHandler {
       const body = await validateRequestBody(request);
       const email = validateEmail(body.email, true);
       const tier = body.tier;
-      const billingPeriod = body.billingPeriod === 'monthly' ? 'monthly' : 'weekly';
+      const billingPeriod = body.billingPeriod;
 
       if (tier !== 'basic' && tier !== 'pro') {
         return jsonResponse({ error: 'Invalid tier' }, 400);
+      }
+
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
       }
 
       // Verify user exists with an active subscription requesting a different plan
@@ -1253,10 +1257,14 @@ export class SubscriptionHandler {
 
       const body = await validateRequestBody(request);
       const newTier = body.tier;
-      const billingPeriod = body.billingPeriod === 'monthly' ? 'monthly' : 'weekly';
+      const billingPeriod = body.billingPeriod;
 
       if (newTier !== 'basic' && newTier !== 'pro') {
         return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
+      }
+
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
       }
 
       const newPriceId = this.getPriceId(newTier, billingPeriod);
@@ -1391,7 +1399,7 @@ export class SubscriptionHandler {
       }
 
       const userData = await this.db
-        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, billing_period FROM users WHERE id = ?')
         .bind(user.userId)
         .first();
 
@@ -1405,7 +1413,7 @@ export class SubscriptionHandler {
       let portalUrl;
       if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id) {
         try {
-          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier);
+          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier, userData.billing_period || 'weekly');
         } catch (planChangeError) {
           // If plan change portal fails (stale subscription, missing item, etc.),
           // fall back to regular billing portal. User can still upgrade from there.
@@ -1583,7 +1591,12 @@ export class SubscriptionHandler {
       }
 
       const body = await validateRequestBody(request);
-      const billingPeriod = body.billingPeriod === 'monthly' ? 'monthly' : 'weekly';
+      const billingPeriod = body.billingPeriod;
+
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
+      }
+
       const proPriceId = this.getPriceId('pro', billingPeriod);
       if (!proPriceId) {
         return jsonResponse({ error: 'Pro price not configured' }, 500);

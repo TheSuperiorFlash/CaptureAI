@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
@@ -19,10 +18,11 @@ export function Tab({
   selected,
   setSelected,
   discount = false,
-  discountLabel = "Save 34%",
+  discountLabel = "Save 32%",
 }: TabProps) {
   return (
     <button
+      type="button"
       onClick={() => setSelected(text)}
       className={cn(
         "relative w-fit px-4 py-2 text-sm font-semibold capitalize",

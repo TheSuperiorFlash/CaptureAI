@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo, useCallback } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
