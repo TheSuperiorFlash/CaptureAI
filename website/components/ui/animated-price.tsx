@@ -12,12 +12,32 @@ interface AnimatedPriceProps {
 }
 
 const slide = {
-  enter: (dir: number) => ({ y: dir * 16, opacity: 0 }),
-  center: { y: 0, opacity: 1 },
-  exit:  (dir: number) => ({ y: dir * -16, opacity: 0 }),
+  enter: (dir: number) => ({
+    y: dir * 24,
+    opacity: 0,
+    filter: "blur(4px)",
+    scale: 0.95,
+  }),
+  center: {
+    y: 0,
+    opacity: 1,
+    filter: "blur(0px)",
+    scale: 1,
+  },
+  exit: (dir: number) => ({
+    y: dir * -24,
+    opacity: 0,
+    filter: "blur(4px)",
+    scale: 1.05,
+  }),
 }
 
-const transition = { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] as const }
+const transition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 35,
+  mass: 0.8,
+}
 
 export function AnimatedPrice({
   price,
@@ -29,8 +49,8 @@ export function AnimatedPrice({
   return (
     <div className="flex items-baseline gap-0.5">
       <span className={priceClassName}>$</span>
-      <div className="overflow-hidden">
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
+      <div className="relative overflow-hidden">
+        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.span
             key={price}
             custom={direction}
@@ -45,8 +65,8 @@ export function AnimatedPrice({
           </motion.span>
         </AnimatePresence>
       </div>
-      <div className="overflow-hidden self-end pb-0.5">
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
+      <div className="relative overflow-hidden self-end pb-0.5">
+        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.span
             key={period}
             custom={direction}
