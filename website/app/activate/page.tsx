@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, memo } from 'react'
+import { flushSync } from 'react-dom'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
@@ -249,7 +250,17 @@ export default function ActivatePage() {
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
     const [isTrial, setIsTrial] = useState(false)
     const [isBasicHiding, setIsBasicHiding] = useState(false)
+    const [isTrialContentVisible, setIsTrialContentVisible] = useState(false)
     const proCardRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (isTrial) {
+            const id = requestAnimationFrame(() => setIsTrialContentVisible(true))
+            return () => cancelAnimationFrame(id)
+        } else {
+            setIsTrialContentVisible(false)
+        }
+    }, [isTrial])
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -288,20 +299,19 @@ export default function ActivatePage() {
     const flipCard = (applyChange: () => void) => {
         const card = proCardRef.current
         const before = card?.getBoundingClientRect()
-        applyChange()
-        requestAnimationFrame(() => {
-            if (!card || !before) return
-            const after = card.getBoundingClientRect()
-            const deltaX = before.left - after.left
-            if (deltaX === 0) return
-            card.style.transition = 'none'
-            card.style.transform = `translateX(${deltaX}px)`
-            card.getBoundingClientRect() // force reflow
-            card.style.transition = 'transform 450ms ease-in-out'
-            card.style.transform = 'translateX(0)'
-            const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
-            card.addEventListener('transitionend', cleanup, { once: true })
-        })
+        // flushSync ensures React updates the DOM synchronously before we measure
+        flushSync(() => { applyChange() })
+        if (!card || !before) return
+        const after = card.getBoundingClientRect()
+        const deltaX = before.left - after.left
+        if (deltaX === 0) return
+        card.style.transition = 'none'
+        card.style.transform = `translateX(${deltaX}px)`
+        card.getBoundingClientRect() // force reflow
+        card.style.transition = 'transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        card.style.transform = 'translateX(0)'
+        const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
+        card.addEventListener('transitionend', cleanup, { once: true })
     }
 
     const enterTrialMode = (e?: React.MouseEvent) => {
@@ -553,7 +563,7 @@ export default function ActivatePage() {
                                         <button
                                             type="button"
                                             onClick={exitTrialMode}
-                                            className="absolute right-6 top-6 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 hover:text-white/70 transition-all"
+                                            className={`absolute right-6 top-6 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 hover:text-white/70 transition-all duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}
                                             aria-label="Exit trial mode"
                                         >
                                             <XIcon className="h-3.5 w-3.5" />
@@ -575,7 +585,7 @@ export default function ActivatePage() {
 
                                     <div className="mb-7 flex items-end gap-3">
                                         {isTrial ? (
-                                            <div className="flex items-end gap-2">
+                                            <div className={`flex items-end gap-2 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}>
                                                 <div className="flex items-end">
                                                     <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
                                                     <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
@@ -629,7 +639,7 @@ export default function ActivatePage() {
                                     </ul>
 
                                     {isTrial && (
-                                        <p className="mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50">
+                                        <p className={`mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-50' : 'opacity-0'}`}>
                                             Cancel anytime · Renews at $3.49/wk
                                         </p>
                                     )}
