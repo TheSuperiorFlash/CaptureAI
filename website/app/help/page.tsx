@@ -19,19 +19,19 @@ type QaItem = { q: string; a: React.ReactNode; aPlain?: string };
 
 const FAQ_SCHEMA_ITEMS = [
     { q: 'How do I get a license key?', a: 'Visit the activation page at captureai.app/activate and enter your email. You\'ll receive a key via email after completing checkout.' },
-    { q: 'What\'s the difference between Basic and Pro?', a: 'Basic gives you 50 AI requests per day for $1.49/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.' },
+    { q: 'What\'s the difference between Basic and Pro?', a: 'Basic gives you 50 AI requests per day starting at $1.99/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve starting at $3.49/week.' },
     { q: 'Which browser is supported?', a: 'CaptureAI works exclusively on Google Chrome (desktop).' },
-    { q: 'How do I upgrade to Pro?', a: 'Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you\'ll see a prorated amount so you only pay for the remaining time.' },
-    { q: 'How do I cancel my subscription?', a: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime.' },
+    { q: 'How do I upgrade to Pro?', a: 'Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you\'ll only be charged for the remaining time in your billing period.' },
+    { q: 'How do I cancel my subscription?', a: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing". From there you can cancel anytime — your access continues until the end of your billing period.' },
     { q: 'What is Privacy Guard?', a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension.' },
     { q: 'Are my screenshots stored on your servers?', a: 'No. Screenshots are never stored on our servers. Text is extracted locally using secure text extraction and only sent to the AI for analysis.' },
     { q: 'Do you offer refunds?', a: 'Refunds are considered on a case-by-case basis within 7 days of purchase. Email support@captureai.dev with your order details.' },
-    { q: 'The floating button isn\'t appearing on the page', a: 'Refresh the page after installing. Press Ctrl+Shift+E to force the UI to appear. Check that the extension is enabled at chrome://extensions.' },
+    { q: 'The floating button isn\'t appearing on the page', a: 'Refresh the page after installing. Press Ctrl+Shift+E to show the panel. If it still doesn\'t appear, make sure the extension is enabled in Chrome by going to chrome://extensions.' },
     { q: 'I paid but never received my license key', a: 'Check your spam/junk folder for an email from captureai.dev. If you still don\'t see it after 10 minutes, email support@captureai.dev with your receipt.' },
-    { q: 'The AI is giving wrong or irrelevant answers', a: 'Capture only the question text, not the entire page. Enable "Disable OCR Extraction" in Settings to send the image directly if text extraction is misreading.' },
-    { q: 'It says "Daily limit reached"', a: 'You\'ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. Upgrade to Pro for unlimited requests.' },
-    { q: 'The extension doesn\'t work on a specific site', a: 'Some sites use strict Content Security Policies. CaptureAI cannot run on chrome:// or Chrome Web Store pages. Enable Privacy Guard (Pro) for exam platforms.' },
-    { q: 'My license key says "Invalid or expired"', a: 'Your subscription may have lapsed due to a failed payment. Open Settings, click "Manage Billing" to check your subscription status and update your payment method.' },
+    { q: 'The AI is giving wrong or irrelevant answers', a: 'Capture only the question text, not the entire page. Try zooming in on the question for better accuracy.' },
+    { q: 'It says "Daily limit reached"', a: 'You\'ve used all 50 requests for today on the Basic plan. Your limit resets at midnight. Upgrade to Pro for unlimited requests.' },
+    { q: 'The extension doesn\'t work on a specific site', a: 'CaptureAI cannot run on Chrome\'s internal pages or the Chrome Web Store. On exam platforms, enabling Privacy Guard (Pro) can help if the site is blocking extension activity.' },
+    { q: 'My license key says "Invalid or expired"', a: 'Your subscription may have lapsed due to a failed payment. Open the extension popup, go to Settings, and click "Manage Billing" to check your status and update your payment method.' },
 ];
 
 const faqJsonLd = {
@@ -52,7 +52,7 @@ const FAQ_ITEMS: QaItem[] = [
     },
     {
         q: 'What\'s the difference between Basic and Pro?',
-        a: 'Basic gives you 50 AI requests per day for $1.49/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve for $9.99/month.',
+        a: 'Basic gives you 50 AI requests per day starting at $1.99/week. Pro gives unlimited requests plus Privacy Guard, Ask Mode, and Auto-Solve starting at $3.49/week.',
     },
     {
         q: 'Which browser is supported?',
@@ -60,17 +60,17 @@ const FAQ_ITEMS: QaItem[] = [
     },
     {
         q: 'How do I upgrade to Pro?',
-        a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll see a prorated amount so you only pay for the remaining time.</>,
-        aPlain: "Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you'll see a prorated amount so you only pay for the remaining time.",
+        a: <>Visit the <Link href="/activate" className={INLINE_LINK_CLASS}>activation page</Link>, select Pro, and enter your email. If you already have an active subscription, you&apos;ll only be charged for the remaining time in your billing period.</>,
+        aPlain: "Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you'll only be charged for the remaining time in your billing period.",
     },
     {
         q: 'How do I cancel my subscription?',
-        a: <>Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.</>,
-        aPlain: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime. Your access continues until the end of the billing period.',
+        a: <>Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo;. From there you can cancel anytime — your access continues until the end of your billing period.</>,
+        aPlain: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing". From there you can cancel anytime — your access continues until the end of your billing period.',
     },
     {
         q: 'What is Privacy Guard?',
-        a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension. It overrides browser focus and visibility APIs at the page level.',
+        a: 'Privacy Guard (Pro only) prevents exam platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension.',
     },
     {
         q: 'Are my screenshots stored on your servers?',
@@ -86,30 +86,30 @@ const FAQ_ITEMS: QaItem[] = [
 const TROUBLESHOOTING_ITEMS: QaItem[] = [
     {
         q: 'The floating button isn\'t appearing on the page',
-        a: 'Refresh the page after installing the extension. On some sites the content script loads after the page — pressing Ctrl+Shift+E will force the UI to appear. If it still doesn\'t show, check that the extension is enabled at chrome://extensions.',
+        a: 'Refresh the page after installing the extension. On some sites the extension takes a moment to load — pressing Ctrl+Shift+E will force the panel to appear. If it still doesn\'t show, make sure the extension is enabled by going to chrome://extensions.',
     },
     {
         q: 'I paid but never received my license key',
-        a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your receipt.</>,
-        aPlain: "Check your spam/junk folder for an email from captureai.dev. Keys are sent immediately after Stripe confirms payment. If you still don't see it after 10 minutes, email support@captureai.dev with your receipt.",
+        a: <>Check your spam/junk folder for an email from captureai.dev. Keys are sent right away once payment goes through. If you still don&apos;t see it after 10 minutes, email <a href="mailto:support@captureai.dev" className={INLINE_LINK_CLASS}>support@captureai.dev</a> with your receipt.</>,
+        aPlain: "Check your spam/junk folder for an email from captureai.dev. Keys are sent right away once payment goes through. If you still don't see it after 10 minutes, email support@captureai.dev with your receipt.",
     },
     {
         q: 'The AI is giving wrong or irrelevant answers',
-        a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing. If text extraction is misreading, open Settings in the popup and enable "Disable OCR Extraction" to send the image directly instead.',
+        a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing.',
     },
     {
         q: 'It says "Daily limit reached"',
-        a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, <Link href="/activate" className={INLINE_LINK_CLASS}>upgrade to Pro</Link>.</>,
-        aPlain: "You've used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. To get unlimited requests, upgrade to Pro.",
+        a: <>You&apos;ve used all 50 requests for today on the Basic plan. Your limit resets at midnight. To get unlimited requests, <Link href="/activate" className={INLINE_LINK_CLASS}>upgrade to Pro</Link>.</>,
+        aPlain: "You've used all 50 requests for today on the Basic plan. Your limit resets at midnight. To get unlimited requests, upgrade to Pro.",
     },
     {
         q: 'The extension doesn\'t work on a specific site',
-        a: 'Some sites use strict Content Security Policies that can interfere with extensions. CaptureAI cannot run on internal Chrome pages (chrome://, edge://) or the Chrome Web Store. For exam platforms, make sure Privacy Guard is enabled (Pro) if the site blocks extension activity.',
+        a: 'CaptureAI cannot run on Chrome\'s internal pages or the Chrome Web Store. On exam platforms, make sure Privacy Guard (Pro) is enabled if the site appears to be blocking extension activity.',
     },
     {
         q: 'My license key says "Invalid or expired"',
-        a: <>Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click &ldquo;Manage Billing&rdquo; to access the Stripe billing portal where you can check your subscription status and update your payment method.</>,
-        aPlain: 'Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, click "Manage Billing" to access the Stripe billing portal where you can check your subscription status and update your payment method.',
+        a: <>Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, and click &ldquo;Manage Billing&rdquo; to check your status and update your payment method.</>,
+        aPlain: 'Your subscription may have lapsed due to a failed payment. Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to check your status and update your payment method.',
     },
     {
         q: 'Does CaptureAI work on locked-down browsers like Respondus?',
@@ -117,7 +117,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     },
     {
         q: "Why isn't CaptureAI working on my school's LMS?",
-        a: "First check that the extension is enabled at chrome://extensions. Some school LMS pages use strict Content Security Policies — try pressing Ctrl+Shift+E to force the UI to appear. If the site runs inside an iframe (common on Blackboard and Canvas), the extension may not inject into nested frames. On exam platforms, enable Privacy Guard (Pro) to prevent the site from blocking extension activity.",
+        a: "First check that the extension is enabled by going to chrome://extensions. Try pressing Ctrl+Shift+E to force the panel to appear. On some platforms like Blackboard and Canvas, certain pages may block extensions — enabling Privacy Guard (Pro) can help in those cases.",
     },
 ];
 

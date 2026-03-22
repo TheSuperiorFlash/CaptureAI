@@ -24,6 +24,6 @@ export const FAQS = [
   {
     question: 'Can CaptureAI answer math and science questions?',
     answer:
-      'Yes. CaptureAI handles multiple choice, short answer, true/false, math problems, science questions, and written prompts. It reads the question from your screen using secure text extraction and sends it to AI for analysis.',
+      'Yes. CaptureAI handles multiple choice, short answer, true/false, math problems, science questions, and written prompts. Just capture the question and the AI will analyze it.',
   },
 ]
