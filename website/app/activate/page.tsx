@@ -6,6 +6,7 @@ import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
 import { trackEvent } from '@/lib/analytics'
+import { Tab } from '@/components/ui/pricing-tab'
 
 const PRICES = {
     basic: { weekly: 1.99, monthly: 5.99 },
@@ -393,66 +394,22 @@ export default function ActivatePage() {
                         </p>
 
                         {/* Billing period toggle */}
-                        <div className="flex justify-center mt-6 mb-1">
-                            <div
-                                className="relative flex w-52 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
-                                onClick={() => setBillingPeriod(billingPeriod === 'weekly' ? 'monthly' : 'weekly')}
-                            >
-                                <div
-                                    className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
-                                    style={{ width: 'calc(50% - 6px)', transform: billingPeriod === 'monthly' ? 'translateX(100%)' : 'translateX(0)' }}
-                                />
-                                <button
-                                    type="button"
-                                    className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${billingPeriod === 'weekly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                    onClick={(e) => { e.stopPropagation(); setBillingPeriod('weekly'); }}
-                                >
-                                    Weekly
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${billingPeriod === 'monthly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                    onClick={(e) => { e.stopPropagation(); setBillingPeriod('monthly'); }}
-                                >
-                                    Monthly
-                                </button>
+                        <div className="flex justify-center mt-6">
+                            <div className="flex w-fit rounded-full bg-muted p-1">
+                                {(['weekly', 'monthly'] as const).map((period) => (
+                                    <Tab
+                                        key={period}
+                                        text={period}
+                                        selected={billingPeriod === period}
+                                        setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
+                                        discount={period === 'monthly'}
+                                        discountLabel="Save 34%"
+                                    />
+                                ))}
                             </div>
                         </div>
-                        {billingPeriod === 'monthly' && (
-                            <p className="text-xs text-cyan-400/80 mt-2">Save ~25% with monthly billing</p>
-                        )}
                     </div>
 
-                    {/* Mobile Tier Toggle */}
-                    <div className="flex md:hidden justify-center mt-6 mb-10">
-                        <div 
-                            className="relative flex w-60 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
-                            onClick={() => setSelectedTier(selectedTier === 'basic' ? 'pro' : 'basic')}
-                        >
-                            <div
-                                className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
-                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === 'pro' ? 'translateX(100%)' : 'translateX(0)' }}
-                            />
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
-                                    selectedTier === 'basic' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
-                                }`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier('basic'); }}
-                            >
-                                Basic
-                            </button>
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 ${
-                                    selectedTier === 'pro' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'
-                                }`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier('pro'); }}
-                            >
-                                Pro
-                            </button>
-                        </div>
-                    </div>
 
                     {/* Plans grid */}
                     <div

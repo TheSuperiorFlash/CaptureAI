@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Tab } from '@/components/ui/pricing-tab'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
 import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
@@ -36,61 +37,21 @@ export default function Pricing() {
                     </p>
 
                     {/* Billing period toggle */}
-                    <div className="flex justify-center mt-8 mb-2">
-                        <div
-                            className="relative flex w-52 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
-                            onClick={() => setBillingPeriod(billingPeriod === 'weekly' ? 'monthly' : 'weekly')}
-                        >
-                            <div
-                                className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
-                                style={{ width: 'calc(50% - 6px)', transform: billingPeriod === 'monthly' ? 'translateX(100%)' : 'translateX(0)' }}
-                            />
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${billingPeriod === 'weekly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                onClick={(e) => { e.stopPropagation(); setBillingPeriod('weekly'); }}
-                            >
-                                Weekly
-                            </button>
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${billingPeriod === 'monthly' ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                onClick={(e) => { e.stopPropagation(); setBillingPeriod('monthly'); }}
-                            >
-                                Monthly
-                            </button>
+                    <div className="flex justify-center mt-8">
+                        <div className="flex w-fit rounded-full bg-muted p-1">
+                            {(['weekly', 'monthly'] as const).map((period) => (
+                                <Tab
+                                    key={period}
+                                    text={period}
+                                    selected={billingPeriod === period}
+                                    setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
+                                    discount={period === 'monthly'}
+                                    discountLabel="Save 34%"
+                                />
+                            ))}
                         </div>
                     </div>
-                    {billingPeriod === 'monthly' && (
-                        <p className="text-xs text-cyan-400/80 mt-2">Save ~25% with monthly billing</p>
-                    )}
 
-                    {/* Mobile Tier Toggle */}
-                    <div className="flex md:hidden justify-center mt-6 mb-4">
-                        <div
-                            className="relative flex w-60 rounded-full bg-white/[0.03] backdrop-blur-md p-1.5 border border-white/5 shadow-inner cursor-pointer"
-                            onClick={() => setSelectedTier(selectedTier === TIER_BASIC ? TIER_PRO : TIER_BASIC)}
-                        >
-                            <div
-                                className="absolute top-1.5 bottom-1.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-transform duration-500 ease-out"
-                                style={{ width: 'calc(50% - 6px)', transform: selectedTier === TIER_PRO ? 'translateX(100%)' : 'translateX(0)' }}
-                            />
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${selectedTier === TIER_BASIC ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_BASIC); }}
-                            >
-                                Basic
-                            </button>
-                            <button
-                                type="button"
-                                className={`relative z-10 w-1/2 rounded-full py-2 text-[15px] font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${selectedTier === TIER_PRO ? 'text-white drop-shadow-md' : 'text-white/50 hover:text-white/90'}`}
-                                onClick={(e) => { e.stopPropagation(); setSelectedTier(TIER_PRO); }}
-                            >
-                                Pro
-                            </button>
-                        </div>
-                    </div>
                 </ScrollReveal>
 
                 <div
