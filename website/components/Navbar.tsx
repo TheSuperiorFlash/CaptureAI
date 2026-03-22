@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef, useId } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper, Mail } from 'lucide-react'
+import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper, Mail, Sunrise, Trees, Book } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './MagneticButton'
 import { trackEvent } from '@/lib/analytics'
@@ -138,9 +138,30 @@ export default function Navbar() {
     ]
 
     const resourceItems = [
-        { label: 'Blog', href: '/blog', Icon: Newspaper },
-        { label: 'Help', href: '/help', Icon: HelpCircle },
-        { label: 'Contact', href: '/contact', Icon: Mail },
+        { 
+            label: 'Help Center', 
+            description: 'Get all the answers you need right here',
+            href: '/help', 
+            Icon: Zap 
+        },
+        { 
+            label: 'Contact Us', 
+            description: 'We are here to help you with any questions you have',
+            href: '/contact', 
+            Icon: Sunrise 
+        },
+        { 
+            label: 'Status', 
+            description: 'Check the current status of our services and APIs',
+            href: '/status', 
+            Icon: Trees 
+        },
+        { 
+            label: 'Terms of Service', 
+            description: 'Our terms and conditions for using our services',
+            href: '/terms', 
+            Icon: Book 
+        },
     ]
 
     const isActive = (href: string) => {
@@ -306,7 +327,7 @@ export default function Navbar() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
-                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-row items-center w-[7.5rem] rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1] z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
+                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col w-[320px] p-2 rounded-2xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#0A0A0A] z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
                                 >
                                     {resourceItems.map((item) => (
                                         <Link
@@ -316,10 +337,19 @@ export default function Navbar() {
                                                 setIsResourcesOpen(false)
                                                 handleNavClick(e, item.href)
                                             }}
-                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 text-[--color-text]"
+                                            className="group flex flex-row items-start gap-4 p-3 rounded-xl hover:bg-white/[0.06] transition-colors"
                                         >
-                                            {item.label}
-                                            <item.Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                                            <div className="flex-shrink-0 mt-0.5">
+                                                <item.Icon className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div className="flex flex-col text-left">
+                                                <span className="text-[15px] font-semibold text-white">
+                                                    {item.label}
+                                                </span>
+                                                <span className="text-[13.5px] text-[#A1A1AA] mt-1 leading-snug">
+                                                    {item.description}
+                                                </span>
+                                            </div>
                                         </Link>
                                     ))}
                                 </motion.div>
