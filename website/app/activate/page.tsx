@@ -305,12 +305,13 @@ export default function ActivatePage() {
         const after = card.getBoundingClientRect()
         const deltaX = before.left - after.left
         if (deltaX === 0) return
+        card.style.willChange = 'transform'
         card.style.transition = 'none'
         card.style.transform = `translateX(${deltaX}px)`
         card.getBoundingClientRect() // force reflow
         card.style.transition = 'transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
         card.style.transform = 'translateX(0)'
-        const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
+        const cleanup = () => { card.style.willChange = ''; card.style.transition = ''; card.style.transform = '' }
         card.addEventListener('transitionend', cleanup, { once: true })
     }
 
@@ -484,7 +485,7 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
+                        className={`mx-auto grid grid-cols-1 w-full ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
