@@ -118,6 +118,20 @@ export default function Navbar() {
     }, [])
 
     useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (resourcesRef.current && !resourcesRef.current.contains(event.target as Node)) {
+                if (resourcesCloseTimeout.current) clearTimeout(resourcesCloseTimeout.current)
+                setIsResourcesOpen(false)
+            }
+        }
+
+        document.addEventListener('click', handleClickOutside)
+        return () => {
+            document.removeEventListener('click', handleClickOutside)
+        }
+    }, [])
+
+    useEffect(() => {
         const updateHash = () => setActiveHash(window.location.hash)
 
         // Update hash immediately on mount and when pathname changes

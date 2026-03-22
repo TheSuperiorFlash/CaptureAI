@@ -1418,9 +1418,9 @@ export class SubscriptionHandler {
       const tier = searchParams.get('tier');
 
       let portalUrl;
-      if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id) {
+      if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id && userData.billing_period) {
         try {
-          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier, userData.billing_period || 'weekly');
+          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier, userData.billing_period);
         } catch (planChangeError) {
           // If plan change portal fails (stale subscription, missing item, etc.),
           // fall back to regular billing portal. User can still upgrade from there.

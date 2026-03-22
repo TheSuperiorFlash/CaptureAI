@@ -105,8 +105,13 @@ describe('Worker Entry Point', () => {
       expect(response.status).toBe(500);
     });
 
-    test('should return 500 when STRIPE_PRICE_PRO_WEEKLY is missing', async () => {
-      delete env.STRIPE_PRICE_PRO_WEEKLY;
+    test.each([
+      'STRIPE_PRICE_BASIC_WEEKLY',
+      'STRIPE_PRICE_BASIC_MONTHLY',
+      'STRIPE_PRICE_PRO_WEEKLY',
+      'STRIPE_PRICE_PRO_MONTHLY',
+    ])('should return 500 when %s is missing', async (priceKey) => {
+      delete env[priceKey];
       const request = createRequest('/health');
       const response = await worker.fetch(request, env, ctx);
       expect(response.status).toBe(500);
