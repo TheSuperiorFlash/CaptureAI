@@ -845,8 +845,8 @@ export class SubscriptionHandler {
           console.error('Failed to fetch subscription for billing date:', err);
         }
       }
-      const isTrial = fetchedSubscription?.metadata?.is_trial === 'true';
-      const isTrialMonthly = fetchedSubscription?.metadata?.is_trial_monthly === 'true';
+      const isTrial = fetchedSubscription?.metadata?.is_trial === 'true' || session.metadata?.is_trial === 'true';
+      const isTrialMonthly = fetchedSubscription?.metadata?.is_trial_monthly === 'true' || session.metadata?.is_trial_monthly === 'true';
 
       // Determine purchased tier and billing period from checkout session metadata
       const purchasedTier = (session.metadata?.tier === 'basic' || session.metadata?.tier === 'pro')
@@ -1798,9 +1798,10 @@ export class SubscriptionHandler {
    * @param {string} couponId - Stripe coupon ID for the $2.50 discount
    */
   async createTrialCheckout(email, couponId) {
+    const priceId = this.getPriceId('pro', 'weekly');
+    if (!priceId) return jsonResponse({ error: 'Price not configured' }, 500);
     const customer = await this.createStripeCustomer(email);
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
-    const priceId = this.env.STRIPE_PRICE_PRO_WEEKLY;
 
     const params = new URLSearchParams({
       customer: customer.id,
@@ -1809,6 +1810,7 @@ export class SubscriptionHandler {
       mode: 'subscription',
       'discounts[0][coupon]': couponId,
       'subscription_data[metadata][is_trial]': 'true',
+      'metadata[is_trial]': 'true',
       'metadata[tier]': 'pro',
       'metadata[billing_period]': 'weekly',
       success_url: `${extensionUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&trial=true`,
@@ -1859,6 +1861,7 @@ export class SubscriptionHandler {
       'line_items[0][quantity]': '1',
       mode: 'subscription',
       'subscription_data[metadata][is_trial_monthly]': 'true',
+      'metadata[is_trial_monthly]': 'true',
       'metadata[tier]': 'pro',
       'metadata[billing_period]': 'monthly',
       success_url: `${extensionUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&trial=true`,
