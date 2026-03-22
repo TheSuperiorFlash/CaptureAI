@@ -567,7 +567,7 @@ export default function ActivatePage() {
                                                 onClick={(e) => enterTrialMode(e)}
                                                 className="mb-2 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-3 py-1 text-[11px] font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
                                             >
-                                                $0.99 for 7 days · $3.49/wk after
+                                                Try $0.99 for 7 days · Renews at $3.49/wk
                                             </button>
                                         )}
                                     </div>
