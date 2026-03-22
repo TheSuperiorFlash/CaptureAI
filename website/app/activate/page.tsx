@@ -7,6 +7,7 @@ import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
 import { trackEvent } from '@/lib/analytics'
 import { Tab } from '@/components/ui/pricing-tab'
+import { AnimatedPrice } from '@/components/ui/animated-price'
 
 const PRICES = {
     basic: { weekly: 1.99, monthly: 5.99 },
@@ -245,6 +246,7 @@ export default function ActivatePage() {
     const [email, setEmail] = useState('')
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
     const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
+    const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -395,7 +397,7 @@ export default function ActivatePage() {
 
                         {/* Billing period toggle */}
                         <div className="flex justify-center mt-6">
-                            <div className="flex w-fit rounded-full bg-muted p-1">
+                            <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
                                 {(['weekly', 'monthly'] as const).map((period) => (
                                     <Tab
                                         key={period}
@@ -444,8 +446,13 @@ export default function ActivatePage() {
                             </div>
 
                             <div className="mb-7">
-                                <span className="text-4xl font-extrabold font-inter text-[--color-text]">${PRICES.basic[billingPeriod].toFixed(2)}</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / {billingPeriod === 'monthly' ? 'mo' : 'wk'}</span>
+                                <AnimatedPrice
+                                    price={PRICES.basic[billingPeriod]}
+                                    period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                    direction={direction}
+                                    priceClassName="text-4xl font-extrabold font-inter text-[--color-text]"
+                                    periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                />
                             </div>
 
                             <ul className="space-y-3">
@@ -492,8 +499,13 @@ export default function ActivatePage() {
                                     </div>
 
                                     <div className="mb-7">
-                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">${PRICES.pro[billingPeriod].toFixed(2)}</span>
-                                        <span className="text-sm text-[--color-text-tertiary]"> / {billingPeriod === 'monthly' ? 'mo' : 'wk'}</span>
+                                        <AnimatedPrice
+                                            price={PRICES.pro[billingPeriod]}
+                                            period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                            direction={direction}
+                                            priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
+                                            periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                        />
                                     </div>
 
                                     {/* Pro highlights grid */}

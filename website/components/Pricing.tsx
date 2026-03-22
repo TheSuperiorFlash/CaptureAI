@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { AnimatedPrice } from '@/components/ui/animated-price'
+import { AnimatedPrice } from '@/components/ui/animated-price'
 import { Tab } from '@/components/ui/pricing-tab'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
@@ -22,6 +24,8 @@ export default function Pricing() {
     const basicPrice = PRICES.basic[billingPeriod]
     const proPrice = PRICES.pro[billingPeriod]
     const periodLabel = billingPeriod === 'monthly' ? 'mo' : 'wk'
+    const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
+    const direction = billingPeriod === 'monthly' ? 1 : -1 as 1 | -1
 
     return (
         <section id="pricing" className="relative py-24 md:py-32 overflow-x-clip">
@@ -38,7 +42,7 @@ export default function Pricing() {
 
                     {/* Billing period toggle */}
                     <div className="flex justify-center mt-8">
-                        <div className="flex w-fit rounded-full bg-muted p-1">
+                        <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
                             {(['weekly', 'monthly'] as const).map((period) => (
                                 <Tab
                                     key={period}
@@ -75,8 +79,13 @@ export default function Pricing() {
                         <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
-                                <span className="text-4xl font-bold font-inter text-[--color-text]">${basicPrice.toFixed(2)}</span>
-                                <span className="text-sm text-[--color-text-tertiary]"> / {periodLabel}</span>
+                                <AnimatedPrice
+                                    price={basicPrice}
+                                    period={periodLabel}
+                                    direction={direction}
+                                    priceClassName="text-4xl font-bold font-inter text-[--color-text]"
+                                    periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                />
                             </div>
 
                             <ul className="mb-8 space-y-3.5 flex-1">
@@ -135,8 +144,13 @@ export default function Pricing() {
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
                                 <div className="mb-7">
-                                    <span className="text-4xl font-bold font-inter text-gradient-static">${proPrice.toFixed(2)}</span>
-                                    <span className="text-sm text-[--color-text-tertiary]"> / {periodLabel}</span>
+                                    <AnimatedPrice
+                                        price={proPrice}
+                                        period={periodLabel}
+                                        direction={direction}
+                                        priceClassName="text-4xl font-bold font-inter text-gradient-static"
+                                        periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                    />
                                 </div>
 
                                 <ul className="mb-8 space-y-3.5 flex-1">
