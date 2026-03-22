@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper } from 'lucide-react'
+import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './MagneticButton'
 import { trackEvent } from '@/lib/analytics'
@@ -126,8 +126,9 @@ export default function Navbar() {
     ]
 
     const resourceItems = [
-        { label: 'Help', href: '/help', Icon: HelpCircle },
         { label: 'Blog', href: '/blog', Icon: Newspaper },
+        { label: 'Help', href: '/help', Icon: HelpCircle },
+        { label: 'Contact', href: '/contact', Icon: Mail },
     ]
 
     const isActive = (href: string) => {
@@ -301,7 +302,6 @@ export default function Navbar() {
                                             exit={{ opacity: 0, x: 20 }}
                                             transition={{ duration: 0.3, delay: i * 0.05 }}
                                             className="w-fit rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
-                                            style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
                                         >
                                             <Link
                                                 href={item.href}
