@@ -915,11 +915,11 @@ Need help? Visit our help page: https://captureai.dev/help`;
         return false;
       }
 
-      const subject = 'Your CaptureAI Pro trial has started — $0.99 this week';
+      const subject = 'Your CaptureAI Pro trial has started — $2.99 this month';
       const htmlContent = this.generateTrialMonthlyEmailHTML(licenseKey);
       const textContent = `Your CaptureAI Pro trial has started!
 
-This week's charge is $0.99. After 7 days, billing continues at $9.99/month.
+This month's charge is $2.99 (trial discount applied). After 30 days, billing continues at $9.99/month.
 
 Your License Key
 ${licenseKey}
@@ -938,7 +938,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
   }
 
   /**
-   * Generate HTML email for the $0.99 → $9.99/month trial welcome.
+   * Generate HTML email for the $2.99 → $9.99/month trial welcome.
    * @param {string} licenseKey
    */
   generateTrialMonthlyEmailHTML(licenseKey) {
@@ -1022,7 +1022,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
                                       <td class="pad" style="padding: 0 0 16px 0;">
                                         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
                                           <div style="font-size: 15px; color: #666666; line-height: 1.5;">
-                                            <p style="margin: 0;">First week: <strong>$0.99</strong>. After 7 days, billing continues at <strong>$9.99/month</strong>.</p>
+                                            <p style="margin: 0;">This month's charge is <strong>$2.99</strong> (trial discount applied). After 30 days, billing continues at <strong>$9.99/month</strong>.</p>
                                           </div>
                                         </div>
                                       </td>

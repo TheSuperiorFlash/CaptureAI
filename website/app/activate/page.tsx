@@ -417,7 +417,7 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
-        const price = isTrial ? 0.99 : PRICES.pro[billingPeriod]
+        const price = isTrial ? (billingPeriod === 'monthly' ? 2.99 : 0.99) : PRICES.pro[billingPeriod]
         trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
         const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
         if (isTrial) body.trial = true
@@ -587,8 +587,8 @@ export default function ActivatePage() {
                                         {isTrial ? (
                                             <div className={`flex items-end gap-2 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}>
                                                 <div className="flex items-end">
-                                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
-                                                    <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
+                                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">{billingPeriod === 'monthly' ? '$2.99' : '$0.99'}</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
                                                 </div>
                                                 <div className="flex items-end">
                                                     <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
