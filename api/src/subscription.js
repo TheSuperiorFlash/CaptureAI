@@ -1743,7 +1743,7 @@ export class SubscriptionHandler {
     if (priceId === this.env.STRIPE_PRICE_BASIC_MONTHLY) return { tier: 'basic', billingPeriod: 'monthly' };
     if (priceId === this.env.STRIPE_PRICE_PRO_WEEKLY) return { tier: 'pro', billingPeriod: 'weekly' };
     if (priceId === this.env.STRIPE_PRICE_PRO_MONTHLY) return { tier: 'pro', billingPeriod: 'monthly' };
-    if (priceId === this.env.STRIPE_PRICE_TRIAL_INTRO) return { tier: 'pro', billingPeriod: 'weekly' };
+    if (priceId === this.env.STRIPE_PRICE_TRIAL_INTRO) return { tier: 'pro', billingPeriod: 'monthly' };
     return null;
   }
 

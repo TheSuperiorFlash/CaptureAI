@@ -283,6 +283,7 @@ export default function ActivatePage() {
         if (trialParam === 'true') {
             setIsTrial(true)
             setSelectedTier('pro')
+            if (!billingParam) setBillingPeriod('weekly')
         }
     }, [setSelectedTier])
 
