@@ -713,7 +713,7 @@ Need help? Visit our help page: https://captureai.dev/help`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: this.env.FROM_EMAIL || 'CaptureAI <no-reply@mail.captureai.dev>',
+          from: this.env.FROM_EMAIL || 'CaptureAI <no-reply@capture.dev>',
           to: [email],
           subject: subject,
           html: htmlContent,
