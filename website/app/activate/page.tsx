@@ -420,7 +420,7 @@ export default function ActivatePage() {
                                     <span className="text-gradient-static">Pro trial</span>
                                 </h1>
                                 <p className="text-[--color-text-secondary]">
-                                    $0.99 this week, then $3.49/week — cancel anytime.
+                                    $0.99 for 7 days unlimited access
                                 </p>
                             </>
                         ) : (
@@ -626,9 +626,7 @@ export default function ActivatePage() {
                                 {isTrial ? 'Start your Pro trial' : selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                             </h3>
                             <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                                {isTrial
-                                    ? '$0.99 today — then $3.49/week after your trial. Enter your email to continue.'
-                                    : 'Enter your email to proceed to secure checkout via Stripe.'}
+                                Enter your email to proceed to secure checkout via Stripe.
                             </p>
 
                             <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">
