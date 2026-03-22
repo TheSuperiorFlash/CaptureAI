@@ -1460,7 +1460,7 @@ export class SubscriptionHandler {
           tier: 'pro',
           name: 'Pro',
           billingPeriod: 'weekly',
-          price: 2.99,
+          price: 3.49,
           dailyLimit: null,
           rateLimit: '20 per minute',
           features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute']

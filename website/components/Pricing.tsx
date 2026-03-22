@@ -11,7 +11,7 @@ const TIER_PRO = 'pro'
 
 const PRICES = {
     basic: { weekly: 1.99, monthly: 5.99 },
-    pro: { weekly: 2.99, monthly: 9.99 },
+    pro: { weekly: 3.49, monthly: 9.99 },
 }
 
 export default function Pricing() {

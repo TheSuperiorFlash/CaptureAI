@@ -28,7 +28,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
-**Tiers:** Basic ($1.99/week or $5.99/month, 50 req/day) | Pro ($2.99/week or $9.99/month, 20 req/min unlimited)
+**Tiers:** Basic ($1.99/week or $5.99/month, 50 req/day) | Pro ($3.49/week or $9.99/month, 20 req/min unlimited)
 
 ## Commands
 
