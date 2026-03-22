@@ -305,13 +305,12 @@ export default function ActivatePage() {
         const after = card.getBoundingClientRect()
         const deltaX = before.left - after.left
         if (deltaX === 0) return
-        card.style.willChange = 'transform'
         card.style.transition = 'none'
         card.style.transform = `translateX(${deltaX}px)`
         card.getBoundingClientRect() // force reflow
         card.style.transition = 'transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
         card.style.transform = 'translateX(0)'
-        const cleanup = () => { card.style.willChange = ''; card.style.transition = ''; card.style.transform = '' }
+        const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
         card.addEventListener('transitionend', cleanup, { once: true })
     }
 
@@ -450,7 +449,7 @@ export default function ActivatePage() {
                                     <span className="text-gradient-static">Pro trial</span>
                                 </h1>
                                 <p className="text-[--color-text-secondary]">
-                                    $0.99 for 7 days unlimited access
+                                    $0.99 for 7 days of unlimited access
                                 </p>
                             </>
                         ) : (
@@ -485,7 +484,7 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className={`mx-auto grid grid-cols-1 w-full ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
+                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
@@ -551,14 +550,14 @@ export default function ActivatePage() {
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'pro'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro'
+                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro'
                                 ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                                 : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                                 }`}
                             onClick={() => !isTrial && setSelectedTier('pro')}
                             onKeyDown={(e) => { if (!isTrial && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setSelectedTier('pro'); } }}
                         >
-                            <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
                                     {isTrial ? (
                                         <button
