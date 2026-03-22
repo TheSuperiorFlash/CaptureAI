@@ -449,7 +449,7 @@ export default function ActivatePage() {
                                     <span className="text-gradient-static">Pro trial</span>
                                 </h1>
                                 <p className="text-[--color-text-secondary]">
-                                    $0.99 for 7 days of unlimited access
+                                    $0.99 for 7 days or $2.99 for 30 days of unlimited access
                                 </p>
                             </>
                         ) : (
