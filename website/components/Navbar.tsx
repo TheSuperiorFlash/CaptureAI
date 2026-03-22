@@ -196,13 +196,15 @@ export default function Navbar() {
                     transition={{ duration: isScrolled ? 0.15 : 0.3, ease: 'easeOut' }}
                 />
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
-                    <Image src="/logo.png" alt="CaptureAI" width={28} height={28} priority />
-                    <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
-                </Link>
+                <div className="flex-1 flex items-center z-10">
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
+                        <Image src="/logo.png" alt="CaptureAI" width={28} height={28} priority />
+                        <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
+                    </Link>
+                </div>
 
                 {/* Desktop nav */}
-                <div className={`hidden items-center md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-500 ease-out ${isScrolled ? 'gap-2' : 'gap-4'}`} onMouseLeave={handleMouseLeave}>
+                <div className={`hidden items-center md:flex z-10 transition-all duration-500 ease-out ${isScrolled ? 'gap-2' : 'gap-4'}`} onMouseLeave={handleMouseLeave}>
                     {navigation.map((item, index) => (
                         <div
                             key={item.name}
@@ -289,7 +291,7 @@ export default function Navbar() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
-                                    className="absolute top-[calc(100%+16px)] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50"
+                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 transition-[top] duration-400 ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
                                 >
                                     {resourceItems.map((item, i) => (
                                         <motion.div
@@ -298,7 +300,7 @@ export default function Navbar() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
                                             transition={{ duration: 0.3, delay: i * 0.05 }}
-                                            className="w-fit rounded-xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            className="w-fit rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
                                             style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
                                         >
                                             <Link
@@ -307,7 +309,7 @@ export default function Navbar() {
                                                     setIsResourcesOpen(false)
                                                     handleNavClick(e, item.href)
                                                 }}
-                                                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 ${isActive(item.href)
+                                                className={`flex items-center gap-2 px-8 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 ${isActive(item.href)
                                                     ? 'text-[--color-text]'
                                                     : 'text-[--color-text]'
                                                     }`}
@@ -323,8 +325,9 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* CTA */}
-                <div className="hidden md:flex items-center relative z-10">
+                {/* CTA + Mobile */}
+                <div className="flex-1 flex items-center justify-end z-10">
+                <div className="hidden md:flex items-center">
                     <MagneticButton magneticRange={10}>
                         <motion.div
                             initial={{
@@ -432,6 +435,7 @@ export default function Navbar() {
                         ]}
                         className="w-[240px]"
                     />
+                </div>
                 </div>
             </div>
         </nav>
