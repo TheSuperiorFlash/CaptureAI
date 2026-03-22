@@ -138,29 +138,23 @@ export default function Navbar() {
     ]
 
     const resourceItems = [
-        { 
-            label: 'Help Center', 
+        {
+            label: 'Blog',
+            description: 'Read our latest articles and updates',
+            href: '/blog',
+            Icon: Newspaper
+        },
+        {
+            label: 'Help Center',
             description: 'Get all the answers you need right here',
-            href: '/help', 
-            Icon: Zap 
+            href: '/help',
+            Icon: HelpCircle
         },
-        { 
-            label: 'Contact Us', 
+        {
+            label: 'Contact Us',
             description: 'We are here to help you with any questions you have',
-            href: '/contact', 
-            Icon: Sunrise 
-        },
-        { 
-            label: 'Status', 
-            description: 'Check the current status of our services and APIs',
-            href: '/status', 
-            Icon: Trees 
-        },
-        { 
-            label: 'Terms of Service', 
-            description: 'Our terms and conditions for using our services',
-            href: '/terms', 
-            Icon: Book 
+            href: '/contact',
+            Icon: Mail
         },
     ]
 
