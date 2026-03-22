@@ -315,7 +315,7 @@ export default function Navbar() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
                                             transition={{ duration: 0.3, delay: i * 0.05 }}
-                                            className="w-28 rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            className="w-32 rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
                                         >
                                             <Link
                                                 href={item.href}
@@ -326,7 +326,7 @@ export default function Navbar() {
                                                 className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 text-[--color-text]"
                                             >
                                                 {item.label}
-                                                <item.Icon className="w-4 h-4 flex-shrink-0" />
+                                                <item.Icon className="w-3.5 h-3.5 flex-shrink-0" />
                                             </Link>
                                         </motion.div>
                                     ))}
