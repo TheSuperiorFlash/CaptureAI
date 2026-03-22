@@ -586,14 +586,20 @@ export default function ActivatePage() {
                                     <div className="mb-7 flex items-end gap-3">
                                         {isTrial ? (
                                             <div className={`flex items-end gap-2 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-                                                <div className="flex items-end">
-                                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">{billingPeriod === 'monthly' ? '$2.99' : '$0.99'}</span>
-                                                    <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
-                                                </div>
-                                                <div className="flex items-end">
-                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
-                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
-                                                </div>
+                                                <AnimatedPrice
+                                                    price={billingPeriod === 'monthly' ? 2.99 : 0.99}
+                                                    period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                                    direction={direction}
+                                                    priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
+                                                    periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                                />
+                                                <AnimatedPrice
+                                                    price={PRICES.pro[billingPeriod]}
+                                                    period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                                    direction={direction}
+                                                    priceClassName="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40"
+                                                    periodClassName="text-sm text-[--color-text-tertiary] opacity-40 ml-0.5"
+                                                />
                                             </div>
                                         ) : (
                                             <AnimatedPrice
