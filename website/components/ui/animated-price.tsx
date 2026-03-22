@@ -33,7 +33,7 @@ const slide = {
 }
 
 const transition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 400,
   damping: 35,
   mass: 0.8,
