@@ -451,11 +451,6 @@ export default function Navbar() {
                                 },
                             },
                             {
-                                label: 'Blog',
-                                Icon: <Newspaper className="w-4 h-4" />,
-                                onClick: () => router.push('/blog'),
-                            },
-                            {
                                 label: 'Download',
                                 Icon: <Download className="w-4 h-4" />,
                                 onClick: () => router.push('/download'),
