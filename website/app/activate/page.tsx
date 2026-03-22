@@ -467,7 +467,7 @@ export default function ActivatePage() {
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'basic'}
-                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
+                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none mx-auto h-full flex flex-col ${selectedTier === 'basic'
                                 ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
                                 : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 }`}
@@ -565,9 +565,9 @@ export default function ActivatePage() {
                                             <button
                                                 type="button"
                                                 onClick={(e) => enterTrialMode(e)}
-                                                className="mb-2 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
+                                                className="mb-2 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-3 py-1 text-[11px] font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
                                             >
-                                                Try $0.99/wk
+                                                $0.99 for 7 days · $3.49/wk after
                                             </button>
                                         )}
                                     </div>
