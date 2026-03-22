@@ -9,6 +9,13 @@ import { validateRequestBody, validateEmail, validateStripeSignature, validateVe
 import { logSubscription, logWebhook, logValidationError } from './logger';
 import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
+const PLAN_PRICES = {
+  basicWeekly: 1.99,
+  basicMonthly: 5.99,
+  proWeekly: 3.49,
+  proMonthly: 9.99,
+};
+
 export class SubscriptionHandler {
   constructor(env, logger = null) {
     this.env = env;
@@ -49,7 +56,16 @@ export class SubscriptionHandler {
         return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
       }
 
-      const priceId = tier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+      let billingPeriod;
+      if (body.billingPeriod === undefined || body.billingPeriod === null) {
+        billingPeriod = 'weekly';
+      } else if (body.billingPeriod === 'weekly' || body.billingPeriod === 'monthly') {
+        billingPeriod = body.billingPeriod;
+      } else {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
+      }
+
+      const priceId = this.getPriceId(tier, billingPeriod);
       if (!priceId) {
         return jsonResponse({ error: 'Price not configured' }, 500);
       }
@@ -58,39 +74,42 @@ export class SubscriptionHandler {
       let customerId;
       let existingSubscriptionId = null;
       const existingUser = await this.db
-        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, subscription_status, tier FROM users WHERE email = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, subscription_status, tier, billing_period FROM users WHERE email = ?')
         .bind(email)
         .first();
 
-      // Block same-tier re-subscription when the user already has a live subscription.
+      // Block same-plan re-subscription (same tier + same billing period) when the user already has a live subscription.
       // 'inactive' is CaptureAI's sentinel for a canceled/cleared subscription.
+      const existingBillingPeriod = existingUser?.billing_period || 'weekly';
       if (
         existingUser?.stripe_subscription_id &&
         existingUser?.tier === tier &&
+        existingBillingPeriod === billingPeriod &&
         existingUser?.subscription_status !== 'inactive'
       ) {
         const tierLabel = tier === 'pro' ? 'Pro' : 'Basic';
+        const periodLabel = billingPeriod === 'monthly' ? 'monthly' : 'weekly';
         return jsonResponse({
-          error: `You already have an active ${tierLabel} subscription. To switch plans, select the other plan.`,
+          error: `You already have an active ${tierLabel} (${periodLabel}) subscription. To switch plans, select a different option.`,
           alreadySubscribed: true,
-          currentTier: existingUser.tier
+          currentTier: existingUser.tier,
+          currentBillingPeriod: existingBillingPeriod
         }, 409);
       }
 
-      // Any subscriber with an existing subscription requesting a different tier
-      // goes through the two-step preview+confirm flow regardless of subscription_status.
-      // This prevents bypassing the preview when status is e.g. 'trialing' or 'past_due'.
+      // Any subscriber requesting a different tier or billing period goes through
+      // the two-step preview+confirm flow regardless of subscription_status.
       if (
         existingUser?.stripe_subscription_id &&
-        existingUser?.tier !== tier
+        (existingUser?.tier !== tier || existingBillingPeriod !== billingPeriod)
       ) {
         existingSubscriptionId = existingUser.stripe_subscription_id;
 
         if (!body.confirmed) {
           // Step 1: return price preview — no charge, no invoice created
           try {
-            const preview = await this.previewSubscriptionTierChange(existingSubscriptionId, tier);
-            return jsonResponse({ requiresConfirmation: true, tier, ...preview });
+            const preview = await this.previewSubscriptionTierChange(existingSubscriptionId, tier, billingPeriod);
+            return jsonResponse({ requiresConfirmation: true, tier, billingPeriod, ...preview });
           } catch (previewError) {
             if (!this.isStripeMissingResourceError(previewError)) {
               throw previewError;
@@ -103,13 +122,14 @@ export class SubscriptionHandler {
         } else {
           // Step 2: confirmed — verify OTP, then redirect to Stripe Customer Portal to complete the plan change
           const verificationCode = validateVerificationCode(body.verificationCode, true);
-          const codeValid = await this.consumeVerificationCode(email, verificationCode, 'tier_switch', tier);
+          const planKey = `${tier}_${billingPeriod}`;
+          const codeValid = await this.consumeVerificationCode(email, verificationCode, 'tier_switch', planKey);
           if (!codeValid) {
             return jsonResponse({ error: 'Invalid or expired verification code' }, 403);
           }
 
           try {
-            const portalUrl = await this.createPortalWithPlanChange(existingUser.stripe_customer_id, existingSubscriptionId, tier);
+            const portalUrl = await this.createPortalWithPlanChange(existingUser.stripe_customer_id, existingSubscriptionId, tier, billingPeriod);
             return jsonResponse({ url: portalUrl, sessionId: 'tier_change_' + existingSubscriptionId });
           } catch (portalError) {
             if (!this.isStripeMissingResourceError(portalError)) {
@@ -133,7 +153,7 @@ export class SubscriptionHandler {
       // Create checkout session for normal flow
       let session;
       try {
-        session = await this.createStripeCheckout(customerId, priceId, email, tier);
+        session = await this.createStripeCheckout(customerId, priceId, email, tier, billingPeriod);
       } catch (checkoutError) {
         // Stripe sandbox migration can leave stale customer IDs in DB.
         // Create a fresh customer and retry checkout once.
@@ -158,7 +178,7 @@ export class SubscriptionHandler {
             .run();
         }
 
-        session = await this.createStripeCheckout(customerId, priceId, email, tier);
+        session = await this.createStripeCheckout(customerId, priceId, email, tier, billingPeriod);
       }
 
       if (this.logger) {
@@ -225,18 +245,26 @@ export class SubscriptionHandler {
       const body = await validateRequestBody(request);
       const email = validateEmail(body.email, true);
       const tier = body.tier;
+      const billingPeriod = body.billingPeriod;
 
       if (tier !== 'basic' && tier !== 'pro') {
         return jsonResponse({ error: 'Invalid tier' }, 400);
       }
 
-      // Verify user exists with an active subscription requesting a different tier
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
+      }
+
+      // Verify user exists with an active subscription requesting a different plan
       const existingUser = await this.db
-        .prepare('SELECT id, tier, stripe_subscription_id FROM users WHERE email = ?')
+        .prepare('SELECT id, tier, billing_period, stripe_subscription_id FROM users WHERE email = ?')
         .bind(email)
         .first();
 
-      if (!existingUser?.stripe_subscription_id || existingUser.tier === tier) {
+      const existingBillingPeriod = existingUser?.billing_period || 'weekly';
+      const isSamePlan = existingUser?.tier === tier && existingBillingPeriod === billingPeriod;
+
+      if (!existingUser?.stripe_subscription_id || isSamePlan) {
         // Don't reveal whether the email exists — return generic success
         return jsonResponse({ success: true, message: 'If an account exists, a verification code has been sent' });
       }
@@ -247,20 +275,23 @@ export class SubscriptionHandler {
         .bind(email, 'tier_switch')
         .run();
 
-      // Generate and store code with 10-minute TTL
+      // Generate and store code with 10-minute TTL.
+      // planKey encodes both tier and billing period for precise matching at confirmation.
+      const planKey = `${tier}_${billingPeriod}`;
       const code = this.generateVerificationCode();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
       await this.db
         .prepare('INSERT INTO verification_codes (email, code, action, tier, expires_at) VALUES (?, ?, ?, ?, ?)')
-        .bind(email, code, 'tier_switch', tier, expiresAt)
+        .bind(email, code, 'tier_switch', planKey, expiresAt)
         .run();
 
       // Send code via email
       if (this.env.RESEND_API_KEY) {
         const tierLabel = tier === 'pro' ? 'Pro' : 'Basic';
-        const subject = `CaptureAI — Verify your plan change to ${tierLabel}`;
-        const textContent = `CaptureAI Verification Code: ${code}\n\nEnter this code to confirm your plan change to ${tierLabel}.\nThis code expires in 10 minutes.\n\nIf you did not request this change, ignore this email.`;
+        const periodLabel = billingPeriod === 'monthly' ? 'monthly' : 'weekly';
+        const subject = `CaptureAI — Verify your plan change to ${tierLabel} (${periodLabel})`;
+        const textContent = `CaptureAI Verification Code: ${code}\n\nEnter this code to confirm your plan change to ${tierLabel} (${periodLabel}).\nThis code expires in 10 minutes.\n\nIf you did not request this change, ignore this email.`;
 
         const htmlContent = `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
@@ -793,26 +824,28 @@ export class SubscriptionHandler {
         }
       }
 
-      // Determine purchased tier from checkout session metadata
+      // Determine purchased tier and billing period from checkout session metadata
       const purchasedTier = (session.metadata?.tier === 'basic' || session.metadata?.tier === 'pro')
         ? session.metadata.tier
         : 'pro';
+      const purchasedBillingPeriod = session.metadata?.billing_period === 'monthly' ? 'monthly' : 'weekly';
 
       if (user) {
-        // User exists - set to purchased tier
+        // User exists - set to purchased tier and billing period
         const prevTier = user.tier;
         const prevStatus = user.subscription_status;
         await this.db
           .prepare(`
             UPDATE users
             SET tier = ?,
+                billing_period = ?,
                 subscription_status = ?,
                 stripe_customer_id = ?,
                 stripe_subscription_id = ?,
                 updated_at = datetime('now')
             WHERE id = ?
           `)
-          .bind(purchasedTier, 'active', customerId, subscriptionId, user.id)
+          .bind(purchasedTier, purchasedBillingPeriod, 'active', customerId, subscriptionId, user.id)
           .run();
 
         await this.logSubscriptionEvent({
@@ -854,10 +887,10 @@ export class SubscriptionHandler {
         const userId = generateUUID();
         await this.db
           .prepare(`
-            INSERT INTO users (id, license_key, email, tier, stripe_customer_id, stripe_subscription_id, subscription_status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (id, license_key, email, tier, billing_period, stripe_customer_id, stripe_subscription_id, subscription_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `)
-          .bind(userId, licenseKey, customerEmail, purchasedTier, customerId, subscriptionId, 'active')
+          .bind(userId, licenseKey, customerEmail, purchasedTier, purchasedBillingPeriod, customerId, subscriptionId, 'active')
           .run();
 
         await this.logSubscriptionEvent({
@@ -891,6 +924,7 @@ export class SubscriptionHandler {
 
       const subscriptionId = invoice.subscription;
       let newTier = null;
+      let newBillingPeriod = null;
 
       // Fetch the subscription to get the current price and sync tier.
       // Proration invoices (billing_reason=subscription_update) don't have a
@@ -906,8 +940,11 @@ export class SubscriptionHandler {
           if (subResponse.ok) {
             const subscription = await subResponse.json();
             const priceId = subscription.items?.data?.[0]?.price?.id;
-            if (priceId === this.env.STRIPE_PRICE_BASIC) newTier = 'basic';
-            else if (priceId === this.env.STRIPE_PRICE_PRO) newTier = 'pro';
+            const resolved = this.resolveTierFromPriceId(priceId);
+            if (resolved) {
+              newTier = resolved.tier;
+              newBillingPeriod = resolved.billingPeriod;
+            }
           }
         } catch (fetchErr) {
           console.error('Failed to fetch subscription in payment handler:', fetchErr);
@@ -916,8 +953,8 @@ export class SubscriptionHandler {
 
       if (newTier && subscriptionId) {
         await this.db
-          .prepare("UPDATE users SET subscription_status = 'active', tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
-          .bind(newTier, subscriptionId, customerEmail)
+          .prepare("UPDATE users SET subscription_status = 'active', tier = ?, billing_period = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE LOWER(email) = LOWER(?)")
+          .bind(newTier, newBillingPeriod, subscriptionId, customerEmail)
           .run();
       } else {
         await this.db
@@ -1156,24 +1193,20 @@ export class SubscriptionHandler {
         return;
       }
 
-      // Detect plan changes so the tier column stays in sync with Stripe.
+      // Detect plan changes so the tier and billing_period columns stay in sync with Stripe.
       // This handles changes made via the billing portal or the change-tier endpoint.
       const newPriceId = subscription.items?.data?.[0]?.price?.id;
-      let newTier = null;
-      if (newPriceId === this.env.STRIPE_PRICE_BASIC) {
-        newTier = 'basic';
-      } else if (newPriceId === this.env.STRIPE_PRICE_PRO) {
-        newTier = 'pro';
-      }
+      const resolved = this.resolveTierFromPriceId(newPriceId);
+      const newTier = resolved?.tier ?? null;
+      const newBillingPeriod = resolved?.billingPeriod ?? null;
 
       // Log price comparison to help diagnose mismatches in production
-      console.log('handleSubscriptionUpdated: priceId', newPriceId, '-> tier', newTier,
-        '| BASIC configured:', !!this.env.STRIPE_PRICE_BASIC, '| PRO configured:', !!this.env.STRIPE_PRICE_PRO);
+      console.log('handleSubscriptionUpdated: priceId', newPriceId, '-> tier', newTier, 'billingPeriod', newBillingPeriod);
 
       if (newTier) {
         await this.db
-          .prepare("UPDATE users SET subscription_status = ?, tier = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
-          .bind(subscriptionStatus, newTier, subscriptionId, user.id)
+          .prepare("UPDATE users SET subscription_status = ?, tier = ?, billing_period = ?, stripe_subscription_id = ?, updated_at = datetime('now') WHERE id = ?")
+          .bind(subscriptionStatus, newTier, newBillingPeriod, subscriptionId, user.id)
           .run();
       } else {
         await this.db
@@ -1231,12 +1264,17 @@ export class SubscriptionHandler {
 
       const body = await validateRequestBody(request);
       const newTier = body.tier;
+      const billingPeriod = body.billingPeriod;
 
       if (newTier !== 'basic' && newTier !== 'pro') {
         return jsonResponse({ error: 'Invalid tier. Must be "basic" or "pro"' }, 400);
       }
 
-      const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
+      }
+
+      const newPriceId = this.getPriceId(newTier, billingPeriod);
       if (!newPriceId) {
         return jsonResponse({ error: 'Price not configured' }, 500);
       }
@@ -1318,8 +1356,8 @@ export class SubscriptionHandler {
       const invoice = updatedSubscription.latest_invoice;
       if (!invoice || this.isInvoiceSettled(invoice)) {
         await this.db
-          .prepare("UPDATE users SET tier = ?, updated_at = datetime('now') WHERE id = ?")
-          .bind(newTier, userData.id)
+          .prepare("UPDATE users SET tier = ?, billing_period = ?, updated_at = datetime('now') WHERE id = ?")
+          .bind(newTier, billingPeriod, userData.id)
           .run();
 
         await this.logSubscriptionEvent({
@@ -1368,7 +1406,7 @@ export class SubscriptionHandler {
       }
 
       const userData = await this.db
-        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?')
+        .prepare('SELECT id, stripe_customer_id, stripe_subscription_id, billing_period FROM users WHERE id = ?')
         .bind(user.userId)
         .first();
 
@@ -1382,7 +1420,7 @@ export class SubscriptionHandler {
       let portalUrl;
       if ((tier === 'basic' || tier === 'pro') && userData.stripe_subscription_id) {
         try {
-          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier);
+          portalUrl = await this.createPortalWithPlanChange(userData.stripe_customer_id, userData.stripe_subscription_id, tier, userData.billing_period || 'weekly');
         } catch (planChangeError) {
           // If plan change portal fails (stale subscription, missing item, etc.),
           // fall back to regular billing portal. User can still upgrade from there.
@@ -1415,21 +1453,39 @@ export class SubscriptionHandler {
    * GET /api/subscription/plans
    */
   async getPlans(request) {
+    const dailyLimit = parseInt(this.env.BASIC_TIER_DAILY_LIMIT || '50');
     return jsonResponse({
       plans: [
         {
           tier: 'basic',
           name: 'Basic',
-          price: 1.49,
-          billingPeriod: 'week',
-          dailyLimit: parseInt(this.env.BASIC_TIER_DAILY_LIMIT || '50'),
+          billingPeriod: 'weekly',
+          price: PLAN_PRICES.basicWeekly,
+          dailyLimit,
+          features: []
+        },
+        {
+          tier: 'basic',
+          name: 'Basic',
+          billingPeriod: 'monthly',
+          price: PLAN_PRICES.basicMonthly,
+          dailyLimit,
           features: []
         },
         {
           tier: 'pro',
           name: 'Pro',
-          price: 9.99,
-          billingPeriod: 'month',
+          billingPeriod: 'weekly',
+          price: PLAN_PRICES.proWeekly,
+          dailyLimit: null,
+          rateLimit: '20 per minute',
+          features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute']
+        },
+        {
+          tier: 'pro',
+          name: 'Pro',
+          billingPeriod: 'monthly',
+          price: PLAN_PRICES.proMonthly,
           dailyLimit: null,
           rateLimit: '20 per minute',
           features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute'],
@@ -1541,7 +1597,14 @@ export class SubscriptionHandler {
         return jsonResponse(rateLimitError, 429);
       }
 
-      const proPriceId = this.env.STRIPE_PRICE_PRO;
+      const body = await validateRequestBody(request);
+      const billingPeriod = body.billingPeriod;
+
+      if (billingPeriod !== 'weekly' && billingPeriod !== 'monthly') {
+        return jsonResponse({ error: 'Invalid billingPeriod. Must be "weekly" or "monthly"' }, 400);
+      }
+
+      const proPriceId = this.getPriceId('pro', billingPeriod);
       if (!proPriceId) {
         return jsonResponse({ error: 'Pro price not configured' }, 500);
       }
@@ -1569,7 +1632,8 @@ export class SubscriptionHandler {
         userData.stripe_subscription_id,
         proPriceId,
         user.userId,
-        userData.email
+        userData.email,
+        billingPeriod
       );
 
       return jsonResponse({ ...upgradeResult, sessionId: 'upgrade_' + userData.stripe_subscription_id });
@@ -1608,9 +1672,40 @@ export class SubscriptionHandler {
   }
 
   /**
+   * Resolve a Stripe price ID from tier + billing period.
+   * @param {'basic'|'pro'} tier
+   * @param {'weekly'|'monthly'} billingPeriod
+   * @returns {string|undefined}
+   */
+  getPriceId(tier, billingPeriod) {
+    if (tier === 'basic') {
+      return billingPeriod === 'monthly'
+        ? this.env.STRIPE_PRICE_BASIC_MONTHLY
+        : this.env.STRIPE_PRICE_BASIC_WEEKLY;
+    }
+    return billingPeriod === 'monthly'
+      ? this.env.STRIPE_PRICE_PRO_MONTHLY
+      : this.env.STRIPE_PRICE_PRO_WEEKLY;
+  }
+
+  /**
+   * Resolve tier and billing period from a Stripe price ID.
+   * @param {string} priceId
+   * @returns {{ tier: string, billingPeriod: string } | null}
+   */
+  resolveTierFromPriceId(priceId) {
+    if (!priceId) return null;
+    if (priceId === this.env.STRIPE_PRICE_BASIC_WEEKLY) return { tier: 'basic', billingPeriod: 'weekly' };
+    if (priceId === this.env.STRIPE_PRICE_BASIC_MONTHLY) return { tier: 'basic', billingPeriod: 'monthly' };
+    if (priceId === this.env.STRIPE_PRICE_PRO_WEEKLY) return { tier: 'pro', billingPeriod: 'weekly' };
+    if (priceId === this.env.STRIPE_PRICE_PRO_MONTHLY) return { tier: 'pro', billingPeriod: 'monthly' };
+    return null;
+  }
+
+  /**
    * Create Stripe checkout session.
    */
-  async createStripeCheckout(customerId, priceId, email, tier = 'pro') {
+  async createStripeCheckout(customerId, priceId, email, tier = 'pro', billingPeriod = 'weekly') {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const params = {
       'line_items[0][price]': priceId,
@@ -1618,7 +1713,8 @@ export class SubscriptionHandler {
       mode: 'subscription',
       success_url: `${extensionUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${extensionUrl}/activate`,
-      'metadata[tier]': tier
+      'metadata[tier]': tier,
+      'metadata[billing_period]': billingPeriod
     };
 
     // Use customer ID if available, otherwise use email
@@ -1654,7 +1750,7 @@ export class SubscriptionHandler {
    * Uses native proration (always_invoice) + billing cycle reset to handle interval changes.
    * Returns the hosted invoice URL for payment, or success URL if already paid.
    */
-  async upgradeStripeSubscription(subscriptionId, newPriceId, userId, email) {
+  async upgradeStripeSubscription(subscriptionId, newPriceId, userId, email, billingPeriod = 'monthly') {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
 
     // 1. Fetch current subscription to get the old item ID
@@ -1710,8 +1806,8 @@ export class SubscriptionHandler {
     // Update DB if invoice already collected; the webhook handles any deferred payment.
     if (updatedSub.status === 'active' || !invoice || this.isInvoiceSettled(invoice)) {
       await this.db
-        .prepare("UPDATE users SET tier = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
-        .bind('pro', 'active', userId)
+        .prepare("UPDATE users SET tier = ?, billing_period = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
+        .bind('pro', billingPeriod, 'active', userId)
         .run();
 
       await this.logSubscriptionEvent({
@@ -1735,9 +1831,9 @@ export class SubscriptionHandler {
    * Switch an active subscription to a different tier with Stripe native proration.
    * Returns hosted invoice URL when payment action is required, otherwise success URL.
    */
-  async switchExistingSubscriptionTier(subscriptionId, newTier, userId, email) {
+  async switchExistingSubscriptionTier(subscriptionId, newTier, userId, email, billingPeriod = 'monthly') {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
-    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+    const newPriceId = this.getPriceId(newTier, billingPeriod);
 
     if (!newPriceId) {
       throw new Error('Price not configured');
@@ -1798,8 +1894,8 @@ export class SubscriptionHandler {
     // Update DB now if payment is already collected; webhook covers any deferred payment.
     if (!invoice || this.isInvoiceSettled(invoice)) {
       await this.db
-        .prepare("UPDATE users SET tier = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
-        .bind(newTier, 'active', userId)
+        .prepare("UPDATE users SET tier = ?, billing_period = ?, subscription_status = ?, updated_at = datetime('now') WHERE id = ?")
+        .bind(newTier, billingPeriod, 'active', userId)
         .run();
 
       if (email) {
@@ -1820,8 +1916,8 @@ export class SubscriptionHandler {
    * Preview the prorated cost of a subscription tier change using Stripe's invoice preview.
    * Does NOT create an invoice or charge the customer.
    */
-  async previewSubscriptionTierChange(subscriptionId, newTier) {
-    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+  async previewSubscriptionTierChange(subscriptionId, newTier, newBillingPeriod = 'weekly') {
+    const newPriceId = this.getPriceId(newTier, newBillingPeriod);
     if (!newPriceId) {
       throw new Error('Price not configured');
     }
@@ -1898,9 +1994,9 @@ export class SubscriptionHandler {
    * The portal lands directly on the subscription update confirmation page, showing
    * the prorated amount. Stripe applies the change when the customer confirms.
    */
-  async createPortalWithPlanChange(customerId, subscriptionId, newTier) {
+  async createPortalWithPlanChange(customerId, subscriptionId, newTier, newBillingPeriod = 'weekly') {
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
-    const newPriceId = newTier === 'basic' ? this.env.STRIPE_PRICE_BASIC : this.env.STRIPE_PRICE_PRO;
+    const newPriceId = this.getPriceId(newTier, newBillingPeriod);
 
     if (!newPriceId) {
       throw new Error('Price not configured');

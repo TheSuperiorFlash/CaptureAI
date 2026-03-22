@@ -36,6 +36,7 @@ Cloudflare D1 (SQLite) database. Schema defined in `api/schema.sql`, single migr
 | email | TEXT NOT NULL | User email |
 | license_key | TEXT UNIQUE NOT NULL | Format: XXXX-XXXX-XXXX-XXXX-XXXX |
 | tier | TEXT | `basic` or `pro` |
+| billing_period | TEXT | `weekly` or `monthly`; default `weekly` |
 | subscription_status | TEXT | `active`, `inactive`, `cancelled`, `past_due` |
 | stripe_customer_id | TEXT UNIQUE | Stripe customer reference |
 | stripe_subscription_id | TEXT | Stripe subscription reference |

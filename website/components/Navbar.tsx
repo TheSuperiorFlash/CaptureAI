@@ -1,16 +1,18 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper, Mail, Sunrise, Trees, Book } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './MagneticButton'
 import { trackEvent } from '@/lib/analytics'
 import FloatingActionMenu from './ui/floating-action-menu'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
+    const [isResourcesOpen, setIsResourcesOpen] = useState(false)
+    const resourcesRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
     const router = useRouter()
     const [activeHash, setActiveHash] = useState('')
@@ -25,6 +27,8 @@ export default function Navbar() {
     const [isFirstInSession, setIsFirstInSession] = useState(true)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
     const resetTimeout = useRef<NodeJS.Timeout | null>(null)
+    const resourcesCloseTimeout = useRef<NodeJS.Timeout | null>(null)
+    const resourcesDropdownId = useId()
 
     const handleMouseEnter = (index: number) => {
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
@@ -92,6 +96,27 @@ export default function Navbar() {
         }
     }, [])
 
+    const RESOURCES_CLOSE_DELAY_MS = 400
+
+    const handleResourcesMouseEnter = () => {
+        if (resourcesCloseTimeout.current) clearTimeout(resourcesCloseTimeout.current)
+    }
+
+    const handleResourcesMouseLeave = () => {
+        resourcesCloseTimeout.current = setTimeout(() => {
+            setIsResourcesOpen(false)
+        }, RESOURCES_CLOSE_DELAY_MS)
+    }
+
+    useEffect(() => {
+        return () => {
+            if (resourcesCloseTimeout.current) {
+                clearTimeout(resourcesCloseTimeout.current)
+                resourcesCloseTimeout.current = null
+            }
+        }
+    }, [])
+
     useEffect(() => {
         const updateHash = () => setActiveHash(window.location.hash)
 
@@ -110,7 +135,27 @@ export default function Navbar() {
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
-        { name: 'Help', href: '/help' },
+    ]
+
+    const resourceItems = [
+        {
+            label: 'Blog',
+            description: 'Read our latest articles and updates',
+            href: '/blog',
+            Icon: Newspaper
+        },
+        {
+            label: 'Help Center',
+            description: 'Get all the answers you need right here',
+            href: '/help',
+            Icon: HelpCircle
+        },
+        {
+            label: 'Contact Us',
+            description: 'We are here to help you with any questions you have',
+            href: '/contact',
+            Icon: Mail
+        },
     ]
 
     const isActive = (href: string) => {
@@ -138,12 +183,10 @@ export default function Navbar() {
                 window.history.pushState(null, '', '/')
                 setActiveHash('')
             }
-        } else if (href === '/download' || href === '/help') {
+        } else if (href === '/download' || href === '/help' || href === '/blog') {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
             e.preventDefault()
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            setTimeout(() => {
-                window.location.href = href
-            }, 100)
+            router.push(href)
         }
     }
 
@@ -162,7 +205,7 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-400 ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-[400ms] ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
@@ -179,13 +222,15 @@ export default function Navbar() {
                     transition={{ duration: isScrolled ? 0.15 : 0.3, ease: 'easeOut' }}
                 />
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2.5 relative z-10 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
-                    <Image src="/logo.png" alt="CaptureAI" width={28} height={28} priority />
-                    <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
-                </Link>
+                <div className="flex-1 flex items-center z-10">
+                    <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" onClick={(e) => handleNavClick(e, '/')}>
+                        <Image src="/logo.png" alt="CaptureAI" width={28} height={28} priority />
+                        <span className="text-[15px] font-semibold text-[--color-text]">CaptureAI</span>
+                    </Link>
+                </div>
 
                 {/* Desktop nav */}
-                <div className={`hidden items-center md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-500 ease-out ${isScrolled ? 'gap-2' : 'gap-4'}`} onMouseLeave={handleMouseLeave}>
+                <div className={`hidden items-center md:flex z-10 transition-all duration-500 ease-out ${isScrolled ? 'gap-2' : 'gap-4'}`} onMouseLeave={handleMouseLeave}>
                     {navigation.map((item, index) => (
                         <div
                             key={item.name}
@@ -221,10 +266,96 @@ export default function Navbar() {
                             </Link>
                         </div>
                     ))}
+
+                    {/* Resources dropdown */}
+                    <div
+                        ref={resourcesRef}
+                        className="relative flex items-center justify-center"
+                        onMouseEnter={() => { handleMouseEnter(navigation.length); handleResourcesMouseEnter() }}
+                        onMouseLeave={handleResourcesMouseLeave}
+                    >
+                        {activePillIndex === navigation.length && !isReducedMotion && (
+                            <motion.div
+                                layoutId={`nav-hover-pill-${sessionKey}`}
+                                className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
+                                    ? 'bg-white/[0.06] backdrop-blur-md'
+                                    : 'border border-white/[0.02] bg-white/[0.02]'
+                                    }`}
+                                style={!shouldUseSimpleGlass ? {
+                                    backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                    WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                    boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
+                                } : undefined}
+                                initial={isFirstInSession ? { opacity: 0 } : false}
+                                animate={{ opacity: isNavHovered ? 1 : 0 }}
+                                transition={{ type: "spring", bounce: 0.15, duration: 0.5, opacity: { duration: 0.2 } }}
+                            />
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                            aria-expanded={isResourcesOpen}
+                            aria-controls={resourcesDropdownId}
+                            className={`relative z-10 px-4 py-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${isResourcesOpen || resourceItems.some(r => isActive(r.href))
+                                ? 'text-[--color-text]'
+                                : 'text-[--color-text-tertiary] hover:text-[--color-text]'
+                                }`}
+                        >
+                            Resources
+                            <motion.span
+                                animate={{ rotate: isResourcesOpen ? 180 : 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                className="flex items-center"
+                            >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                            </motion.span>
+                        </button>
+
+                        {/* Dropdown items */}
+                        <AnimatePresence>
+                            {isResourcesOpen && (
+                                <motion.div
+                                    id={resourcesDropdownId}
+                                    role="navigation"
+                                    aria-label="Resources"
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
+                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col w-[320px] p-2 rounded-2xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#0A0A0A]/95 z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
+                                >
+                                    {resourceItems.map((item) => (
+                                        <Link
+                                            key={item.label}
+                                            href={item.href}
+                                            onClick={(e) => {
+                                                setIsResourcesOpen(false)
+                                                handleNavClick(e, item.href)
+                                            }}
+                                            className="group flex flex-row items-start gap-4 p-3 rounded-xl hover:bg-white/[0.06] transition-colors"
+                                        >
+                                            <div className="flex-shrink-0 mt-0.5">
+                                                <item.Icon className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div className="flex flex-col text-left">
+                                                <span className="text-[15px] font-semibold text-white">
+                                                    {item.label}
+                                                </span>
+                                                <span className="text-[13.5px] text-[#A1A1AA] mt-1 leading-snug">
+                                                    {item.description}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
-                {/* CTA */}
-                <div className="hidden md:flex items-center relative z-10">
+                {/* CTA + Mobile */}
+                <div className="flex-1 flex items-center justify-end z-10">
+                <div className="hidden md:flex items-center">
                     <MagneticButton magneticRange={10}>
                         <motion.div
                             initial={{
@@ -306,12 +437,17 @@ export default function Navbar() {
                                 },
                             },
                             {
+                                label: 'Blog',
+                                Icon: <Newspaper className="w-4 h-4" />,
+                                onClick: () => router.push('/blog'),
+                            },
+                            {
                                 label: 'Download',
                                 Icon: <Download className="w-4 h-4" />,
                                 onClick: () => router.push('/download'),
                             },
                             {
-                                label: 'Help',
+                                label: 'Help Center',
                                 Icon: <HelpCircle className="w-4 h-4" />,
                                 onClick: () => router.push('/help'),
                             },
@@ -327,6 +463,7 @@ export default function Navbar() {
                         ]}
                         className="w-[240px]"
                     />
+                </div>
                 </div>
             </div>
         </nav>

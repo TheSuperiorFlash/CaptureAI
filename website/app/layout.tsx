@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     alternates: {
         canonical: '/',
     },
-    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant, Canvas help, Moodle helper, Blackboard study tool, online exam helper, AI screenshot tool, homework AI, OCR homework solver',
+    keywords: 'AI homework helper, screenshot answers, Chrome extension, AI homework solver, student AI assistant, Canvas help, Moodle helper, Blackboard study tool, online exam helper, AI screenshot tool, homework AI, homework text extraction',
     icons: {
         icon: [
             { url: '/logo.svg', type: 'image/svg+xml' },

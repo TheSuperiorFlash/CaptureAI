@@ -26,7 +26,7 @@ Full-stack Chrome extension with Cloudflare Workers backend for AI-powered scree
 
 **Stack:** Chrome Extension (Manifest V3) + Cloudflare Workers + D1 (SQLite) + OpenAI via AI Gateway + Stripe + Resend + Tesseract.js v7
 
-**Tiers:** Basic ($1.49/week, 50 req/day) | Pro ($9.99/mo, unlimited requests, 20 req/min rate limit)
+**Tiers:** Basic ($1.99/week or $5.99/month, 50 req/day) | Pro ($3.49/week or $9.99/month, unlimited requests, 20 req/min rate limit)
 
 ## Commands
 
@@ -42,6 +42,27 @@ cd api && npm run deploy    # Deploy to production
 cd api && npm run db:migrate  # Run migrations
 ```
 
+## Working Principles
+
+**Planning:** Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Write detailed specs upfront. If something goes sideways, stop and re-plan — don't keep pushing.
+
+**Subagents:** Use subagents liberally to keep the main context window clean. Offload research, exploration, and parallel analysis. One task per subagent for focused execution.
+
+**Verification:** Never mark a task complete without proving it works. Run tests, check logs, demonstrate correctness.
+
+**Elegance:** For non-trivial changes, ask "is there a more elegant way?" If a fix feels hacky, implement the elegant solution. Skip for simple, obvious fixes.
+
+**Bug Fixing:** Given a bug report, fix it — don't ask for hand-holding. Point at logs, errors, and failing tests, then resolve them.
+
+**Self-Improvement:** After any correction from the user, update `tasks/lessons.md` with the pattern to prevent the same mistake.
+
+**Task Management:**
+1. Write plan to `tasks/todo.md` with checkable items before starting
+2. Check in with user before implementation
+3. Mark items complete as you go
+4. Add review section to `tasks/todo.md` when done
+5. Update `tasks/lessons.md` after corrections
+
 ## Key Concepts
 
 - **Module System**: ES6 exports loaded dynamically in `content.js`, accessible via `window.CaptureAI` namespace (14 modules)
@@ -56,10 +77,10 @@ cd api && npm run db:migrate  # Run migrations
 - **Usage Tracking**: Two-table strategy — `usage_breakdown` (per-day analytics by prompt_type + model, reliable writes) + `usage_daily` (O(1) rate limit checks, authoritative daily totals)
 - **Subscription Audit Log**: Every tier/status change is written to `subscription_events` (immutable, never deleted). Query it to answer billing disputes.
 - **Past-Due Auth**: Users with `subscription_status = 'past_due'` are granted Basic-tier access (Pro features blocked) until payment resolves. Cancelled/inactive users get no access.
-- **Stripe Proration**: Basic (weekly) to Pro (monthly) upgrades use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
+- **Stripe Proration**: Plan changes (any tier or billing period switch) use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
-- **Tier-Switch OTP Verification**: Tier switches via `create-checkout` (confirmed flow) require a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification`, stored in `verification_codes` table (10-min TTL), and cleaned up by a daily cron trigger.
+- **Plan-Switch OTP Verification**: Any plan change (tier or billing period) via `create-checkout` (confirmed flow) requires a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification` (accepts `tier` + `billingPeriod`), stored in `verification_codes` table with a `planKey` (`tier_billingPeriod`, e.g. `pro_monthly`) in the `tier` column (10-min TTL), and cleaned up by a daily cron trigger.
 - **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
 - **Website Account System**: Email + 6-digit OTP login at `/account/login`. Dashboard at `/account` shows subscription, usage, billing portal, and account details. Session stored in `localStorage` using the license key as token (`captureai-web-session`, `captureai-web-user`). Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
 
@@ -91,11 +112,7 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 - `camelCase` variables/functions, `UPPER_SNAKE_CASE` constants, `PascalCase` classes
 - `isX`/`hasX`/`canX` booleans, `handleEventName` event handlers
 - kebab-case filenames (`auth-service.js`)
-
-### Variables
-
-- Use meaningful, pronounceable, searchable names — never single letters or mental mappings
-- Avoid Hungarian notation, type prefixes, and redundant context (e.g., `userEmail` not `strUserEmailAddress`)
+- Meaningful, pronounceable, searchable names — never single letters; no Hungarian notation or type prefixes
 - One declaration per `const`/`let` statement; no `var`
 
 ### Functions
@@ -109,26 +126,15 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ### Comments
 
-- Delete comments that restate what the code does syntactically (`// increment counter` above `counter++`)
-- Retain or write comments only to explain *why* — business rules, historical context, non-obvious tradeoffs
-- Retain comments that explain highly specific visual formatting or alignment choices
-
-### Dead Code
-
-- Trace execution paths; remove entirely unused functions, variables, imports, and unreachable branches
-- When removing dead code, also remove any unit tests that exclusively cover it
+- Delete comments that restate what the code does syntactically
+- Retain comments only to explain *why* — business rules, historical context, non-obvious tradeoffs
 
 ### Error Handling
 
 - Catch specific exceptions; never swallow errors with empty `catch` blocks
-- Do not use exceptions for standard control flow (e.g., don't throw to signal "not found")
+- Do not use exceptions for standard control flow
 - Always check `chrome.runtime.lastError` in extension callbacks
 - Try-catch all async operations; surface meaningful error messages
-
-### Constants & Magic Values
-
-- Extract all magic numbers and hardcoded configuration strings into well-named constants
-- Group related constants in `config.js` or at the top of the module they belong to
 
 ### Chrome Extension Specifics
 
@@ -148,13 +154,13 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ## Critical Rules
 
-**Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants
+**Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants | Find root causes — no temp fixes | Make changes as simple and minimal as possible
 
-**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Deploy without testing | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
+**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_BASIC`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
 **Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow

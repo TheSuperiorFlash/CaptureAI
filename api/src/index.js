@@ -12,7 +12,14 @@ import { createRequestLogger, logCorsRejection } from './logger';
  * Throws error if critical config is missing
  */
 function validateEnvironment(env) {
-  const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_PRO', 'STRIPE_PRICE_BASIC'];
+  const required = [
+    'STRIPE_SECRET_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+    'STRIPE_PRICE_BASIC_WEEKLY',
+    'STRIPE_PRICE_BASIC_MONTHLY',
+    'STRIPE_PRICE_PRO_WEEKLY',
+    'STRIPE_PRICE_PRO_MONTHLY',
+  ];
   const missing = required.filter(key => !env[key]);
 
   if (missing.length > 0) {
