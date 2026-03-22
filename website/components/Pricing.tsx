@@ -25,7 +25,6 @@ export default function Pricing() {
     const proPrice = PRICES.pro[billingPeriod]
     const periodLabel = billingPeriod === 'monthly' ? 'mo' : 'wk'
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
-    const direction = billingPeriod === 'monthly' ? 1 : -1 as 1 | -1
 
     return (
         <section id="pricing" className="relative py-24 md:py-32 overflow-x-clip">
