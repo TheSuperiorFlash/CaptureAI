@@ -474,7 +474,7 @@ export default function ActivatePage() {
                                         selected={billingPeriod === period}
                                         setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
                                         discount={period === 'monthly'}
-                                        discountLabel="Save ≈30%"
+                                        discountLabel="Save 30%"
                                     />
                                 ))}
                             </div>
@@ -593,13 +593,10 @@ export default function ActivatePage() {
                                                     priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
                                                     periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
                                                 />
-                                                <AnimatedPrice
-                                                    price={PRICES.pro[billingPeriod]}
-                                                    period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
-                                                    direction={direction}
-                                                    priceClassName="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40"
-                                                    periodClassName="text-sm text-[--color-text-tertiary] opacity-40 ml-0.5"
-                                                />
+                                                <div className="flex items-end">
+                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
+                                                </div>
                                             </div>
                                         ) : (
                                             <AnimatedPrice
