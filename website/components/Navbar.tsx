@@ -315,7 +315,7 @@ export default function Navbar() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
                                             transition={{ duration: 0.3, delay: i * 0.05 }}
-                                            className="w-[7.5rem] h-[1.25rem] rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            className="w-[7.5rem] h-[7.5px] rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
                                         >
                                             <Link
                                                 href={item.href}
