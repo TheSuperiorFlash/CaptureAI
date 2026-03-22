@@ -474,7 +474,7 @@ export default function ActivatePage() {
                                         selected={billingPeriod === period}
                                         setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
                                         discount={period === 'monthly'}
-                                        discountLabel="Save 32%"
+                                        discountLabel="Save ≈30%"
                                     />
                                 ))}
                             </div>
