@@ -247,6 +247,7 @@ export default function ActivatePage() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
     const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
+    const [isTrial, setIsTrial] = useState(false)
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -254,16 +255,22 @@ export default function ActivatePage() {
     const [modalVisible, setModalVisible] = useState(false)
     const [confirmLoading, setConfirmLoading] = useState(false)
 
-    // Read tier and billing period from URL params (set by Pricing page links)
+    // Read tier, billing period, and trial flag from URL params (set by Pricing page links)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
         const tierParam = params.get('tier')
         const billingParam = params.get('billing')
+        const trialParam = params.get('trial')
         if (tierParam === 'basic' || tierParam === 'pro') {
             setSelectedTier(tierParam)
         }
         if (billingParam === 'weekly' || billingParam === 'monthly') {
             setBillingPeriod(billingParam)
+        }
+        if (trialParam === 'true') {
+            setIsTrial(true)
+            setSelectedTier('pro')
+            setBillingPeriod('weekly')
         }
     }, [setSelectedTier])
 
@@ -364,9 +371,11 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
-        const price = PRICES.pro[billingPeriod]
-        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD' })
-        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro', billingPeriod })
+        const price = isTrial ? 0.99 : PRICES.pro[billingPeriod]
+        trackEvent('click_checkout', { tier: 'pro', billingPeriod: isTrial ? 'weekly' : billingPeriod, value: price, currency: 'USD', trial: isTrial })
+        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod: isTrial ? 'weekly' : billingPeriod }
+        if (isTrial) body.trial = true
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
@@ -387,29 +396,43 @@ export default function ActivatePage() {
                 <div className="relative z-10 mx-auto max-w-5xl px-6">
                     {/* Header */}
                     <div className="mx-auto mb-8 max-w-xl text-center">
-                        <h1 className="mb-3">
-                            <span className="text-[--color-text]">Choose your </span>
-                            <span className="text-gradient-static">plan</span>
-                        </h1>
-                        <p className="text-[--color-text-secondary]">
-                            Start basic for 50 requests per day, or unlock everything with Pro.
-                        </p>
+                        {isTrial ? (
+                            <>
+                                <h1 className="mb-3">
+                                    <span className="text-[--color-text]">Start your </span>
+                                    <span className="text-gradient-static">Pro trial</span>
+                                </h1>
+                                <p className="text-[--color-text-secondary]">
+                                    $0.99 this week, then $3.49/week — cancel anytime.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="mb-3">
+                                    <span className="text-[--color-text]">Choose your </span>
+                                    <span className="text-gradient-static">plan</span>
+                                </h1>
+                                <p className="text-[--color-text-secondary]">
+                                    Start basic for 50 requests per day, or unlock everything with Pro.
+                                </p>
 
-                        {/* Billing period toggle */}
-                        <div className="flex justify-center mt-6">
-                            <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
-                                {(['weekly', 'monthly'] as const).map((period) => (
-                                    <Tab
-                                        key={period}
-                                        text={period}
-                                        selected={billingPeriod === period}
-                                        setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
-                                        discount={period === 'monthly'}
-                                        discountLabel="Save 32%"
-                                    />
-                                ))}
-                            </div>
-                        </div>
+                                {/* Billing period toggle */}
+                                <div className="flex justify-center mt-6">
+                                    <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
+                                        {(['weekly', 'monthly'] as const).map((period) => (
+                                            <Tab
+                                                key={period}
+                                                text={period}
+                                                selected={billingPeriod === period}
+                                                setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
+                                                discount={period === 'monthly'}
+                                                discountLabel="Save 32%"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
 
@@ -539,10 +562,12 @@ export default function ActivatePage() {
                     <div className="mx-auto mt-12 max-w-2xl">
                         <div className="glass-card rounded-2xl p-8 md:p-10">
                             <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
-                                {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
+                                {isTrial ? 'Start your Pro trial' : selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                             </h3>
                             <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                                Enter your email to proceed to secure checkout via Stripe.
+                                {isTrial
+                                    ? '$0.99 today — then $3.49/week after your trial. Enter your email to continue.'
+                                    : 'Enter your email to proceed to secure checkout via Stripe.'}
                             </p>
 
                             <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">

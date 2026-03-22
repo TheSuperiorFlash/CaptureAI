@@ -170,10 +170,19 @@ export default function Pricing() {
                                 </ul>
 
                                 <Link
-                                    href={`/activate?tier=pro&billing=${billingPeriod}`}
+                                    href="/activate?tier=pro&billing=weekly&trial=true"
                                     className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
-                                    Get Pro
+                                    Try Pro — $0.99 first week
+                                </Link>
+                                <p className="mt-2 text-center text-xs text-white/40 pointer-events-auto">
+                                    Then $3.49/week — cancel anytime
+                                </p>
+                                <Link
+                                    href={`/activate?tier=pro&billing=${billingPeriod}`}
+                                    className="mt-2 block text-center text-xs text-white/40 transition-colors hover:text-white/60 pointer-events-auto"
+                                >
+                                    Skip trial, pay full price
                                 </Link>
                             </div>
                         </ScrollRevealItem>

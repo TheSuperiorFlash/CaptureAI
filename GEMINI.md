@@ -83,6 +83,7 @@ cd api && npm run db:migrate  # Run migrations
 - **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
 - **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
 - **Plan-Switch OTP Verification**: Any plan change (tier or billing period) via `create-checkout` (confirmed flow) requires a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification` (accepts `tier` + `billingPeriod`), stored in `verification_codes` table with a `planKey` (`tier_billingPeriod`, e.g. `pro_monthly`) in the `tier` column (10-min TTL), and cleaned up by a daily cron trigger.
+- **Trial Offer**: `POST /api/subscription/create-checkout` with `{ trial: true, tier: 'pro', billingPeriod: 'weekly' }` creates a Pro Weekly checkout with a Stripe coupon applied ($2.50 off = $0.99 first week). New users only — existing email returns 409. Trial detected at webhook time via `subscription.metadata.is_trial = 'true'`; sends trial-specific welcome email. Subsequent weeks bill at $3.49/week. Requires `STRIPE_COUPON_PRO_TRIAL` secret (Stripe coupon ID, `duration: once`, $2.50 off).
 - **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
 - **Website Account System**: Email + 6-digit OTP login at `/account/login`. Dashboard at `/account` shows subscription, usage, billing portal, and account details. Session stored in `localStorage` using the license key as token (`captureai-web-session`, `captureai-web-user`). Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
 
@@ -162,7 +163,7 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ## Backend Environment
 
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_COUPON_PRO_TRIAL` (Stripe coupon ID, $2.50 off once, for trial offer), `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
 **Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow
