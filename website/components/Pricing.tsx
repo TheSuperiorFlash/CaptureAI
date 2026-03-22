@@ -179,6 +179,12 @@ export default function Pricing() {
                                     Then $3.49/week — cancel anytime
                                 </p>
                                 <Link
+                                    href="/activate?tier=pro&billing=monthly&trial=true"
+                                    className="mt-2 block text-center text-xs text-white/40 transition-colors hover:text-white/60 pointer-events-auto"
+                                >
+                                    Or try $0.99 → $9.99/month
+                                </Link>
+                                <Link
                                     href={`/activate?tier=pro&billing=${billingPeriod}`}
                                     className="mt-2 block text-center text-xs text-white/40 transition-colors hover:text-white/60 pointer-events-auto"
                                 >

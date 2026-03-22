@@ -283,7 +283,6 @@ export default function ActivatePage() {
         if (trialParam === 'true') {
             setIsTrial(true)
             setSelectedTier('pro')
-            setBillingPeriod('weekly')
         }
     }, [setSelectedTier])
 
@@ -418,8 +417,8 @@ export default function ActivatePage() {
 
     const handleProSignup = async () => {
         const price = isTrial ? 0.99 : PRICES.pro[billingPeriod]
-        trackEvent('click_checkout', { tier: 'pro', billingPeriod: isTrial ? 'weekly' : billingPeriod, value: price, currency: 'USD', trial: isTrial })
-        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod: isTrial ? 'weekly' : billingPeriod }
+        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
+        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
         if (isTrial) body.trial = true
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)
         if (data.requiresConfirmation) {
@@ -461,24 +460,24 @@ export default function ActivatePage() {
                                 <p className="text-[--color-text-secondary]">
                                     Start basic for 50 requests per day, or unlock everything with Pro.
                                 </p>
-
-                                {/* Billing period toggle */}
-                                <div className="flex justify-center mt-6">
-                                    <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
-                                        {(['weekly', 'monthly'] as const).map((period) => (
-                                            <Tab
-                                                key={period}
-                                                text={period}
-                                                selected={billingPeriod === period}
-                                                setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
-                                                discount={period === 'monthly'}
-                                                discountLabel="Save 32%"
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
                             </>
                         )}
+
+                        {/* Billing period toggle */}
+                        <div className="flex justify-center mt-6">
+                            <div className="flex w-fit rounded-full bg-white/[0.05] p-1 ring-1 ring-white/[0.08]">
+                                {(['weekly', 'monthly'] as const).map((period) => (
+                                    <Tab
+                                        key={period}
+                                        text={period}
+                                        selected={billingPeriod === period}
+                                        setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
+                                        discount={period === 'monthly'}
+                                        discountLabel="Save 32%"
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
 
@@ -591,8 +590,8 @@ export default function ActivatePage() {
                                                     <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
                                                 </div>
                                                 <div className="flex items-end">
-                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">$3.49</span>
-                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">/wk</span>
+                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
                                                 </div>
                                             </div>
                                         ) : (
@@ -640,7 +639,7 @@ export default function ActivatePage() {
 
                                     {isTrial && (
                                         <p className={`mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-50' : 'opacity-0'}`}>
-                                            Cancel anytime · Renews at $3.49/wk
+                                            Cancel anytime · {billingPeriod === 'monthly' ? 'Renews at $9.99/mo' : 'Renews at $3.49/wk'}
                                         </p>
                                     )}
 
