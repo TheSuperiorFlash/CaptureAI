@@ -171,7 +171,7 @@ export default function Pricing() {
                                 </ul>
 
                                 <Link
-                                    href={`/activate?tier=pro&billing=${billingPeriod}&trial=true`}
+                                    href="/activate?tier=pro&billing=weekly&trial=true"
                                     className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
                                     Try Pro — $0.99 first week
