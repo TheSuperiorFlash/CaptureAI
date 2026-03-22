@@ -3,14 +3,16 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './MagneticButton'
 import { trackEvent } from '@/lib/analytics'
 import FloatingActionMenu from './ui/floating-action-menu'
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
+    const [isResourcesOpen, setIsResourcesOpen] = useState(false)
+    const resourcesRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
     const router = useRouter()
     const [activeHash, setActiveHash] = useState('')
@@ -25,6 +27,7 @@ export default function Navbar() {
     const [isFirstInSession, setIsFirstInSession] = useState(true)
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
     const resetTimeout = useRef<NodeJS.Timeout | null>(null)
+    const resourcesCloseTimeout = useRef<NodeJS.Timeout | null>(null)
 
     const handleMouseEnter = (index: number) => {
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
@@ -92,6 +95,16 @@ export default function Navbar() {
         }
     }, [])
 
+    const handleResourcesMouseEnter = () => {
+        if (resourcesCloseTimeout.current) clearTimeout(resourcesCloseTimeout.current)
+    }
+
+    const handleResourcesMouseLeave = () => {
+        resourcesCloseTimeout.current = setTimeout(() => {
+            setIsResourcesOpen(false)
+        }, 400)
+    }
+
     useEffect(() => {
         const updateHash = () => setActiveHash(window.location.hash)
 
@@ -110,7 +123,11 @@ export default function Navbar() {
         { name: 'Features', href: '/#features' },
         { name: 'Pricing', href: '/#pricing' },
         { name: 'Download', href: '/download' },
-        { name: 'Help', href: '/help' },
+    ]
+
+    const resourceItems = [
+        { label: 'Help', href: '/help', Icon: HelpCircle },
+        { label: 'Blog', href: '/blog', Icon: Newspaper },
     ]
 
     const isActive = (href: string) => {
@@ -138,7 +155,7 @@ export default function Navbar() {
                 window.history.pushState(null, '', '/')
                 setActiveHash('')
             }
-        } else if (href === '/download' || href === '/help') {
+        } else if (href === '/download' || href === '/help' || href === '/blog') {
             e.preventDefault()
             window.scrollTo({ top: 0, behavior: 'smooth' })
             setTimeout(() => {
@@ -221,6 +238,89 @@ export default function Navbar() {
                             </Link>
                         </div>
                     ))}
+
+                    {/* Resources dropdown */}
+                    <div
+                        ref={resourcesRef}
+                        className="relative flex items-center justify-center"
+                        onMouseEnter={() => { handleMouseEnter(navigation.length); handleResourcesMouseEnter() }}
+                        onMouseLeave={handleResourcesMouseLeave}
+                    >
+                        {activePillIndex === navigation.length && !isReducedMotion && (
+                            <motion.div
+                                layoutId={`nav-hover-pill-${sessionKey}`}
+                                className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
+                                    ? 'bg-white/[0.06] backdrop-blur-md'
+                                    : 'border border-white/[0.02] bg-white/[0.02]'
+                                    }`}
+                                style={!shouldUseSimpleGlass ? {
+                                    backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                    WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
+                                    boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
+                                } : undefined}
+                                initial={isFirstInSession ? { opacity: 0 } : false}
+                                animate={{ opacity: isNavHovered ? 1 : 0 }}
+                                transition={{ type: "spring", bounce: 0.15, duration: 0.5, opacity: { duration: 0.2 } }}
+                            />
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                            className={`relative z-10 px-4 py-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${isResourcesOpen || resourceItems.some(r => isActive(r.href))
+                                ? 'text-[--color-text]'
+                                : 'text-[--color-text-tertiary] hover:text-[--color-text]'
+                                }`}
+                        >
+                            Resources
+                            <motion.span
+                                animate={{ rotate: isResourcesOpen ? 180 : 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                className="flex items-center"
+                            >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                            </motion.span>
+                        </button>
+
+                        {/* Dropdown items */}
+                        <AnimatePresence>
+                            {isResourcesOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
+                                    className="absolute top-[calc(100%+16px)] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50"
+                                >
+                                    {resourceItems.map((item, i) => (
+                                        <motion.div
+                                            key={item.label}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            transition={{ duration: 0.3, delay: i * 0.05 }}
+                                            className="w-fit rounded-xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            style={{ backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+                                        >
+                                            <Link
+                                                href={item.href}
+                                                onClick={(e) => {
+                                                    setIsResourcesOpen(false)
+                                                    handleNavClick(e, item.href)
+                                                }}
+                                                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 ${isActive(item.href)
+                                                    ? 'text-[--color-text]'
+                                                    : 'text-[--color-text]'
+                                                    }`}
+                                            >
+                                                {item.label}
+                                                <item.Icon className="w-4 h-4 flex-shrink-0" />
+                                            </Link>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* CTA */}
@@ -306,12 +406,17 @@ export default function Navbar() {
                                 },
                             },
                             {
+                                label: 'Blog',
+                                Icon: <Newspaper className="w-4 h-4" />,
+                                onClick: () => router.push('/blog'),
+                            },
+                            {
                                 label: 'Download',
                                 Icon: <Download className="w-4 h-4" />,
                                 onClick: () => router.push('/download'),
                             },
                             {
-                                label: 'Help',
+                                label: 'Help Center',
                                 Icon: <HelpCircle className="w-4 h-4" />,
                                 onClick: () => router.push('/help'),
                             },

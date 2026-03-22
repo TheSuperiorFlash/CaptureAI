@@ -43,7 +43,7 @@ export default function TermsPage() {
                             CaptureAI is a Chrome extension that uses AI to help users understand and answer questions from screenshots. The Service includes:
                         </p>
                         <ul className="ml-4 list-inside list-disc space-y-1.5">
-                            <li>On-device OCR text extraction via Tesseract.js (performed locally in your browser)</li>
+                            <li>On-device secure text extraction via Tesseract.js (performed locally in your browser)</li>
                             <li>AI-powered question answering using OpenAI models via Cloudflare AI Gateway</li>
                             <li>Privacy Guard — prevents focus/visibility detection on supported sites (Pro only)</li>
                             <li>Ask Mode — custom question prompting (Pro only)</li>

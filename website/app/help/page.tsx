@@ -24,11 +24,11 @@ const FAQ_SCHEMA_ITEMS = [
     { q: 'How do I upgrade to Pro?', a: 'Visit the activation page, select Pro, and enter your email. If you already have an active subscription, you\'ll see a prorated amount so you only pay for the remaining time.' },
     { q: 'How do I cancel my subscription?', a: 'Open the CaptureAI extension popup, go to Settings, and click "Manage Billing" to access the Stripe billing portal where you can cancel anytime.' },
     { q: 'What is Privacy Guard?', a: 'Privacy Guard (Pro only) prevents exam proctoring platforms from detecting that you\'ve switched tabs, lost focus, or are using a browser extension.' },
-    { q: 'Are my screenshots stored on your servers?', a: 'No. Screenshots are never stored on our servers. Text is extracted locally using Tesseract.js OCR and only sent to the AI for analysis.' },
+    { q: 'Are my screenshots stored on your servers?', a: 'No. Screenshots are never stored on our servers. Text is extracted locally using secure text extraction and only sent to the AI for analysis.' },
     { q: 'Do you offer refunds?', a: 'Refunds are considered on a case-by-case basis within 7 days of purchase. Email support@captureai.dev with your order details.' },
     { q: 'The floating button isn\'t appearing on the page', a: 'Refresh the page after installing. Press Ctrl+Shift+E to force the UI to appear. Check that the extension is enabled at chrome://extensions.' },
     { q: 'I paid but never received my license key', a: 'Check your spam/junk folder for an email from captureai.dev. If you still don\'t see it after 10 minutes, email support@captureai.dev with your receipt.' },
-    { q: 'The AI is giving wrong or irrelevant answers', a: 'Capture only the question text, not the entire page. Enable "Disable OCR Extraction" in Settings to send the image directly if OCR is misreading text.' },
+    { q: 'The AI is giving wrong or irrelevant answers', a: 'Capture only the question text, not the entire page. Enable "Disable OCR Extraction" in Settings to send the image directly if text extraction is misreading.' },
     { q: 'It says "Daily limit reached"', a: 'You\'ve used all 50 requests for today on the Basic plan. Your limit resets at midnight UTC. Upgrade to Pro for unlimited requests.' },
     { q: 'The extension doesn\'t work on a specific site', a: 'Some sites use strict Content Security Policies. CaptureAI cannot run on chrome:// or Chrome Web Store pages. Enable Privacy Guard (Pro) for exam platforms.' },
     { q: 'My license key says "Invalid or expired"', a: 'Your subscription may have lapsed due to a failed payment. Open Settings, click "Manage Billing" to check your subscription status and update your payment method.' },
@@ -74,7 +74,7 @@ const FAQ_ITEMS: QaItem[] = [
     },
     {
         q: 'Are my screenshots stored on your servers?',
-        a: 'No. Screenshots are never stored on our servers. Text is extracted locally in your browser using Tesseract.js OCR. Only the extracted text (or image if OCR confidence is too low) is sent to the AI for analysis.',
+        a: 'No. Screenshots are never stored on our servers. Text is extracted locally in your browser using secure text extraction. Only the extracted text (or image if confidence is too low) is sent to the AI for analysis.',
     },
     {
         q: 'Do you offer refunds?',
@@ -95,7 +95,7 @@ const TROUBLESHOOTING_ITEMS: QaItem[] = [
     },
     {
         q: 'The AI is giving wrong or irrelevant answers',
-        a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing. If OCR is misreading text, open Settings in the popup and enable "Disable OCR Extraction" to send the image directly instead.',
+        a: 'Make sure you\'re capturing only the question text, not the entire page. Try zooming in on the question before capturing. If text extraction is misreading, open Settings in the popup and enable "Disable OCR Extraction" to send the image directly instead.',
     },
     {
         q: 'It says "Daily limit reached"',
