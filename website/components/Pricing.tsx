@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { AnimatedPrice } from '@/components/ui/animated-price'
-import { AnimatedPrice } from '@/components/ui/animated-price'
 import { Tab } from '@/components/ui/pricing-tab'
 import Link from 'next/link'
 import { Check, X as XIcon, Minus } from 'lucide-react'
