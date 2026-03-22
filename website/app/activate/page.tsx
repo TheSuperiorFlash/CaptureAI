@@ -608,6 +608,12 @@ export default function ActivatePage() {
                                         ))}
                                     </ul>
 
+                                    {isTrial && (
+                                        <p className="mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50">
+                                            Cancel anytime · Renews at $3.49/wk
+                                        </p>
+                                    )}
+
                                 </div>
                             </div>
                         </div>
