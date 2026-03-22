@@ -557,8 +557,8 @@ export default function ActivatePage() {
                                         {isTrial ? (
                                             <div className="flex items-end gap-2">
                                                 <div className="flex items-end">
-                                                    <span className="text-lg font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">$3.49</span>
-                                                    <span className="text-xs text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">/wk</span>
+                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">$3.49</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">/wk</span>
                                                 </div>
                                                 <div className="flex items-end">
                                                     <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
