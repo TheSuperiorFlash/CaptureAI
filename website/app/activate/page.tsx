@@ -405,7 +405,7 @@ export default function ActivatePage() {
                                         selected={billingPeriod === period}
                                         setSelected={(v) => setBillingPeriod(v as 'weekly' | 'monthly')}
                                         discount={period === 'monthly'}
-                                        discountLabel="Save 34%"
+                                        discountLabel="Save 32%"
                                     />
                                 ))}
                             </div>
@@ -542,10 +542,7 @@ export default function ActivatePage() {
                                 {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                             </h3>
                             <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
-                                {billingPeriod === 'monthly'
-                                    ? `$${PRICES[selectedTier as 'basic' | 'pro'].monthly.toFixed(2)}/month — billed monthly. Enter your email to proceed via Stripe.`
-                                    : `$${PRICES[selectedTier as 'basic' | 'pro'].weekly.toFixed(2)}/week — billed weekly. Enter your email to proceed via Stripe.`
-                                }
+                                Enter your email to proceed to secure checkout via Stripe.
                             </p>
 
                             <div className="mx-auto max-w-lg mb-4 flex flex-col sm:flex-row gap-4">

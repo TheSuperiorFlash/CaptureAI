@@ -88,7 +88,7 @@ crons = ["0 3 * * *"]
 #   wrangler secret put STRIPE_WEBHOOK_SECRET
 #   wrangler secret put STRIPE_PRICE_BASIC_WEEKLY      ← Basic $1.99/week
 #   wrangler secret put STRIPE_PRICE_BASIC_MONTHLY     ← Basic $5.99/month
-#   wrangler secret put STRIPE_PRICE_PRO_WEEKLY        ← Pro $2.99/week
+#   wrangler secret put STRIPE_PRICE_PRO_WEEKLY        ← Pro $3.49/week
 #   wrangler secret put STRIPE_PRICE_PRO_MONTHLY       ← Pro $9.99/month
 #   wrangler secret put RESEND_API_KEY
 #   wrangler secret put FROM_EMAIL
