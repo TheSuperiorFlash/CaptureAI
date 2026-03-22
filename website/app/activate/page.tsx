@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
@@ -249,6 +249,7 @@ export default function ActivatePage() {
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
     const [isTrial, setIsTrial] = useState(false)
     const [isBasicHiding, setIsBasicHiding] = useState(false)
+    const proCardRef = useRef<HTMLDivElement>(null)
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -284,20 +285,38 @@ export default function ActivatePage() {
         }
     }, [confirmationData])
 
+    const flipCard = (applyChange: () => void) => {
+        const card = proCardRef.current
+        const before = card?.getBoundingClientRect()
+        applyChange()
+        requestAnimationFrame(() => {
+            if (!card || !before) return
+            const after = card.getBoundingClientRect()
+            const deltaX = before.left - after.left
+            if (deltaX === 0) return
+            card.style.transition = 'none'
+            card.style.transform = `translateX(${deltaX}px)`
+            card.getBoundingClientRect() // force reflow
+            card.style.transition = 'transform 450ms ease-in-out'
+            card.style.transform = 'translateX(0)'
+            const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
+            card.addEventListener('transitionend', cleanup, { once: true })
+        })
+    }
+
     const enterTrialMode = (e?: React.MouseEvent) => {
         e?.stopPropagation()
         setIsBasicHiding(true)
         setSelectedTier('pro')
         setBillingPeriod('weekly')
         setTimeout(() => {
-            setIsTrial(true)
-            setIsBasicHiding(false)
+            flipCard(() => { setIsTrial(true); setIsBasicHiding(false) })
         }, 350)
     }
 
     const exitTrialMode = (e?: React.MouseEvent) => {
         e?.stopPropagation()
-        setIsTrial(false)
+        flipCard(() => setIsTrial(false))
     }
 
     const handleSignup = async () => {
@@ -455,7 +474,7 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] transition-all duration-500 ease-in-out ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
+                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
@@ -517,6 +536,7 @@ export default function ActivatePage() {
 
                         {/* Pro plan */}
                         <div
+                            ref={proCardRef}
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'pro'}
