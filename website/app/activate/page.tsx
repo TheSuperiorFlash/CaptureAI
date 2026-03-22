@@ -561,7 +561,7 @@ export default function ActivatePage() {
                                                     <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
                                                 </div>
                                                 <div className="flex items-end">
-                                                    <span className="text-3xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">$3.49</span>
+                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">$3.49</span>
                                                     <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">/wk</span>
                                                 </div>
                                             </div>
