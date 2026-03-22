@@ -316,7 +316,8 @@ export default function Navbar() {
                             {isResourcesOpen && (
                                 <motion.div
                                     id={resourcesDropdownId}
-                                    role="menu"
+                                    role="navigation"
+                                    aria-label="Resources"
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}

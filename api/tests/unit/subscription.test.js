@@ -21,7 +21,7 @@ jest.mock('../../src/auth.js', () => ({
 }));
 
 jest.mock('../../src/validation.js', () => ({
-  validateRequestBody: jest.fn().mockResolvedValue({ email: 'test@example.com', billingPeriod: 'weekly' }),
+  validateRequestBody: jest.fn().mockResolvedValue({ email: 'test@example.com' }),
   validateEmail: jest.fn().mockImplementation((email) => email.toLowerCase().trim()),
   validateStripeSignature: jest.fn().mockReturnValue({
     t: String(Math.floor(Date.now() / 1000)),
@@ -252,6 +252,35 @@ describe('SubscriptionHandler', () => {
       const request = createMockRequest();
       const response = await handler.createCheckout(request);
       expect(response.status).toBe(200);
+    });
+
+    test('should default billingPeriod to weekly when omitted', async () => {
+      // Mock returns no billingPeriod — exercises the omission fallback in createCheckout
+      validateRequestBody.mockResolvedValueOnce({ email: 'test@example.com' });
+
+      jest.spyOn(handler, 'previewSubscriptionTierChange').mockResolvedValue(null);
+      env.DB._mockFirst.mockResolvedValueOnce({
+        id: 'user-123',
+        tier: 'basic',
+        subscription_status: 'active',
+        stripe_subscription_id: 'sub_existing',
+        stripe_customer_id: 'cus_existing'
+      });
+
+      jest.spyOn(handler, 'previewSubscriptionTierChange').mockResolvedValue({
+        amountDueCents: 199,
+        subtotalCents: 199,
+        totalCents: 199,
+        currency: 'usd'
+      });
+
+      const request = createMockRequest();
+      await handler.createCheckout(request);
+
+      // Should have used the weekly price ID (the defaulted value)
+      expect(handler.previewSubscriptionTierChange).toHaveBeenCalledWith(
+        'sub_existing', 'pro', 'weekly'
+      );
     });
   });
 
@@ -948,6 +977,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should return 400 when user is already on Pro', async () => {
+      validateRequestBody.mockResolvedValueOnce({ email: 'test@example.com', billingPeriod: 'weekly' });
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'pro'
@@ -969,6 +999,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should return 400 when user has no Stripe subscription', async () => {
+      validateRequestBody.mockResolvedValueOnce({ email: 'test@example.com', billingPeriod: 'weekly' });
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -990,6 +1021,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should return 500 when Stripe Checkout session creation fails', async () => {
+      validateRequestBody.mockResolvedValueOnce({ email: 'test@example.com', billingPeriod: 'weekly' });
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'
@@ -1013,6 +1045,7 @@ describe('SubscriptionHandler', () => {
     });
 
     test('should return payment-success URL after upgrade', async () => {
+      validateRequestBody.mockResolvedValueOnce({ email: 'test@example.com', billingPeriod: 'weekly' });
       handler.auth.authenticate.mockResolvedValueOnce({
         userId: 'user-1',
         tier: 'basic'

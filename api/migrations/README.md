@@ -19,7 +19,7 @@ wrangler d1 execute captureai-db --file=schema.sql
 | # | File | Description |
 |---|------|-------------|
 | 0001 | `0001_initial_schema.sql` | Complete initial schema — all tables, indexes, and views |
-| 0002 | `0002_add_billing_period.sql` | Add `billing_period TEXT DEFAULT 'weekly'` to `users` table |
+| 0002 | `0002_add_billing_period.sql` | Add `billing_period TEXT DEFAULT 'weekly'` to `users` table — note: lacks the `CHECK (billing_period IN ('weekly', 'monthly'))` constraint present in `schema.sql` (SQLite `ALTER TABLE ADD COLUMN` does not support CHECK constraints); application-layer validation in `subscription.js` enforces valid values at every write boundary |
 
 Migration `0001` uses `IF NOT EXISTS` guards and is idempotent. Migration `0002` uses `ALTER TABLE ADD COLUMN` which SQLite does not support with `IF NOT EXISTS` — re-running it on a database that already has the column will fail. Run each migration exactly once.
 

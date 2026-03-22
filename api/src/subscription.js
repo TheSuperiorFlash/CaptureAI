@@ -9,6 +9,13 @@ import { validateRequestBody, validateEmail, validateStripeSignature, validateVe
 import { logSubscription, logWebhook, logValidationError } from './logger';
 import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
 
+const PLAN_PRICES = {
+  basicWeekly: 1.99,
+  basicMonthly: 5.99,
+  proWeekly: 3.49,
+  proMonthly: 9.99,
+};
+
 export class SubscriptionHandler {
   constructor(env, logger = null) {
     this.env = env;
@@ -1453,7 +1460,7 @@ export class SubscriptionHandler {
           tier: 'basic',
           name: 'Basic',
           billingPeriod: 'weekly',
-          price: 1.99,
+          price: PLAN_PRICES.basicWeekly,
           dailyLimit,
           features: []
         },
@@ -1461,7 +1468,7 @@ export class SubscriptionHandler {
           tier: 'basic',
           name: 'Basic',
           billingPeriod: 'monthly',
-          price: 5.99,
+          price: PLAN_PRICES.basicMonthly,
           dailyLimit,
           features: []
         },
@@ -1469,7 +1476,7 @@ export class SubscriptionHandler {
           tier: 'pro',
           name: 'Pro',
           billingPeriod: 'weekly',
-          price: 3.49,
+          price: PLAN_PRICES.proWeekly,
           dailyLimit: null,
           rateLimit: '20 per minute',
           features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute']
@@ -1478,7 +1485,7 @@ export class SubscriptionHandler {
           tier: 'pro',
           name: 'Pro',
           billingPeriod: 'monthly',
-          price: 9.99,
+          price: PLAN_PRICES.proMonthly,
           dailyLimit: null,
           rateLimit: '20 per minute',
           features: ['Unlimited requests', 'GPT-5 Nano', '20 requests/minute'],
