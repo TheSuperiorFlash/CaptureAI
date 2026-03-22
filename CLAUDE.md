@@ -42,6 +42,27 @@ cd api && npm run deploy    # Deploy to production
 cd api && npm run db:migrate  # Run migrations
 ```
 
+## Working Principles
+
+**Planning:** Enter plan mode for any non-trivial task (3+ steps or architectural decisions). Write detailed specs upfront. If something goes sideways, stop and re-plan — don't keep pushing.
+
+**Subagents:** Use subagents liberally to keep the main context window clean. Offload research, exploration, and parallel analysis. One task per subagent for focused execution.
+
+**Verification:** Never mark a task complete without proving it works. Run tests, check logs, demonstrate correctness.
+
+**Elegance:** For non-trivial changes, ask "is there a more elegant way?" If a fix feels hacky, implement the elegant solution. Skip for simple, obvious fixes.
+
+**Bug Fixing:** Given a bug report, fix it — don't ask for hand-holding. Point at logs, errors, and failing tests, then resolve them.
+
+**Self-Improvement:** After any correction from the user, update `tasks/lessons.md` with the pattern to prevent the same mistake.
+
+**Task Management:**
+1. Write plan to `tasks/todo.md` with checkable items before starting
+2. Check in with user before implementation
+3. Mark items complete as you go
+4. Add review section to `tasks/todo.md` when done
+5. Update `tasks/lessons.md` after corrections
+
 ## Key Concepts
 
 - **Module System**: ES6 exports loaded dynamically in `content.js`, accessible via `window.CaptureAI` namespace (14 modules)
@@ -91,11 +112,7 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 - `camelCase` variables/functions, `UPPER_SNAKE_CASE` constants, `PascalCase` classes
 - `isX`/`hasX`/`canX` booleans, `handleEventName` event handlers
 - kebab-case filenames (`auth-service.js`)
-
-### Variables
-
-- Use meaningful, pronounceable, searchable names — never single letters or mental mappings
-- Avoid Hungarian notation, type prefixes, and redundant context (e.g., `userEmail` not `strUserEmailAddress`)
+- Meaningful, pronounceable, searchable names — never single letters; no Hungarian notation or type prefixes
 - One declaration per `const`/`let` statement; no `var`
 
 ### Functions
@@ -109,26 +126,15 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ### Comments
 
-- Delete comments that restate what the code does syntactically (`// increment counter` above `counter++`)
-- Retain or write comments only to explain *why* — business rules, historical context, non-obvious tradeoffs
-- Retain comments that explain highly specific visual formatting or alignment choices
-
-### Dead Code
-
-- Trace execution paths; remove entirely unused functions, variables, imports, and unreachable branches
-- When removing dead code, also remove any unit tests that exclusively cover it
+- Delete comments that restate what the code does syntactically
+- Retain comments only to explain *why* — business rules, historical context, non-obvious tradeoffs
 
 ### Error Handling
 
 - Catch specific exceptions; never swallow errors with empty `catch` blocks
-- Do not use exceptions for standard control flow (e.g., don't throw to signal "not found")
+- Do not use exceptions for standard control flow
 - Always check `chrome.runtime.lastError` in extension callbacks
 - Try-catch all async operations; surface meaningful error messages
-
-### Constants & Magic Values
-
-- Extract all magic numbers and hardcoded configuration strings into well-named constants
-- Group related constants in `config.js` or at the top of the module they belong to
 
 ### Chrome Extension Specifics
 
@@ -148,9 +154,9 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 
 ## Critical Rules
 
-**Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants
+**Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants | Find root causes — no temp fixes | Make changes as simple and minimal as possible
 
-**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Deploy without testing | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
+**Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
 
 ## Backend Environment
 
