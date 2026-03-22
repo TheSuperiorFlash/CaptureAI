@@ -306,29 +306,21 @@ export default function Navbar() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
-                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
+                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-row items-center w-[7.5rem] rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1] z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
                                 >
-                                    {resourceItems.map((item, i) => (
-                                        <motion.div
+                                    {resourceItems.map((item) => (
+                                        <Link
                                             key={item.label}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            transition={{ duration: 0.3, delay: i * 0.05 }}
-                                            className="w-[7.5rem] rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            href={item.href}
+                                            onClick={(e) => {
+                                                setIsResourcesOpen(false)
+                                                handleNavClick(e, item.href)
+                                            }}
+                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 text-[--color-text]"
                                         >
-                                            <Link
-                                                href={item.href}
-                                                onClick={(e) => {
-                                                    setIsResourcesOpen(false)
-                                                    handleNavClick(e, item.href)
-                                                }}
-                                                className="flex items-center justify-center gap-1 px-4 py-[5px] text-sm font-medium transition-colors whitespace-nowrap hover:opacity-80 text-[--color-text]"
-                                            >
-                                                {item.label}
-                                                <item.Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                                            </Link>
-                                        </motion.div>
+                                            {item.label}
+                                            <item.Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                                        </Link>
                                     ))}
                                 </motion.div>
                             )}
