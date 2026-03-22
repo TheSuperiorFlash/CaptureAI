@@ -141,14 +141,15 @@ export default function Pricing() {
                                     POPULAR
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
-                                <div className="mb-7">
-                                    <AnimatedPrice
-                                        price={proPrice}
-                                        period={periodLabel}
-                                        direction={direction}
-                                        priceClassName="text-4xl font-bold font-inter text-gradient-static"
-                                        periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
-                                    />
+                                <div className="mb-7 flex items-end gap-2">
+                                    <div className="flex items-end">
+                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
+                                        <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
+                                    </div>
+                                    <div className="flex items-end">
+                                        <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
+                                        <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
+                                    </div>
                                 </div>
 
                                 <ul className="mb-8 space-y-3.5 flex-1">
@@ -170,10 +171,10 @@ export default function Pricing() {
                                 </ul>
 
                                 <Link
-                                    href={`/activate?tier=pro&billing=${billingPeriod}`}
+                                    href={`/activate?tier=pro&billing=${billingPeriod}&trial=true`}
                                     className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
-                                    Get Pro
+                                    Try Pro — $0.99 first week
                                 </Link>
                             </div>
                         </ScrollRevealItem>

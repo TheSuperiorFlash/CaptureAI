@@ -39,7 +39,7 @@ All routes prefixed with `/api/` (defined in `src/router.js`).
 
 | Method | Path | Auth | Rate Limit | Description |
 |--------|------|------|------------|-------------|
-| POST | `/api/subscription/create-checkout` | None | 10/min | Stripe checkout session; accepts `tier` + `billingPeriod` (`weekly`/`monthly`); auto-switches active subscribers and returns Stripe-hosted invoice page plus prorated amount preview fields |
+| POST | `/api/subscription/create-checkout` | None | 10/min | Stripe checkout session; accepts `tier` + `billingPeriod` (`weekly`/`monthly`); auto-switches active subscribers and returns Stripe-hosted invoice page plus prorated amount preview fields. Pass `trial: true` with `tier: 'pro'` for the $0.99 trial (new users only): `billingPeriod: 'weekly'` uses `STRIPE_COUPON_PRO_TRIAL` coupon (→ $3.49/wk); `billingPeriod: 'monthly'` uses `STRIPE_PRICE_TRIAL_INTRO` price + Subscription Schedule (→ $9.99/mo after 7 days) |
 | POST | `/api/subscription/send-verification` | None | 5/min (AUTH) | Send 6-digit OTP email for plan-switch confirmation (any tier or billing period change); accepts `tier` + `billingPeriod` |
 | POST | `/api/subscription/change-tier` | LicenseKey | 10/min (CHECKOUT) | Upgrade/downgrade active subscription with proration |
 | POST | `/api/subscription/webhook` | Stripe signature | — | Stripe webhook handler |

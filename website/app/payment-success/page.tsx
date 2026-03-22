@@ -14,6 +14,7 @@ function PaymentSuccessContent() {
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
     const [errorMessage, setErrorMessage] = useState('')
     const [tier, setTier] = useState<'basic' | 'pro'>('pro')
+    const isTrial = searchParams.get('trial') === 'true'
 
     useEffect(() => {
         const verifyPayment = async (attempt: number): Promise<void> => {
@@ -136,9 +137,15 @@ function PaymentSuccessContent() {
                                             <span className={`relative inline-flex h-2 w-2 rounded-full ${isBasic ? 'bg-blue-400' : 'bg-cyan-400'}`} />
                                         </span>
                                         <span className={`text-[11px] font-bold tracking-widest ${isBasic ? 'text-blue-400' : 'text-cyan-400'}`}>
-                                            {isBasic ? 'BASIC UNLOCKED' : 'PRO UNLOCKED'}
+                                            {isTrial ? 'PRO TRIAL STARTED' : isBasic ? 'BASIC UNLOCKED' : 'PRO UNLOCKED'}
                                         </span>
                                     </div>
+
+                                    {isTrial && (
+                                        <p className="mb-4 text-sm text-[--color-text-tertiary]">
+                                            Your first week is <strong className="text-[--color-text-secondary]">$0.99</strong>. After that, you&apos;ll be billed <strong className="text-[--color-text-secondary]">$3.49/week</strong>.
+                                        </p>
+                                    )}
 
                                     <p className="mb-3 text-sm font-semibold text-[--color-text-secondary]">Next steps:</p>
                                     <ol className="list-decimal pl-4 space-y-2 text-sm text-[--color-text-tertiary] marker:text-cyan-600/50">

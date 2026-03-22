@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
+import { flushSync } from 'react-dom'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
@@ -247,6 +248,19 @@ export default function ActivatePage() {
     const { selectedTier, setSelectedTier, handleTouchStart, handleTouchEnd, handleTouchCancel } = useSwipeTier()
     const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
+    const [isTrial, setIsTrial] = useState(false)
+    const [isBasicHiding, setIsBasicHiding] = useState(false)
+    const [isTrialContentVisible, setIsTrialContentVisible] = useState(false)
+    const proCardRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (isTrial) {
+            const id = requestAnimationFrame(() => setIsTrialContentVisible(true))
+            return () => cancelAnimationFrame(id)
+        } else {
+            setIsTrialContentVisible(false)
+        }
+    }, [isTrial])
 
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
@@ -254,16 +268,22 @@ export default function ActivatePage() {
     const [modalVisible, setModalVisible] = useState(false)
     const [confirmLoading, setConfirmLoading] = useState(false)
 
-    // Read tier and billing period from URL params (set by Pricing page links)
+    // Read tier, billing period, and trial flag from URL params (set by Pricing page links)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
         const tierParam = params.get('tier')
         const billingParam = params.get('billing')
+        const trialParam = params.get('trial')
         if (tierParam === 'basic' || tierParam === 'pro') {
             setSelectedTier(tierParam)
         }
         if (billingParam === 'weekly' || billingParam === 'monthly') {
             setBillingPeriod(billingParam)
+        }
+        if (trialParam === 'true') {
+            setIsTrial(true)
+            setSelectedTier('pro')
+            if (!billingParam) setBillingPeriod('weekly')
         }
     }, [setSelectedTier])
 
@@ -275,6 +295,39 @@ export default function ActivatePage() {
             setModalVisible(false)
         }
     }, [confirmationData])
+
+    const flipCard = (applyChange: () => void) => {
+        const card = proCardRef.current
+        const before = card?.getBoundingClientRect()
+        // flushSync ensures React updates the DOM synchronously before we measure
+        flushSync(() => { applyChange() })
+        if (!card || !before) return
+        const after = card.getBoundingClientRect()
+        const deltaX = before.left - after.left
+        if (deltaX === 0) return
+        card.style.transition = 'none'
+        card.style.transform = `translateX(${deltaX}px)`
+        card.getBoundingClientRect() // force reflow
+        card.style.transition = 'transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        card.style.transform = 'translateX(0)'
+        const cleanup = () => { card.style.transition = ''; card.style.transform = '' }
+        card.addEventListener('transitionend', cleanup, { once: true })
+    }
+
+    const enterTrialMode = (e?: React.MouseEvent) => {
+        e?.stopPropagation()
+        setIsBasicHiding(true)
+        setSelectedTier('pro')
+        setBillingPeriod('weekly')
+        setTimeout(() => {
+            flipCard(() => { setIsTrial(true); setIsBasicHiding(false) })
+        }, 350)
+    }
+
+    const exitTrialMode = (e?: React.MouseEvent) => {
+        e?.stopPropagation()
+        flipCard(() => setIsTrial(false))
+    }
 
     const handleSignup = async () => {
         const trimmedEmail = email.trim()
@@ -364,9 +417,11 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
-        const price = PRICES.pro[billingPeriod]
-        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD' })
-        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'pro', billingPeriod })
+        const price = isTrial ? 0.99 : PRICES.pro[billingPeriod]
+        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
+        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
+        if (isTrial) body.trial = true
+        const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
@@ -387,13 +442,27 @@ export default function ActivatePage() {
                 <div className="relative z-10 mx-auto max-w-5xl px-6">
                     {/* Header */}
                     <div className="mx-auto mb-8 max-w-xl text-center">
-                        <h1 className="mb-3">
-                            <span className="text-[--color-text]">Choose your </span>
-                            <span className="text-gradient-static">plan</span>
-                        </h1>
-                        <p className="text-[--color-text-secondary]">
-                            Start basic for 50 requests per day, or unlock everything with Pro.
-                        </p>
+                        {isTrial ? (
+                            <>
+                                <h1 className="mb-3">
+                                    <span className="text-[--color-text]">Start your </span>
+                                    <span className="text-gradient-static">Pro trial</span>
+                                </h1>
+                                <p className="text-[--color-text-secondary]">
+                                    $0.99 for 7 days of unlimited access
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="mb-3">
+                                    <span className="text-[--color-text]">Choose your </span>
+                                    <span className="text-gradient-static">plan</span>
+                                </h1>
+                                <p className="text-[--color-text-secondary]">
+                                    Start basic for 50 requests per day, or unlock everything with Pro.
+                                </p>
+                            </>
+                        )}
 
                         {/* Billing period toggle */}
                         <div className="flex justify-center mt-6">
@@ -415,17 +484,19 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
+                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
                     >
-                        {/* Basic plan */}
+                        {/* Basic plan — hidden in trial mode */}
+                        {(!isTrial || isBasicHiding) && (
+                        <div className={`row-start-1 col-start-1 md:row-auto md:col-auto transition-all duration-300 ease-in-out ${isBasicHiding ? 'opacity-0 -translate-x-3 pointer-events-none' : 'opacity-100'}`}>
                         <div
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'basic'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center flex flex-col ${selectedTier === 'basic'
+                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none mx-auto h-full flex flex-col ${selectedTier === 'basic'
                                 ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
                                 : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 }`}
@@ -470,42 +541,78 @@ export default function ActivatePage() {
                                 ))}
                             </ul>
                         </div>
+                        </div>
+                        )}
 
                         {/* Pro plan */}
                         <div
+                            ref={proCardRef}
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'pro'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro'
                                 ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                                 : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                                 }`}
-                            onClick={() => setSelectedTier('pro')}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                            onClick={() => !isTrial && setSelectedTier('pro')}
+                            onKeyDown={(e) => { if (!isTrial && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setSelectedTier('pro'); } }}
                         >
-                            <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
-                                    <div className="absolute right-6 top-6">
-                                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                            ? 'border-cyan-400 bg-cyan-400'
-                                            : 'border-white/20'
-                                            }`}>
-                                            {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                    {isTrial ? (
+                                        <button
+                                            type="button"
+                                            onClick={exitTrialMode}
+                                            className={`absolute right-6 top-6 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 hover:text-white/70 transition-all duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}
+                                            aria-label="Exit trial mode"
+                                        >
+                                            <XIcon className="h-3.5 w-3.5" />
+                                        </button>
+                                    ) : (
+                                        <div className="absolute right-6 top-6">
+                                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
+                                                ? 'border-cyan-400 bg-cyan-400'
+                                                : 'border-white/20'
+                                                }`}>
+                                                {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                     <div className="mb-6">
                                         <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
                                         <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
                                     </div>
 
-                                    <div className="mb-7">
-                                        <AnimatedPrice
-                                            price={PRICES.pro[billingPeriod]}
-                                            period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
-                                            direction={direction}
-                                            priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
-                                            periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
-                                        />
+                                    <div className="mb-7 flex items-end gap-3">
+                                        {isTrial ? (
+                                            <div className={`flex items-end gap-2 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}>
+                                                <div className="flex items-end">
+                                                    <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
+                                                </div>
+                                                <div className="flex items-end">
+                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
+                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <AnimatedPrice
+                                                price={PRICES.pro[billingPeriod]}
+                                                period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                                direction={direction}
+                                                priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
+                                                periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                            />
+                                        )}
+                                        {!isTrial && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => enterTrialMode(e)}
+                                                className="mb-1 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 py-1.5 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
+                                            >
+                                                Try $0.99 for 7 days
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Pro highlights grid */}
@@ -530,6 +637,13 @@ export default function ActivatePage() {
                                             </li>
                                         ))}
                                     </ul>
+
+                                    {isTrial && (
+                                        <p className={`mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-50' : 'opacity-0'}`}>
+                                            Cancel anytime · {billingPeriod === 'monthly' ? 'Renews at $9.99/mo' : 'Renews at $3.49/wk'}
+                                        </p>
+                                    )}
+
                                 </div>
                             </div>
                         </div>
@@ -539,7 +653,7 @@ export default function ActivatePage() {
                     <div className="mx-auto mt-12 max-w-2xl">
                         <div className="glass-card rounded-2xl p-8 md:p-10">
                             <h3 className="mb-2 text-center text-xl font-semibold text-[--color-text]">
-                                {selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
+                                {isTrial && selectedTier === 'pro' ? 'Start your Pro trial' : selectedTier === 'basic' ? 'Start your Basic subscription' : 'Start your Pro subscription'}
                             </h3>
                             <p className="mb-8 text-center text-[15px] text-[--color-text-tertiary]">
                                 Enter your email to proceed to secure checkout via Stripe.
