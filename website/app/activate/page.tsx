@@ -510,15 +510,24 @@ export default function ActivatePage() {
                         >
                             <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
-                                    {!isTrial && (
-                                    <div className="absolute right-6 top-6">
-                                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
-                                            ? 'border-cyan-400 bg-cyan-400'
-                                            : 'border-white/20'
-                                            }`}>
-                                            {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                    {isTrial ? (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); setIsTrial(false); }}
+                                            className="absolute right-6 top-6 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/20 text-white/40 hover:border-white/40 hover:text-white/70 transition-all"
+                                            aria-label="Exit trial mode"
+                                        >
+                                            <XIcon className="h-3.5 w-3.5" />
+                                        </button>
+                                    ) : (
+                                        <div className="absolute right-6 top-6">
+                                            <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
+                                                ? 'border-cyan-400 bg-cyan-400'
+                                                : 'border-white/20'
+                                                }`}>
+                                                {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
+                                            </div>
                                         </div>
-                                    </div>
                                     )}
                                     <div className="mb-6">
                                         <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
@@ -557,6 +566,16 @@ export default function ActivatePage() {
                                             </li>
                                         ))}
                                     </ul>
+
+                                    {!isTrial && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); setIsTrial(true); setBillingPeriod('weekly'); setSelectedTier('pro'); }}
+                                            className="mt-5 w-full rounded-xl border border-cyan-500/20 bg-cyan-500/[0.04] py-2.5 text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/[0.08] hover:text-cyan-300"
+                                        >
+                                            Try Pro for $0.99 this week →
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
