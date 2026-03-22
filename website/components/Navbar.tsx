@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, Zap, Tag, Download, HelpCircle, ArrowRight, ChevronDown, Newspaper, Mail } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -28,6 +28,7 @@ export default function Navbar() {
     const hoverTimeout = useRef<NodeJS.Timeout | null>(null)
     const resetTimeout = useRef<NodeJS.Timeout | null>(null)
     const resourcesCloseTimeout = useRef<NodeJS.Timeout | null>(null)
+    const resourcesDropdownId = useId()
 
     const handleMouseEnter = (index: number) => {
         if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
@@ -95,6 +96,8 @@ export default function Navbar() {
         }
     }, [])
 
+    const RESOURCES_CLOSE_DELAY_MS = 400
+
     const handleResourcesMouseEnter = () => {
         if (resourcesCloseTimeout.current) clearTimeout(resourcesCloseTimeout.current)
     }
@@ -102,8 +105,17 @@ export default function Navbar() {
     const handleResourcesMouseLeave = () => {
         resourcesCloseTimeout.current = setTimeout(() => {
             setIsResourcesOpen(false)
-        }, 400)
+        }, RESOURCES_CLOSE_DELAY_MS)
     }
+
+    useEffect(() => {
+        return () => {
+            if (resourcesCloseTimeout.current) {
+                clearTimeout(resourcesCloseTimeout.current)
+                resourcesCloseTimeout.current = null
+            }
+        }
+    }, [])
 
     useEffect(() => {
         const updateHash = () => setActiveHash(window.location.hash)
@@ -157,11 +169,9 @@ export default function Navbar() {
                 setActiveHash('')
             }
         } else if (href === '/download' || href === '/help' || href === '/blog') {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
             e.preventDefault()
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-            setTimeout(() => {
-                window.location.href = href
-            }, 100)
+            router.push(href)
         }
     }
 
@@ -180,7 +190,7 @@ export default function Navbar() {
             </svg>
 
             {/* The Floating Pill */}
-            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-400 ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
+            <div className={`pointer-events-auto relative mx-auto flex h-16 w-full items-center justify-between md:h-14 transition-[max-width,padding] duration-[400ms] ease-out ${isScrolled ? 'max-w-full md:max-w-3xl pl-5 pr-5 md:pl-6 md:pr-3' : 'max-w-full md:max-w-5xl px-5 md:px-6'}`}>
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
@@ -269,6 +279,8 @@ export default function Navbar() {
                         <button
                             type="button"
                             onClick={() => setIsResourcesOpen(!isResourcesOpen)}
+                            aria-expanded={isResourcesOpen}
+                            aria-controls={resourcesDropdownId}
                             className={`relative z-10 px-4 py-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${isResourcesOpen || resourceItems.some(r => isActive(r.href))
                                 ? 'text-[--color-text]'
                                 : 'text-[--color-text-tertiary] hover:text-[--color-text]'
@@ -288,11 +300,13 @@ export default function Navbar() {
                         <AnimatePresence>
                             {isResourcesOpen && (
                                 <motion.div
+                                    id={resourcesDropdownId}
+                                    role="menu"
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
-                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 transition-[top] duration-400 ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
+                                    className={`absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
                                 >
                                     {resourceItems.map((item, i) => (
                                         <motion.div
@@ -301,7 +315,7 @@ export default function Navbar() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
                                             transition={{ duration: 0.3, delay: i * 0.05 }}
-                                            className="rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
+                                            className="w-28 rounded-full border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#111111d1]"
                                         >
                                             <Link
                                                 href={item.href}
