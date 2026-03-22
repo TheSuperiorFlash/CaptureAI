@@ -143,8 +143,8 @@ export default function Pricing() {
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
                                 <div className="mb-7 flex items-end gap-2">
                                     <div className="flex items-end">
-                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">$0.99</span>
-                                        <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">/wk</span>
+                                        <span className="text-4xl font-extrabold font-inter text-gradient-static">{billingPeriod === 'monthly' ? '$2.99' : '$0.99'}</span>
+                                        <span className="text-sm text-[--color-text-tertiary] mb-1 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
                                     </div>
                                     <div className="flex items-end">
                                         <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>

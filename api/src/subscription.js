@@ -945,14 +945,6 @@ export class SubscriptionHandler {
         }
       }
 
-      // Create Subscription Schedule to transition from intro week to Pro Monthly
-      if (isTrialMonthly && subscriptionId && fetchedSubscription?.current_period_end) {
-        await this.createMonthlyTransitionSchedule(
-          subscriptionId,
-          fetchedSubscription.current_period_end
-        );
-      }
-
     } catch (error) {
       console.error('Checkout completion error:', error);
     }
@@ -1743,7 +1735,6 @@ export class SubscriptionHandler {
     if (priceId === this.env.STRIPE_PRICE_BASIC_MONTHLY) return { tier: 'basic', billingPeriod: 'monthly' };
     if (priceId === this.env.STRIPE_PRICE_PRO_WEEKLY) return { tier: 'pro', billingPeriod: 'weekly' };
     if (priceId === this.env.STRIPE_PRICE_PRO_MONTHLY) return { tier: 'pro', billingPeriod: 'monthly' };
-    if (priceId === this.env.STRIPE_PRICE_TRIAL_INTRO) return { tier: 'pro', billingPeriod: 'monthly' };
     return null;
   }
 
@@ -1845,21 +1836,24 @@ export class SubscriptionHandler {
   }
 
   /**
-   * Create a Stripe checkout session for the $0.99 → $9.99/month trial.
-   * Uses a dedicated intro price (no coupon). After the first week, a
-   * Subscription Schedule transitions billing to Pro Monthly automatically.
+   * Create a Stripe checkout session for the $2.99 → $9.99/month trial.
+   * Applies a one-time coupon to Pro Monthly, charging $2.99 today.
+   * After the first month, billing continues at $9.99/month automatically.
    * @param {string} email
    */
   async createTrialMonthlyCheckout(email) {
-    const introPriceId = this.env.STRIPE_PRICE_TRIAL_INTRO;
-    if (!introPriceId) return jsonResponse({ error: 'Trial not available' }, 500);
+    const priceId = this.getPriceId('pro', 'monthly');
+    if (!priceId) return jsonResponse({ error: 'Price not configured' }, 500);
+    const couponId = this.env.STRIPE_COUPON_PRO_TRIAL_MONTHLY;
+    if (!couponId) return jsonResponse({ error: 'Trial not available' }, 500);
     const customer = await this.createStripeCustomer(email);
     const extensionUrl = this.env.EXTENSION_URL || 'https://captureai.dev';
     const params = new URLSearchParams({
       customer: customer.id,
-      'line_items[0][price]': introPriceId,
+      'line_items[0][price]': priceId,
       'line_items[0][quantity]': '1',
       mode: 'subscription',
+      'discounts[0][coupon]': couponId,
       'subscription_data[metadata][is_trial_monthly]': 'true',
       'metadata[is_trial_monthly]': 'true',
       'metadata[tier]': 'pro',
@@ -1893,36 +1887,6 @@ export class SubscriptionHandler {
     }
 
     return jsonResponse({ url: session.url, sessionId: session.id });
-  }
-
-  /**
-   * Create a Stripe Subscription Schedule to transition from the $0.99 intro
-   * week (STRIPE_PRICE_TRIAL_INTRO) into Pro Monthly (STRIPE_PRICE_PRO_MONTHLY).
-   * @param {string} subscriptionId
-   * @param {number} periodEnd - Unix timestamp of the intro week's end
-   */
-  async createMonthlyTransitionSchedule(subscriptionId, periodEnd) {
-    const params = new URLSearchParams({
-      from_subscription: subscriptionId,
-      'phases[0][items][0][price]': this.env.STRIPE_PRICE_TRIAL_INTRO,
-      'phases[0][end_date]': String(periodEnd),
-      'phases[1][items][0][price]': this.env.STRIPE_PRICE_PRO_MONTHLY,
-    });
-    const response = await fetchWithTimeout(
-      'https://api.stripe.com/v1/subscription_schedules',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.stripeKey}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: params,
-      },
-      5000
-    );
-    if (!response.ok) {
-      console.error('Failed to create monthly transition schedule:', await response.json());
-    }
   }
 
   /**
