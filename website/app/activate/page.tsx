@@ -438,12 +438,13 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className="mx-auto grid grid-cols-1 w-full max-w-4xl md:gap-6 md:grid-cols-2 perspective-[1200px]"
+                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchCancel}
                     >
-                        {/* Basic plan */}
+                        {/* Basic plan — hidden in trial mode */}
+                        {!isTrial && (
                         <div
                             role="button"
                             tabIndex={0}
@@ -493,21 +494,23 @@ export default function ActivatePage() {
                                 ))}
                             </ul>
                         </div>
+                        )}
 
                         {/* Pro plan */}
                         <div
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'pro'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative cursor-pointer rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === 'pro'
+                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] glow-blue transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro'
                                 ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                                 : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                                 }`}
-                            onClick={() => setSelectedTier('pro')}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
+                            onClick={() => !isTrial && setSelectedTier('pro')}
+                            onKeyDown={(e) => { if (!isTrial && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setSelectedTier('pro'); } }}
                         >
                             <div className={`flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
+                                    {!isTrial && (
                                     <div className="absolute right-6 top-6">
                                         <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
                                             ? 'border-cyan-400 bg-cyan-400'
@@ -516,6 +519,7 @@ export default function ActivatePage() {
                                             {selectedTier === 'pro' && <Check className="h-4 w-4 text-[--color-background]" />}
                                         </div>
                                     </div>
+                                    )}
                                     <div className="mb-6">
                                         <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
                                         <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
