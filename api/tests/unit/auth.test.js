@@ -214,7 +214,7 @@ describe('AuthHandler', () => {
     env = {
       DB: db,
       RESEND_API_KEY: 'test-resend-key',
-      FROM_EMAIL: 'CaptureAI <no-reply@capture.dev>'
+      FROM_EMAIL: 'CaptureAI <no-reply@captureai.dev>'
     };
     handler = new AuthHandler(env, logger);
 
@@ -850,13 +850,13 @@ describe('AuthHandler', () => {
     });
 
     test('should use FROM_EMAIL env variable when set', async () => {
-      env.FROM_EMAIL = 'Custom <custom@capture.dev>';
+      env.FROM_EMAIL = 'Custom <custom@captureai.dev>';
       handler = new AuthHandler(env, logger);
 
       await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
-      expect(callBody.from).toBe('Custom <custom@capture.dev>');
+      expect(callBody.from).toBe('Custom <custom@captureai.dev>');
     });
 
     test('should use default FROM_EMAIL when env var is not set', async () => {
@@ -866,7 +866,7 @@ describe('AuthHandler', () => {
       await handler.sendLicenseKeyEmail('user@test.com', 'ABCD-1234-EFGH-5678-IJKL', 'basic');
 
       const callBody = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
-      expect(callBody.from).toBe('CaptureAI <no-reply@capture.dev>');
+      expect(callBody.from).toBe('CaptureAI <no-reply@captureai.dev>');
     });
   });
 
