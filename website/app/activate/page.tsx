@@ -485,9 +485,9 @@ export default function ActivatePage() {
                     {/* Plans grid */}
                     <div
                         className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchCancel}
+                        onTouchStart={isTrial ? undefined : handleTouchStart}
+                        onTouchEnd={isTrial ? undefined : handleTouchEnd}
+                        onTouchCancel={isTrial ? undefined : handleTouchCancel}
                     >
                         {/* Basic plan — hidden in trial mode */}
                         {(!isTrial || isBasicHiding) && (
