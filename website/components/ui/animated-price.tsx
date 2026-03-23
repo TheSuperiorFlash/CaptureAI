@@ -65,7 +65,7 @@ export function AnimatedPrice({
           </motion.span>
         </AnimatePresence>
       </div>
-      <div className="relative overflow-hidden self-end pb-0.5">
+      <div className="relative overflow-hidden self-end pb-0.5 whitespace-nowrap">
         <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.span
             key={period}
