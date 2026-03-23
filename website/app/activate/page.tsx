@@ -611,7 +611,7 @@ export default function ActivatePage() {
                                             <button
                                                 type="button"
                                                 onClick={(e) => enterTrialMode(e)}
-                                                className="mb-1 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 py-1.5 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
+                                                className="mb-1 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 py-1.5 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap ml-3 sm:ml-0"
                                             >
                                                 <span className="sm:hidden">Try $0.99/wk</span>
                                                 <span className="hidden sm:inline">Try $0.99 for 7 days</span>
