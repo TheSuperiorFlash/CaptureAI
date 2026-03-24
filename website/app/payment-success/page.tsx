@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
+import { trackTikTokEvent } from '@/lib/analytics'
 
 const MAX_RETRIES = 5
 const INITIAL_DELAY_MS = 1000
@@ -95,6 +96,19 @@ function PaymentSuccessContent() {
 
         verifyPayment(0)
     }, [searchParams])
+
+    useEffect(() => {
+        if (status !== 'success') return
+        const sessionId = searchParams.get('session_id')
+        // Only fire for real Stripe Checkout completions — upgraded=1 flows have no session_id
+        // and would produce an undefined event_id, breaking TikTok deduplication.
+        if (!sessionId) return
+        trackTikTokEvent('Purchase', {
+            event_id: sessionId,
+            currency: 'USD',
+            content_type: 'product',
+        })
+    }, [status, searchParams])
 
     const isBasic = tier === 'basic'
 
