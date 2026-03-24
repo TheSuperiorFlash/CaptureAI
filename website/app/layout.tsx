@@ -14,6 +14,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import TikTokPixel from '@/components/tik-tok-pixel'
 import { SITE_URL } from '@/lib/constants'
 import SmoothScroll from '@/components/SmoothScroll'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -83,6 +84,7 @@ export default function RootLayout({
         <html lang="en">
             <body className="noise antialiased">
                 <GoogleAnalytics />
+                <TikTokPixel />
                 <TooltipProvider>
                 <SmoothScroll>
                     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
