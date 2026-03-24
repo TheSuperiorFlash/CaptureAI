@@ -14,7 +14,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
-import TikTokPixel from '@/components/tik-tok-pixel'
+import Script from 'next/script'
 import { SITE_URL } from '@/lib/constants'
 import SmoothScroll from '@/components/SmoothScroll'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -84,7 +84,15 @@ export default function RootLayout({
         <html lang="en">
             <body className="noise antialiased">
                 <GoogleAnalytics />
-                <TikTokPixel />
+                {/* TikTok Pixel Code Start */}
+                <Script id="tiktok-pixel" strategy="beforeInteractive">{`!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
+var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
+;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+  ttq.load('D70T45BC77U98PN6KECG');
+  ttq.page();
+}(window, document, 'ttq');`}</Script>
+                {/* TikTok Pixel Code End */}
                 <TooltipProvider>
                 <SmoothScroll>
                     <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[--color-accent] focus:px-4 focus:py-2 focus:text-white">
