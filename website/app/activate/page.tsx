@@ -6,7 +6,7 @@ import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity 
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
-import { trackEvent } from '@/lib/analytics'
+import { trackEvent, trackTikTokEvent } from '@/lib/analytics'
 import { Tab } from '@/components/ui/pricing-tab'
 import { AnimatedPrice } from '@/components/ui/animated-price'
 
@@ -288,6 +288,14 @@ export default function ActivatePage() {
     }, [setSelectedTier])
 
     useEffect(() => {
+        trackTikTokEvent('ViewContent', {
+            content_id: 'activate',
+            content_type: 'product',
+            content_name: 'CaptureAI Subscription',
+        })
+    }, [])
+
+    useEffect(() => {
         if (confirmationData) {
             const id = requestAnimationFrame(() => setModalVisible(true))
             return () => cancelAnimationFrame(id)
@@ -408,6 +416,7 @@ export default function ActivatePage() {
     const handleBasicSignup = async () => {
         const price = PRICES.basic[billingPeriod]
         trackEvent('click_checkout', { tier: 'basic', billingPeriod, value: price, currency: 'USD' })
+        trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'basic', content_type: 'product' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic', billingPeriod })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
@@ -419,6 +428,7 @@ export default function ActivatePage() {
     const handleProSignup = async () => {
         const price = isTrial ? (billingPeriod === 'monthly' ? 2.99 : 0.99) : PRICES.pro[billingPeriod]
         trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
+        trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'pro', content_type: 'product' })
         const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
         if (isTrial) body.trial = true
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)

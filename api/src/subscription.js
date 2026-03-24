@@ -5,6 +5,7 @@
 
 import { jsonResponse, parseJSON, generateUUID, constantTimeCompare, fetchWithTimeout } from './utils';
 import { AuthHandler } from './auth';
+import { sendTikTokEvent } from './tiktok';
 import { validateRequestBody, validateEmail, validateStripeSignature, validateVerificationCode, ValidationError } from './validation';
 import { logSubscription, logWebhook, logValidationError } from './logger';
 import { checkRateLimit, getClientIdentifier, RateLimitPresets } from './ratelimit';
@@ -943,7 +944,23 @@ export class SubscriptionHandler {
             await this.auth.sendLicenseKeyEmail(customerEmail, licenseKey, purchasedTier, nextBillingDate, true);
           }
         }
+
+        // CompleteRegistration for new users only
+        await sendTikTokEvent(this.env, 'CompleteRegistration', {
+          event_id: `reg_${session.id}`,
+          timestamp: session.created,
+          email: customerEmail,
+        });
       }
+
+      // Purchase event for all checkouts (new and existing users)
+      await sendTikTokEvent(this.env, 'Purchase', {
+        event_id: session.id,
+        timestamp: session.created,
+        email: customerEmail,
+        value: session.amount_total ? session.amount_total / 100 : undefined,
+        currency: session.currency?.toUpperCase() ?? 'USD',
+      });
 
     } catch (error) {
       console.error('Checkout completion error:', error);
