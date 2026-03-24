@@ -100,8 +100,11 @@ function PaymentSuccessContent() {
     useEffect(() => {
         if (status !== 'success') return
         const sessionId = searchParams.get('session_id')
+        // Only fire for real Stripe Checkout completions — upgraded=1 flows have no session_id
+        // and would produce an undefined event_id, breaking TikTok deduplication.
+        if (!sessionId) return
         trackTikTokEvent('Purchase', {
-            event_id: sessionId ?? undefined,
+            event_id: sessionId,
             currency: 'USD',
             content_type: 'product',
         })

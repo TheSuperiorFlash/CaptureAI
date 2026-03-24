@@ -946,21 +946,25 @@ export class SubscriptionHandler {
         }
 
         // CompleteRegistration for new users only
-        await sendTikTokEvent(this.env, 'CompleteRegistration', {
-          event_id: `reg_${session.id}`,
-          timestamp: session.created,
-          email: customerEmail,
-        });
+        if (this.env.TIKTOK_EVENTS_TOKEN) {
+          await sendTikTokEvent(this.env, 'CompleteRegistration', {
+            event_id: `reg_${session.id}`,
+            timestamp: session.created,
+            email: customerEmail,
+          });
+        }
       }
 
       // Purchase event for all checkouts (new and existing users)
-      await sendTikTokEvent(this.env, 'Purchase', {
-        event_id: session.id,
-        timestamp: session.created,
-        email: customerEmail,
-        value: session.amount_total ? session.amount_total / 100 : undefined,
-        currency: session.currency?.toUpperCase() ?? 'USD',
-      });
+      if (this.env.TIKTOK_EVENTS_TOKEN) {
+        await sendTikTokEvent(this.env, 'Purchase', {
+          event_id: session.id,
+          timestamp: session.created,
+          email: customerEmail,
+          value: session.amount_total != null ? session.amount_total / 100 : undefined,
+          currency: session.currency?.toUpperCase() ?? 'USD',
+        });
+      }
 
     } catch (error) {
       console.error('Checkout completion error:', error);

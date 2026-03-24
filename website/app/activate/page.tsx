@@ -416,19 +416,20 @@ export default function ActivatePage() {
     const handleBasicSignup = async () => {
         const price = PRICES.basic[billingPeriod]
         trackEvent('click_checkout', { tier: 'basic', billingPeriod, value: price, currency: 'USD' })
-        trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'basic', content_type: 'product' })
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, { email, tier: 'basic', billingPeriod })
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
         }
-        if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
+        if (data.url) {
+            trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'basic', content_type: 'product' })
+            redirectToCheckout(data.url as string)
+        } else { throw new Error('No checkout URL received') }
     }
 
     const handleProSignup = async () => {
         const price = isTrial ? (billingPeriod === 'monthly' ? 2.99 : 0.99) : PRICES.pro[billingPeriod]
         trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
-        trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'pro', content_type: 'product' })
         const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
         if (isTrial) body.trial = true
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)
@@ -436,7 +437,10 @@ export default function ActivatePage() {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
             return
         }
-        if (data.url) { redirectToCheckout(data.url as string) } else { throw new Error('No checkout URL received') }
+        if (data.url) {
+            trackTikTokEvent('InitiateCheckout', { value: price, currency: 'USD', content_id: 'pro', content_type: 'product' })
+            redirectToCheckout(data.url as string)
+        } else { throw new Error('No checkout URL received') }
     }
 
     return (
