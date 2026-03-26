@@ -8,8 +8,8 @@ Development guide for CaptureAI Chrome extension.
 
 | What you changed | Update these files |
 |------------------|--------------------|
-| API routes, auth, rate limits, AI models, webhooks | [api/ARCHITECTURE.md](api/ARCHITECTURE.md) + [GEMINI.md](GEMINI.md) |
-| Extension modules, storage keys, message actions, Privacy Guard | [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) + [GEMINI.md](GEMINI.md) |
+| API routes, auth, rate limits, AI models, webhooks | [api/ARCHITECTURE.md](api/ARCHITECTURE.md) + [GEMINI.md](GEMINI.md) + This file |
+| Extension modules, storage keys, message actions, Privacy Guard | [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) + [GEMINI.md](GEMINI.md) + This file |
 | Database tables, columns, indexes, views | [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) |
 | New migration file added | [api/migrations/README.md](api/migrations/README.md) |
 | CORS config, extension IDs | [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) |

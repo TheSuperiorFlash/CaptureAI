@@ -3,7 +3,6 @@
 import { useState, useEffect, memo, useMemo } from 'react'
 import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail, Tag } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
-import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
 import { trackEvent, trackTikTokEvent } from '@/lib/analytics'
 import { Tab } from '@/components/ui/pricing-tab'
@@ -250,23 +249,19 @@ const ActivateSparkles = memo(function ActivateSparkles() {
 
 export default function ActivatePage() {
     const [email, setEmail] = useState('')
-    const { selectedTier, setSelectedTier } = useSwipeTier()
+    const [selectedTier, setSelectedTier] = useState<'basic' | 'pro'>('pro')
     const [billingPeriod, setBillingPeriod] = useState<'weekly' | 'monthly'>('monthly')
     const direction = (billingPeriod === 'monthly' ? 1 : -1) as 1 | -1
 
-    const nextSunday = useMemo(() => {
+    const nextFriday = useMemo(() => {
         const today = new Date()
         const day = today.getDay()
         const daysUntil = day === 5 ? 7 : (5 - day + 7) % 7
-        const sunday = new Date(today)
-        sunday.setDate(today.getDate() + daysUntil)
-        const d = sunday.getDate()
-        const longMonth = sunday.toLocaleDateString('en-US', { month: 'long' })
-        const shortMonth = sunday.toLocaleDateString('en-US', { month: 'short' })
-        return {
-            desktop: `${longMonth} ${d}${getOrdinal(d)}`,
-            mobile: `${shortMonth} ${d}`,
-        }
+        const friday = new Date(today)
+        friday.setDate(today.getDate() + daysUntil)
+        const d = friday.getDate()
+        const longMonth = friday.toLocaleDateString('en-US', { month: 'long' })
+        return `${longMonth} ${d}${getOrdinal(d)}`
     }, [])
 
     const [loading, setLoading] = useState(false)
@@ -529,10 +524,9 @@ export default function ActivatePage() {
                                     <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-3 sm:pt-3.5 pointer-events-none">
                                         <div className="inline-flex items-center gap-1.5">
                                             <Tag className="h-3.5 w-3.5 text-cyan-400 mb-0.5" />
-                                            <span className="text-[13px] font-semibold text-cyan-400">
-                                                Introductory pricing, valid until{' '}
-                                                <span className="hidden sm:inline">{nextSunday.desktop}</span>
-                                                <span className="sm:hidden">{nextSunday.mobile}</span>
+                                            <span className="text-[13px] font-semibold text-cyan-400 sm:hidden">Introductory pricing</span>
+                                            <span className="hidden sm:inline text-[13px] font-semibold text-cyan-400">
+                                                Introductory pricing, valid until {nextFriday}
                                             </span>
                                         </div>
                                     </div>

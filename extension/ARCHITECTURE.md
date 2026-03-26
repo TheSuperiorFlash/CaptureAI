@@ -70,7 +70,6 @@ Chrome Extension (Manifest V3) with modular ES6 architecture. Supported auto-sol
 | `captureai-migration-license-v3-complete` | boolean | Migration completion flag |
 | `captureai-migration-notice` | string | Message shown in popup after migration |
 | `captureai-api-key` | string | Legacy API key (deprecated, read as fallback during migration) |
-| `captureai-web-session-ts` | string | ISO timestamp of last successful `/api/auth/me` validation |
 
 ## Privacy Guard System
 
