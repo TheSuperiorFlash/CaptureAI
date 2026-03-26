@@ -1,0 +1,39 @@
+# CaptureAI - AI-Powered Screenshot Answers for Students
+
+> CaptureAI provides an AI-powered browser extension that quickly captures on-screen questions and delivers instant answers across various learning platforms, emphasizing privacy and ease of use.
+
+## Core Content
+
+- How CaptureAI reads and understands on-screen questions, including text, multiple-choice options, diagrams, and math or science problems
+- Features such as screenshot capture, floating interface, stealth mode, ask mode, auto-solve, and privacy guard
+- Instructions on installing and activating the extension
+- Usage guides on capturing questions and obtaining answers seamlessly
+- How Privacy Guard prevents detection on quiz platforms
+- FAQs addressing browser support, detection, answer accuracy, and platform compatibility (Canvas, Moodle, Blackboard, Top Hat, Schoology)
+- Pricing plans, including Basic and Pro tiers with features list
+
+## Learning Platform Compatibility
+
+- Details on how CaptureAI works across learning platforms
+- Compatibility explanation with Canvas, Moodle, Blackboard, Top Hat, and other LMS
+- Functionality regarding math, science, and varied question formats
+
+## Features and Functionality
+
+- How the floating panel and stealth mode operate
+- Privacy protection features to hide extension activity
+- Auto-solve capabilities for specific platforms
+- Ask mode for detailed explanations
+- How the extension reads and delivers answers without pop-ups or traces
+
+## Resources
+
+- Get Started links for installation and activation
+- Feature exploration and FAQs for troubleshooting and detailed understanding
+- Pricing and subscription options
+
+## Optional
+
+- Privacy and security explanations
+- Detailing on auto-answering capabilities with examples
+- Additional tips for effective usage of the extension
