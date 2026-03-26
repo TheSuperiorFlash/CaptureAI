@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { AnimatedPrice } from '@/components/ui/animated-price'
 import { Tab } from '@/components/ui/pricing-tab'
 import Link from 'next/link'
-import { Check, X as XIcon, Minus } from 'lucide-react'
+import { Check, X as XIcon, Minus, Tag } from 'lucide-react'
 import { ScrollReveal, ScrollRevealItem } from './ScrollReveal'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 
@@ -137,7 +137,11 @@ export default function Pricing() {
                     >
                         <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] transition-all duration-300 ${selectedTier === TIER_PRO ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] md:shadow-none md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                             <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === TIER_PRO ? 'border-cyan-400/50' : 'border-white/20 sm:hover:border-cyan-400/50'}`}>
-                                <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
+                                <div className="absolute top-[0.875rem] left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                                    <Tag className="h-3.5 w-3.5 text-cyan-400 mb-0.5" />
+                                    <span className="text-xs font-semibold text-cyan-400 tracking-wide">Introductory pricing</span>
+                                </div>
+                                <span className="absolute right-6 top-9 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>
                                 <h3 className="mb-1 text-xl text-[--color-text]">Pro</h3>
@@ -176,7 +180,7 @@ export default function Pricing() {
                                 </ul>
 
                                 <Link
-                                    href="/activate?tier=pro&billing=weekly&trial=true"
+                                    href="/activate?tier=pro&billing=weekly"
                                     className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
                                 >
                                     Try Pro — $0.99 first week
