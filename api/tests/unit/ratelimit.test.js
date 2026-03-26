@@ -46,7 +46,7 @@ function createFailingNativeEnv(error, bindingName = 'RATE_LIMITER_GLOBAL') {
  * Create a Request object with specific headers for getClientIdentifier tests.
  */
 function mockRequestWithHeaders(headers = {}) {
-  return new Request('https://api.captureai.workers.dev/', {
+  return new Request('https://api.captureai.dev/', {
     headers
   });
 }

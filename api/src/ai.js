@@ -111,7 +111,7 @@ export class AIHandler {
 
       // Send to AI Gateway
       const startTime = Date.now();
-      const aiResponse = await this.sendToGateway(payload, user.userId);
+      const aiResponse = await this.sendToGateway(payload, user.userId, promptType);
       const responseTime = Date.now() - startTime;
 
       // Extract answer
@@ -799,7 +799,7 @@ export class AIHandler {
   /**
    * Send request to Cloudflare AI Gateway
    */
-  async sendToGateway(payload, userId) {
+  async sendToGateway(payload, userId, promptType) {
     const headers = {
       'Content-Type': 'application/json',
       'cf-aig-metadata-user': userId
@@ -808,6 +808,11 @@ export class AIHandler {
     // Add gateway token if using authenticated AI Gateway
     if (this.env.CLOUDFLARE_GATEWAY_TOKEN) {
       headers['cf-aig-authorization'] = this.env.CLOUDFLARE_GATEWAY_TOKEN;
+    }
+
+    // Auto-solve responses must not be served from cache (answers vary per question)
+    if (promptType === 'auto_solve' || promptType === 'auto_solve_image') {
+      headers['cf-aig-skip-cache'] = 'true';
     }
 
     const response = await fetchWithTimeout(this.apiUrl, {

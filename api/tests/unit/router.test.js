@@ -55,7 +55,7 @@ import { Router } from '../../src/router.js';
 
 function createRequest(url, method = 'GET') {
   return {
-    url: `https://api.captureai.workers.dev${url}`,
+    url: `https://api.captureai.dev${url}`,
     method,
     headers: new Map()
   };

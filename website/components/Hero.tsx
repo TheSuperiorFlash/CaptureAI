@@ -108,7 +108,7 @@ export default function Hero() {
 
     return (
         <section
-            className="relative overflow-x-clip pb-20 pt-24 md:pb-48 md:pt-48"
+            className="relative overflow-x-clip pt-24 md:pt-48 flex flex-col min-h-svh"
         >
             {/* Layered deeper gradient background with smooth fade-out */}
             <div className="pointer-events-none absolute -inset-x-0 top-0 bottom-[-400px] z-0 [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]">
@@ -152,9 +152,10 @@ export default function Hero() {
                 </div>
             </div>
 
-            <div className="relative z-10 mx-auto max-w-6xl px-6">
+            <div className="relative z-10 mx-auto max-w-6xl px-6 w-full flex flex-col flex-1">
+                <div className="flex-1 flex items-center">
                 <motion.div
-                    className="mx-auto max-w-4xl text-center"
+                    className="mx-auto max-w-4xl text-center w-full"
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
@@ -220,10 +221,11 @@ export default function Hero() {
                         </a>
                     </motion.div>
                 </motion.div>
+                </div>
 
                 {/* Platform logos */}
                 <motion.div
-                    className="mt-28 w-full"
+                    className="pt-10 pb-8 md:pb-12 w-full"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}

@@ -13,6 +13,7 @@ import Pricing from '@/components/Pricing'
 import FloatingUIShowcase from '@/components/FloatingUIShowcase'
 import { FAQS } from '@/lib/faq-data'
 import { SITE_URL } from '@/lib/constants'
+import { SparklesCore } from '@/components/ui/sparkles'
 
 export const metadata: Metadata = {
     description: 'Chrome extension that screenshots any question and gives you the answer instantly. Works on Canvas, Moodle, Blackboard, Top Hat, and every learning platform.',
@@ -73,10 +74,13 @@ export default function Home() {
             <Hero />
 
             {/* Apple-Style Story Sequence */}
-            <ScrollStory />
+            <div className="hidden md:block">
+                <ScrollStory />
+            </div>
+            <div className="md:hidden h-12" />
 
             {/* ---- Floating UI Showcase ---- */}
-            <section className="relative py-32 md:py-42 overflow-x-clip">
+            <section className="relative py-20 md:py-42 overflow-x-clip">
                 <div className="divider-gradient absolute left-0 right-0 top-0" />
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="grid items-start gap-12 lg:grid-cols-2">
@@ -184,11 +188,36 @@ export default function Home() {
             <FAQ />
 
             {/* ---- Final CTA ---- */}
-            <section className="relative overflow-hidden py-32 md:py-48">
-                <div className="divider-gradient absolute left-0 right-0 top-0" />
+            <section className="relative overflow-hidden py-48 md:py-64">
                 {/* Background glow */}
-                <div className="absolute left-1/2 top-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" />
-                <div className="absolute left-[30%] top-[30%] h-[400px] w-[400px] rounded-full bg-cyan-500 gradient-blur" />
+                <div className="pointer-events-none absolute inset-0" style={{maskImage:'linear-gradient(to bottom,transparent,black 40%,black 75%,rgba(0,0,0,0.25) 100%)',WebkitMaskImage:'linear-gradient(to bottom,transparent,black 40%,black 75%,rgba(0,0,0,0.25) 100%)'}}>
+                    {/* Center blob */}
+                    <div className="absolute left-1/2 top-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600 gradient-blur gradient-blur-animated animate-pulse-glow" style={{ animationDuration: '9s' }} />
+                    {/* Blob 1: Top Center */}
+                    <div className="absolute left-[50%] top-[-100px] md:top-[-200px] h-[500px] w-[500px] md:h-[1000px] md:w-[1000px] -ml-[250px] md:-ml-[500px] pointer-events-none">
+                        <div className="h-full w-full rounded-full bg-[#0047ff] gradient-blur" style={{ opacity: 0.15 }} />
+                    </div>
+                    {/* Blob 2: Right */}
+                    <div className="absolute right-[-150px] md:right-[-100px] top-[50px] h-[400px] w-[400px] md:h-[800px] md:w-[800px] pointer-events-none">
+                        <div className="h-full w-full rounded-full bg-[#00f0ff] gradient-blur" style={{ opacity: 0.1 }} />
+                    </div>
+                    {/* Blob 3: Bottom Left */}
+                    <div className="absolute bottom-[50px] md:bottom-[100px] left-[-150px] h-[500px] w-[500px] md:h-[1000px] md:w-[1000px] pointer-events-none">
+                        <div className="h-full w-full rounded-full bg-[#0d3bbf] gradient-blur" style={{ opacity: 0.1 }} />
+                    </div>
+                </div>
+                <div className="pointer-events-none absolute inset-0 h-full w-full" style={{maskImage:'linear-gradient(to bottom,transparent,black 40%,black 75%,rgba(0,0,0,0.25) 100%)',WebkitMaskImage:'linear-gradient(to bottom,transparent,black 40%,black 75%,rgba(0,0,0,0.25) 100%)'}}>
+                    <SparklesCore
+                        id="cta-sparkles"
+                        background="transparent"
+                        minSize={0.6}
+                        maxSize={1.4}
+                        particleDensity={30}
+                        className="h-full w-full"
+                        particleColor="#FFFFFF"
+                        speed={1}
+                    />
+                </div>
 
                 <div className="relative z-10 mx-auto max-w-6xl px-6">
                     <ScrollReveal delay={0.1} className="mx-auto max-w-xl text-center">

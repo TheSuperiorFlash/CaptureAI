@@ -95,7 +95,7 @@ function createMockRequest(method = 'POST', headers = {}) {
     ...headers
   }));
   return {
-    url: 'https://api.captureai.workers.dev/api/ai/complete',
+    url: 'https://api.captureai.dev/api/ai/complete',
     method,
     headers: { get: (key) => headerMap.get(key) || null }
   };
@@ -628,7 +628,7 @@ describe('AIHandler', () => {
       // Create request with custom URL containing days param
       const request = {
         ...createMockRequest('GET'),
-        url: 'https://api.captureai.workers.dev/api/ai/analytics?days=7'
+        url: 'https://api.captureai.dev/api/ai/analytics?days=7'
       };
 
       const response = await handler.getAnalytics(request);

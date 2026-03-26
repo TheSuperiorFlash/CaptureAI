@@ -80,3 +80,9 @@ captureai-extension.zip
 
 ### Playwright CLI session artifacts ###
 .playwright-cli/
+
+### Claude Code local settings (developer-specific, not shared) ###
+.claude/settings.local.json
+
+### Superpowers specs and local docs ###
+docs/superpowers/
