@@ -1,8 +1,8 @@
 # Extension Architecture
 
-> **Self-update rule:** When you add/change modules, storage keys, message actions, manifest permissions, Privacy Guard protections, or OCR pipeline behavior — update this file and the Storage Keys / Key Concepts sections of [CLAUDE.md](../CLAUDE.md) before committing.
+> **Self-update rule:** When you add/change modules, storage keys, message actions, manifest permissions, Privacy Guard protections, or OCR pipeline behavior — update this file and the Quick Reference section of [CLAUDE.md](../CLAUDE.md) before committing.
 
-Chrome Extension (Manifest V3) with modular ES6 architecture.
+Chrome Extension (Manifest V3) with modular ES6 architecture. Supported auto-solve site: **Vocabulary.com**.
 
 - **`content.js`** (Isolated world): Loads 14 modules via `import()` and exposes each via `window.CaptureAI`.
 - **`background.js`** (Service Worker): Loads `auth-service.js` and `migration.js` directly via `importScripts()` — these are not exposed via `window.CaptureAI`.
@@ -23,8 +23,8 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 |--------|-------------|---------------|
 | `config.js` | content.js (`import()`) → `window.CaptureAI` | CONFIG, TIMING, STORAGE_KEYS, PROMPT_TYPES, ICONS, STATE, DOM_CACHE constants |
 | `storage.js` | content.js (`import()`) → `window.CaptureAI` | Chrome storage wrappers (setValue, getValue, getValues, removeValue, clear) |
-| `auth-service.js` | background.js (`importScripts()`) | Backend API client (`api.captureai.workers.dev`), license validation, user cache (5-min fresh, 1-hour max) |
-| `ocr-service.js` | transitive dep of `image-processing.js` | Tesseract.js v5 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup |
+| `auth-service.js` | background.js (`importScripts()`) | Backend API client (`api.captureai.dev`), license validation, user cache (5-min fresh, 1-hour max) |
+| `ocr-service.js` | transitive dep of `image-processing.js` | Tesseract.js v7 OCR with 60% confidence threshold, 3x upscale preprocessing, site-specific cleanup. See OCR Pipeline section for full flow. |
 | `domains.js` | content.js (`import()`) → `window.CaptureAI` | Site detection (vocabulary.com), strict CSP site detection, URL validation |
 | `utils.js` | content.js (`import()`) → `window.CaptureAI` | Debounce, delay, visibility checks, ID generation, HTML sanitization |
 | `image-processing.js` | content.js (`import()`) → `window.CaptureAI` | WebP/JPEG compression (default 0.3 quality, WebP effective 0.24), max 800x600, zoom-aware capture |
@@ -48,7 +48,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 | `captureai-user-email` | string | User email |
 | `captureai-user-tier` | string | `basic` or `pro` |
 | `captureai-user-cache` | object | `{user, updatedAt}` — cached user data with timestamp |
-| `captureai-backend-url` | string | Backend URL (default: `https://api.captureai.workers.dev`) |
+| `captureai-backend-url` | string | Backend URL (default: `https://api.captureai.dev`) |
 
 ### User Preferences
 | Key | Type | Description |
@@ -70,6 +70,7 @@ Chrome Extension (Manifest V3) with modular ES6 architecture.
 | `captureai-migration-license-v3-complete` | boolean | Migration completion flag |
 | `captureai-migration-notice` | string | Message shown in popup after migration |
 | `captureai-api-key` | string | Legacy API key (deprecated, read as fallback during migration) |
+| `captureai-web-session-ts` | string | ISO timestamp of last successful `/api/auth/me` validation |
 
 ## Privacy Guard System
 
@@ -145,6 +146,14 @@ Background -> chrome.runtime.sendMessage() -> Popup (fire-and-forget)
 4. If confidence >= 60%: Send text only (90% token savings)
 5. If confidence < 60% OR image-selection question detected OR wrong-answer prompt: Send image
 6. Site-specific OCR cleanup for vocabulary.com artifacts (removes QO/OO/QQ patterns)
+
+## Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+X` | Capture new area |
+| `Ctrl+Shift+F` | Recapture last area |
+| `Ctrl+Shift+E` | Toggle panel |
 
 ## Manifest Permissions
 

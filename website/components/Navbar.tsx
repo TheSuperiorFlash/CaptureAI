@@ -223,13 +223,13 @@ export default function Navbar() {
                 {/* Glass background layer — fades in/out independently */}
                 <motion.div
                     className={`absolute inset-0 md:rounded-full pointer-events-none ${shouldUseSimpleGlass
-                        ? 'border-b md:border border-white/[0.08] bg-[#060913]/85 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
-                        : 'border-b md:border border-white/[0.02] bg-[#000000]/25 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
+                        ? 'md:border border-white/[0.08] bg-[#060913]/60 md:bg-[#060913]/85 backdrop-blur-md md:backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
+                        : 'border border-gray-300/[0.25] bg-[#000000]/25 drop-shadow-[-8px_-10px_46px_rgba(0,0,0,0.37)]'
                         }`}
                     style={!shouldUseSimpleGlass ? {
                         backdropFilter: 'brightness(0.9) blur(2px) url(#displacementFilter)',
                         WebkitBackdropFilter: 'brightness(0.9) blur(2px) url(#displacementFilter)',
-                        boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.4), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
+                        boxShadow: 'inset 2px 2px 5px 0px rgba(255, 255, 255, 0.12), inset 0 0 7px 3px rgba(255, 255, 255, 0.08)'
                     } : undefined}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: isScrolled ? 1 : 0 }}
@@ -256,12 +256,12 @@ export default function Navbar() {
                                     layoutId={`nav-hover-pill-${sessionKey}`}
                                     className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
                                         ? 'bg-white/[0.06] backdrop-blur-md'
-                                        : 'border border-white/[0.02] bg-white/[0.02]'
+                                        : 'bg-white/[0.02]'
                                         }`}
                                     style={!shouldUseSimpleGlass ? {
                                         backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
                                         WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
-                                        boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
+                                        boxShadow: 'inset 2px 2px 4px -1px rgba(255, 255, 255, 0.3), inset 0 0 5px 2px rgba(255, 255, 255, 0.3)'
                                     } : undefined}
                                     initial={isFirstInSession ? { opacity: 0 } : false}
                                     animate={{ opacity: isNavHovered ? 1 : 0 }}
@@ -293,12 +293,12 @@ export default function Navbar() {
                                 layoutId={`nav-hover-pill-${sessionKey}`}
                                 className={`absolute inset-0 rounded-full ${shouldUseSimpleGlass
                                     ? 'bg-white/[0.06] backdrop-blur-md'
-                                    : 'border border-white/[0.02] bg-white/[0.02]'
+                                    : 'bg-white/[0.02]'
                                     }`}
                                 style={!shouldUseSimpleGlass ? {
                                     backdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
                                     WebkitBackdropFilter: 'brightness(0.9) blur(4px) url(#displacementFilter)',
-                                    boxShadow: 'inset 2px 2px 0px -2px rgba(255, 255, 255, 0.3), inset 0 0 3px 1px rgba(255, 255, 255, 0.3)'
+                                    boxShadow: 'inset 2px 2px 4px -1px rgba(255, 255, 255, 0.3), inset 0 0 5px 2px rgba(255, 255, 255, 0.3)'
                                 } : undefined}
                                 initial={isFirstInSession ? { opacity: 0 } : false}
                                 animate={{ opacity: isNavHovered ? 1 : 0 }}

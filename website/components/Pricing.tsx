@@ -74,7 +74,7 @@ export default function Pricing() {
                         onClick={() => setSelectedTier(TIER_BASIC)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier(TIER_BASIC); } }}
                     >
-                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : 'md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
+                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!bg-[linear-gradient(145deg,rgb(11,17,32)_0%,rgb(6,9,19)_100%)] md:!bg-none !border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : '!border-white/20 md:!border-transparent md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
                                 <AnimatedPrice
@@ -136,7 +136,7 @@ export default function Pricing() {
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier(TIER_PRO); } }}
                     >
                         <ScrollRevealItem className={`flex h-full w-full flex-col rounded-[24px] transition-all duration-300 ${selectedTier === TIER_PRO ? 'shadow-[0_0_40px_rgba(0,240,255,0.25)] md:shadow-none md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]' : 'md:hover:-translate-y-1 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
-                            <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === TIER_PRO ? 'border-cyan-400/50' : 'border-white/10 sm:hover:border-cyan-400/50'}`}>
+                            <div className={`glow-blue relative flex flex-1 w-full flex-col rounded-[24px] bg-gradient-to-b from-[#0a1128]/95 to-[#040715]/95 backdrop-blur-[12px] p-8 border transition-all duration-300 ${selectedTier === TIER_PRO ? 'border-cyan-400/50' : 'border-white/20 sm:hover:border-cyan-400/50'}`}>
                                 <span className="absolute right-6 top-6 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-3 py-1 text-xs font-bold tracking-wide text-cyan-400">
                                     POPULAR
                                 </span>
@@ -184,6 +184,23 @@ export default function Pricing() {
                             </div>
                         </ScrollRevealItem>
                     </div>
+                </div>
+
+                {/* Mobile swipe affordance */}
+                <div className="flex flex-col items-center gap-2 mt-5 md:hidden">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setSelectedTier(TIER_BASIC)}
+                            aria-label="Select Basic plan"
+                            className={`h-2 rounded-full transition-all duration-300 ${selectedTier === TIER_BASIC ? 'w-5 bg-white' : 'w-2 bg-white/30'}`}
+                        />
+                        <button
+                            onClick={() => setSelectedTier(TIER_PRO)}
+                            aria-label="Select Pro plan"
+                            className={`h-2 rounded-full transition-all duration-300 ${selectedTier === TIER_PRO ? 'w-5 bg-cyan-400' : 'w-2 bg-white/30'}`}
+                        />
+                    </div>
+                    <p className="text-xs text-[--color-text-tertiary]">Swipe to compare</p>
                 </div>
             </div>
         </section>

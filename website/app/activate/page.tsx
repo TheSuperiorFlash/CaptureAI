@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef, memo } from 'react'
+import { useState, useEffect, useRef, memo, useMemo } from 'react'
 import { flushSync } from 'react-dom'
-import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail } from 'lucide-react'
+import { Check, X as XIcon, ArrowRight, Shield, MessageSquare, Repeat, Infinity as InfinityIcon, Minus, AlertCircle, Mail, Flame } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { useSwipeTier } from '@/hooks/useSwipeTier'
 import { SparklesCore } from '@/components/ui/sparkles'
@@ -41,6 +41,12 @@ const proHighlights = [
     { icon: MessageSquare, title: 'Ask Mode', desc: 'Follow-up questions' },
     { icon: Repeat, title: 'Auto-Solve', desc: 'Hands-free answers' },
 ]
+
+function getOrdinal(n: number): string {
+    const s = ['th', 'st', 'nd', 'rd']
+    const v = n % 100
+    return s[(v - 20) % 10] || s[v] || s[0]
+}
 
 async function apiPost(url: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
     try {
@@ -262,6 +268,21 @@ export default function ActivatePage() {
         }
     }, [isTrial])
 
+    const nextSunday = useMemo(() => {
+        const today = new Date()
+        const day = today.getDay()
+        const daysUntil = day === 5 ? 7 : (5 - day + 7) % 7
+        const sunday = new Date(today)
+        sunday.setDate(today.getDate() + daysUntil)
+        const d = sunday.getDate()
+        const longMonth = sunday.toLocaleDateString('en-US', { month: 'long' })
+        const shortMonth = sunday.toLocaleDateString('en-US', { month: 'short' })
+        return {
+            desktop: `${longMonth} ${d}${getOrdinal(d)}`,
+            mobile: `${shortMonth} ${d}`,
+        }
+    }, [])
+
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<ResultState | null>(null)
     const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null)
@@ -428,10 +449,9 @@ export default function ActivatePage() {
     }
 
     const handleProSignup = async () => {
-        const price = isTrial ? (billingPeriod === 'monthly' ? 2.99 : 0.99) : PRICES.pro[billingPeriod]
-        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: isTrial })
-        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod }
-        if (isTrial) body.trial = true
+        const price = billingPeriod === 'monthly' ? 2.99 : 0.99
+        trackEvent('click_checkout', { tier: 'pro', billingPeriod, value: price, currency: 'USD', trial: true })
+        const body: Record<string, unknown> = { email, tier: 'pro', billingPeriod, trial: true }
         const data = await apiPost(`${API_BASE_URL}/api/subscription/create-checkout`, body)
         if (data.requiresConfirmation) {
             showConfirmModal({ tier: data.tier as string, billingPeriod: (data.billingPeriod as 'weekly' | 'monthly') ?? billingPeriod, email })
@@ -498,21 +518,18 @@ export default function ActivatePage() {
 
                     {/* Plans grid */}
                     <div
-                        className={`mx-auto grid grid-cols-1 w-full perspective-[1200px] ${isTrial ? 'max-w-md' : 'max-w-4xl md:gap-6 md:grid-cols-2'}`}
-                        onTouchStart={isTrial ? undefined : handleTouchStart}
-                        onTouchEnd={isTrial ? undefined : handleTouchEnd}
-                        onTouchCancel={isTrial ? undefined : handleTouchCancel}
+                        className={`mx-auto w-full ${isTrial ? 'max-w-md' : 'flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-6 md:max-w-4xl'}`}
                     >
                         {/* Basic plan — hidden in trial mode */}
                         {(!isTrial || isBasicHiding) && (
-                        <div className={`row-start-1 col-start-1 md:row-auto md:col-auto transition-all duration-300 ease-in-out ${isBasicHiding ? 'opacity-0 -translate-x-3 pointer-events-none' : 'opacity-100'}`}>
+                        <div className={`transition-all duration-300 ease-in-out ${isBasicHiding ? 'opacity-0 -translate-x-3 pointer-events-none' : 'opacity-100'}`}>
                         <div
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'basic'}
-                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none mx-auto h-full flex flex-col ${selectedTier === 'basic'
-                                ? '!border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:hover:-translate-y-1'
-                                : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
+                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 w-full h-full flex flex-col ${selectedTier === 'basic'
+                                ? '!border-blue-500/50 !shadow-[0_0_24px_rgba(59,130,246,0.12)] md:hover:-translate-y-1'
+                                : 'opacity-70 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 }`}
                             onClick={() => setSelectedTier('basic')}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('basic'); } }}
@@ -564,14 +581,11 @@ export default function ActivatePage() {
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'pro'}
-                            className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro'
-                                ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
-                                : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
-                                }`}
+                            className={`relative rounded-[24px] transition duration-300 w-full ${isTrial ? 'cursor-default' : 'cursor-pointer'} ${selectedTier === 'pro' ? '' : 'opacity-70 md:opacity-100'}`}
                             onClick={() => !isTrial && setSelectedTier('pro')}
                             onKeyDown={(e) => { if (!isTrial && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setSelectedTier('pro'); } }}
                         >
-                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'border-white/10 md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] p-7 h-full w-full">
                                     {isTrial ? (
                                         <button
@@ -592,45 +606,33 @@ export default function ActivatePage() {
                                             </div>
                                         </div>
                                     )}
+                                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-3 sm:pt-3.5 pointer-events-none">
+                                        <div className="inline-flex items-center gap-2">
+                                            <Flame className="hidden sm:inline h-4 w-4 text-amber-400" />
+                                            <span className="text-[13px] font-semibold text-amber-400">
+                                                Limited time, valid until{' '}
+                                                <span className="hidden sm:inline">{nextSunday.desktop}</span>
+                                                <span className="sm:hidden">{nextSunday.mobile}</span>
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="mb-6">
                                         <h2 className="text-xl font-bold text-[--color-text]">Pro</h2>
                                         <p className="text-sm text-[--color-text-tertiary] mt-1">For daily use</p>
                                     </div>
 
-                                    <div className="mb-7 flex items-end gap-3">
-                                        {isTrial ? (
-                                            <div className={`flex items-end gap-2 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-100' : 'opacity-0'}`}>
-                                                <AnimatedPrice
-                                                    price={billingPeriod === 'monthly' ? 2.99 : 0.99}
-                                                    period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
-                                                    direction={direction}
-                                                    priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
-                                                    periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
-                                                />
-                                                <div className="flex items-end">
-                                                    <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
-                                                    <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <AnimatedPrice
-                                                price={PRICES.pro[billingPeriod]}
-                                                period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
-                                                direction={direction}
-                                                priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
-                                                periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
-                                            />
-                                        )}
-                                        {!isTrial && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => enterTrialMode(e)}
-                                                className="mb-1 flex-shrink-0 inline-flex items-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.06] px-4 py-1.5 text-sm font-semibold text-cyan-400 transition-all hover:bg-cyan-400/10 hover:border-cyan-400/50 whitespace-nowrap"
-                                            >
-                                                <span className="sm:hidden">Try $0.99/wk</span>
-                                                <span className="hidden sm:inline">Try $0.99 for 7 days</span>
-                                            </button>
-                                        )}
+                                    <div className="mb-7 flex items-end gap-2">
+                                        <AnimatedPrice
+                                            price={billingPeriod === 'monthly' ? 2.99 : 0.99}
+                                            period={billingPeriod === 'monthly' ? 'mo' : 'wk'}
+                                            direction={direction}
+                                            priceClassName="text-4xl font-extrabold font-inter text-gradient-static"
+                                            periodClassName="text-sm text-[--color-text-tertiary] ml-0.5"
+                                        />
+                                        <div className="flex items-end">
+                                            <span className="text-2xl font-bold font-inter line-through text-[--color-text-tertiary] opacity-40">{billingPeriod === 'monthly' ? '$9.99' : '$3.49'}</span>
+                                            <span className="text-sm text-[--color-text-tertiary] opacity-40 mb-0.5 ml-0.5">{billingPeriod === 'monthly' ? '/mo' : '/wk'}</span>
+                                        </div>
                                     </div>
 
                                     {/* Pro highlights grid */}
@@ -656,11 +658,9 @@ export default function ActivatePage() {
                                         ))}
                                     </ul>
 
-                                    {isTrial && (
-                                        <p className={`mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50 transition-opacity duration-300 ${isTrialContentVisible ? 'opacity-50' : 'opacity-0'}`}>
-                                            Cancel anytime · {billingPeriod === 'monthly' ? 'Renews at $9.99/mo' : 'Renews at $3.49/wk'}
-                                        </p>
-                                    )}
+                                    <p className="mt-5 text-center text-[11px] text-[--color-text-tertiary] opacity-50">
+                                        Cancel anytime · {billingPeriod === 'monthly' ? 'Renews at $9.99/mo' : 'Renews at $3.49/wk'}
+                                    </p>
 
                                 </div>
                             </div>

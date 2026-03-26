@@ -1,8 +1,8 @@
 # API Architecture
 
-> **Self-update rule:** When you add/change routes, auth logic, rate limit presets, AI models, prompt types, webhook events, CORS origins, or security headers — update this file and the Key Concepts section of [CLAUDE.md](../CLAUDE.md) before committing.
+> **Self-update rule:** When you add/change routes, auth logic, rate limit presets, AI models, prompt types, webhook events, CORS origins, or security headers — update this file and the Quick Reference section of [CLAUDE.md](../CLAUDE.md) before committing.
 
-Backend runs on Cloudflare Workers with D1 (SQLite) database, accessed at `https://api.captureai.workers.dev`.
+Backend runs on Cloudflare Workers with D1 (SQLite) database, accessed at `https://api.captureai.dev`.
 
 ## Routes
 
@@ -79,13 +79,13 @@ Requests go through **Cloudflare AI Gateway** (provider-agnostic OpenAI endpoint
 **Models:**
 - Level 0: `gpt-4.1-nano` — fastest, no reasoning, legacy params (`max_tokens`)
 - Level 1: `gpt-5-nano` + `reasoningEffort: 'low'` — default
-- Level 2: `gpt-5-nano` + `reasoningEffort: 'medium'` — Pro only (server-side enforced; non-Pro requests are clamped to level 1)
+- Level 2: `gpt-5-nano` + `reasoningEffort: 'medium'` — Pro only (server-side enforced; non-Pro requests are clamped to level 1). **RULE:** Never allow client-supplied `reasoningLevel` to bypass this — enforcement is server-side in `ai.js` only.
 
 **Prompt types:** `answer`, `answer_image`, `ask`, `ask_image`, `auto_solve`, `auto_solve_image`
 
 **Max tokens:** AUTO_SOLVE=2500, ASK=8000, TEXT_ONLY=4000, DEFAULT=5000
 
-**Usage tracking:** Dual-table — `usage_records` (per-request detail) + `usage_daily` (O(1) daily limit checks via atomic upsert)
+**Usage tracking:** Dual-table — `usage_breakdown` (per-day analytics keyed on email+date+prompt_type+model, reliable writes) + `usage_daily` (O(1) daily limit checks, authoritative daily totals via atomic upsert)
 
 ## Webhook Security
 
@@ -122,3 +122,20 @@ Applied to all responses: `X-Content-Type-Options: nosniff`, `X-Frame-Options: D
 ## Scheduled Jobs
 
 A daily cron trigger (`0 3 * * *`, defined in `wrangler.toml`) calls the `scheduled` handler in `src/index.js`, which deletes expired and used rows from the `verification_codes` table.
+
+## Subscription Rules
+
+- **Subscription Audit Log**: Every tier/status change is written to `subscription_events` (immutable, never deleted). Query it to answer billing disputes.
+- **Past-Due Auth**: Users with `subscription_status = 'past_due'` are granted Basic-tier access (Pro features blocked) until payment resolves. Cancelled/inactive users get no access at all.
+- **Stripe Proration**: Plan changes (any tier or billing period switch) use the Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
+- **Plan-Switch OTP Verification**: Any plan change via `create-checkout` (confirmed flow) requires a 6-digit email OTP. Codes stored in `verification_codes` with a `planKey` (`tier_billingPeriod`, e.g. `pro_monthly`) in the `tier` column; 10-min TTL; cleaned up by daily cron.
+- **Trial Offer**: Two variants, both new-users-only (existing email → 409).
+  - Weekly: `STRIPE_COUPON_PRO_TRIAL` coupon → $0.99 first week → $3.49/wk; detected via `subscription.metadata.is_trial = 'true'`
+  - Monthly: `STRIPE_COUPON_PRO_TRIAL_MONTHLY` coupon → $2.99 first month → $9.99/mo; detected via `subscription.metadata.is_trial_monthly = 'true'`
+- **Website Account System**: Email + 6-digit OTP login at `/account/login`; dashboard at `/account`; session stored in `localStorage` as `captureai-web-session` / `captureai-web-user` keys using the license key as token. Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
+
+## Backend Environment
+
+**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_COUPON_PRO_TRIAL` (Stripe coupon ID, $2.50 off once — weekly trial), `STRIPE_COUPON_PRO_TRIAL_MONTHLY` (Stripe coupon ID, $7.00 off once — monthly trial), `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
+
+**Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`

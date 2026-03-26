@@ -49,7 +49,7 @@ const worker = indexModule;
 function createRequest(url, method = 'GET', headers = {}) {
   const headerMap = new Map(Object.entries(headers));
   return {
-    url: `https://api.captureai.workers.dev${url}`,
+    url: `https://api.captureai.dev${url}`,
     method,
     headers: {
       get: (key) => headerMap.get(key) || null,

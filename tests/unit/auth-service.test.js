@@ -64,7 +64,7 @@ beforeEach(() => {
 describe('AuthService constants', () => {
   test('DEFAULT_BACKEND_URL points to production workers', () => {
     expect(AuthService.DEFAULT_BACKEND_URL)
-      .toBe('https://api.captureai.workers.dev');
+      .toBe('https://api.captureai.dev');
   });
 
   test('REQUEST_TIMEOUT is 30 seconds', () => {
@@ -103,7 +103,7 @@ describe('AuthService.getBackendUrl', () => {
   test('returns default URL when nothing is stored', async () => {
     const url = await AuthService.getBackendUrl();
 
-    expect(url).toBe('https://api.captureai.workers.dev');
+    expect(url).toBe('https://api.captureai.dev');
   });
 });
 

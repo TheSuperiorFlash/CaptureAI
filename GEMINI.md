@@ -10,8 +10,8 @@ Development guide for CaptureAI Chrome extension.
 
 | What you changed | Update these files |
 |------------------|--------------------|
-| API routes, auth, rate limits, AI models, webhooks | This file + [CLAUDE.md](CLAUDE.md) (Key Concepts) + [api/ARCHITECTURE.md](api/ARCHITECTURE.md) |
-| Extension modules, storage keys, message actions, Privacy Guard | This file + [CLAUDE.md](CLAUDE.md) (Storage Keys) + [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) |
+| API routes, auth, rate limits, AI models, webhooks | [api/ARCHITECTURE.md](api/ARCHITECTURE.md) + [CLAUDE.md](CLAUDE.md) |
+| Extension modules, storage keys, message actions, Privacy Guard | [extension/ARCHITECTURE.md](extension/ARCHITECTURE.md) + [CLAUDE.md](CLAUDE.md) |
 | Database tables, columns, indexes, views | [api/DATABASE_GUIDE.md](api/DATABASE_GUIDE.md) |
 | New migration file added | [api/migrations/README.md](api/migrations/README.md) |
 | CORS config, extension IDs | [api/CHROME_EXTENSIONS.md](api/CHROME_EXTENSIONS.md) |
@@ -65,47 +65,15 @@ cd api && npm run db:migrate  # Run migrations
 4. Add review section to `tasks/todo.md` when done
 5. Update `tasks/lessons.md` after corrections
 
-## Key Concepts
+## Quick Reference
 
-- **Module System**: ES6 exports loaded dynamically in `content.js`, accessible via `window.CaptureAI` namespace (14 modules)
-- **Auto-solve Sites**: Vocabulary.com
-- **Backend URL**: `https://api.captureai.workers.dev`
-- **AI Models**: `gpt-4.1-nano` (level 0, fastest) | `gpt-5-nano` low reasoning (level 1, default) | `gpt-5-nano` medium reasoning (level 2, Pro only)
-- **Privacy Guard**: `inject.js` in `MAIN` world overrides `document.hasFocus()`, blocks visibility/focus/lifecycle events, blocks clipboard events, removes AI honeypots. Pro only, requires enabled in settings. Prevents `unload` policy violations.
-- **OCR Flow**: Capture -> Tesseract.js v7 -> if confidence >60% send text only (90% savings) -> else fallback to image
-- **Shortcuts**: `Ctrl+Shift+X` capture | `Ctrl+Shift+F` recapture | `Ctrl+Shift+E` toggle panel
-- **Rate Limiting**: Cloudflare native Rate Limiting API with 5 presets (AUTH: 5/min, LICENSE: 10/min, CHECKOUT: 10/min, GLOBAL: 60/min, PRO_AI: 20/min)
-- **Auth**: License key system (`XXXX-XXXX-XXXX-XXXX-XXXX`), sent via `Authorization: LicenseKey YOUR-KEY` header
-- **Usage Tracking**: Two-table strategy — `usage_breakdown` (per-day analytics by prompt_type + model, reliable writes) + `usage_daily` (O(1) rate limit checks, authoritative daily totals)
-- **Subscription Audit Log**: Every tier/status change is written to `subscription_events` (immutable, never deleted). Query it to answer billing disputes.
-- **Past-Due Auth**: Users with `subscription_status = 'past_due'` are granted Basic-tier access (Pro features blocked) until payment resolves. Cancelled/inactive users get no access.
-- **Stripe Proration**: Plan changes (any tier or billing period switch) use the native Subscription Update API with `billing_cycle_anchor: 'now'` and `proration_behavior: 'always_invoice'` to handle cross-interval credits.
-- **Checkout Tier Switching**: `/api/subscription/create-checkout` now auto-switches active subscribers to the requested tier and returns Stripe-hosted invoice pages so users can review proration amounts.
-- **Checkout Invoice Preview**: Tier-switch responses include invoice preview fields (`amountDueCents`, `subtotalCents`, `totalCents`, `currency`) so the website can display exact prorated cost before redirecting to Stripe.
-- **Plan-Switch OTP Verification**: Any plan change (tier or billing period) via `create-checkout` (confirmed flow) requires a 6-digit email OTP code. Codes are sent via `/api/subscription/send-verification` (accepts `tier` + `billingPeriod`), stored in `verification_codes` table with a `planKey` (`tier_billingPeriod`, e.g. `pro_monthly`) in the `tier` column (10-min TTL), and cleaned up by a daily cron trigger.
-- **Trial Offer**: Two variants, both new-users-only (existing email returns 409). **Weekly trial** (`{ trial: true, tier: 'pro', billingPeriod: 'weekly' }`): Pro Weekly checkout with `STRIPE_COUPON_PRO_TRIAL` coupon ($2.50 off = $0.99 first week); detected via `subscription.metadata.is_trial = 'true'`; subsequent weeks at $3.49/week. **Monthly trial** (`{ trial: true, tier: 'pro', billingPeriod: 'monthly' }`): Pro Monthly checkout with `STRIPE_COUPON_PRO_TRIAL_MONTHLY` coupon ($7.00 off = $2.99 first month); detected via `subscription.metadata.is_trial_monthly = 'true'`; subsequent months at $9.99/month. Requires `STRIPE_COUPON_PRO_TRIAL` and `STRIPE_COUPON_PRO_TRIAL_MONTHLY` secrets.
-- **Reasoning Level Enforcement**: Server-side clamping in `ai.js` — non-Pro users have `reasoningLevel` capped at 1 regardless of client-sent value.
-- **Website Account System**: Email + 6-digit OTP login at `/account/login`. Dashboard at `/account` shows subscription, usage, billing portal, and account details. Session stored in `localStorage` using the license key as token (`captureai-web-session`, `captureai-web-user`). Backend routes: `POST /api/auth/send-login-code`, `POST /api/auth/verify-login`.
-
-## Storage Keys
-
-```
-captureai-license-key          # Current license key
-captureai-user-email           # User email
-captureai-user-tier            # 'basic' or 'pro'
-captureai-user-cache           # Cached user object with timestamp
-captureai-auto-solve-mode      # Boolean
-captureai-ask-mode             # Boolean
-captureai-last-capture-area    # {startX, startY, width, height}
-captureai-reasoning-level      # 0, 1, or 2
-captureai-settings             # {privacyGuard: {enabled, domainBlacklist}, ocr: {disabled}, theme}
-captureai-last-usage           # Cached AI response usage stats
-captureai-privacy-guard-defaulted  # Auto-enable flag on first Pro upgrade
-captureai-privacy-guard-notice-seen   # True once user dismisses the auto-enable banner
-captureai-backend-url          # Backend URL (default: https://api.captureai.workers.dev)
-captureai-api-key              # Legacy API key (deprecated, kept for reference only)
-captureai-web-session-ts       # Timestamp of last successful /api/auth/me validation (ISO string)
-```
+- **Backend URL**: `https://api.captureai.dev`
+- **AI Models**: `gpt-4.1-nano` (L0) | `gpt-5-nano` low (L1, default) | `gpt-5-nano` medium (L2, Pro only)
+- **Auth header**: `Authorization: LicenseKey XXXX-XXXX-XXXX-XXXX-XXXX`
+- **Rate limit presets**: AUTH (5/min) | LICENSE (10/min) | CHECKOUT (10/min) | GLOBAL (60/min) | PRO_AI (20/min)
+- **Privacy Guard**: Pro only + `settings.privacyGuard.enabled`; `inject.js` runs in MAIN world at `document_start`
+- **OCR threshold**: confidence >60% → send text only; else fallback to image
+- **Extension namespace**: 14 modules loaded via `window.CaptureAI`; shared state at `window.CaptureAI.STATE`
 
 ## Coding Standards
 
@@ -160,11 +128,6 @@ captureai-web-session-ts       # Timestamp of last successful /api/auth/me valid
 **Always:** Read files before editing | Parameterized DB queries | Validate input at boundaries | Verify webhook signatures | Try-catch async ops | Check `chrome.runtime.lastError` | Extract magic values into constants | Find root causes — no temp fixes | Make changes as simple and minimal as possible
 
 **Never:** `innerHTML` with untrusted content | Hardcode secrets | Log sensitive data | Bypass tier restrictions | Modify schema without migrations | Commit secrets | Swallow errors with empty catch | Use exceptions for control flow
-
-## Backend Environment
-
-**Secrets:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_BASIC_WEEKLY`, `STRIPE_PRICE_BASIC_MONTHLY`, `STRIPE_PRICE_PRO_WEEKLY`, `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_COUPON_PRO_TRIAL` (Stripe coupon ID, $2.50 off once, for weekly trial offer), `STRIPE_COUPON_PRO_TRIAL_MONTHLY` (Stripe coupon ID, $7.00 off once, for monthly trial offer), `RESEND_API_KEY`, `FROM_EMAIL`, `ADMIN_KEY` (protects `GET /api/ai/total-usage`)
-**Env vars:** `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_GATEWAY_NAME`, `BASIC_TIER_DAILY_LIMIT`, `PRO_TIER_RATE_LIMIT_PER_MINUTE`, `EXTENSION_URL`, `CHROME_EXTENSION_IDS`
 
 ## Git Workflow
 

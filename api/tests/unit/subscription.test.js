@@ -104,7 +104,7 @@ function createMockRequest(method = 'POST', headers = {}) {
     ...headers
   }));
   return {
-    url: 'https://api.captureai.workers.dev/api/subscription/create-checkout',
+    url: 'https://api.captureai.dev/api/subscription/create-checkout',
     method,
     headers: { get: (key) => headerMap.get(key) || null },
     text: jest.fn().mockResolvedValue('{}')
@@ -962,7 +962,7 @@ describe('SubscriptionHandler', () => {
         ['CF-Connecting-IP', '127.0.0.1']
       ]);
       return {
-        url: 'https://api.captureai.workers.dev/api/subscription/swap-plan',
+        url: 'https://api.captureai.dev/api/subscription/swap-plan',
         method: 'POST',
         headers: { get: (key) => headerMap.get(key) || null }
       };

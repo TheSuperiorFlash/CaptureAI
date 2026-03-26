@@ -307,4 +307,4 @@ Detection: `prefers-reduced-motion`, `prefers-reduced-transparency`, Safari UA s
 |---|---|
 | `hooks/useSwipeTier.ts` | Mobile swipe gesture hook for Basic/Pro tier card switching (40px threshold) |
 | `lib/constants.ts` | `SITE_URL` = `https://captureai.dev` |
-| `lib/api.ts` | `API_BASE_URL` from `NEXT_PUBLIC_API_URL` env or `https://api.captureai.workers.dev` |
+| `lib/api.ts` | `API_BASE_URL` from `NEXT_PUBLIC_API_URL` env or `https://api.captureai.dev` |

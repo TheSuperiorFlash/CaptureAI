@@ -8,7 +8,7 @@
  * Create a mock Request object
  * @param {Object} options - Request options
  * @param {string} options.method - HTTP method (default: 'GET')
- * @param {string} options.url - Request URL (default: 'https://api.captureai.workers.dev/')
+ * @param {string} options.url - Request URL (default: 'https://api.captureai.dev/')
  * @param {Object} options.headers - Request headers
  * @param {Object|string} options.body - Request body (will be JSON.stringify if object)
  * @param {string} options.ip - Client IP address
@@ -17,7 +17,7 @@
 export function createMockRequest(options = {}) {
   const {
     method = 'GET',
-    url = 'https://api.captureai.workers.dev/',
+    url = 'https://api.captureai.dev/',
     headers = {},
     body = null,
     ip = '127.0.0.1'
@@ -53,7 +53,7 @@ export function createMockRequest(options = {}) {
 export function createPostRequest(path, body, extraHeaders = {}) {
   return createMockRequest({
     method: 'POST',
-    url: `https://api.captureai.workers.dev${path}`,
+    url: `https://api.captureai.dev${path}`,
     body,
     headers: extraHeaders
   });
@@ -68,7 +68,7 @@ export function createPostRequest(path, body, extraHeaders = {}) {
 export function createGetRequest(path, extraHeaders = {}) {
   return createMockRequest({
     method: 'GET',
-    url: `https://api.captureai.workers.dev${path}`,
+    url: `https://api.captureai.dev${path}`,
     headers: extraHeaders
   });
 }
@@ -90,7 +90,7 @@ export function createAuthenticatedRequest(method, path, options = {}) {
 
   return createMockRequest({
     method,
-    url: `https://api.captureai.workers.dev${path}`,
+    url: `https://api.captureai.dev${path}`,
     body,
     headers: {
       'Authorization': `LicenseKey ${licenseKey}`
@@ -106,7 +106,7 @@ export function createAuthenticatedRequest(method, path, options = {}) {
  */
 export function createWebhookRequest(body, signature = '') {
   const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
-  return new Request('https://api.captureai.workers.dev/api/subscription/webhook', {
+  return new Request('https://api.captureai.dev/api/subscription/webhook', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

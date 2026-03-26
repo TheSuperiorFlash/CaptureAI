@@ -104,7 +104,7 @@ describe('fetchWithTimeout', () => {
 
 describe('handleCORS', () => {
   test('should allow captureai.dev origin', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'https://captureai.dev' }
     });
 
@@ -113,7 +113,7 @@ describe('handleCORS', () => {
   });
 
   test('should allow github.io origin', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'https://thesuperiorflash.github.io' }
     });
 
@@ -122,7 +122,7 @@ describe('handleCORS', () => {
   });
 
   test('should reject unknown origins', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'https://evil.com' }
     });
 
@@ -131,7 +131,7 @@ describe('handleCORS', () => {
   });
 
   test('should allow chrome extension with matching ID', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'chrome-extension://abc123' }
     });
 
@@ -141,7 +141,7 @@ describe('handleCORS', () => {
   });
 
   test('should reject chrome extension with non-matching ID', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'chrome-extension://unknown' }
     });
 
@@ -151,7 +151,7 @@ describe('handleCORS', () => {
   });
 
   test('should allow localhost in dev mode', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'http://localhost:3000' }
     });
 
@@ -161,7 +161,7 @@ describe('handleCORS', () => {
   });
 
   test('should reject localhost in production', async () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'http://localhost:3000' }
     });
 
@@ -170,7 +170,7 @@ describe('handleCORS', () => {
   });
 
   test('should set CORS headers', () => {
-    const request = new Request('https://api.captureai.workers.dev', {
+    const request = new Request('https://api.captureai.dev', {
       headers: { 'Origin': 'https://captureai.dev' }
     });
 
@@ -182,7 +182,7 @@ describe('handleCORS', () => {
   });
 
   test('should handle missing origin header', () => {
-    const request = new Request('https://api.captureai.workers.dev');
+    const request = new Request('https://api.captureai.dev');
     const res = handleCORS(request, {});
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('null');
   });

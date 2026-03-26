@@ -24,7 +24,7 @@ global.importScripts = jest.fn((...scripts) => {
       // Provide mock AuthService global
       if (typeof global.AuthService === 'undefined') {
         global.AuthService = {
-          DEFAULT_BACKEND_URL: 'https://api.captureai.workers.dev',
+          DEFAULT_BACKEND_URL: 'https://api.captureai.dev',
           REQUEST_TIMEOUT: 30000,
           CACHE_KEY: 'captureai-user-cache',
           CACHE_FRESHNESS_MS: 300000,
