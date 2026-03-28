@@ -265,7 +265,7 @@ export default function Navbar() {
                                     } : undefined}
                                     initial={isFirstInSession ? { opacity: 0 } : false}
                                     animate={{ opacity: isNavHovered ? 1 : 0 }}
-                                    transition={{ type: "spring", bounce: 0.15, duration: 0.5, opacity: { duration: 0.2 } }}
+                                    transition={{ type: "spring", bounce: 0.15, duration: 0.4, opacity: { duration: 0.2 } }}
                                 />
                             )}
                             <Link
@@ -302,7 +302,7 @@ export default function Navbar() {
                                 } : undefined}
                                 initial={isFirstInSession ? { opacity: 0 } : false}
                                 animate={{ opacity: isNavHovered ? 1 : 0 }}
-                                transition={{ type: "spring", bounce: 0.15, duration: 0.5, opacity: { duration: 0.2 } }}
+                                transition={{ type: "spring", bounce: 0.15, duration: 0.4, opacity: { duration: 0.2 } }}
                             />
                         )}
                         <button
@@ -335,7 +335,7 @@ export default function Navbar() {
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
-                                    transition={{ type: 'spring', stiffness: 300, damping: 20, duration: 0.3 }}
+                                    transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                                     className={`absolute left-1/2 -translate-x-1/2 flex flex-col w-[320px] p-2 rounded-2xl border border-white/[0.08] shadow-[0_0_20px_rgba(0,0,0,0.3)] bg-[#0A0A0A]/95 z-50 transition-[top] duration-[400ms] ease-out ${isScrolled ? 'top-[calc(100%+16px)]' : 'top-[calc(100%+8px)]'}`}
                                 >
                                     {resourceItems.map((item) => (

@@ -93,7 +93,7 @@ function FeatureCard({ feature, index, animate }: { feature: Feature; index: num
             initial={animate ? { opacity: 0, y: 30 } : false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
-            transition={{ type: 'spring', stiffness: 100, damping: 15, delay: (index % 4) * 0.1 }}
+            transition={{ type: 'spring', stiffness: 100, damping: 22, delay: (index % 4) * 0.1 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={animate ? { transformStyle: 'preserve-3d', rotateX, rotateY, transformPerspective: 1200 } : undefined}
@@ -211,7 +211,7 @@ export default function Features() {
                         {features.map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-4 bg-cyan-400' : 'w-1.5 bg-white/20'}`}
+                                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${i === activeIndex ? 'w-4 bg-cyan-400' : 'w-1.5 bg-white/20'}`}
                             />
                         ))}
                     </div>

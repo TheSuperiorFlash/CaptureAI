@@ -249,7 +249,7 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
                         borderRadius: 100 * S,
                         top: 0,
                         left: isAskMode ? slideLeftActive : slideLeftInactive,
-                        transition: 'all 0.3s ease',
+                        transition: 'left 0.25s ease-out, width 0.25s ease-out',
                         zIndex: 1,
                         transform: 'translateZ(0)',
                     }}
@@ -264,7 +264,7 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
                         fontSize: Math.round(10 * S),
                         fontWeight: 500,
                         zIndex: 2,
-                        transition: 'color 0.3s ease',
+                        transition: 'color 0.25s ease-out',
                         whiteSpace: 'nowrap',
                     }}
                 >
@@ -280,7 +280,7 @@ function ModeToggle({ isAskMode, onToggle }: { isAskMode: boolean; onToggle: () 
                         fontSize: Math.round(10 * S),
                         fontWeight: 500,
                         zIndex: 2,
-                        transition: 'color 0.3s ease',
+                        transition: 'color 0.25s ease-out',
                         whiteSpace: 'nowrap',
                     }}
                 >

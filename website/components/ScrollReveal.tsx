@@ -20,7 +20,7 @@ export function ScrollReveal({ children, className = "", delay = 0, yOffset = 30
             initial={{ opacity: 0, y: yOffset }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin }}
-            transition={{ duration: 0.6, delay, ease: "easeOut" }}
+            transition={{ duration: 0.45, delay, ease: "easeOut" }}
             className={className}
         >
             {children}
@@ -28,7 +28,7 @@ export function ScrollReveal({ children, className = "", delay = 0, yOffset = 30
     )
 }
 
-export function ScrollRevealStagger({ children, className = "", delay = 0, stagger = 0.15, margin = "-50px" }: ScrollRevealProps) {
+export function ScrollRevealStagger({ children, className = "", delay = 0, stagger = 0.1, margin = "-50px" }: ScrollRevealProps) {
     const reduced = useReducedMotion()
     if (reduced) return <div className={className}>{children}</div>
     return (
