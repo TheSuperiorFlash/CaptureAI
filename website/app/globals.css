@@ -255,7 +255,7 @@ p {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, translate 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
 
 @media (hover: hover) {
