@@ -71,8 +71,8 @@ Defined in `globals.css` under `@theme`:
 - **`.animate-marquee`** — Linear translateX marquee, 30s cycle (used for platform logos)
 
 ### Entrance Animations
-- **`.reveal-up`** — Fade-in-up entrance (opacity 0→1, translateY 20px→0), 0.8s spring
-- **`.delay-100`** through **`.delay-500`** — Staggered animation delays (100ms increments)
+- **`.reveal-up`** — Fade-in-up entrance (opacity 0→1, translateY 20px→0), 0.5s spring
+- **`.delay-100`** through **`.delay-300`** — Staggered animation delays (100ms increments)
 - All animations respect `prefers-reduced-motion: reduce` and `prefers-reduced-transparency: reduce`
 
 ### Overlay

@@ -164,7 +164,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onCancel} />
-            <div className={`relative w-full max-w-sm transition-all duration-300 ease-out ${visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+            <div className={`relative w-full max-w-sm transition-[opacity,transform] duration-300 ease-out ${visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
                 }`}>
                 <div className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-48 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
                 <div className="relative rounded-[28px] border border-cyan-400/25 bg-gradient-to-b from-[#09112a] to-[#040810] p-8 shadow-[0_0_80px_rgba(0,240,255,0.10),0_40px_80px_rgba(0,0,0,0.7)]">
@@ -212,7 +212,7 @@ function UpgradeConfirmModal({ data, visible, loading, onConfirm, onCancel }: {
                     </div>
 
                     <button type="button" onClick={() => onConfirm(verificationCode)} disabled={!canConfirm}
-                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-all ${!canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01]'
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold text-white transition-[scale,box-shadow] duration-300 ${!canConfirm ? 'cursor-not-allowed bg-blue-600/40' : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.01] active:scale-[0.98]'
                             }`}>
                         {loading
                             ? <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" role="status" aria-label="Loading" />
@@ -455,7 +455,7 @@ export default function ActivatePage() {
                             role="button"
                             tabIndex={0}
                             aria-pressed={selectedTier === 'basic'}
-                            className={`relative glass-card cursor-pointer rounded-2xl p-7 transition-all duration-300 w-full h-full flex flex-col ${selectedTier === 'basic'
+                            className={`relative glass-card cursor-pointer rounded-[24px] p-7 transition-[border-color,box-shadow,opacity,translate] duration-300 w-full h-full flex flex-col ${selectedTier === 'basic'
                                 ? '!border-blue-500/50 !shadow-[0_0_24px_rgba(59,130,246,0.12)] md:hover:-translate-y-1'
                                 : 'opacity-70 md:opacity-100 md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'
                                 }`}
@@ -511,7 +511,7 @@ export default function ActivatePage() {
                             onClick={() => setSelectedTier('pro')}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier('pro'); } }}
                         >
-                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-all duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'border-white/10 md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
+                            <div className={`glow-blue flex h-full w-full flex-col rounded-[24px] p-[1px] border transition-[border-color,box-shadow,translate] duration-300 ${selectedTier === 'pro' ? 'border-cyan-400/50 shadow-[0_0_40px_rgba(0,240,255,0.25)] md:hover:-translate-y-1' : 'border-white/10 md:border-transparent md:hover:-translate-y-1 md:hover:border-cyan-400/50 md:hover:shadow-[0_0_40px_rgba(0,240,255,0.25)]'}`}>
                                 <div className="relative rounded-[23px] bg-gradient-to-b from-[#0a1128] to-[#040715] px-7 pt-7 pb-4 h-full w-full">
                                     <div className="absolute right-6 top-6">
                                         <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${selectedTier === 'pro'
@@ -611,9 +611,9 @@ export default function ActivatePage() {
                                     type="button"
                                     onClick={handleSignup}
                                     disabled={loading}
-                                    className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-all ${loading
+                                    className={`flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-8 py-3.5 text-base font-semibold text-white transition-[scale,box-shadow] duration-300 ${loading
                                         ? 'cursor-not-allowed bg-blue-600/40'
-                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02]'
+                                        : 'glow-btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-cyan-500 hover:scale-[1.02] active:scale-[0.98]'
                                         }`}
                                 >
                                     {loading ? (
@@ -635,7 +635,7 @@ export default function ActivatePage() {
                                         role="status"
                                         aria-live="polite"
                                         aria-atomic="true"
-                                        className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5"
+                                        className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-5 reveal-up"
                                     >
                                         <div className="flex flex-col items-center text-center">
                                             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15">
@@ -650,7 +650,7 @@ export default function ActivatePage() {
                                         role="status"
                                         aria-live="polite"
                                         aria-atomic="true"
-                                        className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5"
+                                        className="mt-5 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-5 reveal-up"
                                     >
                                         <div className="flex flex-col items-center text-center">
                                             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">

@@ -67,14 +67,14 @@ export default function Pricing() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === TIER_BASIC}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_BASIC
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative transition duration-300 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_BASIC
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100'
                             : 'z-10 -translate-x-12 sm:-translate-x-16 scale-[0.85] -rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
                         onClick={() => setSelectedTier(TIER_BASIC)}
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedTier(TIER_BASIC); } }}
                     >
-                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-all duration-500 ${selectedTier === TIER_BASIC ? '!bg-[linear-gradient(145deg,rgb(11,17,32)_0%,rgb(6,9,19)_100%)] md:!bg-none !border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : '!border-white/20 md:!border-transparent md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
+                        <ScrollRevealItem className={`glass-card flex w-full h-full flex-col rounded-3xl p-8 transition-[border-color,box-shadow,background,translate] duration-300 ${selectedTier === TIER_BASIC ? '!bg-[linear-gradient(145deg,rgb(11,17,32)_0%,rgb(6,9,19)_100%)] md:!bg-none !border-blue-500/30 !shadow-[0_0_30px_rgba(59,130,246,0.08)] md:border-transparent md:shadow-none md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]' : '!border-white/20 md:!border-transparent md:hover:-translate-y-1 md:hover:!border-blue-500/30 md:hover:!shadow-[0_0_30px_rgba(59,130,246,0.08)]'}`}>
                             <h3 className="mb-1 text-xl text-[--color-text]">Basic</h3>
                             <div className="mb-7">
                                 <AnimatedPrice
@@ -116,7 +116,7 @@ export default function Pricing() {
 
                             <Link
                                 href={`/activate?tier=basic&billing=${billingPeriod}`}
-                                className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-colors hover:text-[--color-text] hover:!bg-white/[0.05] pointer-events-auto"
+                                className="glass mt-auto block rounded-xl py-3.5 text-center text-[15px] font-medium text-[--color-text-secondary] transition-[color,background-color,scale] duration-150 hover:text-[--color-text] hover:!bg-white/[0.05] active:scale-[0.98] pointer-events-auto"
                             >
                                 Get Basic
                             </Link>
@@ -128,7 +128,7 @@ export default function Pricing() {
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedTier === TIER_PRO}
-                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-500 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_PRO
+                        className={`row-start-1 col-start-1 md:row-auto md:col-auto relative rounded-[24px] transition duration-300 origin-center w-[88%] md:w-full max-w-[340px] md:max-w-none justify-self-center ${selectedTier === TIER_PRO
                             ? 'z-20 translate-x-0 scale-100 rotate-0 opacity-100 md:translate-y-0'
                             : 'z-10 translate-x-12 sm:translate-x-16 scale-[0.85] rotate-6 opacity-40 md:z-auto md:translate-x-0 md:scale-100 md:rotate-0 md:opacity-100'
                             }`}
@@ -181,7 +181,7 @@ export default function Pricing() {
 
                                 <Link
                                     href={`/activate?tier=pro&billing=${billingPeriod}`}
-                                    className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-colors duration-300 hover:from-blue-500 hover:to-cyan-500 pointer-events-auto"
+                                    className="glow-btn mt-auto block rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 py-3.5 text-center text-[15px] font-semibold text-white transition-[scale,box-shadow] duration-300 hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98] pointer-events-auto"
                                 >
                                     Try Pro — $0.99 first week
                                 </Link>
@@ -196,12 +196,12 @@ export default function Pricing() {
                         <button
                             onClick={() => setSelectedTier(TIER_BASIC)}
                             aria-label="Select Basic plan"
-                            className={`h-2 rounded-full transition-all duration-300 ${selectedTier === TIER_BASIC ? 'w-5 bg-white' : 'w-2 bg-white/30'}`}
+                            className={`h-2 rounded-full transition-[width,background-color] duration-300 ${selectedTier === TIER_BASIC ? 'w-5 bg-white' : 'w-2 bg-white/30'}`}
                         />
                         <button
                             onClick={() => setSelectedTier(TIER_PRO)}
                             aria-label="Select Pro plan"
-                            className={`h-2 rounded-full transition-all duration-300 ${selectedTier === TIER_PRO ? 'w-5 bg-cyan-400' : 'w-2 bg-white/30'}`}
+                            className={`h-2 rounded-full transition-[width,background-color] duration-300 ${selectedTier === TIER_PRO ? 'w-5 bg-cyan-400' : 'w-2 bg-white/30'}`}
                         />
                     </div>
                     <p className="text-xs text-[--color-text-tertiary]">Swipe to compare</p>

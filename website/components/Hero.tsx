@@ -37,9 +37,9 @@ const itemVariants: Variants = {
         filter: 'blur(0px)',
         transition: {
             type: 'spring',
-            stiffness: 150,
-            damping: 20,
-            mass: 1
+            stiffness: 200,
+            damping: 22,
+            mass: 0.8
         }
     }
 }
@@ -76,7 +76,7 @@ function PlatformMarquee({ logos }: { logos: typeof platformLogos }) {
                         {logos.map((platform) => (
                             <div
                                 key={`${platform.alt}-${setIndex}`}
-                                className="flex-shrink-0 opacity-40 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+                                className="flex-shrink-0 opacity-40 grayscale transition-[opacity,filter] duration-300 hover:opacity-100 hover:grayscale-0"
                             >
                                 <Image
                                     src={platform.src}
@@ -228,7 +228,7 @@ export default function Hero() {
                     className="pt-10 pb-8 md:pb-12 w-full"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.8, ease: "easeOut" }}
+                    transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }}
                 >
                     <p className="mb-8 text-center text-[13px] font-semibold tracking-widest uppercase text-[--color-text-tertiary]">
                         Undetectable on every learning platform

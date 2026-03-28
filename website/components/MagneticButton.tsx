@@ -57,6 +57,7 @@ export default function MagneticButton({ children, className = '', magneticRange
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             style={{ x, y }}
             className={`cursor-pointer inline-block ${className}`}
         >
